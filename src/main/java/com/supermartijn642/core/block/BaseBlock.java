@@ -35,8 +35,8 @@ public class BaseBlock extends Block {
         if(!this.saveTileData)
             return;
 
-        CompoundNBT tag = stack.getOrCreateTag();
-        tag = tag.contains("tileData") ? tag.getCompound("tileData") : null;
+        CompoundNBT tag = stack.getTag();
+        tag = tag == null ? null : tag.contains("tileData") ? tag.getCompound("tileData") : null;
         if(tag == null || tag.isEmpty())
             return;
 
