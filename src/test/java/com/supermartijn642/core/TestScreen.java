@@ -1,6 +1,5 @@
 package com.supermartijn642.core;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.supermartijn642.core.gui.BaseScreen;
 import com.supermartijn642.core.gui.widget.TextFieldWidget;
 import net.minecraft.util.text.StringTextComponent;
@@ -30,12 +29,12 @@ public class TestScreen extends BaseScreen {
     }
 
     @Override
-    protected void render(MatrixStack matrixStack, int mouseX, int mouseY){
-        this.drawScreenBackground(matrixStack);
+    protected void render(int mouseX, int mouseY){
+        this.drawScreenBackground();
     }
 
     @Override
-    protected void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY){
+    protected void renderTooltips(int mouseX, int mouseY){
 
     }
 }

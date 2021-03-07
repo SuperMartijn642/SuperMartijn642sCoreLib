@@ -1,6 +1,5 @@
 package com.supermartijn642.core.block;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
@@ -42,8 +41,8 @@ public abstract class BaseTileEntity extends TileEntity {
     }
 
     @Override
-    public void read(BlockState state, CompoundNBT nbt){
-        super.read(state, nbt);
+    public void read(CompoundNBT nbt){
+        super.read(nbt);
         this.readData(nbt.getCompound("data"));
     }
 
@@ -55,8 +54,8 @@ public abstract class BaseTileEntity extends TileEntity {
     }
 
     @Override
-    public void handleUpdateTag(BlockState state, CompoundNBT tag){
-        super.read(state, tag);
+    public void handleUpdateTag(CompoundNBT tag){
+        super.read(tag);
         this.readData(tag.getCompound("data"));
     }
 

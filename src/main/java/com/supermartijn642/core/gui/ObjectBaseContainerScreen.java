@@ -1,6 +1,5 @@
 package com.supermartijn642.core.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.util.text.ITextComponent;
 
 /**
@@ -37,35 +36,35 @@ public abstract class ObjectBaseContainerScreen<T, X extends ObjectBaseContainer
     protected abstract void addWidgets(T object);
 
     @Override
-    protected void renderBackground(MatrixStack matrixStack, int mouseX, int mouseY){
+    protected void renderBackground(int mouseX, int mouseY){
         T object = this.getObjectOrClose();
         if(object != null)
-            this.renderBackground(matrixStack, mouseX, mouseY, object);
+            this.renderBackground(mouseX, mouseY, object);
     }
 
-    protected void renderBackground(MatrixStack matrixStack, int mouseX, int mouseY, T object){
-        super.renderBackground(matrixStack, mouseX, mouseY);
+    protected void renderBackground(int mouseX, int mouseY, T object){
+        super.renderBackground(mouseX, mouseY);
     }
 
     @Override
-    protected void renderForeground(MatrixStack matrixStack, int mouseX, int mouseY){
+    protected void renderForeground(int mouseX, int mouseY){
         T object = this.getObjectOrClose();
         if(object != null)
-            this.renderForeground(matrixStack, mouseX, mouseY, object);
+            this.renderForeground(mouseX, mouseY, object);
     }
 
-    protected void renderForeground(MatrixStack matrixStack, int mouseX, int mouseY, T object){
-        super.renderForeground(matrixStack, mouseX, mouseY);
+    protected void renderForeground(int mouseX, int mouseY, T object){
+        super.renderForeground(mouseX, mouseY);
     }
 
     @Override
-    protected void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY){
+    protected void renderTooltips(int mouseX, int mouseY){
         T object = this.getObjectOrClose();
         if(object != null)
-            this.renderTooltips(matrixStack, mouseX, mouseY, object);
+            this.renderTooltips(mouseX, mouseY, object);
     }
 
-    protected abstract void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY, T object);
+    protected abstract void renderTooltips(int mouseX, int mouseY, T object);
 
     protected T getObjectOrClose(){
         return this.container.getObjectOrClose();

@@ -1,6 +1,5 @@
 package com.supermartijn642.core.gui.widget;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.supermartijn642.core.gui.ScreenUtils;
@@ -12,7 +11,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.SharedConstants;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -61,14 +59,14 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-        this.drawBackground(matrixStack);
+    public void render(int mouseX, int mouseY, float partialTicks){
+        this.drawBackground();
 
         int textColor = this.active ? 14737632 : 7368816;
         int relativeCursor = this.cursorPosition - this.lineScrollOffset;
         int relativeSelection = this.selectionPos - this.lineScrollOffset;
         FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
-        String s = fontRenderer.func_238412_a_(this.text.substring(this.lineScrollOffset), this.width - 8);
+        String s = fontRenderer.trimStringToWidth(this.text.substring(this.lineScrollOffset), this.width - 8);
         boolean cursorInView = relativeCursor >= 0 && relativeCursor <= s.length();
         boolean shouldBlink = this.focused && this.cursorBlinkCounter / 8 % 2 == 0 && cursorInView;
         int left = this.x + 4;
@@ -80,7 +78,7 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
 
         if(!s.isEmpty()){
             String s1 = cursorInView ? s.substring(0, relativeCursor) : s;
-            leftOffset = fontRenderer.drawString(matrixStack, s1, left, top, textColor) + 1;
+            leftOffset = fontRenderer.drawString(s1, left, top, textColor) + 1;
         }
 
         boolean cursorAtEnd = this.cursorPosition < this.text.length();
@@ -95,32 +93,32 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
 
         // draw text
         if(!s.isEmpty() && cursorInView && relativeCursor < s.length())
-            fontRenderer.drawString(matrixStack, s.substring(relativeCursor), leftOffset, top, textColor);
+            fontRenderer.drawString(s.substring(relativeCursor), leftOffset, top, textColor);
 
         // draw suggestion
         if(this.suggestion.isEmpty() && this.text.isEmpty())
-            fontRenderer.drawStringWithShadow(matrixStack, fontRenderer.func_238412_a_(this.suggestion, this.width - 8 - fontRenderer.getStringWidth("...")) + "...", cursorX, top, -8355712);
+            fontRenderer.drawStringWithShadow(fontRenderer.trimStringToWidth(this.suggestion, this.width - 8 - fontRenderer.getStringWidth("...")) + "...", cursorX, top, -8355712);
 
         // draw cursor
         if(shouldBlink){
             if(cursorAtEnd)
-                ScreenUtils.fillRect(matrixStack, cursorX - 0.5f, top - 1, 1, fontRenderer.FONT_HEIGHT, -3092272);
+                ScreenUtils.fillRect(cursorX - 0.5f, top - 1, 1, fontRenderer.FONT_HEIGHT, -3092272);
             else
-                fontRenderer.drawStringWithShadow(matrixStack, "_", cursorX, top, textColor);
+                fontRenderer.drawStringWithShadow("_", cursorX, top, textColor);
         }
 
         if(relativeSelection != relativeCursor){
             int l1 = left + fontRenderer.getStringWidth(s.substring(0, relativeSelection));
-            this.drawSelectionBox(matrixStack, cursorX, top - 1, l1 - 1, top + 1 + fontRenderer.FONT_HEIGHT);
+            this.drawSelectionBox(cursorX, top - 1, l1 - 1, top + 1 + fontRenderer.FONT_HEIGHT);
         }
     }
 
-    protected void drawBackground(MatrixStack matrixStack){
-        ScreenUtils.fillRect(matrixStack, this.x - 1, this.y - 1, this.width + 2, this.height + 2, this.focused ? -1 : -6250336);
-        ScreenUtils.fillRect(matrixStack, this.x, this.y, this.width, this.height, -16777216);
+    protected void drawBackground(){
+        ScreenUtils.fillRect(this.x - 1, this.y - 1, this.width + 2, this.height + 2, this.focused ? -1 : -6250336);
+        ScreenUtils.fillRect(this.x, this.y, this.width, this.height, -16777216);
     }
 
-    protected void drawSelectionBox(MatrixStack matrixStack, int startX, int startY, int endX, int endY){
+    protected void drawSelectionBox(int startX, int startY, int endX, int endY){
         if(startX < endX){
             int i = startX;
             startX = endX;
@@ -141,7 +139,6 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
             startX = this.x + this.width;
         }
 
-        Matrix4f matrix = matrixStack.getLast().getMatrix();
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
         RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
@@ -149,10 +146,10 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
         RenderSystem.enableColorLogicOp();
         RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
-        bufferbuilder.pos(matrix, startX, endY, 0).endVertex();
-        bufferbuilder.pos(matrix, endX, endY, 0).endVertex();
-        bufferbuilder.pos(matrix, endX, startY, 0).endVertex();
-        bufferbuilder.pos(matrix, startX, startY, 0).endVertex();
+        bufferbuilder.pos(startX, endY, 0).endVertex();
+        bufferbuilder.pos(endX, endY, 0).endVertex();
+        bufferbuilder.pos(endX, startY, 0).endVertex();
+        bufferbuilder.pos(startX, startY, 0).endVertex();
         tessellator.draw();
         RenderSystem.disableColorLogicOp();
         RenderSystem.enableTexture();
@@ -235,9 +232,9 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
     protected void moveLineOffsetToCursor(){
         FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
         int availableWidth = this.width - 8 - (this.cursorPosition == this.text.length() ? fontRenderer.getStringWidth("_") : 0);
-        int min = Math.min(this.cursorPosition + 1, this.text.length()) - fontRenderer.func_238412_a_(new StringBuilder(this.text.substring(0, Math.min(this.text.length(), this.cursorPosition + 2))).reverse().toString(), availableWidth).length();
-        int max = Math.max(this.cursorPosition - 1, 0) + fontRenderer.func_238412_a_(this.text.substring(Math.max(this.cursorPosition - 1, 0)), availableWidth).length();
-        max = max - fontRenderer.func_238412_a_(new StringBuilder(this.text.substring(0, max)).reverse().toString(), availableWidth).length();
+        int min = Math.min(this.cursorPosition + 1, this.text.length()) - fontRenderer.trimStringToWidth(new StringBuilder(this.text.substring(0, Math.min(this.text.length(), this.cursorPosition + 2))).reverse().toString(), availableWidth).length();
+        int max = Math.max(this.cursorPosition - 1, 0) + fontRenderer.trimStringToWidth(this.text.substring(Math.max(this.cursorPosition - 1, 0)), availableWidth).length();
+        max = max - fontRenderer.trimStringToWidth(new StringBuilder(this.text.substring(0, max)).reverse().toString(), availableWidth).length();
         this.lineScrollOffset = Math.min(Math.max(this.lineScrollOffset, min), max);
     }
 
@@ -353,7 +350,7 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
                 int offset = MathHelper.floor(mouseX) - this.x - 4;
 
                 FontRenderer font = Minecraft.getInstance().fontRenderer;
-                String s = font.func_238412_a_(this.text.substring(this.lineScrollOffset), Math.min(offset, this.width - 8));
+                String s = font.trimStringToWidth(this.text.substring(this.lineScrollOffset), Math.min(offset, this.width - 8));
                 this.cursorPosition = s.length() + this.lineScrollOffset;
                 if(!Screen.hasShiftDown())
                     this.selectionPos = this.cursorPosition;

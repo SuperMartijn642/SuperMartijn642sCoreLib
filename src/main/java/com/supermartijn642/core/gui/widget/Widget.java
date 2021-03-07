@@ -1,6 +1,5 @@
 package com.supermartijn642.core.gui.widget;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
@@ -44,7 +43,7 @@ public abstract class Widget {
         this.active = active;
     }
 
-    public abstract void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks);
+    public abstract void render(int mouseX, int mouseY, float partialTicks);
 
     public boolean isHovered(){
         return this.hovered;

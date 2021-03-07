@@ -1,6 +1,5 @@
 package com.supermartijn642.core.gui.widget;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.supermartijn642.core.gui.ScreenUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
@@ -27,8 +26,8 @@ public class ButtonWidget extends AbstractButtonWidget {
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-        ScreenUtils.drawButtonBackground(matrixStack, this.x, this.y, this.width, this.height, (this.active ? this.isHovered() ? 5 : 0 : 10) / 15f);
-        ScreenUtils.drawCenteredStringWithShadow(matrixStack, Minecraft.getInstance().fontRenderer, this.text, this.x + this.width / 2f, this.y + this.height / 2f - 5, this.active ? 0xFFFFFFFF : Integer.MAX_VALUE);
+    public void render(int mouseX, int mouseY, float partialTicks){
+        ScreenUtils.drawButtonBackground(this.x, this.y, this.width, this.height, (this.active ? this.isHovered() ? 5 : 0 : 10) / 15f);
+        ScreenUtils.drawCenteredStringWithShadow(Minecraft.getInstance().fontRenderer, this.text, this.x + this.width / 2f, this.y + this.height / 2f - 5, this.active ? 0xFFFFFFFF : Integer.MAX_VALUE);
     }
 }

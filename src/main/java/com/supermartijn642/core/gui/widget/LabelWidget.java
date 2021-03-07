@@ -1,6 +1,5 @@
 package com.supermartijn642.core.gui.widget;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.supermartijn642.core.gui.ScreenUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -30,14 +29,14 @@ public class LabelWidget extends Widget {
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+    public void render(int mouseX, int mouseY, float partialTicks){
         if(this.active){
-            ScreenUtils.fillRect(matrixStack, this.x - 1, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, -6250336);
-            ScreenUtils.fillRect(matrixStack, this.x, this.y, this.x + this.width, this.y + this.height, 0xff404040);
+            ScreenUtils.fillRect(this.x - 1, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, -6250336);
+            ScreenUtils.fillRect(this.x, this.y, this.x + this.width, this.y + this.height, 0xff404040);
 
             ITextComponent text = this.text.get();
             FontRenderer font = Minecraft.getInstance().fontRenderer;
-            ScreenUtils.drawCenteredStringWithShadow(matrixStack, font, text, this.x, this.y + 2, this.active ? ScreenUtils.ACTIVE_TEXT_COLOR : ScreenUtils.INACTIVE_TEXT_COLOR);
+            ScreenUtils.drawCenteredStringWithShadow(font, text, this.x, this.y + 2, this.active ? ScreenUtils.ACTIVE_TEXT_COLOR : ScreenUtils.INACTIVE_TEXT_COLOR);
         }
     }
 }

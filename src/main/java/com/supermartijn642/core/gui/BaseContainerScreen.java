@@ -1,6 +1,5 @@
 package com.supermartijn642.core.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.supermartijn642.core.gui.widget.IHoverTextWidget;
@@ -105,74 +104,74 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-        this.renderBackground(matrixStack);
+    public void render(int mouseX, int mouseY, float partialTicks){
+        this.renderBackground();
 
-        matrixStack.translate(this.left(), this.top(), 0);
-        this.renderBackground(matrixStack, mouseX - this.left(), mouseY - this.top());
+        GlStateManager.translated(this.left(), this.top(), 0);
+        this.renderBackground(mouseX - this.left(), mouseY - this.top());
 
         if(this.drawSlots){
             for(Slot slot : this.container.inventorySlots){
                 Minecraft.getInstance().getTextureManager().bindTexture(SLOT_TEXTURE);
-                ScreenUtils.drawTexture(matrixStack, slot.xPos - 1, slot.yPos - 1, 18, 18);
+                ScreenUtils.drawTexture(slot.xPos - 1, slot.yPos - 1, 18, 18);
             }
         }
-        matrixStack.translate(-this.left(), -this.top(), 0);
+        GlStateManager.translated(-this.left(), -this.top(), 0);
 
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
+        super.render(mouseX, mouseY, partialTicks);
         // apparently some OpenGl settings are messed up after this
 
         RenderSystem.enableAlphaTest();
         GlStateManager.disableLighting();
 
-        matrixStack.translate(this.left(), this.top(), 0);
+        GlStateManager.translated(this.left(), this.top(), 0);
         for(Widget widget : this.widgets){
             widget.blitOffset = this.getBlitOffset();
             widget.wasHovered = widget.hovered;
             widget.hovered = mouseX - this.left() > widget.x && mouseX - this.left() < widget.x + widget.width &&
                 mouseY - this.top() > widget.y && mouseY - this.top() < widget.y + widget.height;
-            widget.render(matrixStack, mouseX - this.left(), mouseY - this.top(), partialTicks);
+            widget.render(mouseX - this.left(), mouseY - this.top(), partialTicks);
             widget.narrate();
         }
 
-        this.renderForeground(matrixStack, mouseX - this.left(), mouseY - this.top());
+        this.renderForeground(mouseX - this.left(), mouseY - this.top());
 
         for(Widget widget : this.widgets){
             if(widget instanceof IHoverTextWidget && widget.isHovered()){
                 ITextComponent text = ((IHoverTextWidget)widget).getHoverText();
                 if(text != null)
-                    this.renderTooltip(matrixStack, text, mouseX - this.left(), mouseY - this.top());
+                    this.renderTooltip(text.getFormattedText(), mouseX - this.left(), mouseY - this.top());
             }
         }
-        matrixStack.translate(-this.left(), -this.top(), 0);
-        super.renderHoveredTooltip(matrixStack, mouseX, mouseY);
-        this.renderTooltips(matrixStack, mouseX - this.left(), mouseY - this.top());
+        GlStateManager.translated(-this.left(), -this.top(), 0);
+        super.renderHoveredToolTip(mouseX, mouseY);
+        this.renderTooltips(mouseX - this.left(), mouseY - this.top());
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int x, int y){
+    protected void drawGuiContainerBackgroundLayer(float partialTicks, int x, int y){
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int x, int y){
+    protected void drawGuiContainerForegroundLayer(int x, int y){
     }
 
-    protected void renderBackground(MatrixStack matrixStack, int mouseX, int mouseY){
-        this.drawScreenBackground(matrixStack);
+    protected void renderBackground(int mouseX, int mouseY){
+        this.drawScreenBackground();
     }
 
-    protected void renderForeground(MatrixStack matrixStack, int mouseX, int mouseY){
-        ScreenUtils.drawString(matrixStack, this.font, this.title, 8, 7, 4210752);
+    protected void renderForeground(int mouseX, int mouseY){
+        ScreenUtils.drawString(this.font, this.title, 8, 7, 4210752);
     }
 
-    protected abstract void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY);
+    protected abstract void renderTooltips(int mouseX, int mouseY);
 
-    protected void drawScreenBackground(MatrixStack matrixStack, float x, float y, float width, float height){
-        ScreenUtils.drawScreenBackground(matrixStack, x, y, width, height);
+    protected void drawScreenBackground(float x, float y, float width, float height){
+        ScreenUtils.drawScreenBackground(x, y, width, height);
     }
 
-    protected void drawScreenBackground(MatrixStack matrixStack){
-        ScreenUtils.drawScreenBackground(matrixStack, 0, 0, this.sizeX(), this.sizeY());
+    protected void drawScreenBackground(){
+        ScreenUtils.drawScreenBackground(0, 0, this.sizeX(), this.sizeY());
     }
 
     @Override

@@ -6,14 +6,14 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameters;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootContext;
+import net.minecraft.world.storage.loot.LootParameters;
 
 import java.util.List;
 
@@ -35,8 +35,8 @@ public class BaseBlock extends Block {
         if(!this.saveTileData)
             return;
 
-        CompoundNBT tag = stack.getOrCreateTag();
-        tag = tag.contains("tileData") ? tag.getCompound("tileData") : null;
+        CompoundNBT tag = stack.getTag();
+        tag = tag == null ? null : tag.contains("tileData") ? tag.getCompound("tileData") : null;
         if(tag == null || tag.isEmpty())
             return;
 

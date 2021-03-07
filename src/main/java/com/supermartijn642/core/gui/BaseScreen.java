@@ -1,6 +1,6 @@
 package com.supermartijn642.core.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.gui.widget.IHoverTextWidget;
 import com.supermartijn642.core.gui.widget.ITickableWidget;
@@ -71,44 +71,44 @@ public abstract class BaseScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-        this.renderBackground(matrixStack);
+    public void render(int mouseX, int mouseY, float partialTicks){
+        this.renderBackground();
 
-        matrixStack.translate(this.left(), this.top(), 0);
+        GlStateManager.translated(this.left(), this.top(), 0);
         mouseX -= this.left();
         mouseY -= this.top();
 
-        matrixStack.push();
-        this.render(matrixStack, mouseX, mouseY);
-        matrixStack.pop();
+        GlStateManager.pushMatrix();
+        this.render(mouseX, mouseY);
+        GlStateManager.popMatrix();
         for(Widget widget : this.widgets){
             widget.blitOffset = this.getBlitOffset();
             widget.wasHovered = widget.hovered;
             widget.hovered = mouseX > widget.x && mouseX < widget.x + widget.width &&
                 mouseY > widget.y && mouseY < widget.y + widget.height;
-            widget.render(matrixStack, mouseX, mouseY, partialTicks);
+            widget.render(mouseX, mouseY, partialTicks);
             widget.narrate();
         }
         for(Widget widget : this.widgets){
             if(widget instanceof IHoverTextWidget && widget.isHovered()){
                 ITextComponent text = ((IHoverTextWidget)widget).getHoverText();
                 if(text != null)
-                    this.renderTooltip(matrixStack, text, mouseX, mouseY);
+                    this.renderTooltip(text.getFormattedText(), mouseX, mouseY);
             }
         }
-        this.renderTooltips(matrixStack, mouseX, mouseY);
+        this.renderTooltips(mouseX, mouseY);
     }
 
-    protected abstract void render(MatrixStack matrixStack, int mouseX, int mouseY);
+    protected abstract void render(int mouseX, int mouseY);
 
-    protected abstract void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY);
+    protected abstract void renderTooltips(int mouseX, int mouseY);
 
-    protected void drawScreenBackground(MatrixStack matrixStack, float x, float y, float width, float height){
-        ScreenUtils.drawScreenBackground(matrixStack, x, y, width, height);
+    protected void drawScreenBackground(float x, float y, float width, float height){
+        ScreenUtils.drawScreenBackground(x, y, width, height);
     }
 
-    protected void drawScreenBackground(MatrixStack matrixStack){
-        ScreenUtils.drawScreenBackground(matrixStack, 0, 0, this.sizeX(), this.sizeY());
+    protected void drawScreenBackground(){
+        ScreenUtils.drawScreenBackground(0, 0, this.sizeX(), this.sizeY());
     }
 
     @Override
@@ -190,7 +190,7 @@ public abstract class BaseScreen extends Screen {
 
         InputMappings.Input key = InputMappings.getInputByCode(keyCode, scanCode);
         if(ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(key)){
-            this.closeScreen();
+
             return true;
         }
 
@@ -211,5 +211,9 @@ public abstract class BaseScreen extends Screen {
             widget.charTyped(codePoint, modifiers);
 
         return false;
+    }
+
+    protected void closeScreen(){
+        ClientUtils.closeScreen();
     }
 }

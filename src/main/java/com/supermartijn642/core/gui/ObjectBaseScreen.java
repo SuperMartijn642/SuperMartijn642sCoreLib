@@ -1,6 +1,5 @@
 package com.supermartijn642.core.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.util.text.ITextComponent;
 
@@ -39,22 +38,22 @@ public abstract class ObjectBaseScreen<T> extends BaseScreen {
     protected abstract void addWidgets(T object);
 
     @Override
-    protected void render(MatrixStack matrixStack, int mouseX, int mouseY){
+    protected void render(int mouseX, int mouseY){
         T object = this.getObjectOrClose();
         if(object != null)
-            this.render(matrixStack, mouseX, mouseY, object);
+            this.render(mouseX, mouseY, object);
     }
 
-    protected abstract void render(MatrixStack matrixStack, int mouseX, int mouseY, T object);
+    protected abstract void render(int mouseX, int mouseY, T object);
 
     @Override
-    protected void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY){
+    protected void renderTooltips(int mouseX, int mouseY){
         T object = this.getObjectOrClose();
         if(object != null)
-            this.renderTooltips(matrixStack, mouseX, mouseY, object);
+            this.renderTooltips(mouseX, mouseY, object);
     }
 
-    protected abstract void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY, T object);
+    protected abstract void renderTooltips(int mouseX, int mouseY, T object);
 
     protected T getObjectOrClose(){
         T object = this.getObject();
