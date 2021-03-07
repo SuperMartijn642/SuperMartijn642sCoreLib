@@ -1,7 +1,6 @@
 package com.supermartijn642.core.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.supermartijn642.core.gui.ScreenUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -141,18 +140,18 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
-        RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
-        RenderSystem.disableTexture();
-        RenderSystem.enableColorLogicOp();
-        RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
+        GlStateManager.color4f(0.0F, 0.0F, 255.0F, 255.0F);
+        GlStateManager.disableTexture();
+        GlStateManager.enableColorLogicOp();
+        GlStateManager.logicOp(GlStateManager.LogicOp.OR_REVERSE);
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
         bufferbuilder.pos(startX, endY, 0).endVertex();
         bufferbuilder.pos(endX, endY, 0).endVertex();
         bufferbuilder.pos(endX, startY, 0).endVertex();
         bufferbuilder.pos(startX, startY, 0).endVertex();
         tessellator.draw();
-        RenderSystem.disableColorLogicOp();
-        RenderSystem.enableTexture();
+        GlStateManager.disableColorLogicOp();
+        GlStateManager.enableTexture();
     }
 
     public void clear(){

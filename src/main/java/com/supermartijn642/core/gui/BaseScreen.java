@@ -82,7 +82,7 @@ public abstract class BaseScreen extends Screen {
         this.render(mouseX, mouseY);
         GlStateManager.popMatrix();
         for(Widget widget : this.widgets){
-            widget.blitOffset = this.getBlitOffset();
+            widget.blitOffset = this.blitOffset;
             widget.wasHovered = widget.hovered;
             widget.hovered = mouseX > widget.x && mouseX < widget.x + widget.width &&
                 mouseY > widget.y && mouseY < widget.y + widget.height;

@@ -1,7 +1,6 @@
 package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -112,9 +111,8 @@ public class ScreenUtils {
     }
 
     public static void fillRect(float x, float y, float width, float height, float red, float green, float blue, float alpha){
-        RenderSystem.enableBlend();
-        RenderSystem.disableTexture();
-        RenderSystem.defaultBlendFunc();
+        GlStateManager.enableBlend();
+        GlStateManager.disableTexture();
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
@@ -125,8 +123,8 @@ public class ScreenUtils {
         buffer.pos(x, y, 0).color(red, green, blue, alpha).endVertex();
         tessellator.draw();
 
-        RenderSystem.enableTexture();
-        RenderSystem.disableBlend();
+        GlStateManager.enableTexture();
+        GlStateManager.disableBlend();
     }
 
     public static void bindTexture(ResourceLocation location){

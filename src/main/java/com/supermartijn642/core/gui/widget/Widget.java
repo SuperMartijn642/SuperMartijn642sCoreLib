@@ -2,6 +2,7 @@ package com.supermartijn642.core.gui.widget;
 
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.util.Util;
+import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 
 /**
@@ -29,9 +30,8 @@ public abstract class Widget {
 
         if(this.active && this.hovered && Util.milliTime() > this.nextNarration){
             ITextComponent message = this.getNarrationMessage();
-            String s = message == null ? "" : message.getString();
-            if(!s.isEmpty()){
-                NarratorChatListener.INSTANCE.say(s);
+            if(message != null){
+                NarratorChatListener.INSTANCE.say(ChatType.GAME_INFO, message);
                 this.nextNarration = Long.MAX_VALUE;
             }
         }

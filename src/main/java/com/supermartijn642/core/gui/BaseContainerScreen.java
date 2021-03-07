@@ -1,7 +1,6 @@
 package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.supermartijn642.core.gui.widget.IHoverTextWidget;
 import com.supermartijn642.core.gui.widget.ITickableWidget;
 import com.supermartijn642.core.gui.widget.TextFieldWidget;
@@ -121,12 +120,12 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         super.render(mouseX, mouseY, partialTicks);
         // apparently some OpenGl settings are messed up after this
 
-        RenderSystem.enableAlphaTest();
+        GlStateManager.enableAlphaTest();
         GlStateManager.disableLighting();
 
         GlStateManager.translated(this.left(), this.top(), 0);
         for(Widget widget : this.widgets){
-            widget.blitOffset = this.getBlitOffset();
+            widget.blitOffset = this.blitOffset;
             widget.wasHovered = widget.hovered;
             widget.hovered = mouseX - this.left() > widget.x && mouseX - this.left() < widget.x + widget.width &&
                 mouseY - this.top() > widget.y && mouseY - this.top() < widget.y + widget.height;

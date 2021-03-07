@@ -15,14 +15,14 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'com.wynprice.cursemaven'
 
-version = '1.0.0-mc1.15'
+version = '1.0.0-mc1.14'
 group = 'com.supermartijn642.core' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'supermartijn642corelib'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
 minecraft {
-    mappings channel: 'snapshot', version: '20210307-1.15.1'
+    mappings channel: 'snapshot', version: '20200119-1.14.3'
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 
     runs {
@@ -92,10 +92,10 @@ dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.15.2-31.2.49'
+    minecraft 'net.minecraftforge:forge:1.14.4-28.2.23'
 
     // compile against the JEI API but do not include it at runtime
-    compileOnly fg.deobf("mezz.jei:jei-1.15.2:6.0.2.12:api")
+    compileOnly fg.deobf("mezz.jei:jei-1.14.4:6.0.0.27:api")
     // at runtime, use the full JEI jar
-    runtimeOnly fg.deobf("mezz.jei:jei-1.15.2:6.0.2.12")
+    runtimeOnly fg.deobf("mezz.jei:jei-1.14.4:6.0.0.27")
 }
