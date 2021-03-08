@@ -266,7 +266,7 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
     }
 
     @Override
-    public void keyPressed(int keyCode, int scanCode, int modifiers){
+    public void keyPressed(int keyCode){
         if(!this.canWrite())
             return;
 
@@ -330,7 +330,7 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
     }
 
     @Override
-    public void charTyped(char c, int modifiers){
+    public void charTyped(char c){
         if(!this.canWrite())
             return;
 
