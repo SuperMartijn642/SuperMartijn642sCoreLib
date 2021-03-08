@@ -1,12 +1,14 @@
 package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.gui.widget.IHoverTextWidget;
 import com.supermartijn642.core.gui.widget.ITickableWidget;
 import com.supermartijn642.core.gui.widget.TextFieldWidget;
 import com.supermartijn642.core.gui.widget.Widget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -198,20 +200,6 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY){
-        mouseX -= this.left();
-        mouseY -= this.top();
-
-        for(Widget widget : this.widgets)
-            widget.mouseDragged((int)mouseX, (int)mouseY, button);
-
-        mouseX += this.left();
-        mouseY += this.top();
-
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
-    }
-
-    @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button){
         mouseX -= this.left();
         mouseY -= this.top();
@@ -251,24 +239,48 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers){
-        boolean handled = false;
+        if(this.keyReleased(keyCode))
+            return true;
 
-        for(Widget widget : this.widgets){
-            widget.keyPressed(keyCode, scanCode, modifiers);
-            if(widget instanceof TextFieldWidget && ((TextFieldWidget)widget).isFocused())
-                handled = true;
-        }
-
-        if(handled)
+        InputMappings.Input key = InputMappings.getInputByCode(keyCode, scanCode);
+        if(ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(key))
             return true;
 
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
+    public boolean keyPressed(int keyCode){
+        boolean handled = false;
+
+        for(Widget widget : this.widgets){
+            widget.keyPressed(keyCode);
+            if(widget instanceof TextFieldWidget && ((TextFieldWidget)widget).isFocused())
+                handled = true;
+        }
+
+        return handled;
+    }
+
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers){
+        return this.keyReleased(keyCode);
+    }
+
+    public boolean keyReleased(int keyCode){
         for(Widget widget : this.widgets)
-            widget.keyReleased(keyCode, scanCode, modifiers);
+            widget.keyReleased(keyCode);
+
+        return false;
+    }
+
+    @Override
+    public boolean charTyped(char codePoint, int modifiers){
+        return this.charTyped(codePoint);
+    }
+
+    public boolean charTyped(char c){
+        for(Widget widget : this.widgets)
+            widget.charTyped(c);
 
         return false;
     }
