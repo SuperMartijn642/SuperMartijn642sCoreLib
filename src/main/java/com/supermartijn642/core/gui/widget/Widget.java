@@ -1,7 +1,6 @@
 package com.supermartijn642.core.gui.widget;
 
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.util.Util;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 
@@ -26,9 +25,9 @@ public abstract class Widget {
 
     public void narrate(){
         if(this.wasHovered != this.hovered)
-            this.nextNarration = this.hovered ? Util.milliTime() + (long)750 : Long.MAX_VALUE;
+            this.nextNarration = this.hovered ? System.currentTimeMillis() + (long)750 : Long.MAX_VALUE;
 
-        if(this.active && this.hovered && Util.milliTime() > this.nextNarration){
+        if(this.active && this.hovered && System.currentTimeMillis() > this.nextNarration){
             ITextComponent message = this.getNarrationMessage();
             if(message != null){
                 NarratorChatListener.INSTANCE.say(ChatType.GAME_INFO, message);
@@ -52,21 +51,18 @@ public abstract class Widget {
     public void mouseClicked(int mouseX, int mouseY, int button){
     }
 
-    public void mouseDragged(int mouseX, int mouseY, int button){
-    }
-
     public void mouseReleased(int mouseX, int mouseY, int button){
     }
 
     public void mouseScrolled(int mouseX, int mouseY, double scroll){
     }
 
-    public void keyPressed(int keyCode, int scanCode, int modifiers){
+    public void keyPressed(int keyCode){
     }
 
-    public void keyReleased(int keyCode, int scanCode, int modifiers){
+    public void keyReleased(int keyCode){
     }
 
-    public void charTyped(char c, int modifiers){
+    public void charTyped(char c){
     }
 }

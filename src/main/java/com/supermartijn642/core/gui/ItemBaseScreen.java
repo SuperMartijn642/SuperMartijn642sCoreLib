@@ -2,7 +2,7 @@ package com.supermartijn642.core.gui;
 
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.ITextComponent;
 
 import java.util.function.Supplier;
@@ -23,7 +23,7 @@ public abstract class ItemBaseScreen extends ObjectBaseScreen<ItemStack> {
         this(title, () -> ClientUtils.getPlayer().inventory.getStackInSlot(playerSlot));
     }
 
-    protected ItemBaseScreen(ITextComponent title, Hand hand){
+    protected ItemBaseScreen(ITextComponent title, EnumHand hand){
         this(title, () -> ClientUtils.getPlayer().getHeldItem(hand));
     }
 

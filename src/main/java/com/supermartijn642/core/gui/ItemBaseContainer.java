@@ -1,10 +1,9 @@
 package com.supermartijn642.core.gui;
 
 import com.supermartijn642.core.ClientUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
+import net.minecraft.util.EnumHand;
 
 import java.util.function.Supplier;
 
@@ -15,17 +14,17 @@ public abstract class ItemBaseContainer extends ObjectBaseContainer<ItemStack> {
 
     private final Supplier<ItemStack> stackSupplier;
 
-    private ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, Supplier<ItemStack> itemStackSupplier){
-        super(type, id, player);
+    private ItemBaseContainer(EntityPlayer player, Supplier<ItemStack> itemStackSupplier){
+        super(player);
         this.stackSupplier = itemStackSupplier;
     }
 
-    protected ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, int playerSlot){
-        this(type, id, player, () -> player.inventory.getStackInSlot(playerSlot));
+    protected ItemBaseContainer(EntityPlayer player, int playerSlot){
+        this(player, () -> player.inventory.getStackInSlot(playerSlot));
     }
 
-    protected ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, Hand hand){
-        this(type, id, player, () -> ClientUtils.getPlayer().getHeldItem(hand));
+    protected ItemBaseContainer(EntityPlayer player, EnumHand hand){
+        this(player, () -> ClientUtils.getPlayer().getHeldItem(hand));
     }
 
     @Override

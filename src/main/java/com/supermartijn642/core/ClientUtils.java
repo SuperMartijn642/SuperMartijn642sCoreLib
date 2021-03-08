@@ -1,7 +1,7 @@
 package com.supermartijn642.core;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
 
 /**
  * Created 1/26/2021 by SuperMartijn642
@@ -9,10 +9,10 @@ import net.minecraft.entity.player.PlayerEntity;
 public class ClientUtils {
 
     public static Minecraft getMinecraft(){
-        return Minecraft.getInstance();
+        return Minecraft.getMinecraft();
     }
 
-    public static PlayerEntity getPlayer(){
+    public static EntityPlayer getPlayer(){
         return getMinecraft().player;
     }
 
@@ -21,7 +21,7 @@ public class ClientUtils {
     }
 
     public static void queueTask(Runnable task){
-        getMinecraft().enqueue(task);
+        getMinecraft().addScheduledTask(task);
     }
 
 }

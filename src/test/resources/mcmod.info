@@ -1,0 +1,16 @@
+[
+{
+  "modid": "corelibtestmod",
+  "name": "SuperMartijn642's Core Lib Test Mod",
+  "description": "Test mod for SuperMartijn642's Core Lib",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["SuperMartijn642"],
+  "credits": "",
+  "logoFile": "supermartijn642corelib.png",
+  "screenshots": [],
+  "dependencies": []
+}
+]

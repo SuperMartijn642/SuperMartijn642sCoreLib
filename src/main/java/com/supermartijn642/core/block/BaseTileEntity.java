@@ -1,20 +1,22 @@
 package com.supermartijn642.core.block;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
 
 /**
  * Created 1/26/2021 by SuperMartijn642
  */
 public abstract class BaseTileEntity extends TileEntity {
 
+    // Used for block drops
+    boolean destroyedByCreativePlayer = false;
     private boolean dataChanged = false;
 
-    public BaseTileEntity(TileEntityType<?> tileEntityTypeIn){
-        super(tileEntityTypeIn);
+    public BaseTileEntity(){
+        super();
     }
 
     public void dataChanged(){
@@ -23,53 +25,57 @@ public abstract class BaseTileEntity extends TileEntity {
         this.world.notifyBlockUpdate(this.pos, this.getBlockState(), this.getBlockState(), 2 & 4);
     }
 
-    protected abstract CompoundNBT writeData();
+    protected abstract NBTTagCompound writeData();
 
-    protected CompoundNBT writeClientData(){
+    protected NBTTagCompound writeClientData(){
         return this.writeData();
     }
 
-    protected abstract void readData(CompoundNBT tag);
+    protected abstract void readData(NBTTagCompound tag);
 
     @Override
-    public CompoundNBT write(CompoundNBT compound){
-        super.write(compound);
-        CompoundNBT data = this.writeData();
-        if(data != null && !data.isEmpty())
-            compound.put("data", this.writeData());
+    public NBTTagCompound writeToNBT(NBTTagCompound compound){
+        super.writeToNBT(compound);
+        NBTTagCompound data = this.writeData();
+        if(data != null && !data.hasNoTags())
+            compound.setTag("data", this.writeData());
         return compound;
     }
 
     @Override
-    public void read(CompoundNBT nbt){
-        super.read(nbt);
-        this.readData(nbt.getCompound("data"));
+    public void readFromNBT(NBTTagCompound nbt){
+        super.readFromNBT(nbt);
+        this.readData(nbt.getCompoundTag("data"));
     }
 
     @Override
-    public CompoundNBT getUpdateTag(){
-        CompoundNBT tag = super.write(new CompoundNBT());
-        tag.put("data", this.writeClientData());
+    public NBTTagCompound getUpdateTag(){
+        NBTTagCompound tag = super.writeToNBT(new NBTTagCompound());
+        tag.setTag("data", this.writeClientData());
         return tag;
     }
 
     @Override
-    public void handleUpdateTag(CompoundNBT tag){
-        super.read(tag);
-        this.readData(tag.getCompound("data"));
+    public void handleUpdateTag(NBTTagCompound tag){
+        super.readFromNBT(tag);
+        this.readData(tag.getCompoundTag("data"));
     }
 
     @Override
-    public SUpdateTileEntityPacket getUpdatePacket(){
+    public SPacketUpdateTileEntity getUpdatePacket(){
         if(this.dataChanged){
             this.dataChanged = false;
-            return new SUpdateTileEntityPacket(this.pos, 0, this.writeClientData());
+            return new SPacketUpdateTileEntity(this.pos, 0, this.writeClientData());
         }
         return null;
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt){
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt){
         this.readData(pkt.getNbtCompound());
+    }
+
+    public IBlockState getBlockState(){
+        return this.world.getBlockState(this.pos);
     }
 }

@@ -35,7 +35,7 @@ public class LabelWidget extends Widget {
             ScreenUtils.fillRect(this.x, this.y, this.x + this.width, this.y + this.height, 0xff404040);
 
             ITextComponent text = this.text.get();
-            FontRenderer font = Minecraft.getInstance().fontRenderer;
+            FontRenderer font = Minecraft.getMinecraft().fontRenderer;
             ScreenUtils.drawCenteredStringWithShadow(font, text, this.x, this.y + 2, this.active ? ScreenUtils.ACTIVE_TEXT_COLOR : ScreenUtils.INACTIVE_TEXT_COLOR);
         }
     }

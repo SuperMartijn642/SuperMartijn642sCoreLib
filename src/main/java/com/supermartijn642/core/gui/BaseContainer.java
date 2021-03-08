@@ -1,9 +1,8 @@
 package com.supermartijn642.core.gui;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.inventory.container.Slot;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
 import net.minecraft.world.World;
 
 /**
@@ -11,11 +10,10 @@ import net.minecraft.world.World;
  */
 public abstract class BaseContainer extends Container {
 
-    public final PlayerEntity player;
+    public final EntityPlayer player;
     public final World world;
 
-    public BaseContainer(ContainerType<?> type, int id, PlayerEntity player){
-        super(type, id);
+    public BaseContainer(EntityPlayer player){
         this.player = player;
         this.world = player.world;
     }
@@ -24,7 +22,7 @@ public abstract class BaseContainer extends Container {
         this.addSlots(this.player);
     }
 
-    protected abstract void addSlots(PlayerEntity player);
+    protected abstract void addSlots(EntityPlayer player);
 
     protected void addPlayerSlots(int x, int y){
         // player
@@ -39,8 +37,12 @@ public abstract class BaseContainer extends Container {
             this.addSlot(new Slot(this.player.inventory, column, x + 18 * column, y + 58));
     }
 
+    protected Slot addSlot(Slot slot){
+        return this.addSlotToContainer(slot);
+    }
+
     @Override
-    public boolean canInteractWith(PlayerEntity playerIn){
+    public boolean canInteractWith(EntityPlayer playerIn){
         return true;
     }
 }

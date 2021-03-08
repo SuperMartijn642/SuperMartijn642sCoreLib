@@ -1,7 +1,6 @@
 package com.supermartijn642.core.gui;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -14,18 +13,18 @@ public abstract class TileEntityBaseContainer<T extends TileEntity> extends Obje
     protected final World tileWorld;
     protected final BlockPos tilePos;
 
-    public TileEntityBaseContainer(ContainerType<?> type, int id, PlayerEntity player, World tileWorld, BlockPos tilePos){
-        super(type, id, player);
+    public TileEntityBaseContainer(EntityPlayer player, World tileWorld, BlockPos tilePos){
+        super(player);
         this.tileWorld = tileWorld;
         this.tilePos = tilePos;
     }
 
-    public TileEntityBaseContainer(ContainerType<?> type, int id, PlayerEntity player, BlockPos tilePos){
-        this(type, id, player, player.world, tilePos);
+    public TileEntityBaseContainer(EntityPlayer player, BlockPos tilePos){
+        this(player, player.world, tilePos);
     }
 
     @Override
-    public boolean canInteractWith(PlayerEntity playerIn){
+    public boolean canInteractWith(EntityPlayer playerIn){
         return super.canInteractWith(playerIn);
     }
 

@@ -1,9 +1,9 @@
 package com.supermartijn642.core.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
@@ -20,7 +20,7 @@ public class ScreenUtils {
     public static final int ACTIVE_TEXT_COLOR = 14737632, INACTIVE_TEXT_COLOR = 7368816;
 
     public static void drawString(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
-        fontRenderer.drawString(text.getFormattedText(), x, y, color);
+        fontRenderer.drawString(text.getFormattedText(), (int)x, (int)y, color);
     }
 
     public static void drawStringWithShadow(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
@@ -29,7 +29,7 @@ public class ScreenUtils {
 
     public static void drawCenteredString(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
         String s = text.getFormattedText();
-        fontRenderer.drawString(s, x - fontRenderer.getStringWidth(s) / 2f, y, color);
+        fontRenderer.drawString(s, (int)(x - fontRenderer.getStringWidth(s) / 2f), (int)y, color);
     }
 
     public static void drawCenteredStringWithShadow(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
@@ -38,7 +38,7 @@ public class ScreenUtils {
     }
 
     public static void drawString(FontRenderer fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawString(text, x, y, color);
+        fontRenderer.drawString(text, (int)x, (int)y, color);
     }
 
     public static void drawStringWithShadow(FontRenderer fontRenderer, String text, float x, float y, int color){
@@ -46,7 +46,7 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawString(text, x - fontRenderer.getStringWidth(text) / 2f, y, color);
+        fontRenderer.drawString(text, (int)(x - fontRenderer.getStringWidth(text) / 2f), (int)y, color);
     }
 
     public static void drawCenteredStringWithShadow(FontRenderer fontRenderer, String text, float x, float y, int color){
@@ -54,7 +54,7 @@ public class ScreenUtils {
     }
 
     public static void drawScreenBackground(float x, float y, float width, float height){
-        Minecraft.getInstance().textureManager.bindTexture(SCREEN_BACKGROUND);
+        bindTexture(SCREEN_BACKGROUND);
         // corners
         drawTexture(x, y, 4, 4, 0, 0, 4 / 9f, 4 / 9f);
         drawTexture(x + width - 4, y, 4, 4, 5 / 9f, 0, 4 / 9f, 4 / 9f);
@@ -70,7 +70,7 @@ public class ScreenUtils {
     }
 
     public static void drawButtonBackground(float x, float y, float width, float height, float yOffset){
-        Minecraft.getInstance().getTextureManager().bindTexture(BUTTON_BACKGROUND);
+        bindTexture(BUTTON_BACKGROUND);
         // corners
         drawTexture(x, y, 2, 2, 0, yOffset, 2 / 5f, 2 / 15f);
         drawTexture(x + width - 2, y, 2, 2, 3 / 5f, yOffset, 2 / 5f, 2 / 15f);
@@ -90,7 +90,7 @@ public class ScreenUtils {
     }
 
     public static void drawTexture(float x, float y, float width, float height, float tx, float ty, float twidth, float theight){
-        GlStateManager.color4f(1, 1, 1, 1);
+        GlStateManager.color(1, 1, 1, 1);
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
@@ -112,7 +112,7 @@ public class ScreenUtils {
 
     public static void fillRect(float x, float y, float width, float height, float red, float green, float blue, float alpha){
         GlStateManager.enableBlend();
-        GlStateManager.disableTexture();
+        GlStateManager.disableTexture2D();
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
@@ -123,11 +123,11 @@ public class ScreenUtils {
         buffer.pos(x, y, 0).color(red, green, blue, alpha).endVertex();
         tessellator.draw();
 
-        GlStateManager.enableTexture();
+        GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();
     }
 
     public static void bindTexture(ResourceLocation location){
-        Minecraft.getInstance().textureManager.bindTexture(location);
+        Minecraft.getMinecraft().getTextureManager().bindTexture(location);
     }
 }

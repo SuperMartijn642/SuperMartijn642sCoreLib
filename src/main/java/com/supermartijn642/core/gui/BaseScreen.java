@@ -1,31 +1,36 @@
 package com.supermartijn642.core.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.gui.widget.IHoverTextWidget;
 import com.supermartijn642.core.gui.widget.ITickableWidget;
 import com.supermartijn642.core.gui.widget.TextFieldWidget;
 import com.supermartijn642.core.gui.widget.Widget;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.InputMappings;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import org.lwjgl.input.Mouse;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Created 1/19/2021 by SuperMartijn642
  */
-public abstract class BaseScreen extends Screen {
+public abstract class BaseScreen extends GuiScreen {
 
     private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation("supermartijn642corelib", "textures/gui/background.png");
 
     private final List<Widget> widgets = new LinkedList<>();
     private final List<ITickableWidget> tickableWidgets = new LinkedList<>();
+    protected ITextComponent title;
+    protected FontRenderer font;
 
     protected BaseScreen(ITextComponent title){
-        super(title);
+        this.title = title;
     }
 
     protected abstract float sizeX();
@@ -41,7 +46,13 @@ public abstract class BaseScreen extends Screen {
     }
 
     @Override
-    protected void init(){
+    public void setWorldAndResolution(Minecraft mc, int width, int height){
+        super.setWorldAndResolution(mc, width, height);
+        this.font = this.fontRenderer;
+    }
+
+    @Override
+    public void initGui(){
         this.widgets.clear();
         this.tickableWidgets.clear();
         this.addWidgets();
@@ -64,17 +75,17 @@ public abstract class BaseScreen extends Screen {
     }
 
     @Override
-    public void tick(){
+    public void updateScreen(){
         for(Widget widget : this.widgets)
             if(widget instanceof ITickableWidget)
                 ((ITickableWidget)widget).tick();
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks){
-        this.renderBackground();
+    public void drawScreen(int mouseX, int mouseY, float partialTicks){
+        this.drawDefaultBackground();
 
-        GlStateManager.translated(this.left(), this.top(), 0);
+        GlStateManager.translate(this.left(), this.top(), 0);
         mouseX -= this.left();
         mouseY -= this.top();
 
@@ -82,7 +93,7 @@ public abstract class BaseScreen extends Screen {
         this.render(mouseX, mouseY);
         GlStateManager.popMatrix();
         for(Widget widget : this.widgets){
-            widget.blitOffset = this.blitOffset;
+            widget.blitOffset = this.zLevel;
             widget.wasHovered = widget.hovered;
             widget.hovered = mouseX > widget.x && mouseX < widget.x + widget.width &&
                 mouseY > widget.y && mouseY < widget.y + widget.height;
@@ -93,7 +104,7 @@ public abstract class BaseScreen extends Screen {
             if(widget instanceof IHoverTextWidget && widget.isHovered()){
                 ITextComponent text = ((IHoverTextWidget)widget).getHoverText();
                 if(text != null)
-                    this.renderTooltip(text.getFormattedText(), mouseX, mouseY);
+                    this.drawHoveringText(text.getFormattedText(), mouseX, mouseY);
             }
         }
         this.renderTooltips(mouseX, mouseY);
@@ -112,11 +123,19 @@ public abstract class BaseScreen extends Screen {
     }
 
     @Override
+    public boolean doesGuiPauseGame(){
+        return this.isPauseScreen();
+    }
+
     public boolean isPauseScreen(){
         return false;
     }
 
     @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton){
+        this.mouseClicked((double)mouseX, (double)mouseY, mouseButton);
+    }
+
     public boolean mouseClicked(double mouseX, double mouseY, int button){
         mouseX -= this.left();
         mouseY -= this.top();
@@ -126,24 +145,21 @@ public abstract class BaseScreen extends Screen {
         for(Widget widget : this.widgets)
             widget.mouseClicked((int)mouseX, (int)mouseY, button);
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        try{
+            super.mouseClicked((int)mouseX, (int)mouseY, button);
+        }catch(IOException ignore){}
+
+        return false;
     }
 
     protected void onMousePress(int mouseX, int mouseY, int button){
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY){
-        mouseX -= this.left();
-        mouseY -= this.top();
-
-        for(Widget widget : this.widgets)
-            widget.mouseDragged((int)mouseX, (int)mouseY, button);
-
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    protected void mouseReleased(int mouseX, int mouseY, int button){
+        this.mouseReleased((double)mouseX, (double)mouseY, button);
     }
 
-    @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button){
         mouseX -= this.left();
         mouseY -= this.top();
@@ -153,13 +169,24 @@ public abstract class BaseScreen extends Screen {
         for(Widget widget : this.widgets)
             widget.mouseReleased((int)mouseX, (int)mouseY, button);
 
-        return super.mouseReleased(mouseX, mouseY, button);
+        super.mouseReleased((int)mouseX, (int)mouseY, button);
+
+        return false;
     }
 
     protected void onMouseRelease(int mouseX, int mouseY, int button){
     }
 
     @Override
+    public void handleMouseInput() throws IOException{
+        super.handleMouseInput();
+
+        int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth - (int)this.left();
+        int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1 - (int)this.top();
+
+        this.mouseScrolled(mouseX, mouseY, Mouse.getEventDWheel() / 120);
+    }
+
     public boolean mouseScrolled(double mouseX, double mouseY, double delta){
         mouseX -= this.left();
         mouseY -= this.top();
@@ -169,18 +196,17 @@ public abstract class BaseScreen extends Screen {
         for(Widget widget : this.widgets)
             widget.mouseScrolled((int)mouseX, (int)mouseY, delta);
 
-        return super.mouseScrolled(mouseX, mouseY, delta);
+        return false;
     }
 
     protected void onMouseScroll(int mouseX, int mouseY, double scroll){
     }
 
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers){
+    public boolean keyPressed(int keyCode){
         boolean handled = false;
 
         for(Widget widget : this.widgets){
-            widget.keyPressed(keyCode, scanCode, modifiers);
+            widget.keyPressed(keyCode);
             if(widget instanceof TextFieldWidget && ((TextFieldWidget)widget).isFocused())
                 handled = true;
         }
@@ -188,32 +214,32 @@ public abstract class BaseScreen extends Screen {
         if(handled)
             return true;
 
-        InputMappings.Input key = InputMappings.getInputByCode(keyCode, scanCode);
-        if(ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(key)){
-
+        if(ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(keyCode))
             return true;
-        }
-
-        return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers){
-        for(Widget widget : this.widgets)
-            widget.keyReleased(keyCode, scanCode, modifiers);
 
         return false;
     }
 
-    @Override
-    public boolean charTyped(char codePoint, int modifiers){
+    public boolean keyReleased(int keyCode){
         for(Widget widget : this.widgets)
-            widget.charTyped(codePoint, modifiers);
+            widget.keyReleased(keyCode);
 
         return false;
     }
 
     protected void closeScreen(){
         ClientUtils.closeScreen();
+    }
+
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) throws IOException{
+        this.charTyped(typedChar);
+    }
+
+    public boolean charTyped(char c){
+        for(Widget widget : this.widgets)
+            widget.charTyped(c);
+
+        return false;
     }
 }

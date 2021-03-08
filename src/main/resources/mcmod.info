@@ -1,0 +1,16 @@
+[
+{
+  "modid": "supermartijn642corelib",
+  "name": "SuperMartijn642's Core Lib",
+  "description": "SuperMartijn642's Core Lib adds lots of basic implementations for guis that allow for similar code between Minecraft 1.12, 1.14, 1.15, and 1.16!",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["SuperMartijn642"],
+  "credits": "",
+  "logoFile": "supermartijn642corelib.png",
+  "screenshots": [],
+  "dependencies": []
+}
+]
