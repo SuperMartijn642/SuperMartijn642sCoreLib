@@ -53,21 +53,18 @@ public abstract class Widget {
     public void mouseClicked(int mouseX, int mouseY, int button){
     }
 
-    public void mouseDragged(int mouseX, int mouseY, int button){
-    }
-
     public void mouseReleased(int mouseX, int mouseY, int button){
     }
 
     public void mouseScrolled(int mouseX, int mouseY, double scroll){
     }
 
-    public void keyPressed(int keyCode, int scanCode, int modifiers){
+    public void keyPressed(int keyCode){
     }
 
-    public void keyReleased(int keyCode, int scanCode, int modifiers){
+    public void keyReleased(int keyCode){
     }
 
-    public void charTyped(char c, int modifiers){
+    public void charTyped(char c){
     }
 }

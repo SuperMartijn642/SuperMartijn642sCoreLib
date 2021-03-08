@@ -133,17 +133,6 @@ public abstract class BaseScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY){
-        mouseX -= this.left();
-        mouseY -= this.top();
-
-        for(Widget widget : this.widgets)
-            widget.mouseDragged((int)mouseX, (int)mouseY, button);
-
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
-    }
-
-    @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button){
         mouseX -= this.left();
         mouseY -= this.top();
@@ -177,38 +166,48 @@ public abstract class BaseScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers){
-        boolean handled = false;
-
-        for(Widget widget : this.widgets){
-            widget.keyPressed(keyCode, scanCode, modifiers);
-            if(widget instanceof TextFieldWidget && ((TextFieldWidget)widget).isFocused())
-                handled = true;
-        }
-
-        if(handled)
+        if(this.keyReleased(keyCode))
             return true;
 
         InputMappings.Input key = InputMappings.getInputByCode(keyCode, scanCode);
-        if(ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(key)){
-            this.closeScreen();
+        if(ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(key))
             return true;
-        }
 
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
+    public boolean keyPressed(int keyCode){
+        boolean handled = false;
+
+        for(Widget widget : this.widgets){
+            widget.keyPressed(keyCode);
+            if(widget instanceof TextFieldWidget && ((TextFieldWidget)widget).isFocused())
+                handled = true;
+        }
+
+        return handled;
+    }
+
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers){
+        return this.keyReleased(keyCode);
+    }
+
+    public boolean keyReleased(int keyCode){
         for(Widget widget : this.widgets)
-            widget.keyReleased(keyCode, scanCode, modifiers);
+            widget.keyReleased(keyCode);
 
         return false;
     }
 
     @Override
     public boolean charTyped(char codePoint, int modifiers){
+        return this.charTyped(codePoint);
+    }
+
+    public boolean charTyped(char c){
         for(Widget widget : this.widgets)
-            widget.charTyped(codePoint, modifiers);
+            widget.charTyped(c);
 
         return false;
     }

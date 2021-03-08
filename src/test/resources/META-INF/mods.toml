@@ -31,7 +31,7 @@ logoFile="supermartijn642corelib.png" #optional
 # A text field displayed in the mod UI
 authors="SuperMartijn642" #optional
 # The description text for the mod (multi line!) (#mandatory)
-description='''Test mod for SuperMartijn642's Gui Lib'''
+description='''Test mod for SuperMartijn642's Core Lib'''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.corelibtestmod]] #optional
     # the modid of the dependency
