@@ -11,6 +11,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
@@ -202,13 +203,24 @@ public abstract class BaseScreen extends GuiScreen {
     protected void onMouseScroll(int mouseX, int mouseY, double scroll){
     }
 
+    @Override
+    public void handleKeyboardInput() throws IOException{
+        if(Keyboard.getEventKeyState()){
+            if(!this.keyPressed(Keyboard.getEventKey()))
+                super.handleKeyboardInput();
+        }else{
+            if(!this.keyReleased(Keyboard.getEventKey()))
+                super.handleKeyboardInput();
+        }
+    }
+
     public boolean keyPressed(int keyCode){
         boolean handled = false;
 
         for(Widget widget : this.widgets){
-            widget.keyPressed(keyCode);
-            if(widget instanceof TextFieldWidget && ((TextFieldWidget)widget).isFocused())
+            if(widget instanceof TextFieldWidget && ((TextFieldWidget)widget).canWrite())
                 handled = true;
+            widget.keyPressed(keyCode);
         }
 
         if(handled)
@@ -227,10 +239,6 @@ public abstract class BaseScreen extends GuiScreen {
         return false;
     }
 
-    protected void closeScreen(){
-        ClientUtils.closeScreen();
-    }
-
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException{
         this.charTyped(typedChar);
@@ -241,5 +249,9 @@ public abstract class BaseScreen extends GuiScreen {
             widget.charTyped(c);
 
         return false;
+    }
+
+    protected void closeScreen(){
+        ClientUtils.closeScreen();
     }
 }

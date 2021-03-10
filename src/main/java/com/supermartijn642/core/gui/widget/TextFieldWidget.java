@@ -29,6 +29,8 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
     protected int lineScrollOffset;
     protected int cursorPosition;
     protected int selectionPos;
+    protected boolean drawBackground = true;
+    protected int activeTextColor = 14737632, inactiveTextColor = 7368816;
 
     private final BiConsumer<String,String> changeListener;
 
@@ -59,9 +61,10 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
 
     @Override
     public void render(int mouseX, int mouseY, float partialTicks){
-        this.drawBackground();
+        if(this.drawBackground)
+            this.drawBackground();
 
-        int textColor = this.active ? 14737632 : 7368816;
+        int textColor = this.active ? this.activeTextColor : this.inactiveTextColor;
         int relativeCursor = this.cursorPosition - this.lineScrollOffset;
         int relativeSelection = this.selectionPos - this.lineScrollOffset;
         FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
@@ -113,8 +116,8 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
     }
 
     protected void drawBackground(){
-        ScreenUtils.fillRect(this.x - 1, this.y - 1, this.width + 2, this.height + 2, this.focused ? -1 : -6250336);
-        ScreenUtils.fillRect(this.x, this.y, this.width, this.height, -16777216);
+        ScreenUtils.fillRect(this.x, this.y, this.width, this.height, this.focused ? -1 : -6250336);
+        ScreenUtils.fillRect(this.x + 1, this.y + 1, this.width - 2, this.height - 2, -16777216);
     }
 
     protected void drawSelectionBox(int startX, int startY, int endX, int endY){
@@ -257,8 +260,21 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
         return this.suggestion;
     }
 
+    public void setTextColors(int activeTextColor, int inactiveTextColor){
+        this.activeTextColor = activeTextColor;
+        this.inactiveTextColor = inactiveTextColor;
+    }
+
+    public void setDrawBackground(boolean drawBackground){
+        this.drawBackground = drawBackground;
+    }
+
     public boolean isFocused(){
         return this.focused;
+    }
+
+    public void setFocused(boolean focused){
+        this.focused = focused;
     }
 
     @Override
@@ -267,7 +283,9 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
             return;
 
         boolean shift = GuiScreen.isShiftKeyDown();
-        if(GuiScreen.isKeyComboCtrlA(keyCode)){
+        if(keyCode == 256){
+            this.setFocused(false);
+        }else if(GuiScreen.isKeyComboCtrlA(keyCode)){
             this.lineScrollOffset = 0;
             this.cursorPosition = this.text.length();
             this.selectionPos = 0;

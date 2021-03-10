@@ -292,9 +292,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends GuiCo
         boolean handled = false;
 
         for(Widget widget : this.widgets){
-            widget.keyPressed(keyCode);
-            if(widget instanceof TextFieldWidget && ((TextFieldWidget)widget).isFocused())
+            if(widget instanceof TextFieldWidget && ((TextFieldWidget)widget).canWrite())
                 handled = true;
+            widget.keyPressed(keyCode);
         }
 
         if(handled)
