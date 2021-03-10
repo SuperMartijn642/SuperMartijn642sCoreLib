@@ -300,8 +300,10 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends GuiCo
         if(handled)
             return true;
 
-        if(ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(keyCode))
+        if(keyCode == 1 || ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(keyCode)){
+            this.closeScreen();
             return true;
+        }
 
         return false;
     }
@@ -323,5 +325,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends GuiCo
             widget.charTyped(c);
 
         return false;
+    }
+
+    protected void closeScreen(){
+        ClientUtils.closeScreen();
     }
 }

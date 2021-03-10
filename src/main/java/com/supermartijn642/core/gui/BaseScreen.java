@@ -215,6 +215,7 @@ public abstract class BaseScreen extends GuiScreen {
     }
 
     public boolean keyPressed(int keyCode){
+        System.out.println("keyCode: " + keyCode);
         boolean handled = false;
 
         for(Widget widget : this.widgets){
@@ -226,8 +227,10 @@ public abstract class BaseScreen extends GuiScreen {
         if(handled)
             return true;
 
-        if(ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(keyCode))
+        if(keyCode == 1 || ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(keyCode)){
+            this.closeScreen();
             return true;
+        }
 
         return false;
     }
