@@ -32,6 +32,8 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
     protected int lineScrollOffset;
     protected int cursorPosition;
     protected int selectionPos;
+    protected boolean drawBackground = true;
+    protected int activeTextColor = 14737632, inactiveTextColor = 7368816;
 
     private final BiConsumer<String,String> changeListener;
 
@@ -62,9 +64,10 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
 
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-        this.drawBackground(matrixStack);
+        if(this.drawBackground)
+            this.drawBackground(matrixStack);
 
-        int textColor = this.active ? 14737632 : 7368816;
+        int textColor = this.active ? this.activeTextColor : this.inactiveTextColor;
         int relativeCursor = this.cursorPosition - this.lineScrollOffset;
         int relativeSelection = this.selectionPos - this.lineScrollOffset;
         FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
@@ -98,7 +101,7 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
             fontRenderer.drawString(matrixStack, s.substring(relativeCursor), leftOffset, top, textColor);
 
         // draw suggestion
-        if(this.suggestion.isEmpty() && this.text.isEmpty())
+        if(!this.suggestion.isEmpty() && this.text.isEmpty())
             fontRenderer.drawStringWithShadow(matrixStack, fontRenderer.func_238412_a_(this.suggestion, this.width - 8 - fontRenderer.getStringWidth("...")) + "...", cursorX, top, -8355712);
 
         // draw cursor
@@ -116,8 +119,8 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
     }
 
     protected void drawBackground(MatrixStack matrixStack){
-        ScreenUtils.fillRect(matrixStack, this.x - 1, this.y - 1, this.width + 2, this.height + 2, this.focused ? -1 : -6250336);
-        ScreenUtils.fillRect(matrixStack, this.x, this.y, this.width, this.height, -16777216);
+        ScreenUtils.fillRect(matrixStack, this.x, this.y, this.width, this.height, this.focused ? -1 : -6250336);
+        ScreenUtils.fillRect(matrixStack, this.x + 1, this.y + 1, this.width - 2, this.height - 2, -16777216);
     }
 
     protected void drawSelectionBox(MatrixStack matrixStack, int startX, int startY, int endX, int endY){
@@ -261,8 +264,21 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
         return this.suggestion;
     }
 
+    public void setTextColors(int activeTextColor, int inactiveTextColor){
+        this.activeTextColor = activeTextColor;
+        this.inactiveTextColor = inactiveTextColor;
+    }
+
+    public void setDrawBackground(boolean drawBackground){
+        this.drawBackground = drawBackground;
+    }
+
     public boolean isFocused(){
         return this.focused;
+    }
+
+    public void setFocused(boolean focused){
+        this.focused = focused;
     }
 
     @Override
@@ -271,7 +287,9 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
             return;
 
         boolean shift = Screen.hasShiftDown();
-        if(Screen.isSelectAll(keyCode)){
+        if(keyCode == 256){
+            this.setFocused(false);
+        }else if(Screen.isSelectAll(keyCode)){
             this.lineScrollOffset = 0;
             this.cursorPosition = this.text.length();
             this.selectionPos = 0;
