@@ -280,6 +280,8 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends GuiCo
     @Override
     public void handleKeyboardInput() throws IOException{
         if(Keyboard.getEventKeyState()){
+            if(Keyboard.getEventCharacter() >= ' ')
+                super.handleKeyboardInput();
             if(!this.keyPressed(Keyboard.getEventKey()))
                 super.handleKeyboardInput();
         }else{

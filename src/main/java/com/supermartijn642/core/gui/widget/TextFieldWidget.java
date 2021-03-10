@@ -283,7 +283,7 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
             return;
 
         boolean shift = GuiScreen.isShiftKeyDown();
-        if(keyCode == 256){
+        if(keyCode == 1){
             this.setFocused(false);
         }else if(GuiScreen.isKeyComboCtrlA(keyCode)){
             this.lineScrollOffset = 0;
@@ -298,20 +298,20 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
             this.addTextAtCursor("");
         }else{
             switch(keyCode){
-                case 259: // backspace
+                case 14: // backspace
                     this.removeAtCursor(true);
                     break;
-                case 260: // insert
+                case 210: // insert
                 case 264: // ?
                 case 265: // ?
-                case 266: // page up
-                case 267: // page down
+                case 201: // page up
+                case 209: // page down
                 default:
                     break;
-                case 261: // delete
+                case 211: // delete
                     this.removeAtCursor(false);
                     break;
-                case 262: // right
+                case 205: // right
                     if(!shift && this.cursorPosition != this.selectionPos)
                         this.cursorPosition = this.selectionPos = Math.max(this.cursorPosition, this.selectionPos);
                     else if(this.cursorPosition < this.text.length()){
@@ -321,7 +321,7 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
                     }
                     this.moveLineOffsetToCursor();
                     break;
-                case 263: // left
+                case 203: // left
                     if(!shift && this.cursorPosition != this.selectionPos)
                         this.cursorPosition = this.selectionPos = Math.min(this.cursorPosition, this.selectionPos);
                     else if(this.cursorPosition > 0){
@@ -331,11 +331,11 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
                     }
                     this.moveLineOffsetToCursor();
                     break;
-                case 268: // home
+                case 199: // home
                     this.cursorPosition = this.selectionPos = 0;
                     this.moveLineOffsetToCursor();
                     break;
-                case 269: // end
+                case 207: // end
                     this.cursorPosition = this.selectionPos = this.text.length();
                     this.moveLineOffsetToCursor();
                     break;

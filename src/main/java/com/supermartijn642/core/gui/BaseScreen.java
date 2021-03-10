@@ -206,6 +206,8 @@ public abstract class BaseScreen extends GuiScreen {
     @Override
     public void handleKeyboardInput() throws IOException{
         if(Keyboard.getEventKeyState()){
+            if(Keyboard.getEventCharacter() >= ' ')
+                super.handleKeyboardInput();
             if(!this.keyPressed(Keyboard.getEventKey()))
                 super.handleKeyboardInput();
         }else{
@@ -242,7 +244,7 @@ public abstract class BaseScreen extends GuiScreen {
     }
 
     @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException{
+    protected void keyTyped(char typedChar, int keyCode){
         this.charTyped(typedChar);
     }
 
