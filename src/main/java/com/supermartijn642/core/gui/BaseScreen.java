@@ -166,7 +166,7 @@ public abstract class BaseScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers){
-        if(this.keyReleased(keyCode))
+        if(this.keyPressed(keyCode))
             return true;
 
         InputMappings.Input key = InputMappings.getInputByCode(keyCode, scanCode);
@@ -180,9 +180,9 @@ public abstract class BaseScreen extends Screen {
         boolean handled = false;
 
         for(Widget widget : this.widgets){
-            widget.keyPressed(keyCode);
-            if(widget instanceof TextFieldWidget && ((TextFieldWidget)widget).isFocused())
+            if(widget instanceof TextFieldWidget && ((TextFieldWidget)widget).canWrite())
                 handled = true;
+            widget.keyPressed(keyCode);
         }
 
         return handled;
