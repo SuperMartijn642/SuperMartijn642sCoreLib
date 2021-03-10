@@ -215,7 +215,6 @@ public abstract class BaseScreen extends GuiScreen {
     }
 
     public boolean keyPressed(int keyCode){
-        System.out.println("keyCode: " + keyCode);
         boolean handled = false;
 
         for(Widget widget : this.widgets){
