@@ -99,7 +99,7 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
             fontRenderer.drawString(s.substring(relativeCursor), leftOffset, top, textColor);
 
         // draw suggestion
-        if(this.suggestion.isEmpty() && this.text.isEmpty())
+        if(!this.suggestion.isEmpty() && this.text.isEmpty())
             fontRenderer.drawStringWithShadow(fontRenderer.trimStringToWidth(this.suggestion, this.width - 8 - fontRenderer.getStringWidth("...")) + "...", cursorX, top, -8355712);
 
         // draw cursor
