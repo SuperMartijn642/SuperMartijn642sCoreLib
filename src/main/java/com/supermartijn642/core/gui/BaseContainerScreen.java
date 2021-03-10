@@ -243,8 +243,10 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
             return true;
 
         InputMappings.Input key = InputMappings.getInputByCode(keyCode, scanCode);
-        if(ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(key))
+        if(ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(key)){
+            this.closeScreen();
             return true;
+        }
 
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
@@ -283,5 +285,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
             widget.charTyped(c);
 
         return false;
+    }
+
+    protected void closeScreen(){
+        ClientUtils.closeScreen();
     }
 }
