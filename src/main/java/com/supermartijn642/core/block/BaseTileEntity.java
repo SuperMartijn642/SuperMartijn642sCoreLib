@@ -22,7 +22,7 @@ public abstract class BaseTileEntity extends TileEntity {
     public void dataChanged(){
         this.dataChanged = true;
         this.markDirty();
-        this.world.notifyBlockUpdate(this.pos, this.getBlockState(), this.getBlockState(), 2 & 4);
+        this.world.notifyBlockUpdate(this.pos, this.getBlockState(), this.getBlockState(), 2 | 4);
     }
 
     protected abstract NBTTagCompound writeData();
@@ -38,7 +38,7 @@ public abstract class BaseTileEntity extends TileEntity {
         super.writeToNBT(compound);
         NBTTagCompound data = this.writeData();
         if(data != null && !data.hasNoTags())
-            compound.setTag("data", this.writeData());
+            compound.setTag("data", data);
         return compound;
     }
 
@@ -51,7 +51,9 @@ public abstract class BaseTileEntity extends TileEntity {
     @Override
     public NBTTagCompound getUpdateTag(){
         NBTTagCompound tag = super.writeToNBT(new NBTTagCompound());
-        tag.setTag("data", this.writeClientData());
+        NBTTagCompound data = this.writeClientData();
+        if(data != null && !data.hasNoTags())
+            tag.setTag("data", data);
         return tag;
     }
 
