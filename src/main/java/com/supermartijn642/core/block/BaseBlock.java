@@ -32,6 +32,7 @@ public class BaseBlock extends Block {
     public BaseBlock(String registryName, boolean saveTileData, Properties properties){
         super(properties.material, properties.mapColor);
         this.setRegistryName(registryName);
+        this.setUnlocalizedName(this.getRegistryName().getResourceDomain() + "." + this.getRegistryName().getResourcePath());
         this.saveTileData = saveTileData;
 
         this.setSoundType(properties.soundType);
@@ -60,16 +61,8 @@ public class BaseBlock extends Block {
     }
 
     @Override
-    public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state){
-
-    }
-
-    @Override
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state){
-        for(ItemStack drop : this.getActualDrops(worldIn, pos, state, 0))
-            spawnAsEntity(worldIn, pos, drop);
-
-//        super.breakBlock(worldIn, pos, state);
+    public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune){
+        drops.addAll(this.getActualDrops(world, pos, state, fortune));
     }
 
     public List<ItemStack> getActualDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune){
