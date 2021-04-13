@@ -37,6 +37,19 @@ public abstract class ObjectBaseContainerScreen<T, X extends ObjectBaseContainer
     protected abstract void addWidgets(T object);
 
     @Override
+    public void tick(){
+        T object = this.getObjectOrClose();
+        if(object == null)
+            return;
+
+        this.tick(object);
+        super.tick();
+    }
+
+    protected void tick(T object){
+    }
+
+    @Override
     protected void renderBackground(MatrixStack matrixStack, int mouseX, int mouseY){
         T object = this.getObjectOrClose();
         if(object != null)
