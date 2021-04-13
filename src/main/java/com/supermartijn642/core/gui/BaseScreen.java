@@ -77,6 +77,10 @@ public abstract class BaseScreen extends GuiScreen {
 
     @Override
     public void updateScreen(){
+        this.tick();
+    }
+
+    public void tick(){
         for(Widget widget : this.widgets)
             if(widget instanceof ITickableWidget)
                 ((ITickableWidget)widget).tick();

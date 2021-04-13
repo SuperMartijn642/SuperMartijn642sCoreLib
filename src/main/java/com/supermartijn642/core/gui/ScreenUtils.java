@@ -1,5 +1,6 @@
 package com.supermartijn642.core.gui;
 
+import com.supermartijn642.core.ClientUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -23,8 +24,16 @@ public class ScreenUtils {
         fontRenderer.drawString(text.getFormattedText(), (int)x, (int)y, color);
     }
 
+    public static void drawString(ITextComponent text, float x, float y, int color){
+        drawString(ClientUtils.getFontRenderer(), text, x, y, color);
+    }
+
     public static void drawStringWithShadow(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
         fontRenderer.drawStringWithShadow(text.getFormattedText(), x, y, color);
+    }
+
+    public static void drawStringWithShadow(ITextComponent text, float x, float y, int color){
+        drawStringWithShadow(ClientUtils.getFontRenderer(), text, x, y, color);
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
@@ -32,25 +41,49 @@ public class ScreenUtils {
         fontRenderer.drawString(s, (int)(x - fontRenderer.getStringWidth(s) / 2f), (int)y, color);
     }
 
+    public static void drawCenteredString(ITextComponent text, float x, float y, int color){
+        drawCenteredString(ClientUtils.getFontRenderer(), text, x, y, color);
+    }
+
     public static void drawCenteredStringWithShadow(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
         String s = text.getFormattedText();
         fontRenderer.drawStringWithShadow(s, x - fontRenderer.getStringWidth(s) / 2f, y, color);
+    }
+
+    public static void drawCenteredStringWithShadow(ITextComponent text, float x, float y, int color){
+        drawCenteredStringWithShadow(ClientUtils.getFontRenderer(), text, x, y, color);
     }
 
     public static void drawString(FontRenderer fontRenderer, String text, float x, float y, int color){
         fontRenderer.drawString(text, (int)x, (int)y, color);
     }
 
+    public static void drawString(String text, float x, float y, int color){
+        drawString(ClientUtils.getFontRenderer(), text, x, y, color);
+    }
+
     public static void drawStringWithShadow(FontRenderer fontRenderer, String text, float x, float y, int color){
         fontRenderer.drawStringWithShadow(text, x - fontRenderer.getStringWidth(text) / 2f, y, color);
+    }
+
+    public static void drawStringWithShadow(String text, float x, float y, int color){
+        drawStringWithShadow(ClientUtils.getFontRenderer(), text, x, y, color);
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, String text, float x, float y, int color){
         fontRenderer.drawString(text, (int)(x - fontRenderer.getStringWidth(text) / 2f), (int)y, color);
     }
 
+    public static void drawCenteredString(String text, float x, float y, int color){
+        drawCenteredString(ClientUtils.getFontRenderer(), text, x, y, color);
+    }
+
     public static void drawCenteredStringWithShadow(FontRenderer fontRenderer, String text, float x, float y, int color){
         fontRenderer.drawStringWithShadow(text, x - fontRenderer.getStringWidth(text) / 2f, y, color);
+    }
+
+    public static void drawCenteredStringWithShadow(String text, float x, float y, int color){
+        drawCenteredStringWithShadow(ClientUtils.getFontRenderer(), text, x, y, color);
     }
 
     public static void drawScreenBackground(float x, float y, float width, float height){
