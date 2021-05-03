@@ -2,6 +2,7 @@ package com.supermartijn642.core;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
@@ -37,6 +38,10 @@ public class ClientUtils {
 
     public static String translate(String translationKey, Object... args){
         return I18n.format(translationKey, args);
+    }
+
+    public static void displayScreen(GuiScreen screen){
+        getMinecraft().displayGuiScreen(screen);
     }
 
 }
