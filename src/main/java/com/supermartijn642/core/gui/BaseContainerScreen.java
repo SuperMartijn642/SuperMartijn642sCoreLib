@@ -148,7 +148,7 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         }
         matrixStack.translate(-this.left(), -this.top(), 0);
         super.renderHoveredTooltip(matrixStack, mouseX, mouseY);
-        this.renderTooltips(matrixStack, mouseX - this.left(), mouseY - this.top());
+        this.renderTooltips(matrixStack, mouseX, mouseY);
     }
 
     @Override
@@ -167,7 +167,8 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         ScreenUtils.drawString(matrixStack, this.font, this.title, 8, 7, 4210752);
     }
 
-    protected abstract void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY);
+    protected void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY){
+    }
 
     protected void drawScreenBackground(MatrixStack matrixStack, float x, float y, float width, float height){
         ScreenUtils.drawScreenBackground(matrixStack, x, y, width, height);
