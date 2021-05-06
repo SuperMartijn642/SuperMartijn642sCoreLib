@@ -101,7 +101,8 @@ public abstract class BaseScreen extends Screen {
 
     protected abstract void render(int mouseX, int mouseY);
 
-    protected abstract void renderTooltips(int mouseX, int mouseY);
+    protected void renderTooltips(int mouseX, int mouseY){
+    }
 
     protected void drawScreenBackground(float x, float y, float width, float height){
         ScreenUtils.drawScreenBackground(x, y, width, height);
