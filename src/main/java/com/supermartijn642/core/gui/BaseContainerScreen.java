@@ -166,7 +166,7 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends GuiCo
         }
         GlStateManager.translate(-this.left(), -this.top(), 0);
         super.renderHoveredToolTip(mouseX, mouseY);
-        this.renderTooltips(mouseX - this.left(), mouseY - this.top());
+        this.renderTooltips(mouseX, mouseY);
     }
 
     @Override
@@ -185,7 +185,8 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends GuiCo
         ScreenUtils.drawString(this.font, this.title, 8, 7, 4210752);
     }
 
-    protected abstract void renderTooltips(int mouseX, int mouseY);
+    protected void renderTooltips(int mouseX, int mouseY){
+    }
 
     protected void drawScreenBackground(float x, float y, float width, float height){
         ScreenUtils.drawScreenBackground(x, y, width, height);
