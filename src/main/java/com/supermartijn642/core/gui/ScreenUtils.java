@@ -21,14 +21,14 @@ public class ScreenUtils {
     private static final ResourceLocation BUTTON_BACKGROUND = new ResourceLocation("supermartijn642corelib", "textures/gui/buttons.png");
     private static final ResourceLocation SCREEN_BACKGROUND = new ResourceLocation("supermartijn642corelib", "textures/gui/background.png");
 
-    public static final int ACTIVE_TEXT_COLOR = 14737632, INACTIVE_TEXT_COLOR = 7368816;
+    public static final int DEFAULT_TEXT_COLOR = 4210752, ACTIVE_TEXT_COLOR = 14737632, INACTIVE_TEXT_COLOR = 7368816;
 
     public static void drawString(MatrixStack matrixStack, FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
         fontRenderer.func_243248_b(matrixStack, text, x, y, color);
     }
 
     public static void drawString(MatrixStack matrixStack, FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        fontRenderer.func_243248_b(matrixStack, text, x, y, ACTIVE_TEXT_COLOR);
+        fontRenderer.func_243248_b(matrixStack, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawString(MatrixStack matrixStack, ITextComponent text, float x, float y, int color){
@@ -44,7 +44,7 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(MatrixStack matrixStack, FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        fontRenderer.func_243246_a(matrixStack, text, x, y, ACTIVE_TEXT_COLOR);
+        fontRenderer.func_243246_a(matrixStack, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawStringWithShadow(MatrixStack matrixStack, ITextComponent text, float x, float y, int color){
@@ -60,7 +60,7 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredString(MatrixStack matrixStack, FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        fontRenderer.func_243248_b(matrixStack, text, x - fontRenderer.getStringPropertyWidth(text) / 2f, y, ACTIVE_TEXT_COLOR);
+        fontRenderer.func_243248_b(matrixStack, text, x - fontRenderer.getStringPropertyWidth(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredString(MatrixStack matrixStack, ITextComponent text, float x, float y, int color){
@@ -76,7 +76,7 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredStringWithShadow(MatrixStack matrixStack, FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        fontRenderer.func_243246_a(matrixStack, text, x - fontRenderer.getStringPropertyWidth(text) / 2f, y, ACTIVE_TEXT_COLOR);
+        fontRenderer.func_243246_a(matrixStack, text, x - fontRenderer.getStringPropertyWidth(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredStringWithShadow(MatrixStack matrixStack, ITextComponent text, float x, float y, int color){
@@ -92,7 +92,7 @@ public class ScreenUtils {
     }
 
     public static void drawString(MatrixStack matrixStack, FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.drawString(matrixStack, text, x, y, ACTIVE_TEXT_COLOR);
+        fontRenderer.drawString(matrixStack, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawString(MatrixStack matrixStack, String text, float x, float y, int color){
@@ -108,7 +108,7 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(MatrixStack matrixStack, FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.drawStringWithShadow(matrixStack, text, x - fontRenderer.getStringWidth(text) / 2f, y, ACTIVE_TEXT_COLOR);
+        fontRenderer.drawStringWithShadow(matrixStack, text, x - fontRenderer.getStringWidth(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawStringWithShadow(MatrixStack matrixStack, String text, float x, float y, int color){
@@ -124,7 +124,7 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredString(MatrixStack matrixStack, FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.drawString(matrixStack, text, x - fontRenderer.getStringWidth(text) / 2f, y, ACTIVE_TEXT_COLOR);
+        fontRenderer.drawString(matrixStack, text, x - fontRenderer.getStringWidth(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredString(MatrixStack matrixStack, String text, float x, float y, int color){
@@ -140,7 +140,7 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredStringWithShadow(MatrixStack matrixStack, FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.drawStringWithShadow(matrixStack, text, x - fontRenderer.getStringWidth(text) / 2f, y, ACTIVE_TEXT_COLOR);
+        fontRenderer.drawStringWithShadow(matrixStack, text, x - fontRenderer.getStringWidth(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredStringWithShadow(MatrixStack matrixStack, String text, float x, float y, int color){
