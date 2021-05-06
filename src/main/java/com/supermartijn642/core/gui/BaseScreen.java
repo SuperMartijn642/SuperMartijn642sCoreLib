@@ -101,7 +101,8 @@ public abstract class BaseScreen extends Screen {
 
     protected abstract void render(MatrixStack matrixStack, int mouseX, int mouseY);
 
-    protected abstract void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY);
+    protected void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY){
+    }
 
     protected void drawScreenBackground(MatrixStack matrixStack, float x, float y, float width, float height){
         ScreenUtils.drawScreenBackground(matrixStack, x, y, width, height);
