@@ -67,7 +67,8 @@ public abstract class ObjectBaseScreen<T> extends BaseScreen {
             this.renderTooltips(matrixStack, mouseX, mouseY, object);
     }
 
-    protected abstract void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY, T object);
+    protected void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY, T object){
+    }
 
     protected T getObjectOrClose(){
         T object = this.getObject();

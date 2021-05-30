@@ -33,9 +33,4 @@ public class TestScreen extends BaseScreen {
     protected void render(MatrixStack matrixStack, int mouseX, int mouseY){
         this.drawScreenBackground(matrixStack);
     }
-
-    @Override
-    protected void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY){
-
-    }
 }
