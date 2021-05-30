@@ -78,7 +78,8 @@ public abstract class ObjectBaseContainerScreen<T, X extends ObjectBaseContainer
             this.renderTooltips(matrixStack, mouseX, mouseY, object);
     }
 
-    protected abstract void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY, T object);
+    protected void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY, T object){
+    }
 
     protected T getObjectOrClose(){
         return this.container.getObjectOrClose();
