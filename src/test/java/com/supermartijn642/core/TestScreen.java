@@ -32,9 +32,4 @@ public class TestScreen extends BaseScreen {
     protected void render(int mouseX, int mouseY){
         this.drawScreenBackground();
     }
-
-    @Override
-    protected void renderTooltips(int mouseX, int mouseY){
-
-    }
 }
