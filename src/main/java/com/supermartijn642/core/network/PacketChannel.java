@@ -25,6 +25,8 @@ import java.util.function.Supplier;
  */
 public class PacketChannel {
 
+    private static final HashMap<String,PacketChannel> NAME_TO_CHANNEL = new HashMap<>();
+
     public static PacketChannel create(String registryName){
         if(registryName == null)
             throw new IllegalArgumentException("Registry name must not be null!");
@@ -37,6 +39,7 @@ public class PacketChannel {
 
     private final SimpleNetworkWrapper channel;
 
+    private final String name;
     private int index = 0;
     private final HashMap<Class<? extends BasePacket>,Integer> packet_to_index = new HashMap<>();
     private final IntObjectHashMap<Supplier<? extends BasePacket>> index_to_packet = new IntObjectHashMap<>();
@@ -46,9 +49,12 @@ public class PacketChannel {
     private final HashMap<Class<? extends BasePacket>,Boolean> packet_to_queued = new HashMap<>();
 
     private PacketChannel(String name){
-        this.channel = NetworkRegistry.INSTANCE.newSimpleChannel(GameData.checkPrefix(name, false).toString());
-        this.channel.registerMessage(InternalPacket.class, InternalPacket.class, 0, Side.SERVER);
-        this.channel.registerMessage(InternalPacket.class, InternalPacket.class, 1, Side.CLIENT);
+        this.name = GameData.checkPrefix(name, false).toString();
+        this.channel = NetworkRegistry.INSTANCE.newSimpleChannel(this.name);
+        this.channel.registerMessage(new InternalPacket(this), InternalPacket.class, 0, Side.SERVER);
+        this.channel.registerMessage(new InternalPacket(this), InternalPacket.class, 1, Side.CLIENT);
+
+        NAME_TO_CHANNEL.put(this.name, this);
     }
 
     /**
@@ -69,24 +75,24 @@ public class PacketChannel {
 
     public void sendToServer(BasePacket packet){
         this.checkRegistration(packet);
-        this.channel.sendToServer(new InternalPacket().setPacket(packet));
+        this.channel.sendToServer(new InternalPacket(this).setPacket(packet));
     }
 
     public void sendToPlayer(EntityPlayer player, BasePacket packet){
         if(!(player instanceof EntityPlayerMP))
             throw new IllegalStateException("This must only be called server-side!");
         this.checkRegistration(packet);
-        this.channel.sendTo(new InternalPacket().setPacket(packet), (EntityPlayerMP)player);
+        this.channel.sendTo(new InternalPacket(this).setPacket(packet), (EntityPlayerMP)player);
     }
 
     public void sendToAllPlayers(BasePacket packet){
         this.checkRegistration(packet);
-        this.channel.sendToAll(new InternalPacket().setPacket(packet));
+        this.channel.sendToAll(new InternalPacket(this).setPacket(packet));
     }
 
     public void sendToDimension(DimensionType dimension, BasePacket packet){
         this.checkRegistration(packet);
-        this.channel.sendToDimension(new InternalPacket().setPacket(packet), dimension.getId());
+        this.channel.sendToDimension(new InternalPacket(this).setPacket(packet), dimension.getId());
     }
 
     public void sendToDimension(World world, BasePacket packet){
@@ -99,12 +105,12 @@ public class PacketChannel {
         if(entity.world.isRemote)
             throw new IllegalStateException("This must only be called server-side!");
         this.checkRegistration(packet);
-        this.channel.sendToAllTracking(new InternalPacket().setPacket(packet), entity);
+        this.channel.sendToAllTracking(new InternalPacket(this).setPacket(packet), entity);
     }
 
     public void sendToAllNear(DimensionType world, double x, double y, double z, double radius, BasePacket packet){
         this.checkRegistration(packet);
-        this.channel.sendToAllAround(new InternalPacket().setPacket(packet), new NetworkRegistry.TargetPoint(world.getId(), x, y, z, radius));
+        this.channel.sendToAllAround(new InternalPacket(this).setPacket(packet), new NetworkRegistry.TargetPoint(world.getId(), x, y, z, radius));
     }
 
     public void sendToAllNear(DimensionType world, BlockPos pos, double radius, BasePacket packet){
@@ -155,24 +161,43 @@ public class PacketChannel {
         }
     }
 
-    private class InternalPacket implements IMessage, IMessageHandler<InternalPacket,IMessage> {
+    /**
+     * Don't access this, this may change between versions and is only public because the {@link SimpleNetworkWrapper} requires it to be
+     */
+    @Deprecated
+    public static class InternalPacket implements IMessage, IMessageHandler<InternalPacket,IMessage> {
 
-        private final PacketChannel channel = PacketChannel.this;
+        private PacketChannel channel;
         private BasePacket packet;
 
-        public InternalPacket setPacket(BasePacket packet){
+        public InternalPacket(){
+        }
+
+        public InternalPacket(PacketChannel channel){
+            this.channel = channel;
+        }
+
+        private InternalPacket setPacket(BasePacket packet){
             this.packet = packet;
             return this;
         }
 
         @Override
         public void fromBytes(ByteBuf buffer){
-            this.channel.read(new PacketBuffer(buffer));
+            PacketBuffer packetBuffer = new PacketBuffer(buffer);
+            this.channel = NAME_TO_CHANNEL.get(packetBuffer.readString(32767));
+            if(this.channel == null)
+                throw new IllegalStateException("Couldn't find received channel name!");
+
+            this.packet = this.channel.read(packetBuffer);
         }
 
         @Override
         public void toBytes(ByteBuf buffer){
-            this.channel.write(this.packet, new PacketBuffer(buffer));
+            PacketBuffer packetBuffer = new PacketBuffer(buffer);
+            packetBuffer.writeString(this.channel.name);
+
+            this.channel.write(this.packet, packetBuffer);
         }
 
         @Override
