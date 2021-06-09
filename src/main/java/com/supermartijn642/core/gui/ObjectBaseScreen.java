@@ -1,7 +1,10 @@
 package com.supermartijn642.core.gui;
 
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.gui.widget.Widget;
 import net.minecraft.util.text.ITextComponent;
+
+import javax.annotation.Nonnull;
 
 /**
  * Created 1/26/2021 by SuperMartijn642
@@ -18,7 +21,10 @@ public abstract class ObjectBaseScreen<T> extends BaseScreen {
         return object == null ? 0 : this.sizeX(object);
     }
 
-    protected abstract float sizeX(T object);
+    /**
+     * @return the width of the screen
+     */
+    protected abstract float sizeX(@Nonnull T object);
 
     @Override
     protected float sizeY(){
@@ -26,7 +32,10 @@ public abstract class ObjectBaseScreen<T> extends BaseScreen {
         return object == null ? 0 : this.sizeY(object);
     }
 
-    protected abstract float sizeY(T object);
+    /**
+     * @return the height of the screen
+     */
+    protected abstract float sizeY(@Nonnull T object);
 
     @Override
     protected void addWidgets(){
@@ -35,7 +44,10 @@ public abstract class ObjectBaseScreen<T> extends BaseScreen {
             this.addWidgets(object);
     }
 
-    protected abstract void addWidgets(T object);
+    /**
+     * Adds widgets to the screen via {@link #addWidget(Widget)}.
+     */
+    protected abstract void addWidgets(@Nonnull T object);
 
     @Override
     public void tick(){
@@ -47,7 +59,7 @@ public abstract class ObjectBaseScreen<T> extends BaseScreen {
         super.tick();
     }
 
-    protected void tick(T object){
+    protected void tick(@Nonnull T object){
     }
 
     @Override
@@ -57,7 +69,11 @@ public abstract class ObjectBaseScreen<T> extends BaseScreen {
             this.render(mouseX, mouseY, object);
     }
 
-    protected abstract void render(int mouseX, int mouseY, T object);
+    /**
+     * Renders the screen's background and features.
+     * Widgets are drawn after this.
+     */
+    protected abstract void render(int mouseX, int mouseY, @Nonnull T object);
 
     @Override
     protected void renderTooltips(int mouseX, int mouseY){
@@ -66,9 +82,18 @@ public abstract class ObjectBaseScreen<T> extends BaseScreen {
             this.renderTooltips(mouseX, mouseY, object);
     }
 
-    protected void renderTooltips(int mouseX, int mouseY, T object){
+    /**
+     * Renders tooltips for the given {@code mouseX} and {@code mouseY}.
+     * This will be called last in the render chain.
+     */
+    protected void renderTooltips(int mouseX, int mouseY, @Nonnull T object){
     }
 
+    /**
+     * Gets the object from {@link #getObject()}, if {@code null} the screen
+     * will be closed, the object from {@link #getObject()} will be returned.
+     * @return the object from {@link #getObject()} or {@code null}
+     */
     protected T getObjectOrClose(){
         T object = this.getObject();
         if(object == null)
@@ -76,5 +101,8 @@ public abstract class ObjectBaseScreen<T> extends BaseScreen {
         return object;
     }
 
+    /**
+     * @return the object required for the container to remain open
+     */
     protected abstract T getObject();
 }

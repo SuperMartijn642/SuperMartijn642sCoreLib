@@ -11,11 +11,19 @@ public class ButtonWidget extends AbstractButtonWidget {
 
     private ITextComponent text;
 
+    /**
+     * @param text the text to be displayed on the button
+     * @param onPress the action which will called when the user clicks the
+     *                widget
+     */
     public ButtonWidget(int x, int y, int width, int height, ITextComponent text, Runnable onPress){
         super(x, y, width, height, onPress);
         this.text = text;
     }
 
+    /**
+     * Sets the text which is displayed on the button.
+     */
     public void setText(ITextComponent text){
         this.text = text;
     }
