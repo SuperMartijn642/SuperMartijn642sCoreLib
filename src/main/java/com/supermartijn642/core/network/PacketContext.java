@@ -12,16 +12,22 @@ import net.minecraftforge.fml.network.NetworkEvent;
  */
 public class PacketContext {
 
-    private NetworkEvent.Context context;
+    private final NetworkEvent.Context context;
 
     public PacketContext(NetworkEvent.Context context){
         this.context = context;
     }
 
+    /**
+     * @return the side the packet is received on
+     */
     public CoreSide getHandlingSide(){
         return this.context.getDirection().getReceptionSide() == LogicalSide.CLIENT ? CoreSide.CLIENT : CoreSide.SERVER;
     }
 
+    /**
+     * @return the side the packet is originating from
+     */
     public CoreSide getOriginatingSide(){
         return this.context.getDirection().getOriginationSide() == LogicalSide.CLIENT ? CoreSide.CLIENT : CoreSide.SERVER;
     }

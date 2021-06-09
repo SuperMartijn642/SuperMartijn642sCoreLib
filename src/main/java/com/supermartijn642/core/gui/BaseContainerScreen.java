@@ -24,25 +24,41 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
 
     private static final ResourceLocation SLOT_TEXTURE = new ResourceLocation("supermartijn642corelib", "textures/gui/slot.png");
 
-    protected final List<Widget> widgets = new LinkedList<>();
-    protected final List<ITickableWidget> tickableWidgets = new LinkedList<>();
+    private final List<Widget> widgets = new LinkedList<>();
+    private final List<ITickableWidget> tickableWidgets = new LinkedList<>();
 
     protected final T container;
     private boolean drawSlots = true;
 
+    /**
+     * @param screenContainer container the screen will be attached to
+     * @param title title to be read by the narrator and to be displayed in the gui
+     */
     public BaseContainerScreen(T screenContainer, ITextComponent title){
         super(screenContainer, screenContainer.player.inventory, title);
         this.container = screenContainer;
     }
 
+    /**
+     * @return the width of the screen
+     */
     protected abstract int sizeX();
 
+    /**
+     * @return the height of the screen
+     */
     protected abstract int sizeY();
 
+    /**
+     * @return the left edge of the screen
+     */
     protected int left(){
         return (this.width - this.sizeX()) / 2;
     }
 
+    /**
+     * @return the top edge of the screen
+     */
     protected int top(){
         return (this.height - this.sizeY()) / 2;
     }
@@ -67,6 +83,10 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         return this.top();
     }
 
+    /**
+     * Sets whether slots should be drawn by the {@link BaseContainerScreen}.
+     * @param drawSlots whether slots should be drawn
+     */
     protected void setDrawSlots(boolean drawSlots){
         this.drawSlots = drawSlots;
     }
@@ -82,8 +102,16 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         this.addWidgets();
     }
 
+    /**
+     * Adds widgets to the screen via {@link #addWidget(Widget)}.
+     */
     protected abstract void addWidgets();
 
+    /**
+     * Add the given {@code widget} to the screen.
+     * @param widget widget to be added
+     * @return the given {@code widget}
+     */
     protected <T extends Widget> T addWidget(T widget){
         this.widgets.add(widget);
         if(widget instanceof ITickableWidget)
@@ -91,6 +119,11 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         return widget;
     }
 
+    /**
+     * Removes the given {@code widget} from the screen.
+     * @param widget widget to be removed
+     * @return the given {@code widget}
+     */
     protected <T extends Widget> T removeWidget(T widget){
         this.widgets.remove(widget);
         if(widget instanceof ITickableWidget)
@@ -158,21 +191,39 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
     protected void drawGuiContainerForegroundLayer(int x, int y){
     }
 
+    /**
+     * Renders the screen's background. This will be called first in the render chain.
+     */
     protected void renderBackground(int mouseX, int mouseY){
         this.drawScreenBackground();
     }
 
+    /**
+     * Renders the screen's foreground.
+     * Widgets are drawn after this.
+     */
     protected void renderForeground(int mouseX, int mouseY){
         ScreenUtils.drawString(this.font, this.title, 8, 7, 4210752);
     }
 
+    /**
+     * Renders tooltips for the given {@code mouseX} and {@code mouseY}.
+     * This will be called last in the render chain.
+     */
     protected void renderTooltips(int mouseX, int mouseY){
     }
 
+    /**
+     * Draws the default screen background.
+     * Same as {@link ScreenUtils#drawScreenBackground(float, float, float, float)}.
+     */
     protected void drawScreenBackground(float x, float y, float width, float height){
         ScreenUtils.drawScreenBackground(x, y, width, height);
     }
 
+    /**
+     * Draws the default screen background with width {@link #sizeX()} and height {@link #sizeY()}.
+     */
     protected void drawScreenBackground(){
         ScreenUtils.drawScreenBackground(0, 0, this.sizeX(), this.sizeY());
     }
@@ -198,6 +249,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
+    /**
+     * Called whenever a mouse button is pressed down.
+     */
     protected void onMousePress(int mouseX, int mouseY, int button){
     }
 
@@ -217,6 +271,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         return super.mouseReleased(mouseX, mouseY, button);
     }
 
+    /**
+     * Called whenever a mouse button is released.
+     */
     protected void onMouseRelease(int mouseX, int mouseY, int button){
     }
 
@@ -236,6 +293,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         return super.mouseScrolled(mouseX, mouseY, delta);
     }
 
+    /**
+     * Called whenever the user performs a scroll action.
+     */
     protected void onMouseScroll(int mouseX, int mouseY, double scroll){
     }
 
@@ -253,6 +313,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
+    /**
+     * Called whenever a key is pressed down.
+     */
     public boolean keyPressed(int keyCode){
         boolean handled = false;
 
@@ -270,6 +333,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         return this.keyReleased(keyCode);
     }
 
+    /**
+     * Called whenever a key is released.
+     */
     public boolean keyReleased(int keyCode){
         for(Widget widget : this.widgets)
             widget.keyReleased(keyCode);
@@ -282,6 +348,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         return this.charTyped(codePoint);
     }
 
+    /**
+     * Called whenever a character key is released with the given character {@code c}.
+     */
     public boolean charTyped(char c){
         for(Widget widget : this.widgets)
             widget.charTyped(c);

@@ -37,33 +37,65 @@ public abstract class Widget {
         }
     }
 
+    /**
+     * @return the message that should be narrated for the current state of the widget
+     */
     protected abstract ITextComponent getNarrationMessage();
 
+    /**
+     * Sets whether the widget is active, i.e. can be interacted with.
+     * The way the widget is rendered can also change base on whether the
+     * widget is active.
+     */
     public void setActive(boolean active){
         this.active = active;
     }
 
+    /**
+     * Renders the entire widget.
+     */
     public abstract void render(int mouseX, int mouseY, float partialTicks);
 
+    /**
+     * @return whether the user is hovering their cursor over the widget
+     */
     public boolean isHovered(){
         return this.hovered;
     }
 
+    /**
+     * Called whenever a mouse button is pressed down.
+     */
     public void mouseClicked(int mouseX, int mouseY, int button){
     }
 
+    /**
+     * Called whenever a mouse button is released.
+     */
     public void mouseReleased(int mouseX, int mouseY, int button){
     }
 
+    /**
+     * Called whenever the user performs a scroll action.
+     */
     public void mouseScrolled(int mouseX, int mouseY, double scroll){
     }
 
+    /**
+     * Called whenever a key is pressed down.
+     */
     public void keyPressed(int keyCode){
     }
 
+    /**
+     * Called whenever a key is released.
+     */
     public void keyReleased(int keyCode){
     }
 
+    /**
+     * Called whenever a character key is released with the given character {@code c}.
+     */
     public void charTyped(char c){
     }
 }

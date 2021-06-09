@@ -14,11 +14,17 @@ public class LabelWidget extends Widget {
 
     private final Supplier<ITextComponent> text;
 
+    /**
+     * @param text the text to be displayed on the label
+     */
     public LabelWidget(int x, int y, int width, int height, Supplier<ITextComponent> text){
         super(x, y, width, height);
         this.text = text;
     }
 
+    /**
+     * @param text the text to be displayed on the label
+     */
     public LabelWidget(int x, int y, int width, int height, ITextComponent text){
         this(x, y, width, height, () -> text);
     }

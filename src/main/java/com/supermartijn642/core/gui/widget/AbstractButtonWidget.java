@@ -11,11 +11,18 @@ public abstract class AbstractButtonWidget extends Widget {
 
     private final Runnable pressable;
 
+    /**
+     * @param onPress the action which will called when the user clicks the
+     *                widget
+     */
     public AbstractButtonWidget(int x, int y, int width, int height, Runnable onPress){
         super(x, y, width, height);
         this.pressable = onPress;
     }
 
+    /**
+     * Called when the user clicks the widget.
+     */
     public void onPress(){
         playClickSound();
         if(this.pressable != null)
@@ -28,6 +35,9 @@ public abstract class AbstractButtonWidget extends Widget {
             this.onPress();
     }
 
+    /**
+     * Plays the default Minecraft button sound.
+     */
     public static void playClickSound(){
         Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
