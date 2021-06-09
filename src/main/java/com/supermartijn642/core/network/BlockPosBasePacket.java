@@ -13,6 +13,10 @@ public abstract class BlockPosBasePacket implements BasePacket {
     public BlockPosBasePacket(){
     }
 
+    /**
+     * Stores the given {@code pos} with the packet data.
+     * @param pos position to be stored
+     */
     public BlockPosBasePacket(BlockPos pos){
         this.pos = pos;
     }
