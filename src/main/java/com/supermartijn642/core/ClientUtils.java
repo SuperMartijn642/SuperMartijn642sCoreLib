@@ -47,10 +47,17 @@ public class ClientUtils {
         return getMinecraft().getRenderPartialTicks();
     }
 
+    /**
+     * Closes the player's opened screen
+     */
     public static void closeScreen(){
         getPlayer().closeScreen();
     }
 
+    /**
+     * Queues the given task on the main thread
+     * @param task task to be queued
+     */
     public static void queueTask(Runnable task){
         getMinecraft().enqueue(task);
     }
