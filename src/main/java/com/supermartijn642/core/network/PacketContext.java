@@ -18,10 +18,16 @@ public class PacketContext {
         this.context = context;
     }
 
+    /**
+     * @return the side the packet is received on
+     */
     public CoreSide getHandlingSide(){
         return this.context.side == Side.CLIENT ? CoreSide.CLIENT : CoreSide.SERVER;
     }
 
+    /**
+     * @return the side the packet is originating from
+     */
     public CoreSide getOriginatingSide(){
         return this.context.side == Side.CLIENT ? CoreSide.SERVER : CoreSide.CLIENT;
     }

@@ -19,18 +19,35 @@ public abstract class BaseTileEntity extends TileEntity {
         super();
     }
 
+    /**
+     * Marks the tile entity as dirty and send an update packet to clients.
+     */
     public void dataChanged(){
         this.dataChanged = true;
         this.markDirty();
         this.world.notifyBlockUpdate(this.pos, this.getBlockState(), this.getBlockState(), 2 | 4);
     }
 
+    /**
+     * Writes tile entity data to be saved with the chunk.
+     * The stored data will be read in {@link #readData(NBTTagCompound)}.
+     * @return a {@link NBTTagCompound} with the stored data
+     */
     protected abstract NBTTagCompound writeData();
 
+    /**
+     * Writes tile entity data to be sent to the client.
+     * The stored data will be read in {@link #readData(NBTTagCompound)}.
+     * @return a {@link NBTTagCompound} with the stored client data
+     */
     protected NBTTagCompound writeClientData(){
         return this.writeData();
     }
 
+    /**
+     * Reads data stored by {@link #writeData()} and {@link #writeClientData()}.
+     * @param tag data to be read from
+     */
     protected abstract void readData(NBTTagCompound tag);
 
     @Override

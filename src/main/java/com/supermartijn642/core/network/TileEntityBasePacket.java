@@ -17,15 +17,29 @@ public abstract class TileEntityBasePacket<T extends TileEntity> extends BlockPo
     public TileEntityBasePacket(){
     }
 
+    /**
+     * Grabs the tile entity in {@code dimension} at {@code pos}.
+     * @param dimension dimension of the tile entity
+     * @param pos       position of the tile entity
+     */
     public TileEntityBasePacket(DimensionType dimension, BlockPos pos){
         super(pos);
         this.dimension = dimension;
     }
 
+    /**
+     * Grabs the tile entity in {@code world} at {@code pos}.
+     * @param world world the tile entity is in
+     * @param pos   position of the tile entity
+     */
     public TileEntityBasePacket(World world, BlockPos pos){
         this(world == null ? null : world.provider.getDimensionType(), pos);
     }
 
+    /**
+     * Grabs the tile entity at {@code pos} in the relevant player's dimension.
+     * @param pos position of the tile entity
+     */
     public TileEntityBasePacket(BlockPos pos){
         this((DimensionType)null, pos);
     }

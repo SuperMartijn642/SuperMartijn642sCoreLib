@@ -18,12 +18,23 @@ public abstract class BaseContainer extends Container {
         this.world = player.world;
     }
 
+    /**
+     * Adds slots to the container by calling {@link #addSlots(EntityPlayer)}.
+     */
     protected void addSlots(){
         this.addSlots(this.player);
     }
 
+    /**
+     * Adds slots to the container
+     */
     protected abstract void addSlots(EntityPlayer player);
 
+    /**
+     * Adds the player's slots to the container at the given {@code x} and {@code y}.
+     * @param x the x-coordinate of the left side of the left most slots
+     * @param y the y-coordinate of the top edge of the top most slots
+     */
     protected void addPlayerSlots(int x, int y){
         // player
         for(int row = 0; row < 3; row++){
