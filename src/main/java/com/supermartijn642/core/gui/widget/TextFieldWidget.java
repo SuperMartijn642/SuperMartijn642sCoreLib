@@ -1,6 +1,7 @@
 package com.supermartijn642.core.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.ScreenUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -11,7 +12,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.SharedConstants;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -51,7 +51,7 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
 
     @Override
     protected ITextComponent getNarrationMessage(){
-        return new TranslationTextComponent("gui.narrate.editBox", this.suggestion, this.text);
+        return TextComponents.translation("gui.narrate.editBox", this.suggestion, this.text).get();
     }
 
     @Override
