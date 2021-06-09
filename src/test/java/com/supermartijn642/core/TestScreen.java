@@ -2,14 +2,14 @@ package com.supermartijn642.core;
 
 import com.supermartijn642.core.gui.BaseScreen;
 import com.supermartijn642.core.gui.widget.TextFieldWidget;
-import net.minecraft.util.text.TextComponentString;
 
 /**
  * Created 1/22/2021 by SuperMartijn642
  */
 public class TestScreen extends BaseScreen {
+
     protected TestScreen(){
-        super(new TextComponentString("Test Screen"));
+        super(TextComponents.string("Test Screen").get());
     }
 
     @Override
