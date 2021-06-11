@@ -1,6 +1,5 @@
 package com.supermartijn642.core;
 
-import com.supermartijn642.core.gui.ScreenUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -149,25 +148,6 @@ public class TextComponents {
             return this.formatting(color);
         }
 
-        private TextComponentBuilder color(Color color){
-            this.updateStyle(style -> style.setColor(color));
-            return this;
-        }
-
-        /**
-         * Sets the color for the text component.
-         */
-        public TextComponentBuilder color(int rgb){
-            return this.color(Color.fromInt(rgb));
-        }
-
-        /**
-         * Sets the color for the text component.
-         */
-        public TextComponentBuilder color(int r, int g, int b){
-            return this.color(((r & 255) << 16) + ((g & 255) << 8) + (b & 255));
-        }
-
         /**
          * Makes the text component <b>bold</b>.
          */
@@ -213,7 +193,6 @@ public class TextComponents {
          */
         public TextComponentBuilder reset(){
             this.updateStyle(style -> Style.EMPTY.setBold(false).setItalic(false).setUnderlined(false).setStrikethrough(false).setObfuscated(false));
-            this.color(ScreenUtils.DEFAULT_TEXT_COLOR);
             return this;
         }
 
