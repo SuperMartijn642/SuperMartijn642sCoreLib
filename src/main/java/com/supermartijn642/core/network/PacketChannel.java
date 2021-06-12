@@ -9,6 +9,7 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.PacketDistributor;
@@ -42,6 +43,11 @@ public class PacketChannel {
      */
     public static PacketChannel create(String modid){
         return create(modid, "main");
+    }
+
+    @Deprecated
+    public static PacketChannel create(){
+        return create(ModLoadingContext.get().getActiveNamespace(), "main");
     }
 
     private final SimpleChannel channel;
