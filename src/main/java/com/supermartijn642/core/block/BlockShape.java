@@ -61,6 +61,11 @@ public class BlockShape {
             AxisAlignedBB shape1 = shapes.get(i);
             if(shape1.maxX - shape1.minX == 0 || shape1.maxY - shape1.minY == 0 || shape1.maxZ - shape1.minZ == 0)
                 continue;
+            for(AxisAlignedBB shape2 : boxes){
+                if(shape1.minX >= shape2.minX && shape1.minY >= shape2.minY && shape1.minZ >= shape2.minZ &&
+                    shape1.maxX <= shape2.maxX && shape1.maxY <= shape2.maxY && shape1.maxZ <= shape2.maxZ)
+                    continue loop;
+            }
             for(int j = i + 1; j < shapes.size(); j++){
                 AxisAlignedBB shape2 = shapes.get(j);
                 if(shape1.minX >= shape2.minX && shape1.minY >= shape2.minY && shape1.minZ >= shape2.minZ &&
@@ -83,11 +88,11 @@ public class BlockShape {
                     minY = box.minY;
                 if(box.minZ < minZ)
                     minZ = box.minZ;
-                if(box.maxX < maxX)
+                if(box.maxX > maxX)
                     maxX = box.maxX;
-                if(box.maxY < maxY)
+                if(box.maxY > maxY)
                     maxY = box.maxY;
-                if(box.maxZ < maxZ)
+                if(box.maxZ > maxZ)
                     maxZ = box.maxZ;
             }
             this.simplified = new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
@@ -147,27 +152,7 @@ public class BlockShape {
      * Creates the smallest box that encapsulate the entire shape.
      */
     public AxisAlignedBB simplify(){
-        if(this.isEmpty())
-            return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
-
-        double minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;
-        double maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
-        for(AxisAlignedBB box : this.boxes){
-            if(box.minX < minX)
-                minX = box.minX;
-            if(box.minY < minY)
-                minY = box.minY;
-            if(box.minZ < minZ)
-                minZ = box.minZ;
-            if(box.maxX < maxX)
-                maxX = box.maxX;
-            if(box.maxY < maxY)
-                maxY = box.maxY;
-            if(box.maxZ < maxZ)
-                maxZ = box.maxZ;
-        }
-
-        return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+        return this.simplified;
     }
 
     /**
