@@ -1,13 +1,9 @@
 package com.supermartijn642.core.block;
 
-import com.google.common.collect.Lists;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,7 +28,9 @@ public class BlockShape {
      * Combines two shapes.
      */
     public static BlockShape or(BlockShape shape, BlockShape... shapes){
-        return new BlockShape(Lists.asList(shape.simplified, Arrays.stream(shapes).map(s -> s.boxes).toArray(AxisAlignedBB[]::new)));
+        LinkedList<AxisAlignedBB> boxes = new LinkedList<>(shape.boxes);
+        Arrays.stream(shapes).forEach(box -> boxes.addAll(box.boxes));
+        return new BlockShape(boxes);
     }
 
     public static BlockShape fullCube(){
