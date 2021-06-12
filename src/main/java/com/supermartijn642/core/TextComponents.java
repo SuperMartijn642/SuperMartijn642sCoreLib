@@ -17,6 +17,13 @@ import java.util.function.Function;
 public class TextComponents {
 
     /**
+     * Creates a new empty {@link TextComponentBuilder}.
+     */
+    public static TextComponentBuilder empty(){
+        return string("");
+    }
+
+    /**
      * Creates a new {@link TextComponentBuilder} around the given {@code text}.
      */
     public static TextComponentBuilder string(String text){
