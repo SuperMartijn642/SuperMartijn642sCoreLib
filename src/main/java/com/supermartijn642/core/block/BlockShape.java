@@ -13,15 +13,19 @@ import java.util.stream.Collectors;
  */
 public class BlockShape {
 
+    public static BlockShape create(AxisAlignedBB box){
+        return new BlockShape(box);
+    }
+
     public static BlockShape create(double x1, double y1, double z1, double x2, double y2, double z2){
-        return new BlockShape(new AxisAlignedBB(x1, y1, z1, x2, y2, z2));
+        return create(new AxisAlignedBB(x1, y1, z1, x2, y2, z2));
     }
 
     /**
      * Creates a shape with coordinates {@code x1 / 16, y1 / 16, z1 / 16, x2 / 16, y2 / 16, z2 / 16}.
      */
     public static BlockShape createBlockShape(double x1, double y1, double z1, double x2, double y2, double z2){
-        return new BlockShape(new AxisAlignedBB(x1 / 16, y1 / 16, z1 / 16, x2 / 16, y2 / 16, z2 / 16));
+        return create(new AxisAlignedBB(x1 / 16, y1 / 16, z1 / 16, x2 / 16, y2 / 16, z2 / 16));
     }
 
     /**
