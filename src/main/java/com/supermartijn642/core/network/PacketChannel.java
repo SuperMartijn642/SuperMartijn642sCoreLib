@@ -10,6 +10,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -47,6 +49,12 @@ public class PacketChannel {
      */
     public static PacketChannel create(String modid){
         return create(modid, "main");
+    }
+
+    @Deprecated
+    public static PacketChannel create(){
+        ModContainer modContainer = Loader.instance().activeModContainer();
+        return create(modContainer == null ? "unknown" : modContainer.getModId(), "main");
     }
 
     private final SimpleNetworkWrapper channel;
