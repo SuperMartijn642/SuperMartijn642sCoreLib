@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
@@ -15,7 +16,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.registries.GameData;
 
 import java.util.HashMap;
 import java.util.function.Supplier;
@@ -33,18 +33,20 @@ public class PacketChannel {
      * @return a new channel with the given {@code registryName}
      * @throws IllegalArgumentException if {@code registryName == null}
      */
-    public static PacketChannel create(String registryName){
+    public static PacketChannel create(String modid, String registryName){
+        if(modid == null || modid.isEmpty())
+            throw new IllegalArgumentException("Modid must not be null!");
         if(registryName == null)
             throw new IllegalArgumentException("Registry name must not be null!");
-        return new PacketChannel(registryName);
+        return new PacketChannel(modid, registryName);
     }
 
     /**
      * Creates a new channel.
      * @return a new channel with registry name 'main'
      */
-    public static PacketChannel create(){
-        return create("main");
+    public static PacketChannel create(String modid){
+        return create(modid, "main");
     }
 
     private final SimpleNetworkWrapper channel;
@@ -58,8 +60,8 @@ public class PacketChannel {
      */
     private final HashMap<Class<? extends BasePacket>,Boolean> packet_to_queued = new HashMap<>();
 
-    private PacketChannel(String name){
-        this.name = GameData.checkPrefix(name, false).toString();
+    private PacketChannel(String modid, String name){
+        this.name = new ResourceLocation(modid, name).toString();
         this.channel = NetworkRegistry.INSTANCE.newSimpleChannel(this.name);
         this.channel.registerMessage(new InternalPacket(this), InternalPacket.class, 0, Side.SERVER);
         this.channel.registerMessage(new InternalPacket(this), InternalPacket.class, 1, Side.CLIENT);
@@ -116,7 +118,7 @@ public class PacketChannel {
     /**
      * Sends the given {@code packet} to all players in the given {@code dimension}. Must only be used server-side.
      * @param dimension dimension to send the packet to
-     * @param packet packet to be send
+     * @param packet    packet to be send
      */
     public void sendToDimension(DimensionType dimension, BasePacket packet){
         this.checkRegistration(packet);
@@ -125,7 +127,7 @@ public class PacketChannel {
 
     /**
      * Sends the given {@code packet} to all players in the given {@code world}. Must only be used server-side.
-     * @param world world to send the packet to
+     * @param world  world to send the packet to
      * @param packet packet to be send
      */
     public void sendToDimension(World world, BasePacket packet){
