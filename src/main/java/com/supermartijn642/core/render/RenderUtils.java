@@ -35,8 +35,6 @@ public class RenderUtils {
      */
     public static void renderShape(BlockShape shape, double x, double y, double z, float red, float green, float blue, float alpha){
         GlStateManager.pushMatrix();
-        GlStateManager.pushTextureAttributes();
-        GlStateManager.pushLightingAttributes();
         GlStateManager.disableTexture();
         GlStateManager.disableLighting();
         GlStateManager.enableBlend();
@@ -56,7 +54,7 @@ public class RenderUtils {
         tessellator.draw();
 
         GlStateManager.popMatrix();
-        GlStateManager.popAttributes();
+        GlStateManager.enableTexture();
     }
 
     /**
