@@ -277,7 +277,7 @@ public class BlockShape {
         if(axis == EnumFacing.Axis.X)
             return this.transformBoxes(box -> new AxisAlignedBB(box.minX, box.minZ, -box.minY + 1, box.maxX, box.maxZ, -box.maxY + 1));
         if(axis == EnumFacing.Axis.Y)
-            return this.transformBoxes(box -> new AxisAlignedBB(box.minZ, box.minY, -box.minX + 1, box.maxZ, box.maxY, -box.maxX + 1));
+            return this.transformBoxes(box -> new AxisAlignedBB(-box.minZ + 1, box.minY, box.minX, -box.maxZ + 1, box.maxY, box.maxX));
         if(axis == EnumFacing.Axis.Z)
             return this.transformBoxes(box -> new AxisAlignedBB(box.minY, -box.minX + 1, box.minZ, box.maxY, -box.maxX + 1, box.maxZ));
         return null;
