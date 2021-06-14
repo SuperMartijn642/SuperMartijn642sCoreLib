@@ -8,7 +8,9 @@ import com.supermartijn642.core.block.BlockShape;
 import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.shapes.VoxelShape;
 
 /**
  * Created 6/12/2021 by SuperMartijn642
@@ -50,6 +52,13 @@ public class RenderUtils {
     }
 
     /**
+     * Draws an outline for the given shape.
+     */
+    public static void renderShape(MatrixStack matrixStack, VoxelShape shape, double x, double y, double z, float red, float green, float blue, float alpha){
+        renderShape(matrixStack, BlockShape.create(shape), x, y, z, red, green, blue, alpha);
+    }
+
+    /**
      * Draws an outline for the given box.
      */
     public static void renderBox(MatrixStack matrixStack, AxisAlignedBB box, double x, double y, double z, float red, float green, float blue, float alpha){
@@ -59,8 +68,36 @@ public class RenderUtils {
     /**
      * Draws an outline for the given shape.
      */
+    public static void renderShape(MatrixStack matrixStack, BlockShape shape, BlockPos pos, float red, float green, float blue, float alpha){
+        renderShape(matrixStack, shape, pos.getX(), pos.getY(), pos.getZ(), red, green, blue, alpha);
+    }
+
+    /**
+     * Draws an outline for the given shape.
+     */
+    public static void renderShape(MatrixStack matrixStack, VoxelShape shape, BlockPos pos, float red, float green, float blue, float alpha){
+        renderShape(matrixStack, BlockShape.create(shape), pos.getX(), pos.getY(), pos.getZ(), red, green, blue, alpha);
+    }
+
+    /**
+     * Draws an outline for the given box.
+     */
+    public static void renderBox(MatrixStack matrixStack, AxisAlignedBB box, BlockPos pos, float red, float green, float blue, float alpha){
+        renderShape(matrixStack, BlockShape.create(box), pos.getX(), pos.getY(), pos.getZ(), red, green, blue, alpha);
+    }
+
+    /**
+     * Draws an outline for the given shape.
+     */
     public static void renderShape(MatrixStack matrixStack, BlockShape shape, double x, double y, double z, float red, float green, float blue){
         renderShape(matrixStack, shape, x, y, z, red, green, blue, 1);
+    }
+
+    /**
+     * Draws an outline for the given shape.
+     */
+    public static void renderShape(MatrixStack matrixStack, VoxelShape shape, double x, double y, double z, float red, float green, float blue){
+        renderShape(matrixStack, BlockShape.create(shape), x, y, z, red, green, blue, 1);
     }
 
     /**
@@ -73,15 +110,22 @@ public class RenderUtils {
     /**
      * Draws an outline for the given shape.
      */
-    public static void renderShape(MatrixStack matrixStack, BlockShape shape, double x, double y, double z){
-        renderShape(matrixStack, shape, x, y, z, 1, 1, 1, 1);
+    public static void renderShape(MatrixStack matrixStack, BlockShape shape, BlockPos pos, float red, float green, float blue){
+        renderShape(matrixStack, shape, pos.getX(), pos.getY(), pos.getZ(), red, green, blue, 1);
+    }
+
+    /**
+     * Draws an outline for the given shape.
+     */
+    public static void renderShape(MatrixStack matrixStack, VoxelShape shape, BlockPos pos, float red, float green, float blue){
+        renderShape(matrixStack, BlockShape.create(shape), pos.getX(), pos.getY(), pos.getZ(), red, green, blue);
     }
 
     /**
      * Draws an outline for the given box.
      */
-    public static void renderBox(MatrixStack matrixStack, AxisAlignedBB box, double x, double y, double z){
-        renderShape(matrixStack, BlockShape.create(box), x, y, z, 1, 1, 1, 1);
+    public static void renderBox(MatrixStack matrixStack, AxisAlignedBB box, BlockPos pos, float red, float green, float blue){
+        renderShape(matrixStack, BlockShape.create(box), pos.getX(), pos.getY(), pos.getZ(), red, green, blue);
     }
 
     /**
@@ -89,6 +133,13 @@ public class RenderUtils {
      */
     public static void renderShape(MatrixStack matrixStack, BlockShape shape, float red, float green, float blue, float alpha){
         renderShape(matrixStack, shape, 0, 0, 0, red, green, blue, alpha);
+    }
+
+    /**
+     * Draws an outline for the given shape.
+     */
+    public static void renderShape(MatrixStack matrixStack, VoxelShape shape, float red, float green, float blue, float alpha){
+        renderShape(matrixStack, BlockShape.create(shape), 0, 0, 0, red, green, blue, alpha);
     }
 
     /**
@@ -103,6 +154,13 @@ public class RenderUtils {
      */
     public static void renderShape(MatrixStack matrixStack, BlockShape shape, float red, float green, float blue){
         renderShape(matrixStack, shape, 0, 0, 0, red, green, blue, 1);
+    }
+
+    /**
+     * Draws an outline for the given shape.
+     */
+    public static void renderShape(MatrixStack matrixStack, VoxelShape shape, float red, float green, float blue){
+        renderShape(matrixStack, BlockShape.create(shape), 0, 0, 0, red, green, blue, 1);
     }
 
     /**
