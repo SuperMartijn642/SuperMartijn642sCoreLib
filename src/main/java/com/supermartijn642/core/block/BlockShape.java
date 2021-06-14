@@ -2,6 +2,7 @@ package com.supermartijn642.core.block;
 
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -212,6 +213,10 @@ public class BlockShape {
 
     public BlockShape offset(double x, double y, double z){
         return this.transformBoxes(box -> box.offset(x, y, z));
+    }
+
+    public BlockShape offset(BlockPos pos){
+        return this.transformBoxes(box -> box.offset(pos));
     }
 
     /**
