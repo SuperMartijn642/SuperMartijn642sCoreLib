@@ -2,6 +2,7 @@ package com.supermartijn642.core.block;
 
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 
@@ -150,6 +151,10 @@ public class BlockShape {
 
     public BlockShape offset(double x, double y, double z){
         return new BlockShape(this.shape.withOffset(x, y, z));
+    }
+
+    public BlockShape offset(BlockPos pos){
+        return new BlockShape(this.shape.withOffset(pos.getX(), pos.getY(), pos.getZ()));
     }
 
     /**
