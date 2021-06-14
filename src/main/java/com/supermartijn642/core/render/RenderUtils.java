@@ -7,7 +7,9 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.shapes.VoxelShape;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -58,6 +60,13 @@ public class RenderUtils {
     }
 
     /**
+     * Draws an outline for the given shape.
+     */
+    public static void renderShape(VoxelShape shape, double x, double y, double z, float red, float green, float blue, float alpha){
+        renderShape(BlockShape.create(shape), x, y, z, red, green, blue, alpha);
+    }
+
+    /**
      * Draws an outline for the given box.
      */
     public static void renderBox(AxisAlignedBB box, double x, double y, double z, float red, float green, float blue, float alpha){
@@ -67,8 +76,36 @@ public class RenderUtils {
     /**
      * Draws an outline for the given shape.
      */
+    public static void renderShape(BlockShape shape, BlockPos pos, float red, float green, float blue, float alpha){
+        renderShape(shape, pos.getX(), pos.getY(), pos.getZ(), red, green, blue, alpha);
+    }
+
+    /**
+     * Draws an outline for the given shape.
+     */
+    public static void renderShape(VoxelShape shape, BlockPos pos, float red, float green, float blue, float alpha){
+        renderShape(BlockShape.create(shape), pos.getX(), pos.getY(), pos.getZ(), red, green, blue, alpha);
+    }
+
+    /**
+     * Draws an outline for the given box.
+     */
+    public static void renderBox(AxisAlignedBB box, BlockPos pos, float red, float green, float blue, float alpha){
+        renderShape(BlockShape.create(box), pos.getX(), pos.getY(), pos.getZ(), red, green, blue, alpha);
+    }
+
+    /**
+     * Draws an outline for the given shape.
+     */
     public static void renderShape(BlockShape shape, double x, double y, double z, float red, float green, float blue){
         renderShape(shape, x, y, z, red, green, blue, 1);
+    }
+
+    /**
+     * Draws an outline for the given shape.
+     */
+    public static void renderShape(VoxelShape shape, double x, double y, double z, float red, float green, float blue){
+        renderShape(BlockShape.create(shape), x, y, z, red, green, blue, 1);
     }
 
     /**
@@ -81,15 +118,22 @@ public class RenderUtils {
     /**
      * Draws an outline for the given shape.
      */
-    public static void renderShape(BlockShape shape, double x, double y, double z){
-        renderShape(shape, x, y, z, 1, 1, 1, 1);
+    public static void renderShape(BlockShape shape, BlockPos pos, float red, float green, float blue){
+        renderShape(shape, pos.getX(), pos.getY(), pos.getZ(), red, green, blue, 1);
+    }
+
+    /**
+     * Draws an outline for the given shape.
+     */
+    public static void renderShape(VoxelShape shape, BlockPos pos, float red, float green, float blue){
+        renderShape(BlockShape.create(shape), pos.getX(), pos.getY(), pos.getZ(), red, green, blue, 1);
     }
 
     /**
      * Draws an outline for the given box.
      */
-    public static void renderBox(AxisAlignedBB box, double x, double y, double z){
-        renderShape(BlockShape.create(box), x, y, z, 1, 1, 1, 1);
+    public static void renderBox(AxisAlignedBB box, BlockPos pos, float red, float green, float blue){
+        renderShape(BlockShape.create(box), pos.getX(), pos.getY(), pos.getZ(), red, green, blue, 1);
     }
 
     /**
@@ -97,6 +141,13 @@ public class RenderUtils {
      */
     public static void renderShape(BlockShape shape, float red, float green, float blue, float alpha){
         renderShape(shape, 0, 0, 0, red, green, blue, alpha);
+    }
+
+    /**
+     * Draws an outline for the given shape.
+     */
+    public static void renderShape(VoxelShape shape, float red, float green, float blue, float alpha){
+        renderShape(BlockShape.create(shape), 0, 0, 0, red, green, blue, alpha);
     }
 
     /**
@@ -111,6 +162,13 @@ public class RenderUtils {
      */
     public static void renderShape(BlockShape shape, float red, float green, float blue){
         renderShape(shape, 0, 0, 0, red, green, blue, 1);
+    }
+
+    /**
+     * Draws an outline for the given shape.
+     */
+    public static void renderShape(VoxelShape shape, float red, float green, float blue){
+        renderShape(BlockShape.create(shape), 0, 0, 0, red, green, blue, 1);
     }
 
     /**
