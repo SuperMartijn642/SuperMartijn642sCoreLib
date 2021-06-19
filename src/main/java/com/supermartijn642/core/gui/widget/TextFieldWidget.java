@@ -40,6 +40,7 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
         this.text = defaultText;
         this.maxLength = maxLength;
         this.changeListener = changeListener;
+        this.cursorPosition = this.selectionPos = defaultText.length();
     }
 
     public TextFieldWidget(int x, int y, int width, int height, String defaultText, int maxLength, Consumer<String> changeListener){
