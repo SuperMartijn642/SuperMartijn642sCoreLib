@@ -86,7 +86,7 @@ public class TextComponents {
      * display name. The display name includes any custom name.
      */
     public static TextComponentBuilder itemStack(ItemStack stack){
-        return fromTextComponent(stack.getTextComponent());
+        return string(stack.getDisplayName());
     }
 
     /**
