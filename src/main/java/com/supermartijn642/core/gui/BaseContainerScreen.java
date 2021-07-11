@@ -321,13 +321,12 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends GuiCo
         int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth - (int)this.left();
         int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1 - (int)this.top();
 
-        this.mouseScrolled(mouseX, mouseY, Mouse.getEventDWheel() / 120);
+        int scroll = Mouse.getEventDWheel() / 120;
+        if(scroll != 0)
+            this.mouseScrolled(mouseX, mouseY, scroll);
     }
 
     public boolean mouseScrolled(double mouseX, double mouseY, double delta){
-        mouseX -= this.left();
-        mouseY -= this.top();
-
         this.onMouseScroll((int)mouseX, (int)mouseY, delta);
 
         for(Widget widget : this.widgets)
