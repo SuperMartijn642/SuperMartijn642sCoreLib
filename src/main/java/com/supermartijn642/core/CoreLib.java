@@ -10,7 +10,7 @@ public class CoreLib {
 
     public static final String MODID = "supermartijn642corelib";
     public static final String NAME = "SuperMartijn642's Core Lib";
-    public static final String VERSION = "1.0.9a";
+    public static final String VERSION = "1.0.10";
 
     public CoreLib(){
     }
