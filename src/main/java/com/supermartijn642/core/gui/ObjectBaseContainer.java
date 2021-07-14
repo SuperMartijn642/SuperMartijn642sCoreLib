@@ -1,6 +1,5 @@
 package com.supermartijn642.core.gui;
 
-import com.supermartijn642.core.ClientUtils;
 import net.minecraft.entity.player.EntityPlayer;
 
 import javax.annotation.Nonnull;
@@ -36,7 +35,7 @@ public abstract class ObjectBaseContainer<T> extends BaseContainer {
     protected T getObjectOrClose(){
         T object = this.getObject();
         if(object == null)
-            ClientUtils.closeScreen();
+            this.player.closeScreen();
         return object;
     }
 
