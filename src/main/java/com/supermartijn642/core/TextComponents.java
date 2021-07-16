@@ -70,7 +70,7 @@ public class TextComponents {
      * Creates a new {@link TextComponentBuilder} around the given block's name.
      */
     public static TextComponentBuilder block(Block block){
-        return fromTextComponent(block.getTranslatedName());
+        return translation(block.getTranslationKey());
     }
 
     /**
