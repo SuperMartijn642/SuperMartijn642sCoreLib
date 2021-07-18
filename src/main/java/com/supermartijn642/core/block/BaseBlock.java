@@ -28,6 +28,7 @@ import java.util.function.ToIntFunction;
 public class BaseBlock extends Block {
 
     private final boolean saveTileData;
+    private final ToIntFunction<IBlockState> lightLevel;
 
     public BaseBlock(String registryName, boolean saveTileData, Properties properties){
         super(properties.material, properties.mapColor);
@@ -36,7 +37,7 @@ public class BaseBlock extends Block {
         this.saveTileData = saveTileData;
 
         this.setSoundType(properties.soundType);
-        this.setLightLevel(properties.lightLevel.applyAsInt(this.getDefaultState()));
+        this.lightLevel = properties.lightLevel;
         this.setResistance(properties.resistance);
         this.setHardness(properties.hardness);
         this.setTickRandomly(properties.ticksRandomly);
@@ -118,6 +119,11 @@ public class BaseBlock extends Block {
             stack.setTagCompound(tag);
 
         return stack;
+    }
+
+    @Override
+    public int getLightValue(IBlockState state){
+        return this.lightLevel.applyAsInt(state);
     }
 
     public static class Properties {
