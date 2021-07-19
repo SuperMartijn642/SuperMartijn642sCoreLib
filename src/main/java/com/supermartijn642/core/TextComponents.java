@@ -3,11 +3,13 @@ package com.supermartijn642.core;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.text.*;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.FluidStack;
 
 import java.util.function.Function;
 
@@ -28,6 +30,27 @@ public class TextComponents {
      */
     public static TextComponentBuilder string(String text){
         return new TextComponentBuilder(new StringTextComponent(text));
+    }
+
+    /**
+     * Creates a new {@link TextComponentBuilder} for the given {@code number}.
+     */
+    public static TextComponentBuilder number(int number){
+        return new TextComponentBuilder(new StringTextComponent(Integer.toString(number)));
+    }
+
+    /**
+     * Creates a new {@link TextComponentBuilder} for the given {@code number}.
+     */
+    public static TextComponentBuilder number(double number, int decimals){
+        return new TextComponentBuilder(new StringTextComponent(String.format("%." + decimals + "f", number)));
+    }
+
+    /**
+     * Creates a new {@link TextComponentBuilder} for the given {@code number}.
+     */
+    public static TextComponentBuilder number(double number){
+        return new TextComponentBuilder(new StringTextComponent(Double.toString(number)));
     }
 
     /**
@@ -93,6 +116,21 @@ public class TextComponents {
      * display name. The display name includes any custom name.
      */
     public static TextComponentBuilder itemStack(ItemStack stack){
+        return fromTextComponent(stack.getDisplayName().copyRaw());
+    }
+
+    /**
+     * Creates a new {@link TextComponentBuilder} around the given fluid's name.
+     */
+    public static TextComponentBuilder fluid(Fluid fluid){
+        return translation(fluid.getAttributes().getTranslationKey());
+    }
+
+    /**
+     * Creates a new {@link TextComponentBuilder} around the given fluid stack's
+     * display name.
+     */
+    public static TextComponentBuilder fluidStack(FluidStack stack){
         return fromTextComponent(stack.getDisplayName().copyRaw());
     }
 
