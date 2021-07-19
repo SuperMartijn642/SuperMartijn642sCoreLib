@@ -8,6 +8,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.*;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
 
 import java.util.function.Function;
 
@@ -28,6 +30,27 @@ public class TextComponents {
      */
     public static TextComponentBuilder string(String text){
         return new TextComponentBuilder(new TextComponentString(text));
+    }
+
+    /**
+     * Creates a new {@link TextComponentBuilder} for the given {@code number}.
+     */
+    public static TextComponentBuilder number(int number){
+        return new TextComponentBuilder(new TextComponentString(Integer.toString(number)));
+    }
+
+    /**
+     * Creates a new {@link TextComponentBuilder} for the given {@code number}.
+     */
+    public static TextComponentBuilder number(double number, int decimals){
+        return new TextComponentBuilder(new TextComponentString(String.format("%." + decimals + "f", number)));
+    }
+
+    /**
+     * Creates a new {@link TextComponentBuilder} for the given {@code number}.
+     */
+    public static TextComponentBuilder number(double number){
+        return new TextComponentBuilder(new TextComponentString(Double.toString(number)));
     }
 
     /**
@@ -87,6 +110,21 @@ public class TextComponents {
      */
     public static TextComponentBuilder itemStack(ItemStack stack){
         return string(stack.getDisplayName());
+    }
+
+    /**
+     * Creates a new {@link TextComponentBuilder} around the given fluid's name.
+     */
+    public static TextComponentBuilder fluid(Fluid fluid){
+        return translation(fluid.getUnlocalizedName());
+    }
+
+    /**
+     * Creates a new {@link TextComponentBuilder} around the given fluid stack's
+     * display name.
+     */
+    public static TextComponentBuilder fluidStack(FluidStack stack){
+        return translation(stack.getFluid().getUnlocalizedName(stack));
     }
 
     /**
