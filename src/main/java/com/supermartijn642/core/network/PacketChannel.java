@@ -130,9 +130,9 @@ public class PacketChannel {
      * @param packet packet to be send
      */
     public void sendToDimension(World world, BasePacket packet){
-        if(world.isRemote)
+        if(world.isClientSide)
             throw new IllegalStateException("This must only be called server-side!");
-        this.sendToDimension(world.getDimensionKey(), packet);
+        this.sendToDimension(world.dimension(), packet);
     }
 
     /**
@@ -141,7 +141,7 @@ public class PacketChannel {
      * @param packet packet to be send
      */
     public void sendToAllTrackingEntity(Entity entity, BasePacket packet){
-        if(entity.world.isRemote)
+        if(entity.level.isClientSide)
             throw new IllegalStateException("This must only be called server-side!");
         this.checkRegistration(packet);
         this.channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new InternalPacket().setPacket(packet));
@@ -169,9 +169,9 @@ public class PacketChannel {
      * @param packet packet to be send
      */
     public void sendToAllNear(World world, double x, double y, double z, double radius, BasePacket packet){
-        if(world.isRemote)
+        if(world.isClientSide)
             throw new IllegalStateException("This must only be called server-side!");
-        this.sendToAllNear(world.getDimensionKey(), x, y, z, radius, packet);
+        this.sendToAllNear(world.dimension(), x, y, z, radius, packet);
     }
 
     /**
@@ -179,9 +179,9 @@ public class PacketChannel {
      * @param packet packet to be send
      */
     public void sendToAllNear(World world, BlockPos pos, double radius, BasePacket packet){
-        if(world.isRemote)
+        if(world.isClientSide)
             throw new IllegalStateException("This must only be called server-side!");
-        this.sendToAllNear(world.getDimensionKey(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, radius, packet);
+        this.sendToAllNear(world.dimension(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, radius, packet);
     }
 
     private void checkRegistration(BasePacket packet){

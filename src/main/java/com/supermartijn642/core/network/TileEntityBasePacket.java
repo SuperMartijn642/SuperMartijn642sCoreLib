@@ -34,7 +34,7 @@ public abstract class TileEntityBasePacket<T extends TileEntity> extends BlockPo
      * @param pos position of the tile entity
      */
     public TileEntityBasePacket(World world, BlockPos pos){
-        this(world == null ? null : world.getDimensionKey(), pos);
+        this(world == null ? null : world.dimension(), pos);
     }
 
     /**
@@ -50,14 +50,14 @@ public abstract class TileEntityBasePacket<T extends TileEntity> extends BlockPo
         super.write(buffer);
         buffer.writeBoolean(this.dimension != null);
         if(this.dimension != null)
-            buffer.writeResourceLocation(this.dimension.getLocation());
+            buffer.writeResourceLocation(this.dimension.location());
     }
 
     @Override
     public void read(PacketBuffer buffer){
         super.read(buffer);
         if(buffer.readBoolean())
-            this.dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, buffer.readResourceLocation());
+            this.dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, buffer.readResourceLocation());
     }
 
     @Override
@@ -73,13 +73,13 @@ public abstract class TileEntityBasePacket<T extends TileEntity> extends BlockPo
     private T getTileEntity(PacketContext context){
         World world = this.dimension == null ? context.getWorld() :
             context.getHandlingSide() == CoreSide.CLIENT ?
-                context.getWorld().getDimensionKey() == this.dimension ? context.getWorld() : null :
-                context.getWorld().getServer().getWorld(this.dimension);
+                context.getWorld().dimension() == this.dimension ? context.getWorld() : null :
+                context.getWorld().getServer().getLevel(this.dimension);
 
         if(world == null)
             return null;
 
-        TileEntity tile = world.getTileEntity(this.pos);
+        TileEntity tile = world.getBlockEntity(this.pos);
 
         if(tile == null)
             return null;

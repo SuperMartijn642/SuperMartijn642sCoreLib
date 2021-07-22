@@ -21,11 +21,11 @@ public abstract class ItemBaseContainer extends ObjectBaseContainer<ItemStack> {
     }
 
     protected ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, int playerSlot){
-        this(type, id, player, () -> player.inventory.getStackInSlot(playerSlot));
+        this(type, id, player, () -> player.inventory.getItem(playerSlot));
     }
 
     protected ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, Hand hand){
-        this(type, id, player, () -> ClientUtils.getPlayer().getHeldItem(hand));
+        this(type, id, player, () -> ClientUtils.getPlayer().getItemInHand(hand));
     }
 
     @Override

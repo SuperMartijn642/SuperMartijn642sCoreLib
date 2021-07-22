@@ -17,7 +17,7 @@ public class ClientProxy {
 
     @SubscribeEvent
     public static void onBlockBreak(PlayerEvent.ItemPickupEvent e){
-        Minecraft.getInstance().displayGuiScreen(new TestScreen());
+        Minecraft.getInstance().setScreen(new TestScreen());
     }
 
     @SubscribeEvent

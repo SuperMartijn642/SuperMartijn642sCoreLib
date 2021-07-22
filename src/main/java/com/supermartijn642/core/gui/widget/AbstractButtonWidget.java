@@ -39,6 +39,6 @@ public abstract class AbstractButtonWidget extends Widget {
      * Plays the default Minecraft button sound.
      */
     public static void playClickSound(){
-        Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 }

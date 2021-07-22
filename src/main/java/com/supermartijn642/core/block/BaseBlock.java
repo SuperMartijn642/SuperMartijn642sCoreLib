@@ -31,7 +31,7 @@ public class BaseBlock extends Block {
     }
 
     @Override
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack){
+    public void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack){
         if(!this.saveTileData)
             return;
 
@@ -40,7 +40,7 @@ public class BaseBlock extends Block {
         if(tag == null || tag.isEmpty())
             return;
 
-        TileEntity tile = worldIn.getTileEntity(pos);
+        TileEntity tile = worldIn.getBlockEntity(pos);
         if(tile instanceof BaseTileEntity)
             ((BaseTileEntity)tile).readData(tag);
     }
@@ -52,7 +52,7 @@ public class BaseBlock extends Block {
         if(!this.saveTileData)
             return items;
 
-        TileEntity tile = builder.get(LootParameters.BLOCK_ENTITY);
+        TileEntity tile = builder.getOptionalParameter(LootParameters.BLOCK_ENTITY);
         if(!(tile instanceof BaseTileEntity))
             return items;
 
@@ -79,7 +79,7 @@ public class BaseBlock extends Block {
         if(!this.saveTileData)
             return stack;
 
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
         if(!(tile instanceof BaseTileEntity))
             return stack;
 

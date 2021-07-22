@@ -78,7 +78,7 @@ public class TextComponents {
      * Creates a new {@link TextComponentBuilder} around the given text component.
      */
     public static TextComponentBuilder fromTextComponent(ITextComponent textComponent){
-        return fromTextComponent(textComponent.copyRaw());
+        return fromTextComponent(textComponent.plainCopy());
     }
 
     /**
@@ -93,7 +93,7 @@ public class TextComponents {
      * Creates a new {@link TextComponentBuilder} around the given block's name.
      */
     public static TextComponentBuilder block(Block block){
-        return translation(block.getTranslationKey());
+        return translation(block.getDescriptionId());
     }
 
     /**
@@ -108,7 +108,7 @@ public class TextComponents {
      * Creates a new {@link TextComponentBuilder} around the given item's name.
      */
     public static TextComponentBuilder item(Item item){
-        return translation(item.getTranslationKey());
+        return translation(item.getDescriptionId());
     }
 
     /**
@@ -116,7 +116,7 @@ public class TextComponents {
      * display name. The display name includes any custom name.
      */
     public static TextComponentBuilder itemStack(ItemStack stack){
-        return fromTextComponent(stack.getDisplayName().copyRaw());
+        return fromTextComponent(stack.getHoverName().plainCopy());
     }
 
     /**
@@ -131,7 +131,7 @@ public class TextComponents {
      * display name.
      */
     public static TextComponentBuilder fluidStack(FluidStack stack){
-        return fromTextComponent(stack.getDisplayName().copyRaw());
+        return fromTextComponent(stack.getDisplayName().plainCopy());
     }
 
     /**
@@ -147,7 +147,7 @@ public class TextComponents {
      * new {@link TextComponentBuilder} around it.
      */
     public static TextComponentBuilder dimension(RegistryKey<World> dimension){
-        String dimensionName = dimension.getLocation().getPath();
+        String dimensionName = dimension.location().getPath();
         dimensionName = dimensionName.substring(Math.min(dimensionName.length() - 1, Math.max(0, dimensionName.indexOf('/') + 1))).toLowerCase();
         dimensionName = dimensionName.substring(0, 1).toUpperCase() + dimensionName.substring(1);
         for(int i = 0; i < dimensionName.length() - 1; i++)
@@ -161,7 +161,7 @@ public class TextComponents {
      * new {@link TextComponentBuilder} around it.
      */
     public static TextComponentBuilder dimension(World world){
-        return dimension(world.getDimensionKey());
+        return dimension(world.dimension());
     }
 
     public static class TextComponentBuilder {
@@ -182,7 +182,7 @@ public class TextComponents {
          * Sets the formatting for the text component.
          */
         public TextComponentBuilder formatting(TextFormatting color){
-            this.updateStyle(style -> style.setFormatting(color));
+            this.updateStyle(style -> style.withColor(color));
             return this;
         }
 
@@ -197,7 +197,7 @@ public class TextComponents {
          * Makes the text component <b>bold</b>.
          */
         public TextComponentBuilder bold(){
-            this.updateStyle(style -> style.setBold(true));
+            this.updateStyle(style -> style.withBold(true));
             return this;
         }
 
@@ -205,7 +205,7 @@ public class TextComponents {
          * Makes the text component <i>italic<i/>.
          */
         public TextComponentBuilder italic(){
-            this.updateStyle(style -> style.setItalic(true));
+            this.updateStyle(style -> style.withItalic(true));
             return this;
         }
 
@@ -237,7 +237,7 @@ public class TextComponents {
          * Makes the text component's style.
          */
         public TextComponentBuilder reset(){
-            this.updateStyle(style -> Style.EMPTY.setBold(false).setItalic(false).setUnderlined(false).setStrikethrough(false).setObfuscated(false));
+            this.updateStyle(style -> Style.EMPTY.withBold(false).withItalic(false).setUnderlined(false).setStrikethrough(false).setObfuscated(false));
             return this;
         }
 

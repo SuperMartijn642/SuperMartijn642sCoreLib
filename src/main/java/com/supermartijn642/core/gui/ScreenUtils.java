@@ -24,11 +24,11 @@ public class ScreenUtils {
     public static final int DEFAULT_TEXT_COLOR = 4210752, ACTIVE_TEXT_COLOR = 14737632, INACTIVE_TEXT_COLOR = 7368816;
 
     public static void drawString(MatrixStack matrixStack, FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
-        fontRenderer.func_243248_b(matrixStack, text, x, y, color);
+        fontRenderer.draw(matrixStack, text, x, y, color);
     }
 
     public static void drawString(MatrixStack matrixStack, FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        fontRenderer.func_243248_b(matrixStack, text, x, y, DEFAULT_TEXT_COLOR);
+        fontRenderer.draw(matrixStack, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawString(MatrixStack matrixStack, ITextComponent text, float x, float y, int color){
@@ -40,11 +40,11 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(MatrixStack matrixStack, FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
-        fontRenderer.func_243246_a(matrixStack, text, x, y, color);
+        fontRenderer.drawShadow(matrixStack, text, x, y, color);
     }
 
     public static void drawStringWithShadow(MatrixStack matrixStack, FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        fontRenderer.func_243246_a(matrixStack, text, x, y, DEFAULT_TEXT_COLOR);
+        fontRenderer.drawShadow(matrixStack, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawStringWithShadow(MatrixStack matrixStack, ITextComponent text, float x, float y, int color){
@@ -56,11 +56,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredString(MatrixStack matrixStack, FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
-        fontRenderer.func_243248_b(matrixStack, text, x - fontRenderer.getStringPropertyWidth(text) / 2f, y, color);
+        fontRenderer.draw(matrixStack, text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredString(MatrixStack matrixStack, FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        fontRenderer.func_243248_b(matrixStack, text, x - fontRenderer.getStringPropertyWidth(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        fontRenderer.draw(matrixStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredString(MatrixStack matrixStack, ITextComponent text, float x, float y, int color){
@@ -72,11 +72,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredStringWithShadow(MatrixStack matrixStack, FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
-        fontRenderer.func_243246_a(matrixStack, text, x - fontRenderer.getStringPropertyWidth(text) / 2f, y, color);
+        fontRenderer.drawShadow(matrixStack, text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredStringWithShadow(MatrixStack matrixStack, FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        fontRenderer.func_243246_a(matrixStack, text, x - fontRenderer.getStringPropertyWidth(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        fontRenderer.drawShadow(matrixStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredStringWithShadow(MatrixStack matrixStack, ITextComponent text, float x, float y, int color){
@@ -88,11 +88,11 @@ public class ScreenUtils {
     }
 
     public static void drawString(MatrixStack matrixStack, FontRenderer fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawString(matrixStack, text, x, y, color);
+        fontRenderer.draw(matrixStack, text, x, y, color);
     }
 
     public static void drawString(MatrixStack matrixStack, FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.drawString(matrixStack, text, x, y, DEFAULT_TEXT_COLOR);
+        fontRenderer.draw(matrixStack, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawString(MatrixStack matrixStack, String text, float x, float y, int color){
@@ -104,11 +104,11 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(MatrixStack matrixStack, FontRenderer fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawStringWithShadow(matrixStack, text, x - fontRenderer.getStringWidth(text) / 2f, y, color);
+        fontRenderer.drawShadow(matrixStack, text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawStringWithShadow(MatrixStack matrixStack, FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.drawStringWithShadow(matrixStack, text, x - fontRenderer.getStringWidth(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        fontRenderer.drawShadow(matrixStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawStringWithShadow(MatrixStack matrixStack, String text, float x, float y, int color){
@@ -120,11 +120,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredString(MatrixStack matrixStack, FontRenderer fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawString(matrixStack, text, x - fontRenderer.getStringWidth(text) / 2f, y, color);
+        fontRenderer.draw(matrixStack, text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredString(MatrixStack matrixStack, FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.drawString(matrixStack, text, x - fontRenderer.getStringWidth(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        fontRenderer.draw(matrixStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredString(MatrixStack matrixStack, String text, float x, float y, int color){
@@ -136,11 +136,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredStringWithShadow(MatrixStack matrixStack, FontRenderer fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawStringWithShadow(matrixStack, text, x - fontRenderer.getStringWidth(text) / 2f, y, color);
+        fontRenderer.drawShadow(matrixStack, text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredStringWithShadow(MatrixStack matrixStack, FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.drawStringWithShadow(matrixStack, text, x - fontRenderer.getStringWidth(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        fontRenderer.drawShadow(matrixStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredStringWithShadow(MatrixStack matrixStack, String text, float x, float y, int color){
@@ -152,7 +152,7 @@ public class ScreenUtils {
     }
 
     public static void drawScreenBackground(MatrixStack matrixStack, float x, float y, float width, float height){
-        Minecraft.getInstance().textureManager.bindTexture(SCREEN_BACKGROUND);
+        Minecraft.getInstance().textureManager.bind(SCREEN_BACKGROUND);
         // corners
         drawTexture(matrixStack, x, y, 4, 4, 0, 0, 4 / 9f, 4 / 9f);
         drawTexture(matrixStack, x + width - 4, y, 4, 4, 5 / 9f, 0, 4 / 9f, 4 / 9f);
@@ -168,7 +168,7 @@ public class ScreenUtils {
     }
 
     public static void drawButtonBackground(MatrixStack matrixStack, float x, float y, float width, float height, float yOffset){
-        Minecraft.getInstance().getTextureManager().bindTexture(BUTTON_BACKGROUND);
+        Minecraft.getInstance().getTextureManager().bind(BUTTON_BACKGROUND);
         // corners
         drawTexture(matrixStack, x, y, 2, 2, 0, yOffset, 2 / 5f, 2 / 15f);
         drawTexture(matrixStack, x + width - 2, y, 2, 2, 3 / 5f, yOffset, 2 / 5f, 2 / 15f);
@@ -188,17 +188,17 @@ public class ScreenUtils {
     }
 
     public static void drawTexture(MatrixStack matrixStack, float x, float y, float width, float height, float tx, float ty, float twidth, float theight){
-        GlStateManager.color4f(1, 1, 1, 1);
+        GlStateManager._color4f(1, 1, 1, 1);
 
-        Matrix4f matrix = matrixStack.getLast().getMatrix();
+        Matrix4f matrix = matrixStack.last().pose();
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
+        BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.pos(matrix, x, y + height, 0).tex(tx, ty + theight).endVertex();
-        buffer.pos(matrix, x + width, y + height, 0).tex(tx + twidth, ty + theight).endVertex();
-        buffer.pos(matrix, x + width, y, 0).tex(tx + twidth, ty).endVertex();
-        buffer.pos(matrix, x, y, 0).tex(tx, ty).endVertex();
-        tessellator.draw();
+        buffer.vertex(matrix, x, y + height, 0).uv(tx, ty + theight).endVertex();
+        buffer.vertex(matrix, x + width, y + height, 0).uv(tx + twidth, ty + theight).endVertex();
+        buffer.vertex(matrix, x + width, y, 0).uv(tx + twidth, ty).endVertex();
+        buffer.vertex(matrix, x, y, 0).uv(tx, ty).endVertex();
+        tessellator.end();
     }
 
     public static void fillRect(MatrixStack matrixStack, float x, float y, float width, float height, int color){
@@ -214,21 +214,21 @@ public class ScreenUtils {
         RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
 
-        Matrix4f matrix = matrixStack.getLast().getMatrix();
+        Matrix4f matrix = matrixStack.last().pose();
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
+        BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-        buffer.pos(matrix, x, y + height, 0).color(red, green, blue, alpha).endVertex();
-        buffer.pos(matrix, x + width, y + height, 0).color(red, green, blue, alpha).endVertex();
-        buffer.pos(matrix, x + width, y, 0).color(red, green, blue, alpha).endVertex();
-        buffer.pos(matrix, x, y, 0).color(red, green, blue, alpha).endVertex();
-        tessellator.draw();
+        buffer.vertex(matrix, x, y + height, 0).color(red, green, blue, alpha).endVertex();
+        buffer.vertex(matrix, x + width, y + height, 0).color(red, green, blue, alpha).endVertex();
+        buffer.vertex(matrix, x + width, y, 0).color(red, green, blue, alpha).endVertex();
+        buffer.vertex(matrix, x, y, 0).color(red, green, blue, alpha).endVertex();
+        tessellator.end();
 
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
 
     public static void bindTexture(ResourceLocation location){
-        Minecraft.getInstance().textureManager.bindTexture(location);
+        Minecraft.getInstance().textureManager.bind(location);
     }
 }

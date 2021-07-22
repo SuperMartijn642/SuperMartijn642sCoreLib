@@ -101,9 +101,9 @@ public abstract class BaseScreen extends Screen {
         mouseX -= this.left();
         mouseY -= this.top();
 
-        matrixStack.push();
+        matrixStack.pushPose();
         this.render(matrixStack, mouseX, mouseY);
-        matrixStack.pop();
+        matrixStack.popPose();
         for(Widget widget : this.widgets){
             widget.blitOffset = this.getBlitOffset();
             widget.wasHovered = widget.hovered;
@@ -217,9 +217,9 @@ public abstract class BaseScreen extends Screen {
         if(this.keyPressed(keyCode))
             return true;
 
-        InputMappings.Input key = InputMappings.getInputByCode(keyCode, scanCode);
-        if(ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(key)){
-            this.closeScreen();
+        InputMappings.Input key = InputMappings.getKey(keyCode, scanCode);
+        if(ClientUtils.getMinecraft().options.keyInventory.isActiveAndMatches(key)){
+            this.onClose();
             return true;
         }
 
