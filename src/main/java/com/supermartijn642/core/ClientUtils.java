@@ -1,14 +1,14 @@
 package com.supermartijn642.core;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.world.World;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 /**
  * Created 1/26/2021 by SuperMartijn642
@@ -23,19 +23,19 @@ public class ClientUtils {
         return getMinecraft().getTextureManager();
     }
 
-    public static FontRenderer getFontRenderer(){
+    public static Font getFontRenderer(){
         return getMinecraft().font;
     }
 
-    public static PlayerEntity getPlayer(){
+    public static Player getPlayer(){
         return getMinecraft().player;
     }
 
-    public static World getWorld(){
+    public static Level getWorld(){
         return getMinecraft().level;
     }
 
-    public static BlockRendererDispatcher getBlockRenderer(){
+    public static BlockRenderDispatcher getBlockRenderer(){
         return getMinecraft().getBlockRenderer();
     }
 

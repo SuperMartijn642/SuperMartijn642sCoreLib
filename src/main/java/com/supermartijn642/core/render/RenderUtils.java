@@ -1,48 +1,33 @@
 package com.supermartijn642.core.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.block.BlockShape;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderState;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import org.lwjgl.opengl.GL11;
-
-import java.util.OptionalDouble;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * Created 6/12/2021 by SuperMartijn642
  */
 public class RenderUtils {
 
-    private static final RenderState.LayerState VIEW_OFFSET_Z_LAYERING = new RenderState.LayerState("view_offset_z_layering", () -> {
-        RenderSystem.pushMatrix();
-        RenderSystem.scalef(0.99975586F, 0.99975586F, 0.99975586F);
-    }, RenderSystem::popMatrix);
-    private static final RenderState.TransparencyState TRANSLUCENT_TRANSPARENCY = new RenderState.TransparencyState("translucent_transparency", () -> {
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-    }, () -> {
-        RenderSystem.disableBlend();
-        RenderSystem.defaultBlendFunc();
-    });
     private static final RenderType LINES_NO_DEPTH = RenderType.create(
         "supermartijn642corelib:highlight",
-        DefaultVertexFormats.POSITION_COLOR,
-        GL11.GL_LINES,
+        DefaultVertexFormat.POSITION_COLOR,
+        VertexFormat.Mode.LINES,
         128,
-        RenderType.State.builder().setLineState(new RenderState.LineState(OptionalDouble.of(1))).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setLayeringState(VIEW_OFFSET_Z_LAYERING).setWriteMaskState(new RenderState.WriteMaskState(true, false)).setDepthTestState(new RenderState.DepthTestState("no_depth", GL11.GL_ALWAYS)).createCompositeState(false));
-    private static final IRenderTypeBuffer.Impl LINE_BUFFER = IRenderTypeBuffer.immediate(new BufferBuilder(128));
+        true,
+        true,
+        RenderTypeExtension.getLinesNoDepthCompositeState()
+    );
+
+    private static final MultiBufferSource.BufferSource LINE_BUFFER = MultiBufferSource.immediate(new BufferBuilder(128));
 
     public static void enableDepthTest(){
         GlStateManager._enableDepthTest();
@@ -55,147 +40,158 @@ public class RenderUtils {
     /**
      * @return the current interpolated camera position.
      */
-    public static Vector3d getCameraPosition(){
+    public static Vec3 getCameraPosition(){
         return ClientUtils.getMinecraft().getEntityRenderDispatcher().camera.getPosition();
     }
 
     /**
      * Draws an outline for the given shape.
      */
-    public static void renderShape(MatrixStack matrixStack, BlockShape shape, double x, double y, double z, float red, float green, float blue, float alpha){
-        matrixStack.pushPose();
+    public static void renderShape(PoseStack poseStack, BlockShape shape, double x, double y, double z, float red, float green, float blue, float alpha){
+        poseStack.pushPose();
 
-        Vector3d camera = getCameraPosition();
-        matrixStack.translate(x - camera.x, y - camera.y, z - camera.z);
+        Vec3 camera = getCameraPosition();
+        poseStack.translate(x - camera.x, y - camera.y, z - camera.z);
 
-        IVertexBuilder builder = LINE_BUFFER.getBuffer(LINES_NO_DEPTH);
-        Matrix4f matrix4f = matrixStack.last().pose();
+        VertexConsumer builder = LINE_BUFFER.getBuffer(LINES_NO_DEPTH);
+        Matrix4f matrix4f = poseStack.last().pose();
         shape.forEachEdge((x1, y1, z1, x2, y2, z2) -> {
             builder.vertex(matrix4f, (float)x1, (float)y1, (float)z1).color(red, green, blue, alpha).endVertex();
             builder.vertex(matrix4f, (float)x2, (float)y2, (float)z2).color(red, green, blue, alpha).endVertex();
         });
         LINE_BUFFER.endBatch();
 
-        matrixStack.popPose();
+        poseStack.popPose();
     }
 
     /**
      * Draws an outline for the given shape.
      */
-    public static void renderShape(MatrixStack matrixStack, VoxelShape shape, double x, double y, double z, float red, float green, float blue, float alpha){
-        renderShape(matrixStack, BlockShape.create(shape), x, y, z, red, green, blue, alpha);
+    public static void renderShape(PoseStack poseStack, VoxelShape shape, double x, double y, double z, float red, float green, float blue, float alpha){
+        renderShape(poseStack, BlockShape.create(shape), x, y, z, red, green, blue, alpha);
     }
 
     /**
      * Draws an outline for the given box.
      */
-    public static void renderBox(MatrixStack matrixStack, AxisAlignedBB box, double x, double y, double z, float red, float green, float blue, float alpha){
-        renderShape(matrixStack, BlockShape.create(box), x, y, z, red, green, blue, alpha);
+    public static void renderBox(PoseStack poseStack, AABB box, double x, double y, double z, float red, float green, float blue, float alpha){
+        renderShape(poseStack, BlockShape.create(box), x, y, z, red, green, blue, alpha);
     }
 
     /**
      * Draws an outline for the given shape.
      */
-    public static void renderShape(MatrixStack matrixStack, BlockShape shape, BlockPos pos, float red, float green, float blue, float alpha){
-        renderShape(matrixStack, shape, pos.getX(), pos.getY(), pos.getZ(), red, green, blue, alpha);
+    public static void renderShape(PoseStack poseStack, BlockShape shape, BlockPos pos, float red, float green, float blue, float alpha){
+        renderShape(poseStack, shape, pos.getX(), pos.getY(), pos.getZ(), red, green, blue, alpha);
     }
 
     /**
      * Draws an outline for the given shape.
      */
-    public static void renderShape(MatrixStack matrixStack, VoxelShape shape, BlockPos pos, float red, float green, float blue, float alpha){
-        renderShape(matrixStack, BlockShape.create(shape), pos.getX(), pos.getY(), pos.getZ(), red, green, blue, alpha);
+    public static void renderShape(PoseStack poseStack, VoxelShape shape, BlockPos pos, float red, float green, float blue, float alpha){
+        renderShape(poseStack, BlockShape.create(shape), pos.getX(), pos.getY(), pos.getZ(), red, green, blue, alpha);
     }
 
     /**
      * Draws an outline for the given box.
      */
-    public static void renderBox(MatrixStack matrixStack, AxisAlignedBB box, BlockPos pos, float red, float green, float blue, float alpha){
-        renderShape(matrixStack, BlockShape.create(box), pos.getX(), pos.getY(), pos.getZ(), red, green, blue, alpha);
+    public static void renderBox(PoseStack poseStack, AABB box, BlockPos pos, float red, float green, float blue, float alpha){
+        renderShape(poseStack, BlockShape.create(box), pos.getX(), pos.getY(), pos.getZ(), red, green, blue, alpha);
     }
 
     /**
      * Draws an outline for the given shape.
      */
-    public static void renderShape(MatrixStack matrixStack, BlockShape shape, double x, double y, double z, float red, float green, float blue){
-        renderShape(matrixStack, shape, x, y, z, red, green, blue, 1);
+    public static void renderShape(PoseStack poseStack, BlockShape shape, double x, double y, double z, float red, float green, float blue){
+        renderShape(poseStack, shape, x, y, z, red, green, blue, 1);
     }
 
     /**
      * Draws an outline for the given shape.
      */
-    public static void renderShape(MatrixStack matrixStack, VoxelShape shape, double x, double y, double z, float red, float green, float blue){
-        renderShape(matrixStack, BlockShape.create(shape), x, y, z, red, green, blue, 1);
+    public static void renderShape(PoseStack poseStack, VoxelShape shape, double x, double y, double z, float red, float green, float blue){
+        renderShape(poseStack, BlockShape.create(shape), x, y, z, red, green, blue, 1);
     }
 
     /**
      * Draws an outline for the given box.
      */
-    public static void renderBox(MatrixStack matrixStack, AxisAlignedBB box, double x, double y, double z, float red, float green, float blue){
-        renderShape(matrixStack, BlockShape.create(box), x, y, z, red, green, blue, 1);
+    public static void renderBox(PoseStack poseStack, AABB box, double x, double y, double z, float red, float green, float blue){
+        renderShape(poseStack, BlockShape.create(box), x, y, z, red, green, blue, 1);
     }
 
     /**
      * Draws an outline for the given shape.
      */
-    public static void renderShape(MatrixStack matrixStack, BlockShape shape, BlockPos pos, float red, float green, float blue){
-        renderShape(matrixStack, shape, pos.getX(), pos.getY(), pos.getZ(), red, green, blue, 1);
+    public static void renderShape(PoseStack poseStack, BlockShape shape, BlockPos pos, float red, float green, float blue){
+        renderShape(poseStack, shape, pos.getX(), pos.getY(), pos.getZ(), red, green, blue, 1);
     }
 
     /**
      * Draws an outline for the given shape.
      */
-    public static void renderShape(MatrixStack matrixStack, VoxelShape shape, BlockPos pos, float red, float green, float blue){
-        renderShape(matrixStack, BlockShape.create(shape), pos.getX(), pos.getY(), pos.getZ(), red, green, blue);
+    public static void renderShape(PoseStack poseStack, VoxelShape shape, BlockPos pos, float red, float green, float blue){
+        renderShape(poseStack, BlockShape.create(shape), pos.getX(), pos.getY(), pos.getZ(), red, green, blue);
     }
 
     /**
      * Draws an outline for the given box.
      */
-    public static void renderBox(MatrixStack matrixStack, AxisAlignedBB box, BlockPos pos, float red, float green, float blue){
-        renderShape(matrixStack, BlockShape.create(box), pos.getX(), pos.getY(), pos.getZ(), red, green, blue);
+    public static void renderBox(PoseStack poseStack, AABB box, BlockPos pos, float red, float green, float blue){
+        renderShape(poseStack, BlockShape.create(box), pos.getX(), pos.getY(), pos.getZ(), red, green, blue);
     }
 
     /**
      * Draws an outline for the given shape.
      */
-    public static void renderShape(MatrixStack matrixStack, BlockShape shape, float red, float green, float blue, float alpha){
-        renderShape(matrixStack, shape, 0, 0, 0, red, green, blue, alpha);
+    public static void renderShape(PoseStack poseStack, BlockShape shape, float red, float green, float blue, float alpha){
+        renderShape(poseStack, shape, 0, 0, 0, red, green, blue, alpha);
     }
 
     /**
      * Draws an outline for the given shape.
      */
-    public static void renderShape(MatrixStack matrixStack, VoxelShape shape, float red, float green, float blue, float alpha){
-        renderShape(matrixStack, BlockShape.create(shape), 0, 0, 0, red, green, blue, alpha);
+    public static void renderShape(PoseStack poseStack, VoxelShape shape, float red, float green, float blue, float alpha){
+        renderShape(poseStack, BlockShape.create(shape), 0, 0, 0, red, green, blue, alpha);
     }
 
     /**
      * Draws an outline for the given box.
      */
-    public static void renderBox(MatrixStack matrixStack, AxisAlignedBB box, float red, float green, float blue, float alpha){
-        renderShape(matrixStack, BlockShape.create(box), 0, 0, 0, red, green, blue, alpha);
+    public static void renderBox(PoseStack poseStack, AABB box, float red, float green, float blue, float alpha){
+        renderShape(poseStack, BlockShape.create(box), 0, 0, 0, red, green, blue, alpha);
     }
 
     /**
      * Draws an outline for the given shape.
      */
-    public static void renderShape(MatrixStack matrixStack, BlockShape shape, float red, float green, float blue){
-        renderShape(matrixStack, shape, 0, 0, 0, red, green, blue, 1);
+    public static void renderShape(PoseStack poseStack, BlockShape shape, float red, float green, float blue){
+        renderShape(poseStack, shape, 0, 0, 0, red, green, blue, 1);
     }
 
     /**
      * Draws an outline for the given shape.
      */
-    public static void renderShape(MatrixStack matrixStack, VoxelShape shape, float red, float green, float blue){
-        renderShape(matrixStack, BlockShape.create(shape), 0, 0, 0, red, green, blue, 1);
+    public static void renderShape(PoseStack poseStack, VoxelShape shape, float red, float green, float blue){
+        renderShape(poseStack, BlockShape.create(shape), 0, 0, 0, red, green, blue, 1);
     }
 
     /**
      * Draws an outline for the given box.
      */
-    public static void renderBox(MatrixStack matrixStack, AxisAlignedBB box, float red, float green, float blue){
-        renderShape(matrixStack, BlockShape.create(box), 0, 0, 0, red, green, blue, 1);
+    public static void renderBox(PoseStack poseStack, AABB box, float red, float green, float blue){
+        renderShape(poseStack, BlockShape.create(box), 0, 0, 0, red, green, blue, 1);
     }
 
+    private static class RenderTypeExtension extends RenderType {
+
+        // Because stupid protected inner classes
+        public RenderTypeExtension(String p_173178_, VertexFormat p_173179_, VertexFormat.Mode p_173180_, int p_173181_, boolean p_173182_, boolean p_173183_, Runnable p_173184_, Runnable p_173185_){
+            super(p_173178_, p_173179_, p_173180_, p_173181_, p_173182_, p_173183_, p_173184_, p_173185_);
+        }
+
+        public static CompositeState getLinesNoDepthCompositeState(){
+            return RenderType.CompositeState.builder().setLineState(DEFAULT_LINE).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setLayeringState(VIEW_OFFSET_Z_LAYERING).setWriteMaskState(COLOR_WRITE).setDepthTestState(NO_DEPTH_TEST).createCompositeState(false);
+        }
+    }
 }

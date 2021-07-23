@@ -1,10 +1,10 @@
 package com.supermartijn642.core.block;
 
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  */
 public class BlockShape {
 
-    public static BlockShape create(AxisAlignedBB box){
+    public static BlockShape create(AABB box){
         return new BlockShape(box);
     }
 
@@ -26,29 +26,29 @@ public class BlockShape {
     }
 
     public static BlockShape create(double x1, double y1, double z1, double x2, double y2, double z2){
-        return create(VoxelShapes.box(x1, y1, z1, x2, y2, z2));
+        return create(Shapes.box(x1, y1, z1, x2, y2, z2));
     }
 
     /**
      * Creates a shape with coordinates {@code x1 / 16, y1 / 16, z1 / 16, x2 / 16, y2 / 16, z2 / 16}.
      */
     public static BlockShape createBlockShape(double x1, double y1, double z1, double x2, double y2, double z2){
-        return create(VoxelShapes.box(x1 / 16, y1 / 16, z1 / 16, x2 / 16, y2 / 16, z2 / 16));
+        return create(Shapes.box(x1 / 16, y1 / 16, z1 / 16, x2 / 16, y2 / 16, z2 / 16));
     }
 
     /**
      * Combines two shapes.
      */
     public static BlockShape or(BlockShape shape, BlockShape... shapes){
-        return new BlockShape(VoxelShapes.or(shape.shape, Arrays.stream(shapes).map(s -> s.shape).toArray(VoxelShape[]::new)));
+        return new BlockShape(Shapes.or(shape.shape, Arrays.stream(shapes).map(s -> s.shape).toArray(VoxelShape[]::new)));
     }
 
     public static BlockShape fullCube(){
-        return new BlockShape(VoxelShapes.block());
+        return new BlockShape(Shapes.block());
     }
 
     public static BlockShape empty(){
-        return new BlockShape(VoxelShapes.empty());
+        return new BlockShape(Shapes.empty());
     }
 
     /**
@@ -64,19 +64,19 @@ public class BlockShape {
         this.shape = shape;
     }
 
-    public BlockShape(AxisAlignedBB shape){
-        this(VoxelShapes.create(shape));
+    public BlockShape(AABB shape){
+        this(Shapes.create(shape));
     }
 
-    public BlockShape(List<AxisAlignedBB> shapes){
-        this(VoxelShapes.or(VoxelShapes.empty(), shapes.stream().map(VoxelShapes::create).toArray(VoxelShape[]::new)));
+    public BlockShape(List<AABB> shapes){
+        this(Shapes.or(Shapes.empty(), shapes.stream().map(Shapes::create).toArray(VoxelShape[]::new)));
     }
 
-    public List<AxisAlignedBB> toBoxes(){
+    public List<AABB> toBoxes(){
         return this.shape.toAabbs();
     }
 
-    public void forEachBox(Consumer<AxisAlignedBB> action){
+    public void forEachBox(Consumer<AABB> action){
         this.toBoxes().forEach(action);
     }
 
@@ -100,7 +100,7 @@ public class BlockShape {
     /**
      * Creates the smallest box that encapsulate the entire shape.
      */
-    public AxisAlignedBB simplify(){
+    public AABB simplify(){
         return this.shape.bounds();
     }
 
@@ -188,7 +188,7 @@ public class BlockShape {
      * Flips the shape on the given axis.
      */
     public BlockShape flip(Direction.Axis axis){
-        return this.transformBoxes(box -> new AxisAlignedBB(
+        return this.transformBoxes(box -> new AABB(
             axis == Direction.Axis.X ? 1 - box.minX : box.minX,
             axis == Direction.Axis.Y ? 1 - box.minY : box.minY,
             axis == Direction.Axis.Z ? 1 - box.minZ : box.minZ,
@@ -205,15 +205,15 @@ public class BlockShape {
         if(axis == null)
             throw new IllegalArgumentException("axis must not be null!");
         if(axis == Direction.Axis.X)
-            return this.transformBoxes(box -> new AxisAlignedBB(box.minX, box.minZ, -box.minY + 1, box.maxX, box.maxZ, -box.maxY + 1));
+            return this.transformBoxes(box -> new AABB(box.minX, box.minZ, -box.minY + 1, box.maxX, box.maxZ, -box.maxY + 1));
         if(axis == Direction.Axis.Y)
-            return this.transformBoxes(box -> new AxisAlignedBB(-box.minZ + 1, box.minY, box.minX, -box.maxZ + 1, box.maxY, box.maxX));
+            return this.transformBoxes(box -> new AABB(-box.minZ + 1, box.minY, box.minX, -box.maxZ + 1, box.maxY, box.maxX));
         if(axis == Direction.Axis.Z)
-            return this.transformBoxes(box -> new AxisAlignedBB(box.minY, -box.minX + 1, box.minZ, box.maxY, -box.maxX + 1, box.maxZ));
+            return this.transformBoxes(box -> new AABB(box.minY, -box.minX + 1, box.minZ, box.maxY, -box.maxX + 1, box.maxZ));
         return null;
     }
 
-    private BlockShape transformBoxes(Function<AxisAlignedBB,AxisAlignedBB> transformer){
+    private BlockShape transformBoxes(Function<AABB,AABB> transformer){
         return new BlockShape(this.toBoxes().stream().map(transformer::apply).collect(Collectors.toList()));
     }
 

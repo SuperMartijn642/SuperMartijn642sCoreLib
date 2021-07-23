@@ -1,19 +1,19 @@
 package com.supermartijn642.core.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.HitResult;
 
 import java.util.List;
 
@@ -31,16 +31,16 @@ public class BaseBlock extends Block {
     }
 
     @Override
-    public void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack){
+    public void setPlacedBy(Level worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack){
         if(!this.saveTileData)
             return;
 
-        CompoundNBT tag = stack.getTag();
+        CompoundTag tag = stack.getTag();
         tag = tag == null ? null : tag.contains("tileData") ? tag.getCompound("tileData") : null;
         if(tag == null || tag.isEmpty())
             return;
 
-        TileEntity tile = worldIn.getBlockEntity(pos);
+        BlockEntity tile = worldIn.getBlockEntity(pos);
         if(tile instanceof BaseTileEntity)
             ((BaseTileEntity)tile).readData(tag);
     }
@@ -52,15 +52,15 @@ public class BaseBlock extends Block {
         if(!this.saveTileData)
             return items;
 
-        TileEntity tile = builder.getOptionalParameter(LootParameters.BLOCK_ENTITY);
+        BlockEntity tile = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
         if(!(tile instanceof BaseTileEntity))
             return items;
 
-        CompoundNBT tileTag = ((BaseTileEntity)tile).writeData();
+        CompoundTag tileTag = ((BaseTileEntity)tile).writeData();
         if(tileTag == null || tileTag.isEmpty())
             return items;
 
-        CompoundNBT tag = new CompoundNBT();
+        CompoundTag tag = new CompoundTag();
         tag.put("tileData", tileTag);
 
         for(ItemStack stack : items){
@@ -73,21 +73,21 @@ public class BaseBlock extends Block {
     }
 
     @Override
-    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player){
+    public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player){
         ItemStack stack = super.getPickBlock(state, target, world, pos, player);
 
         if(!this.saveTileData)
             return stack;
 
-        TileEntity tile = world.getBlockEntity(pos);
+        BlockEntity tile = world.getBlockEntity(pos);
         if(!(tile instanceof BaseTileEntity))
             return stack;
 
-        CompoundNBT tileTag = ((BaseTileEntity)tile).writeData();
+        CompoundTag tileTag = ((BaseTileEntity)tile).writeData();
         if(tileTag == null || tileTag.isEmpty())
             return stack;
 
-        CompoundNBT tag = new CompoundNBT();
+        CompoundTag tag = new CompoundTag();
         tag.put("tileData", tileTag);
 
         if(stack.getItem() instanceof BlockItem && ((BlockItem)stack.getItem()).getBlock() == this)

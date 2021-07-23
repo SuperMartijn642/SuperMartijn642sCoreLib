@@ -1,8 +1,8 @@
 package com.supermartijn642.core.gui.widget;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
 
 /**
  * Created 10/8/2020 by SuperMartijn642
@@ -39,6 +39,6 @@ public abstract class AbstractButtonWidget extends Widget {
      * Plays the default Minecraft button sound.
      */
     public static void playClickSound(){
-        Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 }

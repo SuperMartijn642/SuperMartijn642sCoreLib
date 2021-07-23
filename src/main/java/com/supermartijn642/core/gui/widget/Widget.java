@@ -1,9 +1,9 @@
 package com.supermartijn642.core.gui.widget;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
 
 /**
  * Created 1/19/2021 by SuperMartijn642
@@ -29,7 +29,7 @@ public abstract class Widget {
             this.nextNarration = this.hovered ? Util.getMillis() + (long)750 : Long.MAX_VALUE;
 
         if(this.active && this.hovered && Util.getMillis() > this.nextNarration){
-            ITextComponent message = this.getNarrationMessage();
+            Component message = this.getNarrationMessage();
             String s = message == null ? "" : message.getString();
             if(!s.isEmpty()){
                 NarratorChatListener.INSTANCE.sayNow(s);
@@ -41,7 +41,7 @@ public abstract class Widget {
     /**
      * @return the message that should be narrated for the current state of the widget
      */
-    protected abstract ITextComponent getNarrationMessage();
+    protected abstract Component getNarrationMessage();
 
     /**
      * Sets whether the widget is active, i.e. can be interacted with.
@@ -55,7 +55,7 @@ public abstract class Widget {
     /**
      * Renders the entire widget.
      */
-    public abstract void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks);
+    public abstract void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks);
 
     /**
      * @return whether the user is hovering their cursor over the widget

@@ -1,20 +1,17 @@
 package com.supermartijn642.core.gui.widget;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.ScreenUtils;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.SharedConstants;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -54,7 +51,7 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
     }
 
     @Override
-    protected ITextComponent getNarrationMessage(){
+    protected Component getNarrationMessage(){
         return TextComponents.translation("gui.narrate.editBox", this.suggestion, this.text).get();
     }
 
@@ -64,14 +61,14 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks){
         if(this.drawBackground)
-            this.drawBackground(matrixStack);
+            this.drawBackground(poseStack);
 
         int textColor = this.active ? this.activeTextColor : this.inactiveTextColor;
         int relativeCursor = this.cursorPosition - this.lineScrollOffset;
         int relativeSelection = this.selectionPos - this.lineScrollOffset;
-        FontRenderer fontRenderer = Minecraft.getInstance().font;
+        Font fontRenderer = Minecraft.getInstance().font;
         String s = fontRenderer.plainSubstrByWidth(this.text.substring(this.lineScrollOffset), this.width - 8);
         boolean cursorInView = relativeCursor >= 0 && relativeCursor <= s.length();
         boolean shouldBlink = this.focused && this.cursorBlinkCounter / 8 % 2 == 0 && cursorInView;
@@ -84,7 +81,7 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
 
         if(!s.isEmpty()){
             String s1 = cursorInView ? s.substring(0, relativeCursor) : s;
-            leftOffset = fontRenderer.draw(matrixStack, s1, left, top, textColor) + 1;
+            leftOffset = fontRenderer.draw(poseStack, s1, left, top, textColor) + 1;
         }
 
         boolean cursorAtEnd = this.cursorPosition < this.text.length();
@@ -99,32 +96,32 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
 
         // draw text
         if(!s.isEmpty() && cursorInView && relativeCursor < s.length())
-            fontRenderer.draw(matrixStack, s.substring(relativeCursor), leftOffset, top, textColor);
+            fontRenderer.draw(poseStack, s.substring(relativeCursor), leftOffset, top, textColor);
 
         // draw suggestion
         if(!this.suggestion.isEmpty() && this.text.isEmpty())
-            fontRenderer.drawShadow(matrixStack, fontRenderer.plainSubstrByWidth(this.suggestion, this.width - 8 - fontRenderer.width("...")) + "...", cursorX, top, -8355712);
+            fontRenderer.drawShadow(poseStack, fontRenderer.plainSubstrByWidth(this.suggestion, this.width - 8 - fontRenderer.width("...")) + "...", cursorX, top, -8355712);
 
         // draw cursor
         if(shouldBlink){
             if(cursorAtEnd)
-                ScreenUtils.fillRect(matrixStack, cursorX - 0.5f, top - 1, 1, fontRenderer.lineHeight, -3092272);
+                ScreenUtils.fillRect(poseStack, cursorX - 0.5f, top - 1, 1, fontRenderer.lineHeight, -3092272);
             else
-                fontRenderer.drawShadow(matrixStack, "_", cursorX, top, textColor);
+                fontRenderer.drawShadow(poseStack, "_", cursorX, top, textColor);
         }
 
         if(relativeSelection != relativeCursor){
             int l1 = left + fontRenderer.width(s.substring(0, relativeSelection));
-            this.drawSelectionBox(matrixStack, cursorX, top - 1, l1 - 1, top + 1 + fontRenderer.lineHeight);
+            this.drawSelectionBox(poseStack, cursorX, top - 1, l1 - 1, top + 1 + fontRenderer.lineHeight);
         }
     }
 
-    protected void drawBackground(MatrixStack matrixStack){
-        ScreenUtils.fillRect(matrixStack, this.x, this.y, this.width, this.height, this.focused ? -1 : -6250336);
-        ScreenUtils.fillRect(matrixStack, this.x + 1, this.y + 1, this.width - 2, this.height - 2, -16777216);
+    protected void drawBackground(PoseStack poseStack){
+        ScreenUtils.fillRect(poseStack, this.x, this.y, this.width, this.height, this.focused ? -1 : -6250336);
+        ScreenUtils.fillRect(poseStack, this.x + 1, this.y + 1, this.width - 2, this.height - 2, -16777216);
     }
 
-    protected void drawSelectionBox(MatrixStack matrixStack, int startX, int startY, int endX, int endY){
+    protected void drawSelectionBox(PoseStack poseStack, int startX, int startY, int endX, int endY){
         if(startX < endX){
             int i = startX;
             startX = endX;
@@ -145,14 +142,14 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
             startX = this.x + this.width;
         }
 
-        Matrix4f matrix = matrixStack.last().pose();
-        Tessellator tessellator = Tessellator.getInstance();
+        Matrix4f matrix = poseStack.last().pose();
+        Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuilder();
-        RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
+        RenderSystem.setShaderColor(0.0F, 0.0F, 255.0F, 255.0F); // TODO check if this works
         RenderSystem.disableTexture();
         RenderSystem.enableColorLogicOp();
         RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-        bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
         bufferbuilder.vertex(matrix, startX, endY, 0).endVertex();
         bufferbuilder.vertex(matrix, endX, endY, 0).endVertex();
         bufferbuilder.vertex(matrix, endX, startY, 0).endVertex();
@@ -237,7 +234,7 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
     }
 
     protected void moveLineOffsetToCursor(){
-        FontRenderer fontRenderer = Minecraft.getInstance().font;
+        Font fontRenderer = Minecraft.getInstance().font;
         int availableWidth = this.width - 8 - (this.cursorPosition == this.text.length() ? fontRenderer.width("_") : 0);
         int min = Math.min(this.cursorPosition + 1, this.text.length()) - fontRenderer.plainSubstrByWidth(new StringBuilder(this.text.substring(0, Math.min(this.text.length(), this.cursorPosition + 2))).reverse().toString(), availableWidth).length();
         int max = Math.max(this.cursorPosition - 1, 0) + fontRenderer.plainSubstrByWidth(this.text.substring(Math.max(this.cursorPosition - 1, 0)), availableWidth).length();
@@ -369,9 +366,9 @@ public class TextFieldWidget extends Widget implements ITickableWidget {
             if(button == 1)
                 this.clear();
             else{
-                int offset = MathHelper.floor(mouseX) - this.x - 4;
+                int offset = Mth.floor(mouseX) - this.x - 4;
 
-                FontRenderer font = Minecraft.getInstance().font;
+                Font font = Minecraft.getInstance().font;
                 String s = font.plainSubstrByWidth(this.text.substring(this.lineScrollOffset), Math.min(offset, this.width - 8));
                 this.cursorPosition = s.length() + this.lineScrollOffset;
                 if(!Screen.hasShiftDown())

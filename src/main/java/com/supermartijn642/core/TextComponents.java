@@ -1,14 +1,14 @@
 package com.supermartijn642.core;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.text.*;
-import net.minecraft.world.World;
+import net.minecraft.network.chat.*;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
 import java.util.function.Function;
@@ -29,55 +29,55 @@ public class TextComponents {
      * Creates a new {@link TextComponentBuilder} around the given {@code text}.
      */
     public static TextComponentBuilder string(String text){
-        return new TextComponentBuilder(new StringTextComponent(text));
+        return new TextComponentBuilder(new TextComponent(text));
     }
 
     /**
      * Creates a new {@link TextComponentBuilder} for the given {@code number}.
      */
     public static TextComponentBuilder number(int number){
-        return new TextComponentBuilder(new StringTextComponent(Integer.toString(number)));
+        return new TextComponentBuilder(new TextComponent(Integer.toString(number)));
     }
 
     /**
      * Creates a new {@link TextComponentBuilder} for the given {@code number}.
      */
     public static TextComponentBuilder number(double number, int decimals){
-        return new TextComponentBuilder(new StringTextComponent(String.format("%." + decimals + "f", number)));
+        return new TextComponentBuilder(new TextComponent(String.format("%." + decimals + "f", number)));
     }
 
     /**
      * Creates a new {@link TextComponentBuilder} for the given {@code number}.
      */
     public static TextComponentBuilder number(double number){
-        return new TextComponentBuilder(new StringTextComponent(Double.toString(number)));
+        return new TextComponentBuilder(new TextComponent(Double.toString(number)));
     }
 
     /**
      * Creates a new {@link TextComponentBuilder} around the given translation.
      */
     public static TextComponentBuilder translation(String translationKey, Object... arguments){
-        return new TextComponentBuilder(new TranslationTextComponent(translationKey, arguments));
+        return new TextComponentBuilder(new TranslatableComponent(translationKey, arguments));
     }
 
     /**
      * Creates a new {@link TextComponentBuilder} around the given translation.
      */
     public static TextComponentBuilder translation(String translationKey){
-        return new TextComponentBuilder(new TranslationTextComponent(translationKey));
+        return new TextComponentBuilder(new TranslatableComponent(translationKey));
     }
 
     /**
      * Creates a new {@link TextComponentBuilder} around the given text component.
      */
-    public static TextComponentBuilder fromTextComponent(IFormattableTextComponent textComponent){
+    public static TextComponentBuilder fromTextComponent(MutableComponent textComponent){
         return new TextComponentBuilder(textComponent);
     }
 
     /**
      * Creates a new {@link TextComponentBuilder} around the given text component.
      */
-    public static TextComponentBuilder fromTextComponent(ITextComponent textComponent){
+    public static TextComponentBuilder fromTextComponent(Component textComponent){
         return fromTextComponent(textComponent.plainCopy());
     }
 
@@ -85,7 +85,7 @@ public class TextComponents {
      * Formats the given text component. Must only be side client side.
      * @return the formatted string
      */
-    public static String format(ITextComponent textComponent){
+    public static String format(Component textComponent){
         return textComponent.getString();
     }
 
@@ -146,7 +146,7 @@ public class TextComponents {
      * Converts the dimension registry name to a capitalized name and creates a
      * new {@link TextComponentBuilder} around it.
      */
-    public static TextComponentBuilder dimension(RegistryKey<World> dimension){
+    public static TextComponentBuilder dimension(ResourceKey<Level> dimension){
         String dimensionName = dimension.location().getPath();
         dimensionName = dimensionName.substring(Math.min(dimensionName.length() - 1, Math.max(0, dimensionName.indexOf('/') + 1))).toLowerCase();
         dimensionName = dimensionName.substring(0, 1).toUpperCase() + dimensionName.substring(1);
@@ -160,28 +160,28 @@ public class TextComponents {
      * Converts the dimension registry name to a capitalized name and creates a
      * new {@link TextComponentBuilder} around it.
      */
-    public static TextComponentBuilder dimension(World world){
+    public static TextComponentBuilder dimension(Level world){
         return dimension(world.dimension());
     }
 
     public static class TextComponentBuilder {
 
         private final TextComponentBuilder parent;
-        private final IFormattableTextComponent textComponent;
+        private final MutableComponent textComponent;
 
-        private TextComponentBuilder(IFormattableTextComponent textComponent, TextComponentBuilder parent){
+        private TextComponentBuilder(MutableComponent textComponent, TextComponentBuilder parent){
             this.textComponent = textComponent;
             this.parent = parent;
         }
 
-        private TextComponentBuilder(IFormattableTextComponent textComponent){
+        private TextComponentBuilder(MutableComponent textComponent){
             this(textComponent, null);
         }
 
         /**
          * Sets the formatting for the text component.
          */
-        public TextComponentBuilder formatting(TextFormatting color){
+        public TextComponentBuilder formatting(TextColor color){
             this.updateStyle(style -> style.withColor(color));
             return this;
         }
@@ -189,7 +189,7 @@ public class TextComponents {
         /**
          * Sets the formatting for the text component.
          */
-        public TextComponentBuilder color(TextFormatting color){
+        public TextComponentBuilder color(TextColor color){
             return this.formatting(color);
         }
 
@@ -251,7 +251,7 @@ public class TextComponents {
          * @return a new {@link TextComponentBuilder} for the given string
          */
         public TextComponentBuilder string(String text){
-            return this.append(new StringTextComponent(text));
+            return this.append(new TextComponent(text));
         }
 
         /**
@@ -260,7 +260,7 @@ public class TextComponents {
          * @return a new {@link TextComponentBuilder} for the given translation
          */
         public TextComponentBuilder translation(String translationKey, Object... arguments){
-            return this.append(new TranslationTextComponent(translationKey, arguments));
+            return this.append(new TranslatableComponent(translationKey, arguments));
         }
 
         /**
@@ -269,7 +269,7 @@ public class TextComponents {
          * @return a new {@link TextComponentBuilder} for the given translation
          */
         public TextComponentBuilder translation(String translationKey){
-            return this.append(new TranslationTextComponent(translationKey));
+            return this.append(new TranslatableComponent(translationKey));
         }
 
         /**
@@ -277,7 +277,7 @@ public class TextComponents {
          * {@link TextComponentBuilder} for the given translation.
          * @return a new {@link TextComponentBuilder} for the given text component
          */
-        public TextComponentBuilder append(IFormattableTextComponent textComponent){
+        public TextComponentBuilder append(MutableComponent textComponent){
             this.textComponent.append(textComponent);
             return new TextComponentBuilder(textComponent, this);
         }
@@ -285,7 +285,7 @@ public class TextComponents {
         /**
          * @return the constructed text component
          */
-        public IFormattableTextComponent get(){
+        public MutableComponent get(){
             return this.parent == null ? this.textComponent : this.parent.get();
         }
 

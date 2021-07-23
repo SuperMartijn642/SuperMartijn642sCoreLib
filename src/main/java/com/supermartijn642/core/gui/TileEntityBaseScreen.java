@@ -1,23 +1,23 @@
 package com.supermartijn642.core.gui;
 
 import com.supermartijn642.core.ClientUtils;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * Created 1/26/2021 by SuperMartijn642
  */
-public abstract class TileEntityBaseScreen<T extends TileEntity> extends ObjectBaseScreen<T> {
+public abstract class TileEntityBaseScreen<T extends BlockEntity> extends ObjectBaseScreen<T> {
 
     protected final BlockPos tilePos;
 
-    protected TileEntityBaseScreen(ITextComponent title, BlockPos tilePos){
+    protected TileEntityBaseScreen(Component title, BlockPos tilePos){
         super(title);
         this.tilePos = tilePos;
     }
 
-    protected TileEntityBaseScreen(ITextComponent title){
+    protected TileEntityBaseScreen(Component title){
         this(title, null);
     }
 
@@ -28,7 +28,7 @@ public abstract class TileEntityBaseScreen<T extends TileEntity> extends ObjectB
 
     @SuppressWarnings("unchecked")
     protected T getTileEntity(){
-        TileEntity tile = ClientUtils.getWorld().getBlockEntity(this.tilePos);
+        BlockEntity tile = ClientUtils.getWorld().getBlockEntity(this.tilePos);
 
         if(tile == null)
             return null;

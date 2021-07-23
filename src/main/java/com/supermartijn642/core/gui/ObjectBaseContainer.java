@@ -1,7 +1,7 @@
 package com.supermartijn642.core.gui;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.MenuType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -11,12 +11,12 @@ import javax.annotation.Nullable;
  */
 public abstract class ObjectBaseContainer<T> extends BaseContainer {
 
-    public ObjectBaseContainer(ContainerType<?> type, int id, PlayerEntity player){
+    public ObjectBaseContainer(MenuType<?> type, int id, Player player){
         super(type, id, player);
     }
 
     @Override
-    protected void addSlots(PlayerEntity player){
+    protected void addSlots(Player player){
         T object = this.getObjectOrClose();
         if(object != null)
             this.addSlots(player, object);
@@ -25,7 +25,7 @@ public abstract class ObjectBaseContainer<T> extends BaseContainer {
     /**
      * Adds slots to the container
      */
-    protected abstract void addSlots(PlayerEntity player, @Nonnull T object);
+    protected abstract void addSlots(Player player, @Nonnull T object);
 
     /**
      * Gets the object from {@link #getObject()}, if {@code null} the screen

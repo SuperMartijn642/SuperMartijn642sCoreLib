@@ -1,8 +1,7 @@
 package com.supermartijn642.core;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.gui.BaseScreen;
-import com.supermartijn642.core.gui.ScreenUtils;
 import com.supermartijn642.core.gui.widget.TextFieldWidget;
 
 /**
@@ -31,7 +30,7 @@ public class TestScreen extends BaseScreen {
     }
 
     @Override
-    protected void render(MatrixStack matrixStack, int mouseX, int mouseY){
-        this.drawScreenBackground(matrixStack);
+    protected void render(PoseStack poseStack, int mouseX, int mouseY){
+        this.drawScreenBackground(poseStack);
     }
 }

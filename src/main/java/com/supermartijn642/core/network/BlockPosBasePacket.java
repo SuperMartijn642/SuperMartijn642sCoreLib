@@ -1,7 +1,7 @@
 package com.supermartijn642.core.network;
 
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 
 /**
  * Created 5/30/2021 by SuperMartijn642
@@ -22,12 +22,12 @@ public abstract class BlockPosBasePacket implements BasePacket {
     }
 
     @Override
-    public void write(PacketBuffer buffer){
+    public void write(FriendlyByteBuf buffer){
         buffer.writeBlockPos(this.pos);
     }
 
     @Override
-    public void read(PacketBuffer buffer){
+    public void read(FriendlyByteBuf buffer){
         this.pos = buffer.readBlockPos();
     }
 

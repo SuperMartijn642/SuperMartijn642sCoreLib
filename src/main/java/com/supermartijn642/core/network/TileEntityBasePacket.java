@@ -1,19 +1,19 @@
 package com.supermartijn642.core.network;
 
 import com.supermartijn642.core.CoreSide;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * Created 5/30/2021 by SuperMartijn642
  */
-public abstract class TileEntityBasePacket<T extends TileEntity> extends BlockPosBasePacket {
+public abstract class TileEntityBasePacket<T extends BlockEntity> extends BlockPosBasePacket {
 
-    public RegistryKey<World> dimension;
+    public ResourceKey<Level> dimension;
 
     public TileEntityBasePacket(){
     }
@@ -21,9 +21,9 @@ public abstract class TileEntityBasePacket<T extends TileEntity> extends BlockPo
     /**
      * Grabs the tile entity in {@code dimension} at {@code pos}.
      * @param dimension dimension of the tile entity
-     * @param pos position of the tile entity
+     * @param pos       position of the tile entity
      */
-    public TileEntityBasePacket(RegistryKey<World> dimension, BlockPos pos){
+    public TileEntityBasePacket(ResourceKey<Level> dimension, BlockPos pos){
         super(pos);
         this.dimension = dimension;
     }
@@ -31,9 +31,9 @@ public abstract class TileEntityBasePacket<T extends TileEntity> extends BlockPo
     /**
      * Grabs the tile entity in {@code world} at {@code pos}.
      * @param world world the tile entity is in
-     * @param pos position of the tile entity
+     * @param pos   position of the tile entity
      */
-    public TileEntityBasePacket(World world, BlockPos pos){
+    public TileEntityBasePacket(Level world, BlockPos pos){
         this(world == null ? null : world.dimension(), pos);
     }
 
@@ -42,11 +42,11 @@ public abstract class TileEntityBasePacket<T extends TileEntity> extends BlockPo
      * @param pos position of the tile entity
      */
     public TileEntityBasePacket(BlockPos pos){
-        this((RegistryKey<World>)null, pos);
+        this((ResourceKey<Level>)null, pos);
     }
 
     @Override
-    public void write(PacketBuffer buffer){
+    public void write(FriendlyByteBuf buffer){
         super.write(buffer);
         buffer.writeBoolean(this.dimension != null);
         if(this.dimension != null)
@@ -54,10 +54,10 @@ public abstract class TileEntityBasePacket<T extends TileEntity> extends BlockPo
     }
 
     @Override
-    public void read(PacketBuffer buffer){
+    public void read(FriendlyByteBuf buffer){
         super.read(buffer);
         if(buffer.readBoolean())
-            this.dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, buffer.readResourceLocation());
+            this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, buffer.readResourceLocation());
     }
 
     @Override
@@ -71,7 +71,7 @@ public abstract class TileEntityBasePacket<T extends TileEntity> extends BlockPo
 
     @SuppressWarnings("unchecked")
     private T getTileEntity(PacketContext context){
-        World world = this.dimension == null ? context.getWorld() :
+        Level world = this.dimension == null ? context.getWorld() :
             context.getHandlingSide() == CoreSide.CLIENT ?
                 context.getWorld().dimension() == this.dimension ? context.getWorld() : null :
                 context.getWorld().getServer().getLevel(this.dimension);
@@ -79,7 +79,7 @@ public abstract class TileEntityBasePacket<T extends TileEntity> extends BlockPo
         if(world == null)
             return null;
 
-        TileEntity tile = world.getBlockEntity(this.pos);
+        BlockEntity tile = world.getBlockEntity(this.pos);
 
         if(tile == null)
             return null;

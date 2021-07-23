@@ -1,19 +1,16 @@
 package com.supermartijn642.core.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.gui.widget.IHoverTextWidget;
 import com.supermartijn642.core.gui.widget.ITickableWidget;
 import com.supermartijn642.core.gui.widget.TextFieldWidget;
 import com.supermartijn642.core.gui.widget.Widget;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.util.InputMappings;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.Slot;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +18,7 @@ import java.util.List;
 /**
  * Created 1/20/2021 by SuperMartijn642
  */
-public abstract class BaseContainerScreen<T extends BaseContainer> extends ContainerScreen<T> {
+public abstract class BaseContainerScreen<T extends BaseContainer> extends AbstractContainerScreen<T> {
 
     private static final ResourceLocation SLOT_TEXTURE = new ResourceLocation("supermartijn642corelib", "textures/gui/slot.png");
 
@@ -33,10 +30,10 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
 
     /**
      * @param screenContainer container the screen will be attached to
-     * @param title title to be read by the narrator and to be displayed in the gui
+     * @param title           title to be read by the narrator and to be displayed in the gui
      */
-    public BaseContainerScreen(T screenContainer, ITextComponent title){
-        super(screenContainer, screenContainer.player.inventory, title);
+    public BaseContainerScreen(T screenContainer, Component title){
+        super(screenContainer, screenContainer.player.getInventory(), title);
         this.container = screenContainer;
     }
 
@@ -133,100 +130,100 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
     }
 
     @Override
-    public void tick(){
+    protected void containerTick(){ // TODO this replaces BaseContainerScreen#tick, find a solution for compatibility with other versions
         for(Widget widget : this.widgets)
             if(widget instanceof ITickableWidget)
                 ((ITickableWidget)widget).tick();
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-        this.renderBackground(matrixStack);
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks){
+        this.renderBackground(poseStack);
 
-        matrixStack.translate(this.left(), this.top(), 0);
-        this.renderBackground(matrixStack, mouseX - this.left(), mouseY - this.top());
+        poseStack.translate(this.left(), this.top(), 0);
+        this.renderBackground(poseStack, mouseX - this.left(), mouseY - this.top());
 
         if(this.drawSlots){
             for(Slot slot : this.container.slots){
-                Minecraft.getInstance().getTextureManager().bind(SLOT_TEXTURE);
-                ScreenUtils.drawTexture(matrixStack, slot.x - 1, slot.y - 1, 18, 18);
+                ScreenUtils.bindTexture(SLOT_TEXTURE);
+                ScreenUtils.drawTexture(poseStack, slot.x - 1, slot.y - 1, 18, 18);
             }
         }
-        matrixStack.translate(-this.left(), -this.top(), 0);
+        poseStack.translate(-this.left(), -this.top(), 0);
 
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
+        super.render(poseStack, mouseX, mouseY, partialTicks);
         // apparently some OpenGl settings are messed up after this
 
-        RenderSystem.enableAlphaTest();
-        GlStateManager._disableLighting();
+//        RenderSystem.enableAlphaTest(); // TODO
+//        GlStateManager._disableLighting();
 
-        matrixStack.translate(this.left(), this.top(), 0);
+        poseStack.translate(this.left(), this.top(), 0);
         for(Widget widget : this.widgets){
             widget.blitOffset = this.getBlitOffset();
             widget.wasHovered = widget.hovered;
             widget.hovered = mouseX - this.left() > widget.x && mouseX - this.left() < widget.x + widget.width &&
                 mouseY - this.top() > widget.y && mouseY - this.top() < widget.y + widget.height;
-            widget.render(matrixStack, mouseX - this.left(), mouseY - this.top(), partialTicks);
+            widget.render(poseStack, mouseX - this.left(), mouseY - this.top(), partialTicks);
             widget.narrate();
         }
 
-        this.renderForeground(matrixStack, mouseX - this.left(), mouseY - this.top());
+        this.renderForeground(poseStack, mouseX - this.left(), mouseY - this.top());
 
         for(Widget widget : this.widgets){
             if(widget instanceof IHoverTextWidget && widget.isHovered()){
-                ITextComponent text = ((IHoverTextWidget)widget).getHoverText();
+                Component text = ((IHoverTextWidget)widget).getHoverText();
                 if(text != null)
-                    this.renderTooltip(matrixStack, text, mouseX - this.left(), mouseY - this.top());
+                    this.renderTooltip(poseStack, text, mouseX - this.left(), mouseY - this.top());
             }
         }
-        matrixStack.translate(-this.left(), -this.top(), 0);
-        super.renderTooltip(matrixStack, mouseX, mouseY);
-        this.renderTooltips(matrixStack, mouseX, mouseY);
+        poseStack.translate(-this.left(), -this.top(), 0);
+        super.renderTooltip(poseStack, mouseX, mouseY);
+        this.renderTooltips(poseStack, mouseX, mouseY);
     }
 
     @Override
-    protected void renderBg(MatrixStack matrixStack, float partialTicks, int x, int y){
+    protected void renderBg(PoseStack poseStack, float partialTicks, int x, int y){
     }
 
     @Override
-    protected void renderLabels(MatrixStack matrixStack, int x, int y){
+    protected void renderLabels(PoseStack poseStack, int x, int y){
     }
 
     /**
      * Renders the screen's background. This will be called first in the render chain.
      */
-    protected void renderBackground(MatrixStack matrixStack, int mouseX, int mouseY){
-        this.drawScreenBackground(matrixStack);
+    protected void renderBackground(PoseStack poseStack, int mouseX, int mouseY){
+        this.drawScreenBackground(poseStack);
     }
 
     /**
      * Renders the screen's foreground.
      * Widgets are drawn after this.
      */
-    protected void renderForeground(MatrixStack matrixStack, int mouseX, int mouseY){
-        ScreenUtils.drawString(matrixStack, this.font, this.title, 8, 7, 4210752);
+    protected void renderForeground(PoseStack poseStack, int mouseX, int mouseY){
+        ScreenUtils.drawString(poseStack, this.font, this.title, 8, 7, 4210752);
     }
 
     /**
      * Renders tooltips for the given {@code mouseX} and {@code mouseY}.
      * This will be called last in the render chain.
      */
-    protected void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY){
+    protected void renderTooltips(PoseStack poseStack, int mouseX, int mouseY){
     }
 
     /**
      * Draws the default screen background.
-     * Same as {@link ScreenUtils#drawScreenBackground(MatrixStack, float, float, float, float)}.
+     * Same as {@link ScreenUtils#drawScreenBackground(PoseStack, float, float, float, float)}.
      */
-    protected void drawScreenBackground(MatrixStack matrixStack, float x, float y, float width, float height){
-        ScreenUtils.drawScreenBackground(matrixStack, x, y, width, height);
+    protected void drawScreenBackground(PoseStack poseStack, float x, float y, float width, float height){
+        ScreenUtils.drawScreenBackground(poseStack, x, y, width, height);
     }
 
     /**
      * Draws the default screen background with width {@link #sizeX()} and height {@link #sizeY()}.
      */
-    protected void drawScreenBackground(MatrixStack matrixStack){
-        ScreenUtils.drawScreenBackground(matrixStack, 0, 0, this.sizeX(), this.sizeY());
+    protected void drawScreenBackground(PoseStack poseStack){
+        ScreenUtils.drawScreenBackground(poseStack, 0, 0, this.sizeX(), this.sizeY());
     }
 
     @Override
@@ -305,7 +302,7 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         if(this.keyPressed(keyCode))
             return true;
 
-        InputMappings.Input key = InputMappings.getKey(keyCode, scanCode);
+        InputConstants.Key key = InputConstants.getKey(keyCode, scanCode);
         if(ClientUtils.getMinecraft().options.keyInventory.isActiveAndMatches(key)){
             this.onClose();
             return true;

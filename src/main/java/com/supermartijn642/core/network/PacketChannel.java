@@ -1,19 +1,19 @@
 package com.supermartijn642.core.network;
 
 import io.netty.util.collection.IntObjectHashMap;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.fmllegacy.network.NetworkRegistry;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
+import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 
 import java.util.HashMap;
 import java.util.function.Supplier;
@@ -98,11 +98,11 @@ public class PacketChannel {
      * @param player player to send the packet to
      * @param packet packet to be send
      */
-    public void sendToPlayer(PlayerEntity player, BasePacket packet){
-        if(!(player instanceof ServerPlayerEntity))
+    public void sendToPlayer(Player player, BasePacket packet){
+        if(!(player instanceof ServerPlayer))
             throw new IllegalStateException("This must only be called server-side!");
         this.checkRegistration(packet);
-        this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)player), new InternalPacket().setPacket(packet));
+        this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer)player), new InternalPacket().setPacket(packet));
     }
 
     /**
@@ -119,7 +119,7 @@ public class PacketChannel {
      * @param dimension dimension to send the packet to
      * @param packet    packet to be send
      */
-    public void sendToDimension(RegistryKey<World> dimension, BasePacket packet){
+    public void sendToDimension(ResourceKey<Level> dimension, BasePacket packet){
         this.checkRegistration(packet);
         this.channel.send(PacketDistributor.DIMENSION.with(() -> dimension), new InternalPacket().setPacket(packet));
     }
@@ -129,7 +129,7 @@ public class PacketChannel {
      * @param world  world to send the packet to
      * @param packet packet to be send
      */
-    public void sendToDimension(World world, BasePacket packet){
+    public void sendToDimension(Level world, BasePacket packet){
         if(world.isClientSide)
             throw new IllegalStateException("This must only be called server-side!");
         this.sendToDimension(world.dimension(), packet);
@@ -151,7 +151,7 @@ public class PacketChannel {
      * Sends the given {@code packet} to all players tracking the given position in the given {@code world}. Must only be used server-side.
      * @param packet packet to be send
      */
-    public void sendToAllNear(RegistryKey<World> world, double x, double y, double z, double radius, BasePacket packet){
+    public void sendToAllNear(ResourceKey<Level> world, double x, double y, double z, double radius, BasePacket packet){
         this.checkRegistration(packet);
         this.channel.send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(x, y, z, radius, world)), new InternalPacket().setPacket(packet));
     }
@@ -160,7 +160,7 @@ public class PacketChannel {
      * Sends the given {@code packet} to all players tracking the given position in the given {@code world}. Must only be used server-side.
      * @param packet packet to be send
      */
-    public void sendToAllNear(RegistryKey<World> world, BlockPos pos, double radius, BasePacket packet){
+    public void sendToAllNear(ResourceKey<Level> world, BlockPos pos, double radius, BasePacket packet){
         this.sendToAllNear(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, radius, packet);
     }
 
@@ -168,7 +168,7 @@ public class PacketChannel {
      * Sends the given {@code packet} to all players tracking the given position in the given {@code world}. Must only be used server-side.
      * @param packet packet to be send
      */
-    public void sendToAllNear(World world, double x, double y, double z, double radius, BasePacket packet){
+    public void sendToAllNear(Level world, double x, double y, double z, double radius, BasePacket packet){
         if(world.isClientSide)
             throw new IllegalStateException("This must only be called server-side!");
         this.sendToAllNear(world.dimension(), x, y, z, radius, packet);
@@ -178,7 +178,7 @@ public class PacketChannel {
      * Sends the given {@code packet} to all players tracking the given position in the given {@code world}. Must only be used server-side.
      * @param packet packet to be send
      */
-    public void sendToAllNear(World world, BlockPos pos, double radius, BasePacket packet){
+    public void sendToAllNear(Level world, BlockPos pos, double radius, BasePacket packet){
         if(world.isClientSide)
             throw new IllegalStateException("This must only be called server-side!");
         this.sendToAllNear(world.dimension(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, radius, packet);
@@ -189,14 +189,14 @@ public class PacketChannel {
             throw new IllegalArgumentException("Tried to send unregistered packet '" + packet.getClass() + "'!");
     }
 
-    private void write(BasePacket packet, PacketBuffer buffer){
+    private void write(BasePacket packet, FriendlyByteBuf buffer){
         // assume the packet has already been checked for registration here
         int index = this.packet_to_index.get(packet.getClass());
         buffer.writeInt(index);
         packet.write(buffer);
     }
 
-    private BasePacket read(PacketBuffer buffer){
+    private BasePacket read(FriendlyByteBuf buffer){
         int index = buffer.readInt();
         if(!this.index_to_packet.containsKey(index))
             throw new IllegalStateException("Received an unregistered packet with index '" + index + "'!");
@@ -219,11 +219,11 @@ public class PacketChannel {
 
     private static class InternalPacket {
 
-        public static InternalPacket read(PacketChannel channel, PacketBuffer buffer){
+        public static InternalPacket read(PacketChannel channel, FriendlyByteBuf buffer){
             return new InternalPacket().setPacket(channel.read(buffer));
         }
 
-        public static void write(PacketChannel channel, InternalPacket packet, PacketBuffer buffer){
+        public static void write(PacketChannel channel, InternalPacket packet, FriendlyByteBuf buffer){
             channel.write(packet.packet, buffer);
         }
 
