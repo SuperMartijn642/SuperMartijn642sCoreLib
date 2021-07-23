@@ -1,5 +1,6 @@
 package com.supermartijn642.core;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
@@ -181,7 +182,7 @@ public class TextComponents {
         /**
          * Sets the formatting for the text component.
          */
-        public TextComponentBuilder formatting(TextColor color){
+        public TextComponentBuilder formatting(ChatFormatting color){
             this.updateStyle(style -> style.withColor(color));
             return this;
         }
@@ -189,7 +190,7 @@ public class TextComponents {
         /**
          * Sets the formatting for the text component.
          */
-        public TextComponentBuilder color(TextColor color){
+        public TextComponentBuilder color(ChatFormatting color){
             return this.formatting(color);
         }
 
