@@ -6,6 +6,7 @@ import com.mojang.math.Matrix4f;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.block.BlockShape;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
@@ -191,7 +192,7 @@ public class RenderUtils {
         }
 
         public static CompositeState getLinesNoDepthCompositeState(){
-            return RenderType.CompositeState.builder().setLineState(DEFAULT_LINE).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setLayeringState(VIEW_OFFSET_Z_LAYERING).setWriteMaskState(COLOR_WRITE).setDepthTestState(NO_DEPTH_TEST).createCompositeState(false);
+            return RenderType.CompositeState.builder().setShaderState(RenderStateShard.POSITION_COLOR_SHADER).setLineState(DEFAULT_LINE).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setLayeringState(VIEW_OFFSET_Z_LAYERING).setWriteMaskState(COLOR_WRITE).setDepthTestState(NO_DEPTH_TEST).createCompositeState(false);
         }
     }
 }

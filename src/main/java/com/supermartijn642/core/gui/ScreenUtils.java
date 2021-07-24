@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -147,8 +148,8 @@ public class ScreenUtils {
     }
 
     public static void drawScreenBackground(PoseStack poseStack, float x, float y, float width, float height){
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         bindTexture(SCREEN_BACKGROUND);
-
         // corners
         drawTexture(poseStack, x, y, 4, 4, 0, 0, 4 / 9f, 4 / 9f);
         drawTexture(poseStack, x + width - 4, y, 4, 4, 5 / 9f, 0, 4 / 9f, 4 / 9f);
@@ -164,6 +165,7 @@ public class ScreenUtils {
     }
 
     public static void drawButtonBackground(PoseStack poseStack, float x, float y, float width, float height, float yOffset){
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         bindTexture(BUTTON_BACKGROUND);
         // corners
         drawTexture(poseStack, x, y, 2, 2, 0, yOffset, 2 / 5f, 2 / 15f);
@@ -184,7 +186,8 @@ public class ScreenUtils {
     }
 
     public static void drawTexture(PoseStack poseStack, float x, float y, float width, float height, float tx, float ty, float twidth, float theight){
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F); // TODO check if this works
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
         Matrix4f matrix = poseStack.last().pose();
         Tesselator tessellator = Tesselator.getInstance();
@@ -206,6 +209,7 @@ public class ScreenUtils {
     }
 
     public static void fillRect(PoseStack poseStack, float x, float y, float width, float height, float red, float green, float blue, float alpha){
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.enableBlend();
         RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
