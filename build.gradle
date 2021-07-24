@@ -80,3 +80,10 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     minecraft 'net.minecraftforge:forge:1.17.1-37.0.0'
 }
+
+task unobfuscated_jar(type: Jar){
+    archiveClassifier.set("unobfuscated")
+    from sourceSets.main.output
+}
+
+tasks.build.dependsOn unobfuscated_jar
