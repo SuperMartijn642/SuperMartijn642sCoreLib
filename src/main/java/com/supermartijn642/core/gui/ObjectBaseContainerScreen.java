@@ -57,7 +57,7 @@ public abstract class ObjectBaseContainerScreen<T, X extends ObjectBaseContainer
             return;
 
         this.containerTick(object);
-        super.tick();
+        super.containerTick();
     }
 
     protected void containerTick(@Nonnull T object){
