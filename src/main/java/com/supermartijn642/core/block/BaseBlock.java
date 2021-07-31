@@ -56,7 +56,7 @@ public class BaseBlock extends Block {
         if(!(tile instanceof BaseTileEntity))
             return items;
 
-        CompoundNBT tileTag = ((BaseTileEntity)tile).writeData();
+        CompoundNBT tileTag = ((BaseTileEntity)tile).writeItemStackData();
         if(tileTag == null || tileTag.isEmpty())
             return items;
 
