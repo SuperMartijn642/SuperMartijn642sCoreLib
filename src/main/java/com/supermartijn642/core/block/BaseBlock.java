@@ -81,7 +81,7 @@ public class BaseBlock extends Block {
         if(((BaseTileEntity)tile).destroyedByCreativePlayer)
             return NonNullList.create();
 
-        NBTTagCompound tileTag = ((BaseTileEntity)tile).writeData();
+        NBTTagCompound tileTag = ((BaseTileEntity)tile).writeItemStackData();
         if(tileTag == null || tileTag.hasNoTags())
             return drops;
 
@@ -108,7 +108,7 @@ public class BaseBlock extends Block {
         if(!(tile instanceof BaseTileEntity))
             return stack;
 
-        NBTTagCompound tileTag = ((BaseTileEntity)tile).writeData();
+        NBTTagCompound tileTag = ((BaseTileEntity)tile).writeItemStackData();
         if(tileTag == null || tileTag.hasNoTags())
             return stack;
 
