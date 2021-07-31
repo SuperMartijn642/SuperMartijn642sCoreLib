@@ -28,6 +28,8 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
     private final List<Widget> widgets = new LinkedList<>();
     private final List<ITickableWidget> tickableWidgets = new LinkedList<>();
 
+    /** Have this because it replaced my variable name with an srg name for some reason **/
+    protected final T field_147002_h;
     protected final T container;
     private boolean drawSlots = true;
 
@@ -38,6 +40,7 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
     public BaseContainerScreen(T screenContainer, ITextComponent title){
         super(screenContainer, screenContainer.player.inventory, title);
         this.container = screenContainer;
+        this.field_147002_h = screenContainer;
     }
 
     /**
@@ -147,7 +150,7 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         this.renderBackground(matrixStack, mouseX - this.left(), mouseY - this.top());
 
         if(this.drawSlots){
-            for(Slot slot : this.container.slots){
+            for(Slot slot : this.menu.slots){
                 Minecraft.getInstance().getTextureManager().bind(SLOT_TEXTURE);
                 ScreenUtils.drawTexture(matrixStack, slot.x - 1, slot.y - 1, 18, 18);
             }
