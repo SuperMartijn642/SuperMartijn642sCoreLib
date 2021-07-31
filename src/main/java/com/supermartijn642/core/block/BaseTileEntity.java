@@ -44,8 +44,18 @@ public abstract class BaseTileEntity extends TileEntity {
     }
 
     /**
-     * Reads data stored by {@link #writeData()} and {@link #writeClientData()}.
-     * @param tag data to be read from
+     * Writes tile entity data to be stored on item stacks.
+     * The stored data will be read in {@link #readData(CompoundNBT)}.
+     * @return a {@link CompoundNBT} with the stored item stack data
+     */
+    protected CompoundNBT writeItemStackData(){
+        return this.writeData();
+    }
+
+    /**
+     * Reads data stored by {@link #writeData()}, {@link #writeClientData()},
+     * and {@link #writeItemStackData()}.
+     * @param tag data to be read
      */
     protected abstract void readData(CompoundNBT tag);
 
