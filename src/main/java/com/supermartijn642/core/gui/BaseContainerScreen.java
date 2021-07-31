@@ -29,6 +29,7 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
     private final List<ITickableWidget> tickableWidgets = new LinkedList<>();
 
     /** Have this because it replaced my variable name with an srg name for some reason **/
+    @Deprecated
     protected final T field_147002_h;
     protected final T container;
     private boolean drawSlots = true;
