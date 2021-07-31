@@ -56,7 +56,7 @@ public class BaseBlock extends Block {
         if(!(tile instanceof BaseTileEntity))
             return items;
 
-        CompoundTag tileTag = ((BaseTileEntity)tile).writeData();
+        CompoundTag tileTag = ((BaseTileEntity)tile).writeItemStackData();
         if(tileTag == null || tileTag.isEmpty())
             return items;
 
@@ -83,7 +83,7 @@ public class BaseBlock extends Block {
         if(!(tile instanceof BaseTileEntity))
             return stack;
 
-        CompoundTag tileTag = ((BaseTileEntity)tile).writeData();
+        CompoundTag tileTag = ((BaseTileEntity)tile).writeItemStackData();
         if(tileTag == null || tileTag.isEmpty())
             return stack;
 
