@@ -1,7 +1,6 @@
 package com.supermartijn642.core;
 
 import java.text.NumberFormat;
-import java.util.Locale;
 
 /**
  * Created 7/30/2021 by SuperMartijn642
@@ -52,7 +51,7 @@ public class EnergyFormat {
         }
 
         public String convertEnergy(int energy){
-            return NumberFormat.getNumberInstance(Locale.getDefault()).format(energy);
+            return NumberFormat.getNumberInstance(ClientUtils.getMinecraft().getLanguageManager().getCurrentLanguage().getJavaLocale()).format(energy);
         }
     }
 }
