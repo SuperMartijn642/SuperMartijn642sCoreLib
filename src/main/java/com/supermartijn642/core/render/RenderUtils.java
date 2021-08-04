@@ -1,12 +1,11 @@
 package com.supermartijn642.core.render;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.block.BlockShape;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
@@ -20,7 +19,7 @@ public class RenderUtils {
 
     private static final RenderType LINES_NO_DEPTH = RenderType.create(
         "supermartijn642corelib:highlight",
-        DefaultVertexFormat.POSITION_COLOR,
+        DefaultVertexFormat.POSITION_COLOR_NORMAL,
         VertexFormat.Mode.LINES,
         128,
         true,
@@ -30,12 +29,14 @@ public class RenderUtils {
 
     private static final MultiBufferSource.BufferSource LINE_BUFFER = MultiBufferSource.immediate(new BufferBuilder(128));
 
+    private static boolean depthTest = true;
+
     public static void enableDepthTest(){
-        GlStateManager._enableDepthTest();
+        depthTest = true;
     }
 
     public static void disableDepthTest(){
-        GlStateManager._disableDepthTest();
+        depthTest = false;
     }
 
     /**
@@ -56,13 +57,19 @@ public class RenderUtils {
 
         VertexConsumer builder = LINE_BUFFER.getBuffer(LINES_NO_DEPTH);
         Matrix4f matrix4f = poseStack.last().pose();
+        Matrix3f matrix3f = poseStack.last().normal();
         shape.forEachEdge((x1, y1, z1, x2, y2, z2) -> {
-            builder.vertex(matrix4f, (float)x1, (float)y1, (float)z1).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix4f, (float)x2, (float)y2, (float)z2).color(red, green, blue, alpha).endVertex();
+            Vec3 normal = new Vec3(x2 - x1, y2 - y1, z2 - z1);
+            normal.normalize();
+            builder.vertex(matrix4f, (float)x1, (float)y1, (float)z1).color(red, green, blue, alpha).normal(matrix3f, (float)normal.x, (float)normal.y, (float)normal.z).endVertex();
+            builder.vertex(matrix4f, (float)x2, (float)y2, (float)z2).color(red, green, blue, alpha).normal(matrix3f, (float)normal.x, (float)normal.y, (float)normal.z).endVertex();
         });
         LINE_BUFFER.endBatch();
 
         poseStack.popPose();
+
+        // TODO this is stupid vv find a better solution
+        depthTest = true;
     }
 
     /**
@@ -192,7 +199,23 @@ public class RenderUtils {
         }
 
         public static CompositeState getLinesNoDepthCompositeState(){
-            return RenderType.CompositeState.builder().setShaderState(RenderStateShard.POSITION_COLOR_SHADER).setLineState(DEFAULT_LINE).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setLayeringState(VIEW_OFFSET_Z_LAYERING).setWriteMaskState(COLOR_WRITE).setDepthTestState(NO_DEPTH_TEST).createCompositeState(false);
+            return RenderType.CompositeState.builder().setShaderState(RENDERTYPE_LINES_SHADER).setLineState(DEFAULT_LINE).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setLayeringState(VIEW_OFFSET_Z_LAYERING).setWriteMaskState(COLOR_WRITE).setDepthTestState(getDepthState()).setCullState(NO_CULL).createCompositeState(false);
+        }
+
+        private static DepthTestStateShard getDepthState(){
+            return new DepthTestStateShard("dependent", 515) {
+                @Override
+                public void setupRenderState(){
+                    if(depthTest)
+                        super.setupRenderState();
+                }
+
+                @Override
+                public void clearRenderState(){
+                    if(depthTest)
+                        super.clearRenderState();
+                }
+            };
         }
     }
 }
