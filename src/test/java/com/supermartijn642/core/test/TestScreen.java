@@ -1,5 +1,6 @@
-package com.supermartijn642.core;
+package com.supermartijn642.core.test;
 
+import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.BaseScreen;
 import com.supermartijn642.core.gui.widget.TextFieldWidget;
 
