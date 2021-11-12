@@ -1,4 +1,4 @@
-package com.supermartijn642.core;
+package com.supermartijn642.core.test;
 
 import net.minecraftforge.fml.common.Mod;
 
