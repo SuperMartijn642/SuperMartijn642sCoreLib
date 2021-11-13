@@ -1,6 +1,9 @@
 package com.supermartijn642.core;
 
+import net.minecraft.client.resources.LanguageManager;
+
 import java.text.NumberFormat;
+import java.util.Locale;
 
 /**
  * Created 7/30/2021 by SuperMartijn642
@@ -51,7 +54,9 @@ public class EnergyFormat {
         }
 
         public String convertEnergy(int energy){
-            return NumberFormat.getNumberInstance(ClientUtils.getMinecraft().getLanguageManager().getCurrentLanguage().getJavaLocale()).format(energy);
+            LanguageManager manager = ClientUtils.getMinecraft().getLanguageManager();
+            Locale locale = manager == null || manager.getCurrentLanguage() == null ? Locale.getDefault() : manager.getCurrentLanguage().getJavaLocale();
+            return NumberFormat.getNumberInstance(locale).format(energy);
         }
     }
 }
