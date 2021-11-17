@@ -1,6 +1,7 @@
 package com.supermartijn642.core.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.block.BlockShape;
@@ -75,7 +76,7 @@ public class RenderUtils {
     /**
      * @return the current interpolated camera position
      */
-    public static IRenderTypeBuffer getMainBufferSource(){
+    public static IRenderTypeBuffer.Impl getMainBufferSource(){
         return ClientUtils.getMinecraft().getRenderTypeBuffers().getBufferSource();
     }
 
@@ -89,6 +90,7 @@ public class RenderUtils {
             builder.pos(matrix4f, (float)x1, (float)y1, (float)z1).color(red, green, blue, alpha).endVertex();
             builder.pos(matrix4f, (float)x2, (float)y2, (float)z2).color(red, green, blue, alpha).endVertex();
         });
+        getMainBufferSource().finish();
     }
 
     /**
@@ -134,6 +136,7 @@ public class RenderUtils {
             builder.pos(matrix, maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
             builder.pos(matrix, maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
         });
+        getMainBufferSource().finish();
     }
 
     /**
@@ -213,6 +216,15 @@ public class RenderUtils {
             super(p_i225992_1_, p_i225992_2_, p_i225992_3_, p_i225992_4_, p_i225992_5_, p_i225992_6_, p_i225992_7_, p_i225992_8_);
         }
 
+        private static final DepthTestState NO_DEPTH_TEST = new DepthTestState("always", 519){
+            @Override
+            public void setupRenderState(){
+                // Actually disable the depth test
+                RenderSystem.disableDepthTest();
+                super.setupRenderState();
+            }
+        };
+
         public static State getLinesState(){
             return State.getBuilder()
                 .alpha(DEFAULT_ALPHA)
@@ -232,7 +244,7 @@ public class RenderUtils {
                 .transparency(TRANSLUCENT_TRANSPARENCY)
                 .layer(field_239235_M_)
                 .cull(CULL_DISABLED)
-                .depthTest(DEPTH_ALWAYS)
+                .depthTest(NO_DEPTH_TEST)
                 .writeMask(COLOR_WRITE)
                 .build(false);
         }
@@ -254,7 +266,7 @@ public class RenderUtils {
                 .transparency(TRANSLUCENT_TRANSPARENCY)
                 .texture(NO_TEXTURE)
                 .cull(CULL_DISABLED)
-                .depthTest(DEPTH_ALWAYS)
+                .depthTest(NO_DEPTH_TEST)
                 .writeMask(COLOR_WRITE)
                 .build(false);
         }
