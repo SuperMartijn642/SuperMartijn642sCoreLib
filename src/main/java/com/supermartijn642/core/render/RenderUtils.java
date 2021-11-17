@@ -1,11 +1,11 @@
 package com.supermartijn642.core.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.block.BlockShape;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -76,7 +76,7 @@ public class RenderUtils {
     /**
      * @return the current interpolated camera position
      */
-    public static IRenderTypeBuffer getMainBufferSource(){
+    public static IRenderTypeBuffer.Impl getMainBufferSource(){
         return ClientUtils.getMinecraft().renderBuffers().bufferSource();
     }
 
@@ -90,14 +90,13 @@ public class RenderUtils {
             builder.vertex(matrix4f, (float)x1, (float)y1, (float)z1).color(red, green, blue, alpha).endVertex();
             builder.vertex(matrix4f, (float)x2, (float)y2, (float)z2).color(red, green, blue, alpha).endVertex();
         });
+        getMainBufferSource().endBatch();
     }
 
     /**
      * Draws the sides of the given shape
      */
     public static void renderShapeSides(MatrixStack matrixStack, BlockShape shape, float red, float green, float blue, float alpha){
-        matrixStack.pushPose();
-
         IVertexBuilder builder = getMainBufferSource().getBuffer(depthTest ? QUADS : QUADS_NO_DEPTH);
         Matrix4f matrix = matrixStack.last().pose();
         shape.forEachBox(box -> {
@@ -137,8 +136,7 @@ public class RenderUtils {
             builder.vertex(matrix, maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
             builder.vertex(matrix, maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
         });
-
-        matrixStack.popPose();
+        getMainBufferSource().endBatch();
     }
 
     /**
@@ -218,9 +216,18 @@ public class RenderUtils {
             super(p_i225992_1_, p_i225992_2_, p_i225992_3_, p_i225992_4_, p_i225992_5_, p_i225992_6_, p_i225992_7_, p_i225992_8_);
         }
 
+        private static final DepthTestState NO_DEPTH_TEST = new DepthTestState("always", 519){
+            @Override
+            public void setupRenderState(){
+                // Actually disable the depth test
+                RenderSystem.disableDepthTest();
+                super.setupRenderState();
+            }
+        };
+
         public static State getLinesState(){
             return State.builder()
-                .setAlphaState(RenderState.DEFAULT_ALPHA)
+                .setAlphaState(DEFAULT_ALPHA)
                 .setLineState(DEFAULT_LINE)
                 .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                 .setLayeringState(VIEW_OFFSET_Z_LAYERING)
@@ -232,7 +239,7 @@ public class RenderUtils {
 
         public static State getLinesStateNoDepth(){
             return State.builder()
-                .setAlphaState(RenderState.DEFAULT_ALPHA)
+                .setAlphaState(DEFAULT_ALPHA)
                 .setLineState(DEFAULT_LINE)
                 .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                 .setLayeringState(VIEW_OFFSET_Z_LAYERING)
@@ -244,7 +251,7 @@ public class RenderUtils {
 
         public static State getQuadState(){
             return State.builder()
-                .setAlphaState(RenderState.DEFAULT_ALPHA)
+                .setAlphaState(DEFAULT_ALPHA)
                 .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                 .setTextureState(NO_TEXTURE)
                 .setCullState(NO_CULL)
@@ -255,7 +262,7 @@ public class RenderUtils {
 
         public static State getQuadStateNoDepth(){
             return State.builder()
-                .setAlphaState(RenderState.DEFAULT_ALPHA)
+                .setAlphaState(DEFAULT_ALPHA)
                 .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                 .setTextureState(NO_TEXTURE)
                 .setCullState(NO_CULL)
