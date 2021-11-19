@@ -90,7 +90,7 @@ public class RenderUtils {
             builder.pos(matrix4f, (float)x1, (float)y1, (float)z1).color(red, green, blue, alpha).endVertex();
             builder.pos(matrix4f, (float)x2, (float)y2, (float)z2).color(red, green, blue, alpha).endVertex();
         });
-        getMainBufferSource().finish();
+        getMainBufferSource().finish(depthTest ? LINES : LINES_NO_DEPTH);
     }
 
     /**
@@ -136,7 +136,7 @@ public class RenderUtils {
             builder.pos(matrix, maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
             builder.pos(matrix, maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
         });
-        getMainBufferSource().finish();
+        getMainBufferSource().finish(depthTest ? QUADS : QUADS_NO_DEPTH);
     }
 
     /**
