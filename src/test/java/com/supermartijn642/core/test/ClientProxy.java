@@ -2,11 +2,11 @@ package com.supermartijn642.core.test;
 
 import com.supermartijn642.core.block.BlockShape;
 import com.supermartijn642.core.render.RenderUtils;
+import com.supermartijn642.core.render.RenderWorldEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.DrawHighlightEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -35,14 +35,14 @@ public class ClientProxy {
     }
 
     @SubscribeEvent
-    public static void onRenderWorld(RenderWorldLastEvent e){
+    public static void onRenderWorld(RenderWorldEvent e){
         Vector3d camera = RenderUtils.getCameraPosition();
-        e.getMatrixStack().pushPose();
-        e.getMatrixStack().translate(-camera.x, -camera.y, -camera.z);
+        e.getPoseStack().pushPose();
+        e.getPoseStack().translate(-camera.x, -camera.y, -camera.z);
         RenderUtils.disableDepthTest();
-        RenderUtils.renderShape(e.getMatrixStack(), BlockShape.fullCube(), 1, 1, 0, 0.5f);
-        RenderUtils.renderShapeSides(e.getMatrixStack(), BlockShape.fullCube(), 0, 1, 1, 0.5f);
+        RenderUtils.renderShape(e.getPoseStack(), BlockShape.fullCube(), 1, 1, 0, 0.5f);
+        RenderUtils.renderShapeSides(e.getPoseStack(), BlockShape.fullCube(), 0, 1, 1, 0.5f);
         RenderUtils.resetState();
-        e.getMatrixStack().popPose();
+        e.getPoseStack().popPose();
     }
 }

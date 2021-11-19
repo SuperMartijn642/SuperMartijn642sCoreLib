@@ -90,7 +90,7 @@ public class RenderUtils {
             builder.vertex(matrix4f, (float)x1, (float)y1, (float)z1).color(red, green, blue, alpha).endVertex();
             builder.vertex(matrix4f, (float)x2, (float)y2, (float)z2).color(red, green, blue, alpha).endVertex();
         });
-        getMainBufferSource().endBatch();
+        getMainBufferSource().endBatch(depthTest ? LINES : LINES_NO_DEPTH);
     }
 
     /**
@@ -136,7 +136,7 @@ public class RenderUtils {
             builder.vertex(matrix, maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
             builder.vertex(matrix, maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
         });
-        getMainBufferSource().endBatch();
+        getMainBufferSource().endBatch(depthTest ? QUADS : QUADS_NO_DEPTH);
     }
 
     /**
