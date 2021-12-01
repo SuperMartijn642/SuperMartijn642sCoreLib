@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "mixins.supermartijn642corelib.refmap.json",
+  "package": "com.supermartijn642.core.mixin",
+  "mixins": [],
+  "client": [
+    "LevelRendererMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}

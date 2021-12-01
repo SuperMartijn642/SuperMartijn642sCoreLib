@@ -3,17 +3,17 @@ buildscript {
         maven { url = 'https://files.minecraftforge.net/maven' }
         jcenter()
         mavenCentral()
-        maven { url = 'https://plugins.gradle.org/m2'}
+        maven { url = "https://repo.spongepowered.org/maven" }
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
-        classpath group: 'com.wynprice.cursemaven', name: 'CurseMaven', version: '2.1.4'
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
-apply plugin: 'com.wynprice.cursemaven'
+apply plugin: 'org.spongepowered.mixin'
 
 version = '1.0.14-mc1.14'
 group = 'com.supermartijn642.core' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -32,6 +32,8 @@ minecraft {
             // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
+            arg '--mixin=mixins.supermartijn642corelib.json'
+
             mods {
                 supermartijn642corelib {
                     source sourceSets.main
@@ -47,6 +49,8 @@ minecraft {
 
             // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            arg '--mixin=mixins.supermartijn642corelib.json'
 
             mods {
                 supermartijn642corelib {
@@ -66,6 +70,8 @@ minecraft {
 
             args '--mod', 'supermartijn642corelib', '--all', '--output', file('src/generated/resources/')
 
+            arg '--mixin=mixins.supermartijn642corelib.json'
+
             mods {
                 supermartijn642corelib {
                     source sourceSets.main
@@ -75,9 +81,28 @@ minecraft {
     }
 }
 
+repositories {
+    maven {
+        url = "https://repo.spongepowered.org/maven"
+    }
+}
+
 dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.14.4-28.2.23'
+
+//    compile 'org.spongepowered:mixin:0.8.4:processor'
+    compile('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
+        exclude module: 'guava'
+        exclude module: 'commons-io'
+        exclude module: 'gson'
+    }
+}
+
+
+mixin {
+    add sourceSets.main, "mixins.supermartijn642corelib.refmap.json"
+    disableAnnotationProcessorCheck()
 }
