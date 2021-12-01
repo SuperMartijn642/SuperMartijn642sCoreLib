@@ -94,7 +94,7 @@ public abstract class BaseTileEntity extends BlockEntity {
     public ClientboundBlockEntityDataPacket getUpdatePacket(){
         if(this.dataChanged){
             this.dataChanged = false;
-            return new ClientboundBlockEntityDataPacket(this.worldPosition, 0, this.writeClientData());
+            return ClientboundBlockEntityDataPacket.create(this, entity -> ((BaseTileEntity)entity).writeClientData());
         }
         return null;
     }

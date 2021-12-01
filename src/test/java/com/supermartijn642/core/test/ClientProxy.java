@@ -25,13 +25,13 @@ public class ClientProxy {
     @SubscribeEvent
     public static void onDrawSelection(DrawSelectionEvent e){
         Vec3 camera = RenderUtils.getCameraPosition();
-        e.getMatrix().pushPose();
-        e.getMatrix().translate(-camera.x, -camera.y, -camera.z);
+        e.getPoseStack().pushPose();
+        e.getPoseStack().translate(-camera.x, -camera.y, -camera.z);
         RenderUtils.disableDepthTest();
-        RenderUtils.renderShape(e.getMatrix(), BlockShape.fullCube(), 1, 1, 0, 0.5f);
-        RenderUtils.renderShapeSides(e.getMatrix(), BlockShape.fullCube(), 0, 1, 1, 0.5f);
+        RenderUtils.renderShape(e.getPoseStack(), BlockShape.fullCube(), 1, 1, 0, 0.5f);
+        RenderUtils.renderShapeSides(e.getPoseStack(), BlockShape.fullCube(), 0, 1, 1, 0.5f);
         RenderUtils.resetState();
-        e.getMatrix().popPose();
+        e.getPoseStack().popPose();
     }
 
     @SubscribeEvent

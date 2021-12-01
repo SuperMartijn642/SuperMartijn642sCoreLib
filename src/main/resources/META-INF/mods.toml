@@ -48,6 +48,6 @@ description='''SuperMartijn642's Core Lib adds lots of basic implementations for
 [[dependencies.supermartijn642corelib]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.17,1.18)"
+    versionRange="[1.18,1.19)"
     ordering="NONE"
     side="BOTH"
