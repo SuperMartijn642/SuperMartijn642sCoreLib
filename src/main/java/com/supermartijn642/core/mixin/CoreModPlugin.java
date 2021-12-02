@@ -10,7 +10,7 @@ import java.util.Map;
  * Created 1/16/2021 by SuperMartijn642
  */
 @IFMLLoadingPlugin.MCVersion("1.12.2")
-@IFMLLoadingPlugin.Name("Scarecrow's Territory Plugin")
+@IFMLLoadingPlugin.Name("SuperMartijn642's Core Lib Plugin")
 public class CoreModPlugin implements IFMLLoadingPlugin {
 
     public CoreModPlugin(){
