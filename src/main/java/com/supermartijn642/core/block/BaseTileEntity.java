@@ -61,12 +61,11 @@ public abstract class BaseTileEntity extends BlockEntity {
     protected abstract void readData(CompoundTag tag);
 
     @Override
-    public CompoundTag save(CompoundTag compound){
+    protected void saveAdditional(CompoundTag compound){
         super.save(compound);
         CompoundTag data = this.writeData();
         if(data != null && !data.isEmpty())
             compound.put("data", data);
-        return compound;
     }
 
     @Override
