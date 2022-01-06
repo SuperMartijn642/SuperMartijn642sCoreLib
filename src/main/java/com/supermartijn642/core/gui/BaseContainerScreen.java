@@ -199,7 +199,7 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends GuiCo
         }
         GlStateManager.translate(-this.left(), -this.top(), 0);
         super.renderHoveredToolTip(mouseX, mouseY);
-        this.renderTooltips(mouseX, mouseY);
+        this.renderTooltips(mouseX - this.left(), mouseY - this.top());
     }
 
     @Override
