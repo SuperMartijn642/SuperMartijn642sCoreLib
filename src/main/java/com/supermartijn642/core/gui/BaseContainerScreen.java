@@ -178,7 +178,7 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Abstr
         }
         poseStack.translate(-this.left(), -this.top(), 0);
         super.renderTooltip(poseStack, mouseX, mouseY);
-        this.renderTooltips(poseStack, mouseX, mouseY);
+        this.renderTooltips(poseStack, mouseX - this.left(), mouseY - this.top());
     }
 
     @Override
