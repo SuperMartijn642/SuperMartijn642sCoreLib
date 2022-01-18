@@ -27,13 +27,12 @@ public class LevelRendererMixin {
     @Inject(method = "renderWorldPass(IFJ)V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/client/renderer/GlStateManager;enableBlend()V"),
+            target = "Lnet/minecraft/client/renderer/RenderGlobal;renderBlockLayer(Lnet/minecraft/util/BlockRenderLayer;DILnet/minecraft/entity/Entity;)I"),
         slice = @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/debug/DebugRenderer;shouldRender()Z"),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GlStateManager;disableBlend()V")
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderGlobal;renderWorldBorder(Lnet/minecraft/entity/Entity;F)V"),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/EntityRenderer;renderHand(FI)V")
         ))
     public void renderLevel(CallbackInfo ci){
         MinecraftForge.EVENT_BUS.post(new RenderWorldEvent(this.partialTicks));
     }
-
 }
