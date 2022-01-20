@@ -62,7 +62,7 @@ public abstract class BaseTileEntity extends BlockEntity {
 
     @Override
     protected void saveAdditional(CompoundTag compound){
-        super.save(compound);
+        super.saveAdditional(compound);
         CompoundTag data = this.writeData();
         if(data != null && !data.isEmpty())
             compound.put("data", data);
@@ -76,7 +76,8 @@ public abstract class BaseTileEntity extends BlockEntity {
 
     @Override
     public CompoundTag getUpdateTag(){
-        CompoundTag tag = super.save(new CompoundTag());
+        CompoundTag tag = new CompoundTag();
+        super.saveAdditional(tag);
         CompoundTag data = this.writeClientData();
         if(data != null && !data.isEmpty())
             tag.put("data", data);
