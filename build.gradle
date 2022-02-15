@@ -5,13 +5,13 @@ buildscript {
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-//        classpath 'org.spongepowered:mixingradle:0.7.+'
+        classpath 'org.spongepowered:mixingradle:0.7.+'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
-//apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'org.spongepowered.mixin'
 
 version = '1.0.16a-mc1.18'
 group = 'com.supermartijn642.core' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -33,7 +33,7 @@ minecraft {
             // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'REGISTRIES'
 
-//            arg '-mixin.config=mixins.supermartijn642corelib.json'
+            arg '-mixin.config=mixins.supermartijn642corelib.json'
 
             mods {
                 supermartijn642corelib {
@@ -51,7 +51,7 @@ minecraft {
             // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'REGISTRIES'
 
-//            arg '-mixin.config=mixins.supermartijn642corelib.json'
+            arg '-mixin.config=mixins.supermartijn642corelib.json'
 
             mods {
                 supermartijn642corelib {
@@ -71,7 +71,7 @@ minecraft {
 
             args '--mod', 'supermartijn642corelib', '--all', '--output', file('src/generated/resources/')
 
-//            arg '-mixin.config=mixins.supermartijn642corelib.json'
+            arg '-mixin.config=mixins.supermartijn642corelib.json'
 
             mods {
                 supermartijn642corelib {
@@ -88,7 +88,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     minecraft 'net.minecraftforge:forge:1.18.1-39.0.45'
 
-//    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
+    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
 }
 
 task unobfuscated_jar(type: Jar){
@@ -98,11 +98,11 @@ task unobfuscated_jar(type: Jar){
 
 tasks.build.dependsOn unobfuscated_jar
 
-//mixin {
-//    // MixinGradle Settings
-//    add sourceSets.main, 'mixins.supermartijn642corelib.refmap.json'
-//    config 'mixins.supermartijn642corelib.json'
-//
-//    debug.verbose = true
-//    debug.export = true
-//}
+mixin {
+    // MixinGradle Settings
+    add sourceSets.main, 'mixins.supermartijn642corelib.refmap.json'
+    config 'mixins.supermartijn642corelib.json'
+
+    debug.verbose = true
+    debug.export = true
+}
