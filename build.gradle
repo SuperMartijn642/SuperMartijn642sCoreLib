@@ -103,6 +103,7 @@ dependencies {
 
 
 mixin {
-    add sourceSets.main, "mixins.supermartijn642corelib.refmap.json"
-    disableAnnotationProcessorCheck()
+    // MixinGradle Settings
+    add sourceSets.main, 'mixins.supermartijn642corelib.refmap.json'
+    config 'mixins.supermartijn642corelib.json'
 }
