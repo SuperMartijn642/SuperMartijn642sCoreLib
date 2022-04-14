@@ -1,38 +1,22 @@
 package com.supermartijn642.core.mixin;
 
 import com.supermartijn642.core.render.RenderWorldEvent;
-import net.minecraft.client.renderer.EntityRenderer;
+import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Created 17/11/2021 by SuperMartijn642
  */
-@Mixin(EntityRenderer.class)
+@Mixin(ForgeHooksClient.class) // Yes this is stupid, but I need to keep it for legacy reasons and proper mixin placement causes problems with every other mod in 1.12
 public class LevelRendererMixin {
 
-    private float partialTicks;
-
-    @ModifyVariable(method = "updateCameraAndRender", at = @At("HEAD"))
-    public float modifyPartialTicks(float partialTicks){
-        this.partialTicks = partialTicks;
-        return partialTicks;
-    }
-
-    @Inject(method = "renderWorldPass(IFJ)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/client/renderer/RenderGlobal;renderBlockLayer(Lnet/minecraft/util/BlockRenderLayer;DILnet/minecraft/entity/Entity;)I"),
-        slice = @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderGlobal;renderWorldBorder(Lnet/minecraft/entity/Entity;F)V"),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/EntityRenderer;renderHand(FI)V")
-        ))
-    public void renderLevel(CallbackInfo ci){
-        MinecraftForge.EVENT_BUS.post(new RenderWorldEvent(this.partialTicks));
+    @Inject(method = "dispatchRenderLast(Lnet/minecraft/client/renderer/RenderGlobal;F)V", at = @At("HEAD"), remap = false)
+    private static void dispatchRenderLast(RenderGlobal context, float partialTicks, CallbackInfo ci){
+        MinecraftForge.EVENT_BUS.post(new RenderWorldEvent(partialTicks));
     }
 }

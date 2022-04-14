@@ -92,7 +92,6 @@ dependencies {
 
 mixin {
     add sourceSets.main, "mixins.supermartijn642corelib.refmap.json"
-    disableAnnotationProcessorCheck()
 }
 
 jar {
