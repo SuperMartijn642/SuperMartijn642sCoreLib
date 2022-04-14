@@ -3,7 +3,6 @@ package com.supermartijn642.core.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -13,7 +12,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.phys.HitResult;
 
 import java.util.List;
 
@@ -24,9 +22,8 @@ public class BaseBlock extends Block {
 
     private final boolean saveTileData;
 
-    public BaseBlock(String registryName, boolean saveTileData, Properties properties){
+    public BaseBlock(boolean saveTileData, Properties properties){
         super(properties);
-        this.setRegistryName(registryName);
         this.saveTileData = saveTileData;
     }
 
@@ -73,8 +70,8 @@ public class BaseBlock extends Block {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player){
-        ItemStack stack = super.getCloneItemStack(state, target, world, pos, player);
+    public ItemStack getCloneItemStack(BlockGetter world, BlockPos pos, BlockState state){
+        ItemStack stack = super.getCloneItemStack(world, pos, state);
 
         if(!this.saveTileData)
             return stack;

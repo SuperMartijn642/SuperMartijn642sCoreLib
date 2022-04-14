@@ -2,38 +2,41 @@ package com.supermartijn642.core.network;
 
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.CoreSide;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.network.NetworkEvent;
 
 /**
  * Created 5/30/2021 by SuperMartijn642
  */
 public class PacketContext {
 
-    private final NetworkEvent.Context context;
+    private final CoreSide handlingSide;
+    private final Player sendingPlayer;
+    private final MinecraftServer server;
 
-    public PacketContext(NetworkEvent.Context context){
-        this.context = context;
+    public PacketContext(CoreSide handlingSide, Player sendingPlayer, MinecraftServer server){
+        this.handlingSide = handlingSide;
+        this.sendingPlayer = sendingPlayer;
+        this.server = server;
     }
 
     /**
      * @return the side the packet is received on
      */
     public CoreSide getHandlingSide(){
-        return this.context.getDirection().getReceptionSide() == LogicalSide.CLIENT ? CoreSide.CLIENT : CoreSide.SERVER;
+        return this.handlingSide;
     }
 
     /**
      * @return the side the packet is originating from
      */
     public CoreSide getOriginatingSide(){
-        return this.context.getDirection().getOriginationSide() == LogicalSide.CLIENT ? CoreSide.CLIENT : CoreSide.SERVER;
+        return this.handlingSide == CoreSide.CLIENT ? CoreSide.SERVER : CoreSide.CLIENT;
     }
 
     public Player getSendingPlayer(){
-        return this.context.getSender();
+        return this.sendingPlayer;
     }
 
     /**
@@ -45,14 +48,8 @@ public class PacketContext {
 
     public void queueTask(Runnable task){
         if(this.getHandlingSide() == CoreSide.SERVER)
-            this.context.enqueueWork(task);
+            this.server.submit(task);
         else
             ClientUtils.queueTask(task);
     }
-
-    @Deprecated
-    public NetworkEvent.Context getUnderlyingContext(){
-        return this.context;
-    }
-
 }

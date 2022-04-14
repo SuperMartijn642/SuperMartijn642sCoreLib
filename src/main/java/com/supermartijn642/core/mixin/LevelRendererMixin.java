@@ -3,7 +3,6 @@ package com.supermartijn642.core.mixin;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.render.RenderWorldEvent;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -41,7 +40,7 @@ public class LevelRendererMixin {
             to = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPoseMatrix(Lcom/mojang/math/Matrix4f;)V")
         ))
     public void renderLevel(CallbackInfo ci){
-        MinecraftForge.EVENT_BUS.post(new RenderWorldEvent(this.poseStack, this.partialTicks));
+        RenderWorldEvent.EVENT.invoker().accept(new RenderWorldEvent(this.poseStack, this.partialTicks));
     }
 
 }

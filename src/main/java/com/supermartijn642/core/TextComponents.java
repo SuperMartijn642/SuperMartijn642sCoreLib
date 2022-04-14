@@ -1,5 +1,7 @@
 package com.supermartijn642.core;
 
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceKey;
@@ -10,7 +12,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
 
 import java.util.function.Function;
 
@@ -121,18 +122,26 @@ public class TextComponents {
     }
 
     /**
-     * Creates a new {@link TextComponentBuilder} around the given fluid's name.
+     * Creates a new {@link TextComponentBuilder} around the given item
+     * variant's display name. The display name includes any custom name.
      */
-    public static TextComponentBuilder fluid(Fluid fluid){
-        return translation(fluid.getAttributes().getTranslationKey());
+    public static TextComponentBuilder itemVariant(ItemVariant variant){
+        return itemStack(variant.toStack());
     }
 
     /**
-     * Creates a new {@link TextComponentBuilder} around the given fluid stack's
-     * display name.
+     * Creates a new {@link TextComponentBuilder} around the given fluid's name.
      */
-    public static TextComponentBuilder fluidStack(FluidStack stack){
-        return fromTextComponent(stack.getDisplayName().plainCopy());
+    public static TextComponentBuilder fluid(Fluid fluid){
+        return blockState(fluid.defaultFluidState().createLegacyBlock());
+    }
+
+    /**
+     * Creates a new {@link TextComponentBuilder} around the given fluid
+     * variant's display name.
+     */
+    public static TextComponentBuilder fluidVariant(FluidVariant variant){
+        return fluid(variant.getFluid());
     }
 
     /**
@@ -214,7 +223,7 @@ public class TextComponents {
          * Makes the text component <u>underlined<u/>.
          */
         public TextComponentBuilder underline(){
-            this.updateStyle(style -> style.setUnderlined(true));
+            this.updateStyle(style -> style.withUnderlined(true));
             return this;
         }
 
@@ -222,7 +231,7 @@ public class TextComponents {
          * Makes the text component <s>strikethrough<s/>.
          */
         public TextComponentBuilder strikethrough(){
-            this.updateStyle(style -> style.setStrikethrough(true));
+            this.updateStyle(style -> style.withStrikethrough(true));
             return this;
         }
 
@@ -230,7 +239,7 @@ public class TextComponents {
          * Makes the text component obfuscated, i.e. random characters.
          */
         public TextComponentBuilder obfuscate(){
-            this.updateStyle(style -> style.setObfuscated(true));
+            this.updateStyle(style -> style.withObfuscated(true));
             return this;
         }
 
@@ -238,7 +247,7 @@ public class TextComponents {
          * Makes the text component's style.
          */
         public TextComponentBuilder reset(){
-            this.updateStyle(style -> Style.EMPTY.withBold(false).withItalic(false).setUnderlined(false).setStrikethrough(false).setObfuscated(false));
+            this.updateStyle(style -> Style.EMPTY.withBold(false).withItalic(false).withUnderlined(false).withStrikethrough(false).withObfuscated(false));
             return this;
         }
 

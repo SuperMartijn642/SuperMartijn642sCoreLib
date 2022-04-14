@@ -51,7 +51,8 @@ public class ClientUtils {
      * Closes the player's opened screen
      */
     public static void closeScreen(){
-        getPlayer().closeContainer();
+        Player player = getPlayer();
+        player.containerMenu = player.inventoryMenu;
     }
 
     /**

@@ -2,7 +2,6 @@ package com.supermartijn642.core.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -85,22 +84,15 @@ public abstract class BaseTileEntity extends BlockEntity {
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag){
-        super.load(tag);
-        this.readData(tag.getCompound("data"));
-    }
-
-    @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket(){
         if(this.dataChanged){
             this.dataChanged = false;
-            return ClientboundBlockEntityDataPacket.create(this, entity -> ((BaseTileEntity)entity).writeClientData());
+            return ClientboundBlockEntityDataPacket.create(this, entity -> {
+                CompoundTag tag = new CompoundTag();
+                tag.put("data", ((BaseTileEntity)entity).writeClientData());
+                return tag;
+            });
         }
         return null;
-    }
-
-    @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt){
-        this.readData(pkt.getTag());
     }
 }

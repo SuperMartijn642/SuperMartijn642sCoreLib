@@ -1,29 +1,39 @@
+# gradle
+.gradle/
+build/
+out/
+classes/
+
 # eclipse
-bin
+bin/
 *.launch
 .settings
 .metadata
-.classpath
-.project
 
 # idea
-out
+.idea/
 *.ipr
 *.iws
 *.iml
-.idea
 
-# gradle
-build
-.gradle
+# vscode
+.settings/
+.vscode/
+.classpath
+.project
+
+# macos
+*.DS_Store
 
 # other
-eclipse
-run
+eclipse/
+run/
+libs/
+logs/
 
-# Files from Forge MDK
+# forge
 forge*changelog.txt
 
-images
+# other
+images/
 desktop.ini
-logs

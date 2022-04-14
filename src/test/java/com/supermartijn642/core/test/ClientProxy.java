@@ -3,38 +3,46 @@ package com.supermartijn642.core.test;
 import com.supermartijn642.core.block.BlockShape;
 import com.supermartijn642.core.render.RenderUtils;
 import com.supermartijn642.core.render.RenderWorldEvent;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.DrawSelectionEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
 /**
  * Created 1/22/2021 by SuperMartijn642
  */
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ClientProxy {
 
-    @SubscribeEvent
-    public static void onBlockBreak(PlayerEvent.ItemPickupEvent e){
-        Minecraft.getInstance().setScreen(new TestScreen());
+    static{
+        WorldRenderEvents.BLOCK_OUTLINE.register(ClientProxy::onDrawSelection);
+        AttackBlockCallback.EVENT.register(ClientProxy::onBlockBreak);
     }
 
-    @SubscribeEvent
-    public static void onDrawSelection(DrawSelectionEvent e){
+    public static InteractionResult onBlockBreak(Player player, Level world, InteractionHand hand, BlockPos pos, Direction direction){
+        if(world.isClientSide)
+            Minecraft.getInstance().setScreen(new TestScreen());
+        return InteractionResult.PASS;
+    }
+
+    public static boolean onDrawSelection(WorldRenderContext renderContext, WorldRenderContext.BlockOutlineContext outlineContext){
         Vec3 camera = RenderUtils.getCameraPosition();
-        e.getPoseStack().pushPose();
-        e.getPoseStack().translate(-camera.x, -camera.y, -camera.z);
+        renderContext.matrixStack().pushPose();
+        renderContext.matrixStack().translate(-camera.x, -camera.y, -camera.z);
         RenderUtils.disableDepthTest();
-        RenderUtils.renderShape(e.getPoseStack(), BlockShape.fullCube(), 1, 1, 0, 0.5f);
-        RenderUtils.renderShapeSides(e.getPoseStack(), BlockShape.fullCube(), 0, 1, 1, 0.5f);
+        RenderUtils.renderShape(renderContext.matrixStack(), BlockShape.fullCube(), 1, 1, 0, 0.5f);
+        RenderUtils.renderShapeSides(renderContext.matrixStack(), BlockShape.fullCube(), 0, 1, 1, 0.5f);
         RenderUtils.resetState();
-        e.getPoseStack().popPose();
+        renderContext.matrixStack().popPose();
+        return true;
     }
 
-    @SubscribeEvent
     public static void onRenderWorld(RenderWorldEvent e){
         Vec3 camera = RenderUtils.getCameraPosition();
         e.getPoseStack().pushPose();

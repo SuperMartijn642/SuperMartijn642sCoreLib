@@ -1,6 +1,5 @@
 package com.supermartijn642.core.gui;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.gui.widget.IHoverTextWidget;
@@ -217,8 +216,7 @@ public abstract class BaseScreen extends Screen {
         if(this.keyPressed(keyCode))
             return true;
 
-        InputConstants.Key key = InputConstants.getKey(keyCode, scanCode);
-        if(ClientUtils.getMinecraft().options.keyInventory.isActiveAndMatches(key)){
+        if(ClientUtils.getMinecraft().options.keyInventory.matches(keyCode, scanCode)){
             this.onClose();
             return true;
         }

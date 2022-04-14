@@ -1,14 +1,29 @@
 package com.supermartijn642.core;
 
-import net.minecraftforge.fml.common.Mod;
+import com.google.common.reflect.Reflection;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 
 /**
- * Created 7/7/2020 by SuperMartijn642
+ * Created 18/03/2022 by SuperMartijn642
  */
-@Mod("supermartijn642corelib")
-public class CoreLib {
+public class CoreLib implements ModInitializer {
 
-    public CoreLib(){
+    @Override
+    public void onInitialize(){
+        Reflection.initialize(CommonUtils.class);
+
+        // Load test mod stuff
+        if(FabricLoader.getInstance().isDevelopmentEnvironment()){
+            ModInitializer testMod = null;
+            try{
+                Class<?> testModClass = Class.forName("com.supermartijn642.core.test.TestMod");
+                testMod = (ModInitializer)testModClass.getConstructors()[0].newInstance();
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            if(testMod != null)
+                testMod.onInitialize();
+        }
     }
-
 }

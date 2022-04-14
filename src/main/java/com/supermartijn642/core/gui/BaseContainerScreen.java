@@ -1,6 +1,5 @@
 package com.supermartijn642.core.gui;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.gui.widget.IHoverTextWidget;
@@ -61,22 +60,18 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Abstr
         return (this.height - this.sizeY()) / 2;
     }
 
-    @Override
     public int getXSize(){
         return this.sizeX();
     }
 
-    @Override
     public int getYSize(){
         return this.sizeY();
     }
 
-    @Override
     public int getGuiLeft(){
         return this.left();
     }
 
-    @Override
     public int getGuiTop(){
         return this.top();
     }
@@ -152,10 +147,6 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Abstr
         poseStack.translate(-this.left(), -this.top(), 0);
 
         super.render(poseStack, mouseX, mouseY, partialTicks);
-        // apparently some OpenGl settings are messed up after this
-
-//        RenderSystem.enableAlphaTest(); // TODO
-//        GlStateManager._disableLighting();
 
         poseStack.translate(this.left(), this.top(), 0);
         for(Widget widget : this.widgets){
@@ -302,8 +293,7 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Abstr
         if(this.keyPressed(keyCode))
             return true;
 
-        InputConstants.Key key = InputConstants.getKey(keyCode, scanCode);
-        if(ClientUtils.getMinecraft().options.keyInventory.isActiveAndMatches(key)){
+        if(ClientUtils.getMinecraft().options.keyInventory.matches(keyCode, scanCode)){
             this.onClose();
             return true;
         }

@@ -1,21 +1,21 @@
 package com.supermartijn642.core;
 
-import net.minecraftforge.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 /**
  * Created 5/30/2021 by SuperMartijn642
  */
 public enum CoreSide {
-    CLIENT(LogicalSide.CLIENT), SERVER(LogicalSide.SERVER);
+    CLIENT(EnvType.CLIENT), SERVER(EnvType.SERVER);
 
-    private final LogicalSide side;
+    private final EnvType environment;
 
-    CoreSide(LogicalSide side){
-        this.side = side;
+    CoreSide(EnvType environment){
+        this.environment = environment;
     }
 
     @Deprecated
-    public LogicalSide getUnderlyingSide(){
-        return side;
+    public EnvType getUnderlyingSide(){
+        return this.environment;
     }
 }
