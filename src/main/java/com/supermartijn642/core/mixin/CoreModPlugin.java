@@ -15,7 +15,7 @@ public class CoreModPlugin implements IFMLLoadingPlugin {
 
     public CoreModPlugin(){
         MixinBootstrap.init();
-        Mixins.addConfiguration("mixins.supermartijn642corelib.json");
+        Mixins.addConfiguration("supermartijn642corelib.mixins.json");
     }
 
     @Override
