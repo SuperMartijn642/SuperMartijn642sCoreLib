@@ -56,7 +56,7 @@ public abstract class TileEntityBasePacket<T extends TileEntity> extends BlockPo
     public void read(PacketBuffer buffer){
         super.read(buffer);
         if(buffer.readBoolean())
-            this.dimension = DimensionType.byName(buffer.readResourceLocation());
+            this.dimension = DimensionType.getByName(buffer.readResourceLocation());
     }
 
     @Override
@@ -73,12 +73,12 @@ public abstract class TileEntityBasePacket<T extends TileEntity> extends BlockPo
         World world = this.dimension == null ? context.getWorld() :
             context.getHandlingSide() == CoreSide.CLIENT ?
                 context.getWorld().getDimension().getType() == this.dimension ? context.getWorld() : null :
-                context.getWorld().getServer().getWorld(this.dimension);
+                context.getWorld().getServer().getLevel(this.dimension);
 
         if(world == null)
             return null;
 
-        TileEntity tile = world.getTileEntity(this.pos);
+        TileEntity tile = world.getBlockEntity(this.pos);
 
         if(tile == null)
             return null;

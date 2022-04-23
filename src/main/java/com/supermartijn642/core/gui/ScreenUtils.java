@@ -22,11 +22,11 @@ public class ScreenUtils {
     public static final int DEFAULT_TEXT_COLOR = 4210752, ACTIVE_TEXT_COLOR = 14737632, INACTIVE_TEXT_COLOR = 7368816;
 
     public static void drawString(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
-        fontRenderer.drawString(text.getFormattedText(), x, y, color);
+        fontRenderer.draw(text.getColoredString(), x, y, color);
     }
 
     public static void drawString(FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        fontRenderer.drawString(text.getFormattedText(), x, y, DEFAULT_TEXT_COLOR);
+        fontRenderer.draw(text.getColoredString(), x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawString(ITextComponent text, float x, float y, int color){
@@ -38,11 +38,11 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
-        fontRenderer.drawStringWithShadow(text.getFormattedText(), x, y, color);
+        fontRenderer.drawShadow(text.getColoredString(), x, y, color);
     }
 
     public static void drawStringWithShadow(FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        fontRenderer.drawStringWithShadow(text.getFormattedText(), x, y, DEFAULT_TEXT_COLOR);
+        fontRenderer.drawShadow(text.getColoredString(), x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawStringWithShadow(ITextComponent text, float x, float y, int color){
@@ -54,13 +54,13 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
-        String s = text.getFormattedText();
-        fontRenderer.drawString(s, x - fontRenderer.getStringWidth(s) / 2f, y, color);
+        String s = text.getColoredString();
+        fontRenderer.draw(s, x - fontRenderer.width(s) / 2f, y, color);
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        String s = text.getFormattedText();
-        fontRenderer.drawString(s, x - fontRenderer.getStringWidth(s) / 2f, y, DEFAULT_TEXT_COLOR);
+        String s = text.getColoredString();
+        fontRenderer.draw(s, x - fontRenderer.width(s) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredString(ITextComponent text, float x, float y, int color){
@@ -72,13 +72,13 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredStringWithShadow(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
-        String s = text.getFormattedText();
-        fontRenderer.drawStringWithShadow(s, x - fontRenderer.getStringWidth(s) / 2f, y, color);
+        String s = text.getColoredString();
+        fontRenderer.drawShadow(s, x - fontRenderer.width(s) / 2f, y, color);
     }
 
     public static void drawCenteredStringWithShadow(FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        String s = text.getFormattedText();
-        fontRenderer.drawStringWithShadow(s, x - fontRenderer.getStringWidth(s) / 2f, y, DEFAULT_TEXT_COLOR);
+        String s = text.getColoredString();
+        fontRenderer.drawShadow(s, x - fontRenderer.width(s) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredStringWithShadow(ITextComponent text, float x, float y, int color){
@@ -90,11 +90,11 @@ public class ScreenUtils {
     }
 
     public static void drawString(FontRenderer fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawString(text, x, y, color);
+        fontRenderer.draw(text, x, y, color);
     }
 
     public static void drawString(FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.drawString(text, x, y, DEFAULT_TEXT_COLOR);
+        fontRenderer.draw(text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawString(String text, float x, float y, int color){
@@ -106,11 +106,11 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(FontRenderer fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawStringWithShadow(text, x - fontRenderer.getStringWidth(text) / 2f, y, color);
+        fontRenderer.drawShadow(text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawStringWithShadow(FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.drawStringWithShadow(text, x - fontRenderer.getStringWidth(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        fontRenderer.drawShadow(text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawStringWithShadow(String text, float x, float y, int color){
@@ -122,11 +122,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawString(text, x - fontRenderer.getStringWidth(text) / 2f, y, color);
+        fontRenderer.draw(text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.drawString(text, x - fontRenderer.getStringWidth(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        fontRenderer.draw(text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredString(String text, float x, float y, int color){
@@ -138,11 +138,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredStringWithShadow(FontRenderer fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawStringWithShadow(text, x - fontRenderer.getStringWidth(text) / 2f, y, color);
+        fontRenderer.drawShadow(text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredStringWithShadow(FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.drawStringWithShadow(text, x - fontRenderer.getStringWidth(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        fontRenderer.drawShadow(text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredStringWithShadow(String text, float x, float y, int color){
@@ -154,7 +154,7 @@ public class ScreenUtils {
     }
 
     public static void drawScreenBackground(float x, float y, float width, float height){
-        Minecraft.getInstance().textureManager.bindTexture(SCREEN_BACKGROUND);
+        Minecraft.getInstance().textureManager.bind(SCREEN_BACKGROUND);
         // corners
         drawTexture(x, y, 4, 4, 0, 0, 4 / 9f, 4 / 9f);
         drawTexture(x + width - 4, y, 4, 4, 5 / 9f, 0, 4 / 9f, 4 / 9f);
@@ -170,7 +170,7 @@ public class ScreenUtils {
     }
 
     public static void drawButtonBackground(float x, float y, float width, float height, float yOffset){
-        Minecraft.getInstance().getTextureManager().bindTexture(BUTTON_BACKGROUND);
+        Minecraft.getInstance().getTextureManager().bind(BUTTON_BACKGROUND);
         // corners
         drawTexture(x, y, 2, 2, 0, yOffset, 2 / 5f, 2 / 15f);
         drawTexture(x + width - 2, y, 2, 2, 3 / 5f, yOffset, 2 / 5f, 2 / 15f);
@@ -190,16 +190,16 @@ public class ScreenUtils {
     }
 
     public static void drawTexture(float x, float y, float width, float height, float tx, float ty, float twidth, float theight){
-        GlStateManager.color4f(1, 1, 1, 1);
+        GlStateManager._color4f(1, 1, 1, 1);
 
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
+        BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.pos(x, y + height, 0).tex(tx, ty + theight).endVertex();
-        buffer.pos(x + width, y + height, 0).tex(tx + twidth, ty + theight).endVertex();
-        buffer.pos(x + width, y, 0).tex(tx + twidth, ty).endVertex();
-        buffer.pos(x, y, 0).tex(tx, ty).endVertex();
-        tessellator.draw();
+        buffer.vertex(x, y + height, 0).uv(tx, ty + theight).endVertex();
+        buffer.vertex(x + width, y + height, 0).uv(tx + twidth, ty + theight).endVertex();
+        buffer.vertex(x + width, y, 0).uv(tx + twidth, ty).endVertex();
+        buffer.vertex(x, y, 0).uv(tx, ty).endVertex();
+        tessellator.end();
     }
 
     public static void fillRect(float x, float y, float width, float height, int color){
@@ -216,19 +216,19 @@ public class ScreenUtils {
         RenderSystem.defaultBlendFunc();
 
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
+        BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-        buffer.pos(x, y + height, 0).color(red, green, blue, alpha).endVertex();
-        buffer.pos(x + width, y + height, 0).color(red, green, blue, alpha).endVertex();
-        buffer.pos(x + width, y, 0).color(red, green, blue, alpha).endVertex();
-        buffer.pos(x, y, 0).color(red, green, blue, alpha).endVertex();
-        tessellator.draw();
+        buffer.vertex(x, y + height, 0).color(red, green, blue, alpha).endVertex();
+        buffer.vertex(x + width, y + height, 0).color(red, green, blue, alpha).endVertex();
+        buffer.vertex(x + width, y, 0).color(red, green, blue, alpha).endVertex();
+        buffer.vertex(x, y, 0).color(red, green, blue, alpha).endVertex();
+        tessellator.end();
 
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
 
     public static void bindTexture(ResourceLocation location){
-        Minecraft.getInstance().textureManager.bindTexture(location);
+        Minecraft.getInstance().textureManager.bind(location);
     }
 }

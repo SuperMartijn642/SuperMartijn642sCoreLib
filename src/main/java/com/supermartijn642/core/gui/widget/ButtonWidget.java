@@ -36,6 +36,6 @@ public class ButtonWidget extends AbstractButtonWidget {
     @Override
     public void render(int mouseX, int mouseY, float partialTicks){
         ScreenUtils.drawButtonBackground(this.x, this.y, this.width, this.height, (this.active ? this.isHovered() ? 5 : 0 : 10) / 15f);
-        ScreenUtils.drawCenteredStringWithShadow(Minecraft.getInstance().fontRenderer, this.text, this.x + this.width / 2f, this.y + this.height / 2f - 5, this.active ? 0xFFFFFFFF : Integer.MAX_VALUE);
+        ScreenUtils.drawCenteredStringWithShadow(Minecraft.getInstance().font, this.text, this.x + this.width / 2f, this.y + this.height / 2f - 5, this.active ? 0xFFFFFFFF : Integer.MAX_VALUE);
     }
 }

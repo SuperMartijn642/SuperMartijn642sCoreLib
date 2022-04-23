@@ -20,28 +20,28 @@ import org.lwjgl.opengl.GL11;
  */
 public class RenderUtils {
 
-    private static final RenderType LINES = RenderType.makeType(
+    private static final RenderType LINES = RenderType.create(
         "supermartijn642corelib:lines",
         DefaultVertexFormats.POSITION_COLOR,
         GL11.GL_LINES,
         128,
         RenderTypeExtension.getLinesState()
     );
-    private static final RenderType LINES_NO_DEPTH = RenderType.makeType(
+    private static final RenderType LINES_NO_DEPTH = RenderType.create(
         "supermartijn642corelib:lines_no_depth",
         DefaultVertexFormats.POSITION_COLOR,
         GL11.GL_LINES,
         128,
         RenderTypeExtension.getLinesStateNoDepth()
     );
-    private static final RenderType QUADS = RenderType.makeType(
+    private static final RenderType QUADS = RenderType.create(
         "supermartijn642corelib:quads",
         DefaultVertexFormats.POSITION_COLOR,
         GL11.GL_QUADS,
         128,
         RenderTypeExtension.getQuadState()
     );
-    private static final RenderType QUADS_NO_DEPTH = RenderType.makeType(
+    private static final RenderType QUADS_NO_DEPTH = RenderType.create(
         "supermartijn642corelib:quads_no_depth",
         DefaultVertexFormats.POSITION_COLOR,
         GL11.GL_QUADS,
@@ -70,14 +70,14 @@ public class RenderUtils {
      * @return the current interpolated camera position
      */
     public static Vec3d getCameraPosition(){
-        return ClientUtils.getMinecraft().getRenderManager().info.getProjectedView();
+        return ClientUtils.getMinecraft().getEntityRenderDispatcher().camera.getPosition();
     }
 
     /**
      * @return the current interpolated camera position
      */
     public static IRenderTypeBuffer.Impl getMainBufferSource(){
-        return ClientUtils.getMinecraft().getRenderTypeBuffers().getBufferSource();
+        return ClientUtils.getMinecraft().renderBuffers().bufferSource();
     }
 
     /**
@@ -85,12 +85,12 @@ public class RenderUtils {
      */
     public static void renderShape(MatrixStack matrixStack, BlockShape shape, float red, float green, float blue, float alpha){
         IVertexBuilder builder = getMainBufferSource().getBuffer(depthTest ? LINES : LINES_NO_DEPTH);
-        Matrix4f matrix4f = matrixStack.getLast().getMatrix();
+        Matrix4f matrix4f = matrixStack.last().pose();
         shape.forEachEdge((x1, y1, z1, x2, y2, z2) -> {
-            builder.pos(matrix4f, (float)x1, (float)y1, (float)z1).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix4f, (float)x2, (float)y2, (float)z2).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix4f, (float)x1, (float)y1, (float)z1).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix4f, (float)x2, (float)y2, (float)z2).color(red, green, blue, alpha).endVertex();
         });
-        getMainBufferSource().finish();
+        getMainBufferSource().endBatch();
     }
 
     /**
@@ -98,45 +98,45 @@ public class RenderUtils {
      */
     public static void renderShapeSides(MatrixStack matrixStack, BlockShape shape, float red, float green, float blue, float alpha){
         IVertexBuilder builder = getMainBufferSource().getBuffer(depthTest ? QUADS : QUADS_NO_DEPTH);
-        Matrix4f matrix = matrixStack.getLast().getMatrix();
+        Matrix4f matrix = matrixStack.last().pose();
         shape.forEachBox(box -> {
             float minX = (float)box.minX, maxX = (float)box.maxX;
             float minY = (float)box.minY, maxY = (float)box.maxY;
             float minZ = (float)box.minZ, maxZ = (float)box.maxZ;
 
-            builder.pos(matrix, minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
 
-            builder.pos(matrix, minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-
-
-            builder.pos(matrix, minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-
-            builder.pos(matrix, minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
 
 
-            builder.pos(matrix, minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
 
-            builder.pos(matrix, maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(matrix, maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+
+
+            builder.vertex(matrix, minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+
+            builder.vertex(matrix, maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(matrix, maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
         });
-        getMainBufferSource().finish();
+        getMainBufferSource().endBatch();
     }
 
     /**
@@ -226,49 +226,49 @@ public class RenderUtils {
         };
 
         public static State getLinesState(){
-            return State.getBuilder()
-                .alpha(DEFAULT_ALPHA)
-                .line(DEFAULT_LINE)
-                .transparency(TRANSLUCENT_TRANSPARENCY)
-                .layer(PROJECTION_LAYERING)
-                .cull(CULL_DISABLED)
-                .depthTest(DEPTH_LEQUAL)
-                .writeMask(COLOR_WRITE)
-                .build(false);
+            return State.builder()
+                .setAlphaState(DEFAULT_ALPHA)
+                .setLineState(DEFAULT_LINE)
+                .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                .setLayeringState(PROJECTION_LAYERING)
+                .setCullState(NO_CULL)
+                .setDepthTestState(LEQUAL_DEPTH_TEST)
+                .setWriteMaskState(COLOR_WRITE)
+                .createCompositeState(false);
         }
 
         public static State getLinesStateNoDepth(){
-            return State.getBuilder()
-                .alpha(DEFAULT_ALPHA)
-                .line(DEFAULT_LINE)
-                .transparency(TRANSLUCENT_TRANSPARENCY)
-                .layer(PROJECTION_LAYERING)
-                .cull(CULL_DISABLED)
-                .depthTest(NO_DEPTH_TEST)
-                .writeMask(COLOR_WRITE)
-                .build(false);
+            return State.builder()
+                .setAlphaState(DEFAULT_ALPHA)
+                .setLineState(DEFAULT_LINE)
+                .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                .setLayeringState(PROJECTION_LAYERING)
+                .setCullState(NO_CULL)
+                .setDepthTestState(NO_DEPTH_TEST)
+                .setWriteMaskState(COLOR_WRITE)
+                .createCompositeState(false);
         }
 
         public static State getQuadState(){
-            return State.getBuilder()
-                .alpha(DEFAULT_ALPHA)
-                .transparency(TRANSLUCENT_TRANSPARENCY)
-                .texture(NO_TEXTURE)
-                .cull(CULL_DISABLED)
-                .depthTest(DEPTH_LEQUAL)
-                .writeMask(COLOR_WRITE)
-                .build(false);
+            return State.builder()
+                .setAlphaState(DEFAULT_ALPHA)
+                .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                .setTextureState(NO_TEXTURE)
+                .setCullState(NO_CULL)
+                .setDepthTestState(LEQUAL_DEPTH_TEST)
+                .setWriteMaskState(COLOR_WRITE)
+                .createCompositeState(false);
         }
 
         public static State getQuadStateNoDepth(){
-            return State.getBuilder()
-                .alpha(DEFAULT_ALPHA)
-                .transparency(TRANSLUCENT_TRANSPARENCY)
-                .texture(NO_TEXTURE)
-                .cull(CULL_DISABLED)
-                .depthTest(NO_DEPTH_TEST)
-                .writeMask(COLOR_WRITE)
-                .build(false);
+            return State.builder()
+                .setAlphaState(DEFAULT_ALPHA)
+                .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                .setTextureState(NO_TEXTURE)
+                .setCullState(NO_CULL)
+                .setDepthTestState(NO_DEPTH_TEST)
+                .setWriteMaskState(COLOR_WRITE)
+                .createCompositeState(false);
         }
     }
 }

@@ -19,30 +19,30 @@ public class ClientProxy {
 
     @SubscribeEvent
     public static void onBlockBreak(PlayerEvent.ItemPickupEvent e){
-        Minecraft.getInstance().displayGuiScreen(new TestScreen());
+        Minecraft.getInstance().setScreen(new TestScreen());
     }
 
     @SubscribeEvent
     public static void onDrawSelection(DrawHighlightEvent e){
         Vec3d camera = RenderUtils.getCameraPosition();
-        e.getMatrix().push();
+        e.getMatrix().pushPose();
         e.getMatrix().translate(-camera.x, -camera.y, -camera.z);
         RenderUtils.disableDepthTest();
         RenderUtils.renderShape(e.getMatrix(), BlockShape.fullCube(), 1, 1, 0, 0.5f);
         RenderUtils.renderShapeSides(e.getMatrix(), BlockShape.fullCube(), 0, 1, 1, 0.5f);
         RenderUtils.resetState();
-        e.getMatrix().pop();
+        e.getMatrix().popPose();
     }
 
     @SubscribeEvent
     public static void onRenderWorld(RenderWorldEvent e){
         Vec3d camera = RenderUtils.getCameraPosition();
-        e.getPoseStack().push();
+        e.getPoseStack().pushPose();
         e.getPoseStack().translate(-camera.x, -camera.y, -camera.z);
         RenderUtils.disableDepthTest();
         RenderUtils.renderShape(e.getPoseStack(), BlockShape.fullCube(), 1, 1, 0, 0.5f);
         RenderUtils.renderShapeSides(e.getPoseStack(), BlockShape.fullCube(), 0, 1, 1, 0.5f);
         RenderUtils.resetState();
-        e.getPoseStack().pop();
+        e.getPoseStack().popPose();
     }
 }

@@ -97,13 +97,13 @@ public abstract class BaseScreen extends Screen {
     public void render(int mouseX, int mouseY, float partialTicks){
         this.renderBackground();
 
-        GlStateManager.translated(this.left(), this.top(), 0);
+        GlStateManager._translated(this.left(), this.top(), 0);
         mouseX -= this.left();
         mouseY -= this.top();
 
-        GlStateManager.pushMatrix();
+        GlStateManager._pushMatrix();
         this.render(mouseX, mouseY);
-        GlStateManager.popMatrix();
+        GlStateManager._popMatrix();
         for(Widget widget : this.widgets){
             widget.blitOffset = this.getBlitOffset();
             widget.wasHovered = widget.hovered;
@@ -116,7 +116,7 @@ public abstract class BaseScreen extends Screen {
             if(widget instanceof IHoverTextWidget && widget.isHovered()){
                 ITextComponent text = ((IHoverTextWidget)widget).getHoverText();
                 if(text != null)
-                    this.renderTooltip(text.getFormattedText(), mouseX, mouseY);
+                    this.renderTooltip(text.getColoredString(), mouseX, mouseY);
             }
         }
         this.renderTooltips(mouseX, mouseY);
@@ -217,8 +217,8 @@ public abstract class BaseScreen extends Screen {
         if(this.keyPressed(keyCode))
             return true;
 
-        InputMappings.Input key = InputMappings.getInputByCode(keyCode, scanCode);
-        if(ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(key)){
+        InputMappings.Input key = InputMappings.getKey(keyCode, scanCode);
+        if(ClientUtils.getMinecraft().options.keyInventory.isActiveAndMatches(key)){
             this.closeScreen();
             return true;
         }
