@@ -26,14 +26,14 @@ public class BlockShape {
     }
 
     public static BlockShape create(double x1, double y1, double z1, double x2, double y2, double z2){
-        return create(VoxelShapes.create(x1, y1, z1, x2, y2, z2));
+        return create(VoxelShapes.box(x1, y1, z1, x2, y2, z2));
     }
 
     /**
      * Creates a shape with coordinates {@code x1 / 16, y1 / 16, z1 / 16, x2 / 16, y2 / 16, z2 / 16}.
      */
     public static BlockShape createBlockShape(double x1, double y1, double z1, double x2, double y2, double z2){
-        return create(VoxelShapes.create(x1 / 16, y1 / 16, z1 / 16, x2 / 16, y2 / 16, z2 / 16));
+        return create(VoxelShapes.box(x1 / 16, y1 / 16, z1 / 16, x2 / 16, y2 / 16, z2 / 16));
     }
 
     /**
@@ -44,7 +44,7 @@ public class BlockShape {
     }
 
     public static BlockShape fullCube(){
-        return new BlockShape(VoxelShapes.fullCube());
+        return new BlockShape(VoxelShapes.block());
     }
 
     public static BlockShape empty(){
@@ -73,7 +73,7 @@ public class BlockShape {
     }
 
     public List<AxisAlignedBB> toBoxes(){
-        return this.shape.toBoundingBoxList();
+        return this.shape.toAabbs();
     }
 
     public void forEachBox(Consumer<AxisAlignedBB> action){
@@ -81,11 +81,11 @@ public class BlockShape {
     }
 
     public void forEachEdge(LineConsumer action){
-        this.shape.forEachEdge(action::apply);
+        this.shape.forAllEdges(action::apply);
     }
 
     public void forEachCorner(PointConsumer action){
-        this.shape.forEachBox((x1, y1, z1, x2, y2, z2) -> {
+        this.shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
             action.apply(x1, y1, z1);
             action.apply(x2, y1, z1);
             action.apply(x1, y1, z2);
@@ -101,21 +101,21 @@ public class BlockShape {
      * Creates the smallest box that encapsulate the entire shape.
      */
     public AxisAlignedBB simplify(){
-        return this.shape.getBoundingBox();
+        return this.shape.bounds();
     }
 
     /**
      * @return the minimum coordinate for the given axis.
      */
     public double getStart(Direction.Axis axis){
-        return this.shape.getStart(axis);
+        return this.shape.min(axis);
     }
 
     /**
      * @return the maximum coordinate for the given axis.
      */
     public double getEnd(Direction.Axis axis){
-        return this.shape.getEnd(axis);
+        return this.shape.max(axis);
     }
 
     public double minX(){
@@ -150,18 +150,18 @@ public class BlockShape {
     }
 
     public BlockShape offset(double x, double y, double z){
-        return new BlockShape(this.shape.withOffset(x, y, z));
+        return new BlockShape(this.shape.move(x, y, z));
     }
 
     public BlockShape offset(BlockPos pos){
-        return new BlockShape(this.shape.withOffset(pos.getX(), pos.getY(), pos.getZ()));
+        return new BlockShape(this.shape.move(pos.getX(), pos.getY(), pos.getZ()));
     }
 
     /**
      * Offsets the shape by 1 in the given direction.
      */
     public BlockShape offset(Direction direction){
-        return this.offset(direction.getXOffset(), direction.getYOffset(), direction.getZOffset());
+        return this.offset(direction.getStepX(), direction.getStepY(), direction.getStepZ());
     }
 
     /**
@@ -177,11 +177,11 @@ public class BlockShape {
     }
 
     public BlockShape grow(double amount){
-        return this.transformBoxes(box -> box.grow(amount));
+        return this.transformBoxes(box -> box.inflate(amount));
     }
 
     public BlockShape shrink(double amount){
-        return this.transformBoxes(box -> box.shrink(amount));
+        return this.transformBoxes(box -> box.deflate(amount));
     }
 
     /**

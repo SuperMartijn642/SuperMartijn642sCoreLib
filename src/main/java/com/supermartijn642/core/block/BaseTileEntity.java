@@ -22,8 +22,8 @@ public abstract class BaseTileEntity extends TileEntity {
      */
     public void dataChanged(){
         this.dataChanged = true;
-        this.markDirty();
-        this.world.notifyBlockUpdate(this.pos, this.getBlockState(), this.getBlockState(), 2 | 4);
+        this.setChanged();
+        this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 2 | 4);
     }
 
     /**
@@ -59,8 +59,8 @@ public abstract class BaseTileEntity extends TileEntity {
     protected abstract void readData(CompoundNBT tag);
 
     @Override
-    public CompoundNBT write(CompoundNBT compound){
-        super.write(compound);
+    public CompoundNBT save(CompoundNBT compound){
+        super.save(compound);
         CompoundNBT data = this.writeData();
         if(data != null && !data.isEmpty())
             compound.put("data", data);
@@ -68,14 +68,14 @@ public abstract class BaseTileEntity extends TileEntity {
     }
 
     @Override
-    public void read(CompoundNBT nbt){
-        super.read(nbt);
+    public void load(CompoundNBT nbt){
+        super.load(nbt);
         this.readData(nbt.getCompound("data"));
     }
 
     @Override
     public CompoundNBT getUpdateTag(){
-        CompoundNBT tag = super.write(new CompoundNBT());
+        CompoundNBT tag = super.save(new CompoundNBT());
         CompoundNBT data = this.writeClientData();
         if(data != null && !data.isEmpty())
             tag.put("data", data);
@@ -84,7 +84,7 @@ public abstract class BaseTileEntity extends TileEntity {
 
     @Override
     public void handleUpdateTag(CompoundNBT tag){
-        super.read(tag);
+        super.load(tag);
         this.readData(tag.getCompound("data"));
     }
 
@@ -92,13 +92,13 @@ public abstract class BaseTileEntity extends TileEntity {
     public SUpdateTileEntityPacket getUpdatePacket(){
         if(this.dataChanged){
             this.dataChanged = false;
-            return new SUpdateTileEntityPacket(this.pos, 0, this.writeClientData());
+            return new SUpdateTileEntityPacket(this.worldPosition, 0, this.writeClientData());
         }
         return null;
     }
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt){
-        this.readData(pkt.getNbtCompound());
+        this.readData(pkt.getTag());
     }
 }

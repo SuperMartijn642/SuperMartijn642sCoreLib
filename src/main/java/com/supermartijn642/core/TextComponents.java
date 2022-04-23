@@ -86,7 +86,7 @@ public class TextComponents {
      * Creates a new {@link TextComponentBuilder} around the given block's name.
      */
     public static TextComponentBuilder block(Block block){
-        return translation(block.getTranslationKey());
+        return translation(block.getDescriptionId());
     }
 
     /**
@@ -101,7 +101,7 @@ public class TextComponents {
      * Creates a new {@link TextComponentBuilder} around the given item's name.
      */
     public static TextComponentBuilder item(Item item){
-        return translation(item.getTranslationKey());
+        return translation(item.getDescriptionId());
     }
 
     /**
@@ -109,7 +109,7 @@ public class TextComponents {
      * display name. The display name includes any custom name.
      */
     public static TextComponentBuilder itemStack(ItemStack stack){
-        return fromTextComponent(stack.getDisplayName().shallowCopy());
+        return fromTextComponent(stack.getHoverName().copy());
     }
 
     /**
@@ -124,7 +124,7 @@ public class TextComponents {
      * display name.
      */
     public static TextComponentBuilder fluidStack(FluidStack stack){
-        return fromTextComponent(stack.getDisplayName().shallowCopy());
+        return fromTextComponent(stack.getDisplayName().copy());
     }
 
     /**
@@ -271,7 +271,7 @@ public class TextComponents {
          * @return a new {@link TextComponentBuilder} for the given text component
          */
         public TextComponentBuilder append(ITextComponent textComponent){
-            this.textComponent.appendSibling(textComponent);
+            this.textComponent.append(textComponent);
             return new TextComponentBuilder(textComponent, this);
         }
 

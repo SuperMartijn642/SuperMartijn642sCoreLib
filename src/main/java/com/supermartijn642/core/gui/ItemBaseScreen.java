@@ -20,11 +20,11 @@ public abstract class ItemBaseScreen extends ObjectBaseScreen<ItemStack> {
     }
 
     protected ItemBaseScreen(ITextComponent title, int playerSlot){
-        this(title, () -> ClientUtils.getPlayer().inventory.getStackInSlot(playerSlot));
+        this(title, () -> ClientUtils.getPlayer().inventory.getItem(playerSlot));
     }
 
     protected ItemBaseScreen(ITextComponent title, Hand hand){
-        this(title, () -> ClientUtils.getPlayer().getHeldItem(hand));
+        this(title, () -> ClientUtils.getPlayer().getItemInHand(hand));
     }
 
     @Override

@@ -24,7 +24,7 @@ public class ClientUtils {
     }
 
     public static FontRenderer getFontRenderer(){
-        return getMinecraft().fontRenderer;
+        return getMinecraft().font;
     }
 
     public static PlayerEntity getPlayer(){
@@ -32,11 +32,11 @@ public class ClientUtils {
     }
 
     public static World getWorld(){
-        return getMinecraft().world;
+        return getMinecraft().level;
     }
 
     public static BlockRendererDispatcher getBlockRenderer(){
-        return getMinecraft().getBlockRendererDispatcher();
+        return getMinecraft().getBlockRenderer();
     }
 
     public static ItemRenderer getItemRenderer(){
@@ -44,14 +44,14 @@ public class ClientUtils {
     }
 
     public static float getPartialTicks(){
-        return getMinecraft().getRenderPartialTicks();
+        return getMinecraft().getFrameTime();
     }
 
     /**
      * Closes the player's opened screen
      */
     public static void closeScreen(){
-        getPlayer().closeScreen();
+        getPlayer().closeContainer();
     }
 
     /**
@@ -59,15 +59,15 @@ public class ClientUtils {
      * @param task task to be queued
      */
     public static void queueTask(Runnable task){
-        getMinecraft().enqueue(task);
+        getMinecraft().tell(task);
     }
 
     public static String translate(String translationKey, Object... args){
-        return I18n.format(translationKey, args);
+        return I18n.get(translationKey, args);
     }
 
     public static void displayScreen(Screen screen){
-        getMinecraft().displayGuiScreen(screen);
+        getMinecraft().setScreen(screen);
     }
 
 }

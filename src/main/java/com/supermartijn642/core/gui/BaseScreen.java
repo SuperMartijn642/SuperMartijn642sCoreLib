@@ -116,7 +116,7 @@ public abstract class BaseScreen extends Screen {
             if(widget instanceof IHoverTextWidget && widget.isHovered()){
                 ITextComponent text = ((IHoverTextWidget)widget).getHoverText();
                 if(text != null)
-                    this.renderTooltip(text.getFormattedText(), mouseX, mouseY);
+                    this.renderTooltip(text.getColoredString(), mouseX, mouseY);
             }
         }
         this.renderTooltips(mouseX, mouseY);
@@ -217,8 +217,8 @@ public abstract class BaseScreen extends Screen {
         if(this.keyPressed(keyCode))
             return true;
 
-        InputMappings.Input key = InputMappings.getInputByCode(keyCode, scanCode);
-        if(ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(key)){
+        InputMappings.Input key = InputMappings.getKey(keyCode, scanCode);
+        if(ClientUtils.getMinecraft().options.keyInventory.isActiveAndMatches(key)){
             this.closeScreen();
             return true;
         }

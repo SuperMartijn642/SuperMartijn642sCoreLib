@@ -92,8 +92,8 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
 
     @Override
     public void init(){
-        this.xSize = this.sizeX();
-        this.ySize = this.sizeY();
+        this.imageWidth = this.sizeX();
+        this.imageHeight = this.sizeY();
         super.init();
 
         this.widgets.clear();
@@ -145,9 +145,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         this.renderBackground(mouseX - this.left(), mouseY - this.top());
 
         if(this.drawSlots){
-            for(Slot slot : this.container.inventorySlots){
-                Minecraft.getInstance().getTextureManager().bindTexture(SLOT_TEXTURE);
-                ScreenUtils.drawTexture(slot.xPos - 1, slot.yPos - 1, 18, 18);
+            for(Slot slot : this.container.slots){
+                Minecraft.getInstance().getTextureManager().bind(SLOT_TEXTURE);
+                ScreenUtils.drawTexture(slot.x - 1, slot.y - 1, 18, 18);
             }
         }
         GlStateManager.translated(-this.left(), -this.top(), 0);
@@ -174,20 +174,20 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
             if(widget instanceof IHoverTextWidget && widget.isHovered()){
                 ITextComponent text = ((IHoverTextWidget)widget).getHoverText();
                 if(text != null)
-                    this.renderTooltip(text.getFormattedText(), mouseX - this.left(), mouseY - this.top());
+                    this.renderTooltip(text.getColoredString(), mouseX - this.left(), mouseY - this.top());
             }
         }
         GlStateManager.translated(-this.left(), -this.top(), 0);
-        super.renderHoveredToolTip(mouseX, mouseY);
+        super.renderTooltip(mouseX, mouseY);
         this.renderTooltips(mouseX - this.left(), mouseY - this.top());
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(float partialTicks, int x, int y){
+    protected void renderBg(float partialTicks, int x, int y){
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(int x, int y){
+    protected void renderLabels(int x, int y){
     }
 
     /**
@@ -303,8 +303,8 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
         if(this.keyPressed(keyCode))
             return true;
 
-        InputMappings.Input key = InputMappings.getInputByCode(keyCode, scanCode);
-        if(ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(key)){
+        InputMappings.Input key = InputMappings.getKey(keyCode, scanCode);
+        if(ClientUtils.getMinecraft().options.keyInventory.isActiveAndMatches(key)){
             this.closeScreen();
             return true;
         }

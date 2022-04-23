@@ -55,7 +55,7 @@ public class EnergyFormat {
 
         public String convertEnergy(int energy){
             LanguageManager manager = ClientUtils.getMinecraft().getLanguageManager();
-            Locale locale = manager == null || manager.getCurrentLanguage() == null ? Locale.getDefault() : manager.getCurrentLanguage().getJavaLocale();
+            Locale locale = manager == null || manager.getSelected() == null ? Locale.getDefault() : manager.getSelected().getJavaLocale();
             return NumberFormat.getNumberInstance(locale).format(energy);
         }
     }

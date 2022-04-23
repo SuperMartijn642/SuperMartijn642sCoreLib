@@ -26,12 +26,12 @@ public abstract class Widget {
 
     public void narrate(){
         if(this.wasHovered != this.hovered)
-            this.nextNarration = this.hovered ? Util.milliTime() + (long)750 : Long.MAX_VALUE;
+            this.nextNarration = this.hovered ? Util.getMillis() + (long)750 : Long.MAX_VALUE;
 
-        if(this.active && this.hovered && Util.milliTime() > this.nextNarration){
+        if(this.active && this.hovered && Util.getMillis() > this.nextNarration){
             ITextComponent message = this.getNarrationMessage();
             if(message != null){
-                NarratorChatListener.INSTANCE.say(ChatType.GAME_INFO, message);
+                NarratorChatListener.INSTANCE.handle(ChatType.GAME_INFO, message);
                 this.nextNarration = Long.MAX_VALUE;
             }
         }

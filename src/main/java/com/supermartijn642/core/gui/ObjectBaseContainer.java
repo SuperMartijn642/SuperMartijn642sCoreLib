@@ -36,7 +36,7 @@ public abstract class ObjectBaseContainer<T> extends BaseContainer {
     protected T getObjectOrClose(){
         T object = this.getObject();
         if(object == null)
-            this.player.closeScreen();
+            this.player.closeContainer();
         return object;
     }
 

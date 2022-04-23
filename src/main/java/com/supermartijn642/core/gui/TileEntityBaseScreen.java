@@ -28,7 +28,7 @@ public abstract class TileEntityBaseScreen<T extends TileEntity> extends ObjectB
 
     @SuppressWarnings("unchecked")
     protected T getTileEntity(){
-        TileEntity tile = ClientUtils.getWorld().getTileEntity(this.tilePos);
+        TileEntity tile = ClientUtils.getWorld().getBlockEntity(this.tilePos);
 
         if(tile == null)
             return null;

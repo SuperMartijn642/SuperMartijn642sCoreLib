@@ -21,18 +21,18 @@ public abstract class TileEntityBaseContainer<T extends TileEntity> extends Obje
     }
 
     public TileEntityBaseContainer(ContainerType<?> type, int id, PlayerEntity player, BlockPos tilePos){
-        this(type, id, player, player.world, tilePos);
+        this(type, id, player, player.level, tilePos);
     }
 
     @Override
-    public boolean canInteractWith(PlayerEntity playerIn){
-        return super.canInteractWith(playerIn);
+    public boolean stillValid(PlayerEntity playerIn){
+        return super.stillValid(playerIn);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     protected T getObject(){
-        TileEntity tile = this.tileWorld.getTileEntity(this.tilePos);
+        TileEntity tile = this.tileWorld.getBlockEntity(this.tilePos);
 
         if(tile == null)
             return null;

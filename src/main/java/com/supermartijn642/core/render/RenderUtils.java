@@ -37,7 +37,7 @@ public class RenderUtils {
      * @return the current interpolated camera position
      */
     public static Vec3d getCameraPosition(){
-        return ClientUtils.getMinecraft().gameRenderer.getActiveRenderInfo().getProjectedView();
+        return ClientUtils.getMinecraft().gameRenderer.getMainCamera().getPosition();
     }
 
     /**
@@ -64,13 +64,13 @@ public class RenderUtils {
         GlStateManager.disableCull();
 
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
+        BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
         shape.forEachEdge((x1, y1, z1, x2, y2, z2) -> {
-            buffer.pos(x1, y1, z1).color(red, green, blue, alpha).endVertex();
-            buffer.pos(x2, y2, z2).color(red, green, blue, alpha).endVertex();
+            buffer.vertex(x1, y1, z1).color(red, green, blue, alpha).endVertex();
+            buffer.vertex(x2, y2, z2).color(red, green, blue, alpha).endVertex();
         });
-        tessellator.draw();
+        tessellator.end();
 
         if(depthTest) GlStateManager.enableDepthTest();
         else GlStateManager.disableDepthTest();
@@ -104,46 +104,46 @@ public class RenderUtils {
         GlStateManager.disableCull();
 
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder builder = tessellator.getBuffer();
+        BufferBuilder builder = tessellator.getBuilder();
         builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
         shape.forEachBox(box -> {
             float minX = (float)box.minX, maxX = (float)box.maxX;
             float minY = (float)box.minY, maxY = (float)box.maxY;
             float minZ = (float)box.minZ, maxZ = (float)box.maxZ;
 
-            builder.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
 
-            builder.pos(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-
-
-            builder.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-
-            builder.pos(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
 
 
-            builder.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
 
-            builder.pos(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.pos(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+
+
+            builder.vertex(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+
+            builder.vertex(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.vertex(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
         });
-        tessellator.draw();
+        tessellator.end();
 
         if(depthTest) GlStateManager.enableDepthTest();
         else GlStateManager.disableDepthTest();
