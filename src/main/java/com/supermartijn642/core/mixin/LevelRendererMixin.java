@@ -20,24 +20,24 @@ public class LevelRendererMixin {
     private MatrixStack poseStack;
     private float partialTicks;
 
-    @ModifyVariable(method = "updateCameraAndRender", at = @At("HEAD"))
+    @ModifyVariable(method = "renderLevel", at = @At("HEAD"))
     public MatrixStack modifyPoseStack(MatrixStack poseStack){
         this.poseStack = poseStack;
         return poseStack;
     }
 
-    @ModifyVariable(method = "updateCameraAndRender", at = @At("HEAD"))
+    @ModifyVariable(method = "renderLevel", at = @At("HEAD"))
     public float modifyPartialTicks(float partialTicks){
         this.partialTicks = partialTicks;
         return partialTicks;
     }
 
-    @Inject(method = "updateCameraAndRender",
+    @Inject(method = "renderLevel",
         at = @At(
             value = "INVOKE",
             target = "Lcom/mojang/blaze3d/systems/RenderSystem;pushMatrix()V"),
         slice = @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/BlockRayTraceResult;getPos()Lnet/minecraft/util/math/BlockPos;"),
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/BlockRayTraceResult;getBlockPos()Lnet/minecraft/util/math/BlockPos;"),
             to = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;multMatrix(Lnet/minecraft/client/renderer/Matrix4f;)V")
         ))
     public void renderLevel(CallbackInfo ci){
