@@ -26,7 +26,7 @@ public class BaseBlock extends Block {
 
     public BaseBlock(String registryName, boolean saveTileData, Properties properties){
         super(properties);
-        this.setRegistryName(registryName);
+//        this.setRegistryName(registryName); // TODO
         this.saveTileData = saveTileData;
     }
 
