@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
  * Created 1/26/2021 by SuperMartijn642
  */
 public abstract class ObjectBaseContainerScreen<T, X extends ObjectBaseContainer<T>> extends BaseContainerScreen<X> {
-
     public ObjectBaseContainerScreen(X screenContainer, Component title){
         super(screenContainer, title);
     }
@@ -78,6 +77,21 @@ public abstract class ObjectBaseContainerScreen<T, X extends ObjectBaseContainer
     }
 
     @Override
+    protected void render(PoseStack poseStack, int mouseX, int mouseY){
+        T object = this.getObjectOrClose();
+        if(object != null)
+            this.render(poseStack, mouseX, mouseY, object);
+    }
+
+    /**
+     * Renders the screen's main features.
+     * Called after the background and slots are drawn, but before widgets, items, and tooltips are drawn.
+     */
+    protected void render(PoseStack poseStack, int mouseX, int mouseY, @Nonnull T object){
+        super.render(poseStack, mouseX, mouseY);
+    }
+
+    @Override
     protected void renderForeground(PoseStack poseStack, int mouseX, int mouseY){
         T object = this.getObjectOrClose();
         if(object != null)
@@ -86,7 +100,7 @@ public abstract class ObjectBaseContainerScreen<T, X extends ObjectBaseContainer
 
     /**
      * Renders the screen's foreground.
-     * Widgets are drawn after this.
+     * Called after widgets are drawn, but before tooltips are drawn.
      */
     protected void renderForeground(PoseStack poseStack, int mouseX, int mouseY, @Nonnull T object){
         super.renderForeground(poseStack, mouseX, mouseY);
