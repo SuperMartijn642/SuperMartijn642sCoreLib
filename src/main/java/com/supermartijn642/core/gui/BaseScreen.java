@@ -118,13 +118,15 @@ public abstract class BaseScreen extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks){
         this.drawDefaultBackground();
 
+        GlStateManager.pushMatrix();
         GlStateManager.translate(this.left(), this.top(), 0);
         mouseX -= this.left();
         mouseY -= this.top();
 
-        GlStateManager.pushMatrix();
+        this.renderBackground(mouseX, mouseY);
+
         this.render(mouseX, mouseY);
-        GlStateManager.popMatrix();
+
         for(Widget widget : this.widgets){
             widget.blitOffset = this.zLevel;
             widget.wasHovered = widget.hovered;
@@ -133,6 +135,9 @@ public abstract class BaseScreen extends GuiScreen {
             widget.render(mouseX, mouseY, partialTicks);
             widget.narrate();
         }
+
+        this.renderForeground(mouseX, mouseY);
+
         for(Widget widget : this.widgets){
             if(widget instanceof IHoverTextWidget && widget.isHovered()){
                 ITextComponent text = ((IHoverTextWidget)widget).getHoverText();
@@ -141,13 +146,29 @@ public abstract class BaseScreen extends GuiScreen {
             }
         }
         this.renderTooltips(mouseX, mouseY);
+
+        GlStateManager.popMatrix();
     }
 
     /**
-     * Renders the screen's background and features.
-     * Widgets are drawn after this.
+     * Renders the screen's background. This will be called first in the render chain.
      */
-    protected abstract void render(int mouseX, int mouseY);
+    protected void renderBackground(int mouseX, int mouseY){
+    }
+
+    /**
+     * Renders the screen's main features.
+     * Called after the background and slots are drawn, but before widgets, items, and tooltips are drawn.
+     */
+    protected void render(int mouseX, int mouseY){
+    }
+
+    /**
+     * Renders the screen's foreground.
+     * Called after widgets are drawn, but before tooltips are drawn.
+     */
+    protected void renderForeground(int mouseX, int mouseY){
+    }
 
     /**
      * Renders tooltips for the given {@code mouseX} and {@code mouseY}.

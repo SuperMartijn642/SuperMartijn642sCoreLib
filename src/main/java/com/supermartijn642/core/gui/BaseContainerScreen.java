@@ -170,6 +170,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends GuiCo
                 ScreenUtils.drawTexture(slot.xPos - 1, slot.yPos - 1, 18, 18);
             }
         }
+
+        this.render(mouseX - this.left(), mouseY - this.top());
+
         GlStateManager.translate(-this.left(), -this.top(), 0);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
@@ -218,8 +221,15 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends GuiCo
     }
 
     /**
+     * Renders the screen's main features.
+     * Called after the background and slots are drawn, but before widgets, items, and tooltips are drawn.
+     */
+    protected void render(int mouseX, int mouseY){
+    }
+
+    /**
      * Renders the screen's foreground.
-     * Widgets are drawn after this.
+     * Called after widgets are drawn, but before tooltips are drawn.
      */
     protected void renderForeground(int mouseX, int mouseY){
         ScreenUtils.drawString(this.font, this.title, 8, 7, 4210752);
