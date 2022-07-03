@@ -31,7 +31,7 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
 
     /**
      * @param screenContainer container the screen will be attached to
-     * @param title title to be read by the narrator and to be displayed in the gui
+     * @param title           title to be read by the narrator and to be displayed in the gui
      */
     public BaseContainerScreen(T screenContainer, ITextComponent title){
         super(screenContainer, screenContainer.player.inventory, title);
@@ -150,6 +150,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
                 ScreenUtils.drawTexture(slot.x - 1, slot.y - 1, 18, 18);
             }
         }
+
+        this.render(mouseX - this.left(), mouseY - this.top());
+
         GlStateManager.translated(-this.left(), -this.top(), 0);
 
         super.render(mouseX, mouseY, partialTicks);
@@ -198,8 +201,15 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
     }
 
     /**
+     * Renders the screen's main features.
+     * Called after the background and slots are drawn, but before widgets, items, and tooltips are drawn.
+     */
+    protected void render(int mouseX, int mouseY){
+    }
+
+    /**
      * Renders the screen's foreground.
-     * Widgets are drawn after this.
+     * Called after widgets are drawn, but before tooltips are drawn.
      */
     protected void renderForeground(int mouseX, int mouseY){
         ScreenUtils.drawString(this.font, this.title, 8, 7, 4210752);
