@@ -97,13 +97,15 @@ public abstract class BaseScreen extends Screen {
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks){
         this.renderBackground(poseStack);
 
+        poseStack.pushPose();
         poseStack.translate(this.left(), this.top(), 0);
         mouseX -= this.left();
         mouseY -= this.top();
 
-        poseStack.pushPose();
+        this.renderBackground(poseStack, mouseX, mouseY);
+
         this.render(poseStack, mouseX, mouseY);
-        poseStack.popPose();
+
         for(Widget widget : this.widgets){
             widget.blitOffset = this.getBlitOffset();
             widget.wasHovered = widget.hovered;
@@ -112,6 +114,9 @@ public abstract class BaseScreen extends Screen {
             widget.render(poseStack, mouseX, mouseY, partialTicks);
             widget.narrate();
         }
+
+        this.renderForeground(poseStack, mouseX, mouseY);
+
         for(Widget widget : this.widgets){
             if(widget instanceof IHoverTextWidget && widget.isHovered()){
                 Component text = ((IHoverTextWidget)widget).getHoverText();
@@ -120,13 +125,29 @@ public abstract class BaseScreen extends Screen {
             }
         }
         this.renderTooltips(poseStack, mouseX, mouseY);
+
+        poseStack.popPose();
     }
 
     /**
-     * Renders the screen's background and features.
-     * Widgets are drawn after this.
+     * Renders the screen's background. This will be called first in the render chain.
      */
-    protected abstract void render(PoseStack poseStack, int mouseX, int mouseY);
+    protected void renderBackground(PoseStack poseStack, int mouseX, int mouseY){
+    }
+
+    /**
+     * Renders the screen's main features.
+     * Called after the background and slots are drawn, but before widgets, items, and tooltips are drawn.
+     */
+    protected void render(PoseStack poseStack, int mouseX, int mouseY){
+    }
+
+    /**
+     * Renders the screen's foreground.
+     * Called after widgets are drawn, but before tooltips are drawn.
+     */
+    protected void renderForeground(PoseStack poseStack, int mouseX, int mouseY){
+    }
 
     /**
      * Renders tooltips for the given {@code mouseX} and {@code mouseY}.
