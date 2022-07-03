@@ -97,13 +97,15 @@ public abstract class BaseScreen extends Screen {
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
         this.renderBackground(matrixStack);
 
+        matrixStack.pushPose();
         matrixStack.translate(this.left(), this.top(), 0);
         mouseX -= this.left();
         mouseY -= this.top();
 
-        matrixStack.pushPose();
+        this.renderBackground(matrixStack, mouseX, mouseY);
+
         this.render(matrixStack, mouseX, mouseY);
-        matrixStack.popPose();
+
         for(Widget widget : this.widgets){
             widget.blitOffset = this.getBlitOffset();
             widget.wasHovered = widget.hovered;
@@ -112,6 +114,9 @@ public abstract class BaseScreen extends Screen {
             widget.render(matrixStack, mouseX, mouseY, partialTicks);
             widget.narrate();
         }
+
+        this.renderForeground(matrixStack, mouseX, mouseY);
+
         for(Widget widget : this.widgets){
             if(widget instanceof IHoverTextWidget && widget.isHovered()){
                 ITextComponent text = ((IHoverTextWidget)widget).getHoverText();
@@ -120,13 +125,29 @@ public abstract class BaseScreen extends Screen {
             }
         }
         this.renderTooltips(matrixStack, mouseX, mouseY);
+
+        matrixStack.popPose();
     }
 
     /**
-     * Renders the screen's background and features.
-     * Widgets are drawn after this.
+     * Renders the screen's background. This will be called first in the render chain.
      */
-    protected abstract void render(MatrixStack matrixStack, int mouseX, int mouseY);
+    protected void renderBackground(MatrixStack matrixStack, int mouseX, int mouseY){
+    }
+
+    /**
+     * Renders the screen's main features.
+     * Called after the background and slots are drawn, but before widgets, items, and tooltips are drawn.
+     */
+    protected void render(MatrixStack matrixStack, int mouseX, int mouseY){
+    }
+
+    /**
+     * Renders the screen's foreground.
+     * Called after widgets are drawn, but before tooltips are drawn.
+     */
+    protected void renderForeground(MatrixStack matrixStack, int mouseX, int mouseY){
+    }
 
     /**
      * Renders tooltips for the given {@code mouseX} and {@code mouseY}.

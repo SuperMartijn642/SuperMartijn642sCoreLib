@@ -28,7 +28,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
     private final List<Widget> widgets = new LinkedList<>();
     private final List<ITickableWidget> tickableWidgets = new LinkedList<>();
 
-    /** Have this because it replaced my variable name with an srg name for some reason **/
+    /**
+     * Have this because it replaced my variable name with an srg name for some reason
+     **/
     @Deprecated
     protected final T field_147002_h;
     protected final T container;
@@ -36,7 +38,7 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
 
     /**
      * @param screenContainer container the screen will be attached to
-     * @param title title to be read by the narrator and to be displayed in the gui
+     * @param title           title to be read by the narrator and to be displayed in the gui
      */
     public BaseContainerScreen(T screenContainer, ITextComponent title){
         super(screenContainer, screenContainer.player.inventory, title);
@@ -156,6 +158,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
                 ScreenUtils.drawTexture(matrixStack, slot.x - 1, slot.y - 1, 18, 18);
             }
         }
+
+        this.render(matrixStack, mouseX - this.left(), mouseY - this.top());
+
         matrixStack.translate(-this.left(), -this.top(), 0);
 
         super.render(matrixStack, mouseX, mouseY, partialTicks);
@@ -204,8 +209,15 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Conta
     }
 
     /**
+     * Renders the screen's main features.
+     * Called after the background and slots are drawn, but before widgets, items, and tooltips are drawn.
+     */
+    protected void render(MatrixStack matrixStack, int mouseX, int mouseY){
+    }
+
+    /**
      * Renders the screen's foreground.
-     * Widgets are drawn after this.
+     * Called after widgets are drawn, but before tooltips are drawn.
      */
     protected void renderForeground(MatrixStack matrixStack, int mouseX, int mouseY){
         ScreenUtils.drawString(matrixStack, this.font, this.title, 8, 7, 4210752);

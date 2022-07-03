@@ -64,6 +64,20 @@ public abstract class ObjectBaseScreen<T> extends BaseScreen {
     }
 
     @Override
+    protected void renderBackground(MatrixStack matrixStack, int mouseX, int mouseY){
+        T object = this.getObjectOrClose();
+        if(object != null)
+            this.renderBackground(matrixStack, mouseX, mouseY, object);
+    }
+
+    /**
+     * Renders the screen's background. This will be called first in the render chain.
+     */
+    protected void renderBackground(MatrixStack matrixStack, int mouseX, int mouseY, @Nonnull T object){
+        super.renderBackground(matrixStack, mouseX, mouseY);
+    }
+
+    @Override
     protected void render(MatrixStack matrixStack, int mouseX, int mouseY){
         T object = this.getObjectOrClose();
         if(object != null)
@@ -71,10 +85,26 @@ public abstract class ObjectBaseScreen<T> extends BaseScreen {
     }
 
     /**
-     * Renders the screen's background and features.
-     * Widgets are drawn after this.
+     * Renders the screen's main features.
+     * Called after the background and slots are drawn, but before widgets, items, and tooltips are drawn.
      */
-    protected abstract void render(MatrixStack matrixStack, int mouseX, int mouseY, @Nonnull T object);
+    protected void render(MatrixStack matrixStack, int mouseX, int mouseY, @Nonnull T object){
+    }
+
+    @Override
+    protected void renderForeground(MatrixStack matrixStack, int mouseX, int mouseY){
+        T object = this.getObjectOrClose();
+        if(object != null)
+            this.renderForeground(matrixStack, mouseX, mouseY, object);
+    }
+
+    /**
+     * Renders the screen's foreground.
+     * Called after widgets are drawn, but before tooltips are drawn.
+     */
+    protected void renderForeground(MatrixStack matrixStack, int mouseX, int mouseY, @Nonnull T object){
+        super.renderForeground(matrixStack, mouseX, mouseY);
+    }
 
     @Override
     protected void renderTooltips(MatrixStack matrixStack, int mouseX, int mouseY){
