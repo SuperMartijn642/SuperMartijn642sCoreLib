@@ -60,18 +60,22 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Abstr
         return (this.height - this.sizeY()) / 2;
     }
 
+    @Override
     public int getXSize(){
         return this.sizeX();
     }
 
+    @Override
     public int getYSize(){
         return this.sizeY();
     }
 
+    @Override
     public int getGuiLeft(){
         return this.left();
     }
 
+    @Override
     public int getGuiTop(){
         return this.top();
     }
@@ -144,6 +148,9 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Abstr
                 ScreenUtils.drawTexture(poseStack, slot.x - 1, slot.y - 1, 18, 18);
             }
         }
+
+        this.render(poseStack, mouseX - this.left(), mouseY - this.top());
+
         poseStack.translate(-this.left(), -this.top(), 0);
 
         super.render(poseStack, mouseX, mouseY, partialTicks);
@@ -188,8 +195,15 @@ public abstract class BaseContainerScreen<T extends BaseContainer> extends Abstr
     }
 
     /**
+     * Renders the screen's main features.
+     * Called after the background and slots are drawn, but before widgets, items, and tooltips are drawn.
+     */
+    protected void render(PoseStack poseStack, int mouseX, int mouseY){
+    }
+
+    /**
      * Renders the screen's foreground.
-     * Widgets are drawn after this.
+     * Called after widgets are drawn, but before tooltips are drawn.
      */
     protected void renderForeground(PoseStack poseStack, int mouseX, int mouseY){
         ScreenUtils.drawString(poseStack, this.font, this.title, 8, 7, 4210752);
