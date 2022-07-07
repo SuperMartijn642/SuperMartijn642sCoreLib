@@ -3,11 +3,12 @@
   "minVersion": "${mixin_minimum_version}",
   "package": "${mod_package}.${mixin_package}",
   "compatibilityLevel": "${mixin_compatibility_level}",
-  "mixins": [
-  ],
+  "refmap": "${mod_id}.mixins.refmap.json",
+  "mixins": [],
   "client": [
     "LevelRendererMixin"
   ],
+  "server": [],
   "injectors": {
     "defaultRequire": 1
   }
