@@ -39,9 +39,11 @@ processResources {
         expand project.properties
     }
 
-    rename "icon.png", "${project.mod_id}.png"
-    rename "modid.accesswidener", "${project.mod_id}.accesswidener"
-    rename "modid.mixins.json", "${project.mod_id}.mixins.json"
+    exclude "**/*.pdn"
+
+    rename "^icon.png\$", "${project.mod_id}.png"
+    rename "^modid.accesswidener\$", "${project.mod_id}.accesswidener"
+    rename "^modid.mixins.json\$", "${project.mod_id}.mixins.json"
 }
 
 loom {
