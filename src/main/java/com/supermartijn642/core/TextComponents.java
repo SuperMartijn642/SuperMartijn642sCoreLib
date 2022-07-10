@@ -126,7 +126,7 @@ public class TextComponents {
      * Creates a new {@link TextComponentBuilder} around the given fluid's name.
      */
     public static TextComponentBuilder fluid(Fluid fluid){
-        return translation(fluid.getAttributes().getTranslationKey());
+        return translation(fluid.getFluidType().getDescriptionId());
     }
 
     /**
@@ -134,7 +134,7 @@ public class TextComponents {
      * display name.
      */
     public static TextComponentBuilder fluidStack(FluidStack stack){
-        return fromTextComponent(stack.getDisplayName().plainCopy());
+        return fromTextComponent(stack.getDisplayName());
     }
 
     /**
