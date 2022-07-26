@@ -199,7 +199,7 @@ public class PacketChannel {
     private BasePacket read(FriendlyByteBuf buffer){
         int index = buffer.readInt();
         if(!this.index_to_packet.containsKey(index))
-            throw new IllegalStateException("Received an unregistered packet with index '" + index + "'!");
+            throw new RuntimeException("Received an unregistered packet with index '" + index + "'!");
 
         BasePacket packet = this.index_to_packet.get(index).get();
         packet.read(buffer);

@@ -1,13 +1,14 @@
 package com.supermartijn642.core.test;
 
+import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.block.BlockShape;
+import com.supermartijn642.core.gui.WidgetScreen;
 import com.supermartijn642.core.render.RenderUtils;
 import com.supermartijn642.core.render.RenderWorldEvent;
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderHighlightEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -18,8 +19,9 @@ import net.minecraftforge.fml.common.Mod;
 public class ClientProxy {
 
     @SubscribeEvent
-    public static void onBlockBreak(PlayerEvent.ItemPickupEvent e){
-        Minecraft.getInstance().setScreen(new TestScreen());
+    public static void onBlockBreak(LivingEvent.LivingJumpEvent e){
+        if(e.getEntity().getLevel().isClientSide)
+            ClientUtils.displayScreen(WidgetScreen.of(new TestScreen()));
     }
 
     @SubscribeEvent
@@ -27,10 +29,8 @@ public class ClientProxy {
         Vec3 camera = RenderUtils.getCameraPosition();
         e.getPoseStack().pushPose();
         e.getPoseStack().translate(-camera.x, -camera.y, -camera.z);
-        RenderUtils.disableDepthTest();
-        RenderUtils.renderShape(e.getPoseStack(), BlockShape.fullCube(), 1, 1, 0, 0.5f);
-        RenderUtils.renderShapeSides(e.getPoseStack(), BlockShape.fullCube(), 0, 1, 1, 0.5f);
-        RenderUtils.resetState();
+        RenderUtils.renderShape(e.getPoseStack(), BlockShape.fullCube(), 1, 1, 0, 0.5f, false);
+        RenderUtils.renderShapeSides(e.getPoseStack(), BlockShape.fullCube(), 0, 1, 1, 0.5f, false);
         e.getPoseStack().popPose();
     }
 
@@ -39,10 +39,8 @@ public class ClientProxy {
         Vec3 camera = RenderUtils.getCameraPosition();
         e.getPoseStack().pushPose();
         e.getPoseStack().translate(-camera.x, -camera.y, -camera.z);
-        RenderUtils.disableDepthTest();
-        RenderUtils.renderShape(e.getPoseStack(), BlockShape.fullCube(), 1, 1, 0, 0.5f);
-        RenderUtils.renderShapeSides(e.getPoseStack(), BlockShape.fullCube(), 0, 1, 1, 0.5f);
-        RenderUtils.resetState();
+        RenderUtils.renderShape(e.getPoseStack(), BlockShape.fullCube(), 1, 1, 0, 0.5f, false);
+        RenderUtils.renderShapeSides(e.getPoseStack(), BlockShape.fullCube(), 0, 1, 1, 0.5f, false);
         e.getPoseStack().popPose();
     }
 }

@@ -11,11 +11,11 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * Created 1/26/2021 by SuperMartijn642
  */
-public abstract class BaseTileEntity extends BlockEntity {
+public abstract class BaseBlockEntity extends BlockEntity {
 
     private boolean dataChanged = false;
 
-    public BaseTileEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state){
+    public BaseBlockEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state){
         super(tileEntityTypeIn, pos, state);
     }
 
@@ -94,13 +94,13 @@ public abstract class BaseTileEntity extends BlockEntity {
     public ClientboundBlockEntityDataPacket getUpdatePacket(){
         if(this.dataChanged){
             this.dataChanged = false;
-            return ClientboundBlockEntityDataPacket.create(this, entity -> ((BaseTileEntity)entity).writeClientData());
+            return ClientboundBlockEntityDataPacket.create(this, entity -> ((BaseBlockEntity)entity).writeClientData());
         }
         return null;
     }
 
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt){
-        this.readData(pkt.getTag());
+        this.readData(pkt.getTag() == null ? new CompoundTag() : pkt.getTag());
     }
 }
