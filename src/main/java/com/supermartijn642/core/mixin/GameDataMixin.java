@@ -17,14 +17,14 @@ public class GameDataMixin {
 
     private static RegistryEvent.Register<?> registerEvent;
 
-    @ModifyVariable(method = "postRegistryEventDispatch(Ljava/util/concurrent/Executor;Lnet/minecraftforge/fml/IModStateTransition$EventGenerator;)Ljava/util/concurrent/CompletableFuture;", at = @At("STORE"), ordinal = 0, remap = false)
+    @ModifyVariable(method = "lambda$postRegistryEventDispatch$19(Lnet/minecraftforge/fml/IModStateTransition$EventGenerator;)V", at = @At("STORE"), ordinal = 0, remap = false)
     private static RegistryEvent.Register<?> modifyRegisterEvent(RegistryEvent.Register<?> registerEvent){
         GameDataMixin.registerEvent = registerEvent;
         return registerEvent;
     }
 
     @Inject(
-        method = "postRegistryEventDispatch(Ljava/util/concurrent/Executor;Lnet/minecraftforge/fml/IModStateTransition$EventGenerator;)Ljava/util/concurrent/CompletableFuture;",
+        method = "lambda$postRegistryEventDispatch$19(Lnet/minecraftforge/fml/IModStateTransition$EventGenerator;)V",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraftforge/registries/GameData;applyHolderLookups(Lnet/minecraft/resources/ResourceLocation;)V"
