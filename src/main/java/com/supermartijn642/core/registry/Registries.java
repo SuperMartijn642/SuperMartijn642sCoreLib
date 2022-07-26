@@ -71,6 +71,11 @@ public class Registries<T extends IForgeRegistryEntry<T>> {
         return this.registry;
     }
 
+    public void register(ResourceLocation identifier, T object){
+        object.setRegistryName(identifier);
+        this.getUnderlying().register(object);
+    }
+
     public ResourceLocation getIdentifier(T object){
         return this.registry.getKey(object);
     }

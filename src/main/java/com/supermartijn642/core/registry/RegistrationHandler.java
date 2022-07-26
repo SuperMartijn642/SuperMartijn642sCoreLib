@@ -413,8 +413,7 @@ public class RegistrationHandler {
         Map<ResourceLocation,Supplier<?>> entries = this.entryMap.get(registry);
         for(Map.Entry<ResourceLocation,Supplier<?>> entry : entries.entrySet()){
             T object = (T)entry.getValue().get();
-            ((IForgeRegistryEntry<?>)object).setRegistryName(entry.getKey());
-            registry.getUnderlying().register(object);
+            registry.register(entry.getKey(), object);
         }
     }
 
@@ -454,8 +453,7 @@ public class RegistrationHandler {
             if(entries.containsKey(fullIdentifier))
                 throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + this.registry.getUnderlying().getRegistryName() + "'!");
 
-            ((IForgeRegistryEntry<?>)object).setRegistryName(fullIdentifier);
-            this.registry.getUnderlying().register(object);
+            this.registry.register(fullIdentifier, object);
         }
     }
 }
