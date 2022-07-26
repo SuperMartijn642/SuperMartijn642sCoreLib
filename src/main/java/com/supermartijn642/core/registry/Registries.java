@@ -72,6 +72,10 @@ public class Registries<T> {
         return this.registry;
     }
 
+    public void register(ResourceLocation identifier, T object){
+        this.getUnderlying().register(identifier, object);
+    }
+
     public ResourceLocation getIdentifier(T object){
         return this.registry.getKey(object);
     }
