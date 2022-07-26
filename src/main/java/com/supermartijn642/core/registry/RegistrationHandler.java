@@ -59,7 +59,12 @@ public class RegistrationHandler {
 
     private RegistrationHandler(String modid){
         this.modid = modid;
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleRegisterEvent);
+        Registries.UNDERLYING_REGISTRY_MAP.values().forEach(this::registerRegistryEventHandler);
+    }
+
+    @SuppressWarnings({"unchecked"})
+    private <T extends IForgeRegistryEntry<T>> void registerRegistryEventHandler(Registries<T> registry){
+        FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(registry.getValueClass(), (Consumer<RegistryEvent.Register<T>>)(Object)(Consumer<RegistryEvent.Register<?>>)this::handleRegisterEvent);
     }
 
     public void registerBlock(String identifier, Supplier<Block> block){

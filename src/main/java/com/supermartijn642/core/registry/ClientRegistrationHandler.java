@@ -383,7 +383,7 @@ public class ClientRegistrationHandler {
     }
 
     private void registerRegisterHandler(){
-        this.registerGenericEventHandler(RegistryEvent.Register.class, EventPriority.LOWEST, e -> {
+        this.registerGenericEventHandler(RegistryEvent.Register.class, Item.class, EventPriority.LOWEST, e -> {
             // Custom item renderers
             Set<Item> items = new HashSet<>();
             if(Registries.ITEMS.getUnderlying().equals(e.getRegistry())){
@@ -418,12 +418,12 @@ public class ClientRegistrationHandler {
             FMLJavaModLoadingContext.get().getModEventBus().addListener(priority, eventHandler);
     }
 
-    private <T extends GenericEvent<?>> void registerGenericEventHandler(Class<T> event, Consumer<T> eventHandler){
-        this.registerGenericEventHandler(event, EventPriority.NORMAL, eventHandler);
+    private <T extends GenericEvent<? extends F>, F> void registerGenericEventHandler(Class<T> event, Class<F> filter, Consumer<T> eventHandler){
+        this.registerGenericEventHandler(event, filter, EventPriority.NORMAL, eventHandler);
     }
 
-    private <T extends GenericEvent<? extends F>, F> void registerGenericEventHandler(Class<T> event, EventPriority priority, Consumer<T> eventHandler){
+    private <T extends GenericEvent<? extends F>, F> void registerGenericEventHandler(Class<T> event, Class<F> filter, EventPriority priority, Consumer<T> eventHandler){
         if(this.registeredEvents.add(event))
-            FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(Object.class, priority, eventHandler);
+            FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(filter, priority, eventHandler);
     }
 }

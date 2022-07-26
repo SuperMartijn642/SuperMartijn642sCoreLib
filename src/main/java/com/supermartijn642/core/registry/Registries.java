@@ -32,7 +32,7 @@ import java.util.stream.Stream;
  */
 public class Registries<T extends IForgeRegistryEntry<T>> {
 
-    private static final Map<IForgeRegistry<?>,Registries<?>> UNDERLYING_REGISTRY_MAP = new HashMap<>();
+    static final Map<IForgeRegistry<?>,Registries<?>> UNDERLYING_REGISTRY_MAP = new HashMap<>();
 
     @SuppressWarnings("unchecked")
     @Deprecated
