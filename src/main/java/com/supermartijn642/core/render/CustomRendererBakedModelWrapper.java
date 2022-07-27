@@ -8,9 +8,13 @@ import net.minecraftforge.client.model.BakedModelWrapper;
 /**
  * Created 25/07/2022 by SuperMartijn642
  */
-public class CustomRendererBakedModelWrapper extends BakedModelWrapper<BakedModel> {
+public final class CustomRendererBakedModelWrapper extends BakedModelWrapper<BakedModel> {
 
-    public CustomRendererBakedModelWrapper(BakedModel originalModel){
+    public static BakedModel wrap(BakedModel originalModel){
+        return new CustomRendererBakedModelWrapper(originalModel);
+    }
+
+    private CustomRendererBakedModelWrapper(BakedModel originalModel){
         super(originalModel);
     }
 

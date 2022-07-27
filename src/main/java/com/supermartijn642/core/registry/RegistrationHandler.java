@@ -46,16 +46,19 @@ public class RegistrationHandler {
         if(!RegistryUtil.isValidNamespace(modid))
             throw new IllegalArgumentException("Modid '" + modid + "' must only contain characters [a-z0-9_.-]!");
         String activeMod = ModLoadingContext.get().getActiveNamespace();
-        if(activeMod != null && !activeMod.equals(modid) && !activeMod.equals("minecraft") && !activeMod.equals("forge"))
-            CoreLib.LOGGER.warn("Mod '" + ModLoadingContext.get().getActiveContainer().getModInfo().getDisplayName() + "' is requesting registration helper for different modid '" + modid + "'!");
+        if(activeMod != null && !activeMod.equals("minecraft") && !activeMod.equals("forge")){
+            if(!activeMod.equals(modid))
+                CoreLib.LOGGER.warn("Mod '" + ModLoadingContext.get().getActiveContainer().getModInfo().getDisplayName() + "' is requesting registration helper for different modid '" + modid + "'!");
+        }else if(modid.equals("minecraft") || modid.equals("forge"))
+            CoreLib.LOGGER.warn("Mod is requesting registration helper for modid '" + modid + "'!");
 
         return REGISTRATION_HELPER_MAP.computeIfAbsent(modid, RegistrationHandler::new);
     }
 
     private final String modid;
-    private final Map<Registries<?>,Map<ResourceLocation,Supplier<?>>> entryMap = new HashMap<>();
-    private final Map<Registries<?>,List<Consumer<Helper<?>>>> callbacks = new HashMap<>();
-    private final Set<Registries<?>> encounteredEvents = new HashSet<>();
+    private final Map<Registries.Registry<?>,Map<ResourceLocation,Supplier<?>>> entryMap = new HashMap<>();
+    private final Map<Registries.Registry<?>,List<Consumer<Helper<?>>>> callbacks = new HashMap<>();
+    private final Set<Registries.Registry<?>> encounteredEvents = new HashSet<>();
 
     private RegistrationHandler(String modid){
         this.modid = modid;
@@ -382,11 +385,11 @@ public class RegistrationHandler {
         this.addCallback(Registries.STAT_TYPES, callback);
     }
 
-    private <T> void addEntry(Registries<T> registry, String identifier, Supplier<T> entry){
+    private <T> void addEntry(Registries.Registry<T> registry, String identifier, Supplier<T> entry){
         this.addEntry(registry, this.modid, identifier, entry);
     }
 
-    private <T> void addEntry(Registries<T> registry, String namespace, String identifier, Supplier<T> entry){
+    private <T> void addEntry(Registries.Registry<T> registry, String namespace, String identifier, Supplier<T> entry){
         if(this.encounteredEvents.contains(registry))
             throw new IllegalStateException("Cannot register new entries after RegisterEvent has been fired!");
         if(!RegistryUtil.isValidNamespace(namespace))
@@ -399,12 +402,12 @@ public class RegistrationHandler {
         ResourceLocation fullIdentifier = new ResourceLocation(namespace, identifier);
         Map<ResourceLocation,Supplier<?>> entries = this.entryMap.computeIfAbsent(registry, o -> new HashMap<>());
         if(entries.containsKey(fullIdentifier))
-            throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + registry.getUnderlying().getRegistryName() + "'!");
+            throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + registry.getVanillaRegistry().key().location() + "'!");
 
         entries.put(fullIdentifier, entry);
     }
 
-    private <T> void addCallback(Registries<T> registry, Consumer<Helper<T>> callback){
+    private <T> void addCallback(Registries.Registry<T> registry, Consumer<Helper<T>> callback){
         if(this.encounteredEvents.contains(registry))
             throw new IllegalStateException("Cannot register callbacks after RegisterEvent has been fired!");
         if(callback == null)
@@ -416,7 +419,7 @@ public class RegistrationHandler {
 
     private void handleRegisterEvent(RegisterEvent event){
         IForgeRegistry<?> underlyingRegistry = event.getForgeRegistry();
-        Registries<?> registry = Registries.fromUnderlying(underlyingRegistry);
+        Registries.Registry<?> registry = Registries.fromUnderlying(underlyingRegistry);
         this.encounteredEvents.add(registry);
 
         // Register entries
@@ -429,7 +432,7 @@ public class RegistrationHandler {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> void registerEntries(Registries<T> registry){
+    private <T> void registerEntries(Registries.Registry<T> registry){
         Map<ResourceLocation,Supplier<?>> entries = this.entryMap.get(registry);
         for(Map.Entry<ResourceLocation,Supplier<?>> entry : entries.entrySet()){
             T object = (T)entry.getValue().get();
@@ -437,7 +440,7 @@ public class RegistrationHandler {
         }
     }
 
-    private void callCallbacks(Registries<?> registry){
+    private void callCallbacks(Registries.Registry<?> registry){
         Helper<?> helper = new Helper<>(registry);
         List<Consumer<Helper<?>>> callbacks = this.callbacks.get(registry);
         for(Consumer<Helper<?>> callback : callbacks)
@@ -446,9 +449,9 @@ public class RegistrationHandler {
 
     public class Helper<T> {
 
-        private final Registries<T> registry;
+        private final Registries.Registry<T> registry;
 
-        public Helper(Registries<T> registry){
+        public Helper(Registries.Registry<T> registry){
             this.registry = registry;
         }
 
@@ -471,7 +474,7 @@ public class RegistrationHandler {
             ResourceLocation fullIdentifier = new ResourceLocation(namespace, identifier);
             Map<ResourceLocation,Supplier<?>> entries = RegistrationHandler.this.entryMap.computeIfAbsent(this.registry, o -> new HashMap<>());
             if(entries.containsKey(fullIdentifier))
-                throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + this.registry.getUnderlying().getRegistryName() + "'!");
+                throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + this.registry.getVanillaRegistry().key().location() + "'!");
 
             this.registry.register(fullIdentifier, object);
         }
