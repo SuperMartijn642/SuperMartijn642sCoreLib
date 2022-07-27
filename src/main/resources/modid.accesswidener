@@ -1,4 +1,26 @@
 accessWidener v1 named
 
-# RenderType
-accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;IZZLnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType; # create
+# AbstractContainerScreen
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen draggingItem Lnet/minecraft/world/item/ItemStack; # draggingItem
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen isSplittingStack Z # isSplittingStack
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen quickCraftingRemainder I # quickCraftingRemainder
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackEnd Lnet/minecraft/world/inventory/Slot; # snapbackEnd
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackItem Lnet/minecraft/world/item/ItemStack; # snapbackItem
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackStartX I # snapbackStartX
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackStartY I # snapbackStartY
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackTime J # snapbackTime
+accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderFloatingItem (Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V # renderFloatingItem
+accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderSlot (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/inventory/Slot;)V # renderSlot
+# BlockBehaviour
+accessible field net/minecraft/world/level/block/state/BlockBehaviour properties Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties; # properties
+extendable method net/minecraft/world/level/block/state/BlockBehaviour getLootTable ()Lnet/minecraft/resources/ResourceLocation; # getLootTable
+# BlockBehaviour$Properties
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties material Lnet/minecraft/world/level/material/Material; # material
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties hasCollision Z # hasCollision
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties lightEmission Ljava/util/function/ToIntFunction; # lightEmission
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties isRedstoneConductor Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate; # isRedstoneConductor
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties isSuffocating Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate; # isSuffocating
+# GuiComponent
+accessible method net/minecraft/client/gui/GuiComponent fillGradient (Lcom/mojang/math/Matrix4f;Lcom/mojang/blaze3d/vertex/BufferBuilder;IIIIIII)V # fillGradient
+# ItemRenderer
+accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V # renderModelLists

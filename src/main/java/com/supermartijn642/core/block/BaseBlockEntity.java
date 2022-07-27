@@ -10,11 +10,11 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * Created 1/26/2021 by SuperMartijn642
  */
-public abstract class BaseTileEntity extends BlockEntity {
+public abstract class BaseBlockEntity extends BlockEntity {
 
     private boolean dataChanged = false;
 
-    public BaseTileEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state){
+    public BaseBlockEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state){
         super(tileEntityTypeIn, pos, state);
     }
 
@@ -89,7 +89,7 @@ public abstract class BaseTileEntity extends BlockEntity {
             this.dataChanged = false;
             return ClientboundBlockEntityDataPacket.create(this, entity -> {
                 CompoundTag tag = new CompoundTag();
-                tag.put("data", ((BaseTileEntity)entity).writeClientData());
+                tag.put("data", ((BaseBlockEntity)entity).writeClientData());
                 return tag;
             });
         }

@@ -1,5 +1,6 @@
 package com.supermartijn642.core.gui;
 
+import com.supermartijn642.core.ClientUtils;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 
@@ -36,7 +37,7 @@ public abstract class ObjectBaseContainer<T> extends BaseContainer {
     protected T getObjectOrClose(){
         T object = this.getObject();
         if(object == null)
-            this.player.containerMenu = this.player.inventoryMenu;
+            ClientUtils.closeScreen();
         return object;
     }
 

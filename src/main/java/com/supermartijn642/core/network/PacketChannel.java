@@ -57,7 +57,7 @@ public class PacketChannel {
     private final HashMap<Class<? extends BasePacket>,Boolean> packet_to_queued = new HashMap<>();
 
     private PacketChannel(String modid, String name){
-        this.channelName = new ResourceLocation("modid", "name");
+        this.channelName = new ResourceLocation(modid, name);
 
         if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT)
             ClientPacketHandler.registerReceiver(this.channelName, this);
@@ -175,6 +175,8 @@ public class PacketChannel {
      * @param packet packet to be send
      */
     public void sendToAllNear(Level world, BlockPos pos, double radius, BasePacket packet){
+        if(world.isClientSide)
+            throw new IllegalStateException("This must only be called server-side!");
         this.sendToAllNear(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, radius, packet);
     }
 

@@ -1,8 +1,8 @@
-package com.supermartijn642.core.gui.widget;
+package com.supermartijn642.core.gui.widget.premade;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.gui.ScreenUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 public class ButtonWidget extends AbstractButtonWidget {
 
     private Component text;
+    private boolean active = true;
 
     /**
      * @param text    the text to be displayed on the button
@@ -29,14 +30,18 @@ public class ButtonWidget extends AbstractButtonWidget {
         this.text = text;
     }
 
+    public void setActive(boolean active){
+        this.active = active;
+    }
+
     @Override
-    protected Component getNarrationMessage(){
+    public Component getNarrationMessage(){
         return this.text;
     }
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks){
-        ScreenUtils.drawButtonBackground(poseStack, this.x, this.y, this.width, this.height, (this.active ? this.isHovered() ? 5 : 0 : 10) / 15f);
-        ScreenUtils.drawCenteredStringWithShadow(poseStack, Minecraft.getInstance().font, this.text, this.x + this.width / 2f, this.y + this.height / 2f - 5, this.active ? 0xFFFFFFFF : Integer.MAX_VALUE);
+    public void render(PoseStack poseStack, int mouseX, int mouseY){
+        ScreenUtils.drawButtonBackground(poseStack, this.x, this.y, this.width, this.height, (this.active ? this.isFocused() ? 5 : 0 : 10) / 15f);
+        ScreenUtils.drawCenteredStringWithShadow(poseStack, ClientUtils.getFontRenderer(), this.text, this.x + this.width / 2f, this.y + this.height / 2f - 5, this.active ? 0xFFFFFFFF : Integer.MAX_VALUE);
     }
 }

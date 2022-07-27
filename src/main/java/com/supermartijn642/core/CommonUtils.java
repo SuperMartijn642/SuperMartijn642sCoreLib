@@ -1,6 +1,7 @@
 package com.supermartijn642.core;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
@@ -11,8 +12,10 @@ import net.minecraft.world.level.Level;
 public class CommonUtils {
 
     private static MinecraftServer server;
-    static {
+
+    static void initialize(){
         ServerLifecycleEvents.SERVER_STARTING.register(server -> CommonUtils.server = server);
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> CommonUtils.server = null);
     }
 
     /**
@@ -25,5 +28,19 @@ public class CommonUtils {
     public static Level getLevel(ResourceKey<Level> resourceKey){
         MinecraftServer server = getServer();
         return server == null ? null : server.getLevel(resourceKey);
+    }
+
+    /**
+     * @return which environment the game is running in.
+     */
+    public static CoreSide getEnvironmentSide(){
+        return CoreSide.fromUnderlying(FabricLoader.getInstance().getEnvironmentType());
+    }
+
+    /**
+     * Checks whether a mod with the given modid is loaded and active.
+     */
+    public static boolean isModLoaded(String modid){
+        return FabricLoader.getInstance().isModLoaded(modid);
     }
 }
