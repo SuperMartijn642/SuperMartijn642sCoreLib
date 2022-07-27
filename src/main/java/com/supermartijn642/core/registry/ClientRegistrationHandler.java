@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.fabricmc.fabric.impl.client.texture.SpriteRegistryCallbackHolder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -15,9 +16,11 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -26,6 +29,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -87,24 +91,27 @@ public class ClientRegistrationHandler {
 
     private final List<Pair<Supplier<Item>,Supplier<BuiltinItemRendererRegistry.DynamicItemRenderer>>> customItemRenderers = new ArrayList<>();
 
+    private boolean passedModelRegistry;
+    private boolean passedTextureStitch;
+
     private ClientRegistrationHandler(String modid){
         this.modid = modid;
-        this.registerAdditionalModelHandler();
-        this.registerTextureAtlasStitchHandler();
+        ModelLoadingRegistry.INSTANCE.registerModelProvider(this::handleModelRegistryEvent);
+        SpriteRegistryCallbackHolder.EVENT_GLOBAL.register(this::handleTextureStitchEvent);
     }
 
     /**
      * Registers the given model location to be loaded from a json file.
      */
     public void registerModel(ResourceLocation identifier){
+        if(this.passedModelRegistry)
+            throw new IllegalStateException("Cannot register new models after model registry has been completed!");
         if(this.models.contains(identifier))
             throw new RuntimeException("Duplicate model location '" + identifier + "'!");
         if(this.specialModels.containsKey(identifier))
             throw new RuntimeException("Overlapping special model and model location '" + identifier + "'!");
 
         this.models.add(identifier);
-
-        this.registerAdditionalModelHandler();
     }
 
     /**
@@ -130,6 +137,8 @@ public class ClientRegistrationHandler {
      * Registers the given baked model under the given identifier. The identifier must not already contain a model.
      */
     public void registerSpecialModel(String identifier, Supplier<BakedModel> model){
+        if(haveModelsBeenRegistered)
+            throw new IllegalStateException("Cannot register new special models after model baking has completed!");
         if(!RegistryUtil.isValidPath(identifier))
             throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
@@ -153,6 +162,8 @@ public class ClientRegistrationHandler {
      * Registers an overwrite for an already present baked model.
      */
     public void registerModelOverwrite(ResourceLocation identifier, Function<BakedModel,BakedModel> modelOverwrite){
+        if(haveModelsBeenRegistered)
+            throw new IllegalStateException("Cannot register new model overwrites after model baking has completed!");
         if(this.modelOverwrites.containsKey(identifier))
             throw new RuntimeException("Duplicate model overwrite '" + identifier + "'!");
         if(this.specialModels.containsKey(identifier))
@@ -222,6 +233,9 @@ public class ClientRegistrationHandler {
      */
     @SuppressWarnings("unchecked")
     public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, Function<EntityRendererProvider.Context,EntityRenderer<? super T>> entityRenderer){
+        if(haveRenderersBeenRegistered)
+            throw new IllegalStateException("Cannot register new renderers after renderer registration has been completed!");
+
         this.entityRenderers.add(Pair.of((Supplier<EntityType<?>>)(Object)entityType, (Function<EntityRendererProvider.Context,EntityRenderer<?>>)(Object)entityRenderer));
     }
 
@@ -244,6 +258,9 @@ public class ClientRegistrationHandler {
      */
     @SuppressWarnings("unchecked")
     public <T extends BlockEntity> void registerBlockEntityRenderer(Supplier<BlockEntityType<T>> entityType, Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<? super T>> blockEntityRenderer){
+        if(haveRenderersBeenRegistered)
+            throw new IllegalStateException("Cannot register new renderers after renderer registration has been completed!");
+
         this.blockEntityRenderers.add(Pair.of((Supplier<BlockEntityType<?>>)(Object)entityType, (Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?>>)(Object)blockEntityRenderer));
     }
 
@@ -279,6 +296,8 @@ public class ClientRegistrationHandler {
      * Adds the given sprite to the given atlas.
      */
     public void registerAtlasSprite(ResourceLocation textureAtlas, String spriteLocation){
+        if(this.passedTextureStitch)
+            throw new IllegalStateException("Cannot register new models after texture stitching has been completed!");
         if(textureAtlas == null)
             throw new IllegalArgumentException("Texture atlas must not be null!");
         if(!RegistryUtil.isValidPath(spriteLocation))
@@ -296,6 +315,9 @@ public class ClientRegistrationHandler {
      * Registers the given custom item renderer for the given item.
      */
     public void registerItemRenderer(Supplier<Item> item, Supplier<BuiltinItemRendererRegistry.DynamicItemRenderer> itemRenderer){
+        if(haveRenderersBeenRegistered)
+            throw new IllegalStateException("Cannot register new renderers after renderer registration has been completed!");
+
         this.customItemRenderers.add(Pair.of(item, itemRenderer));
     }
 
@@ -395,11 +417,12 @@ public class ClientRegistrationHandler {
         }
     }
 
-    private void registerAdditionalModelHandler(){
-        ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> {
-            for(ResourceLocation model : this.models)
-                out.accept(model);
-        });
+    private void handleModelRegistryEvent(ResourceManager manager, Consumer<ResourceLocation> out){
+        this.passedModelRegistry = true;
+
+        // Additional models
+        for(ResourceLocation model : this.models)
+            out.accept(model);
     }
 
     private void registerModelOverwrites(Map<ResourceLocation,BakedModel> modelRegistry){
@@ -431,13 +454,14 @@ public class ClientRegistrationHandler {
         }
     }
 
-    private void registerTextureAtlasStitchHandler(){
-        SpriteRegistryCallbackHolder.EVENT_GLOBAL.register((atlasTexture, registry) -> {
-            Set<ResourceLocation> sprites = this.textureAtlasSprites.get(atlasTexture.location());
-            if(sprites == null)
-                return;
+    private void handleTextureStitchEvent(TextureAtlas atlasTexture, ClientSpriteRegistryCallback.Registry registry){
+        this.passedTextureStitch = true;
 
-            sprites.forEach(registry::register);
-        });
+        // Texture atlas sprites
+        Set<ResourceLocation> sprites = this.textureAtlasSprites.get(atlasTexture.location());
+        if(sprites == null)
+            return;
+
+        sprites.forEach(registry::register);
     }
 }

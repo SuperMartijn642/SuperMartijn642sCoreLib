@@ -1,6 +1,5 @@
 package com.supermartijn642.core.registry;
 
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -14,6 +13,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -25,75 +25,133 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static net.minecraft.core.Registry.*;
+
 /**
  * Created 14/07/2022 by SuperMartijn642
  */
-public class Registries<T> {
+public final class Registries {
 
-    static final Map<Registry<?>,Registries<?>> UNDERLYING_REGISTRY_MAP = new HashMap<>();
+    static final Map<net.minecraft.core.Registry<?>,Registry<?>> VANILLA_REGISTRY_MAP = new HashMap<>();
+
+    private static void addRegistry(Registry<?> registry){
+        if(VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
+            throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
+
+        VANILLA_REGISTRY_MAP.put(registry.getVanillaRegistry(), registry);
+    }
 
     @SuppressWarnings("unchecked")
     @Deprecated
-    public static <T> Registries<T> fromUnderlying(Registry<T> registry){
-        return (Registries<T>)UNDERLYING_REGISTRY_MAP.get(registry);
+    public static <T> Registry<T> fromUnderlying(net.minecraft.core.Registry<T> registry){
+        return (Registry<T>)VANILLA_REGISTRY_MAP.get(registry);
     }
 
-    public static final Registries<Block> BLOCKS = new Registries<>(Registry.BLOCK, Block.class);
-    public static final Registries<Fluid> FLUIDS = new Registries<>(Registry.FLUID, Fluid.class);
-    public static final Registries<Item> ITEMS = new Registries<>(Registry.ITEM, Item.class);
-    public static final Registries<MobEffect> MOB_EFFECTS = new Registries<>(Registry.MOB_EFFECT, MobEffect.class);
-    public static final Registries<SoundEvent> SOUND_EVENTS = new Registries<>(Registry.SOUND_EVENT, SoundEvent.class);
-    public static final Registries<Potion> POTIONS = new Registries<>(Registry.POTION, Potion.class);
-    public static final Registries<Enchantment> ENCHANTMENTS = new Registries<>(Registry.ENCHANTMENT, Enchantment.class);
-    public static final Registries<EntityType<?>> ENTITY_TYPES = new Registries<>(Registry.ENTITY_TYPE, EntityType.class);
-    public static final Registries<BlockEntityType<?>> BLOCK_ENTITY_TYPES = new Registries<>(Registry.BLOCK_ENTITY_TYPE, BlockEntityType.class);
-    public static final Registries<ParticleType<?>> PARTICLE_TYPES = new Registries<>(Registry.PARTICLE_TYPE, ParticleType.class);
-    public static final Registries<MenuType<?>> MENU_TYPES = new Registries<>(Registry.MENU, MenuType.class);
-    public static final Registries<Motive> PAINTING_VARIANTS = new Registries<>(Registry.MOTIVE, Motive.class);
-    public static final Registries<RecipeSerializer<?>> RECIPE_SERIALIZERS = new Registries<>(Registry.RECIPE_SERIALIZER, RecipeSerializer.class);
-    public static final Registries<Attribute> ATTRIBUTES = new Registries<>(Registry.ATTRIBUTE, Attribute.class);
-    public static final Registries<StatType<?>> STAT_TYPES = new Registries<>(Registry.STAT_TYPE, StatType.class);
+    public static final Registry<Block> BLOCKS = vanilla(BLOCK, Block.class);
+    public static final Registry<Fluid> FLUIDS = vanilla(FLUID, Fluid.class);
+    public static final Registry<Item> ITEMS = vanilla(ITEM, Item.class);
+    public static final Registry<MobEffect> MOB_EFFECTS = vanilla(MOB_EFFECT, MobEffect.class);
+    public static final Registry<SoundEvent> SOUND_EVENTS = vanilla(SOUND_EVENT, SoundEvent.class);
+    public static final Registry<Potion> POTIONS = vanilla(POTION, Potion.class);
+    public static final Registry<Enchantment> ENCHANTMENTS = vanilla(ENCHANTMENT, Enchantment.class);
+    public static final Registry<EntityType<?>> ENTITY_TYPES = vanilla(ENTITY_TYPE, EntityType.class);
+    public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPES = vanilla(BLOCK_ENTITY_TYPE, BlockEntityType.class);
+    public static final Registry<ParticleType<?>> PARTICLE_TYPES = vanilla(PARTICLE_TYPE, ParticleType.class);
+    public static final Registry<MenuType<?>> MENU_TYPES = vanilla(MENU, MenuType.class);
+    public static final Registry<Motive> PAINTING_VARIANTS = vanilla(MOTIVE, Motive.class);
+    public static final Registry<RecipeType<?>> RECIPE_TYPES = vanilla(RECIPE_TYPE, RecipeType.class);
+    public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZERS = vanilla(RECIPE_SERIALIZER, RecipeSerializer.class);
+    public static final Registry<Attribute> ATTRIBUTES = vanilla(ATTRIBUTE, Attribute.class);
+    public static final Registry<StatType<?>> STAT_TYPES = vanilla(STAT_TYPE, StatType.class);
 
-    private final Registry<T> registry;
-    private final Class<T> valueClass;
-
-    Registries(Registry<T> registry, Class<? super T> valueClass){
-        this.registry = registry;
-        this.valueClass = (Class<T>)valueClass;
-
-        UNDERLYING_REGISTRY_MAP.put(registry, this);
+    private static <T> Registry<T> vanilla(net.minecraft.core.Registry<T> registry, Class<? super T> valueClass){
+        return new VanillaRegistryWrapper<>(registry, valueClass);
     }
 
-    @Deprecated
-    public Registry<T> getUnderlying(){
-        return this.registry;
+    public interface Registry<T> {
+
+        net.minecraft.core.Registry<T> getVanillaRegistry();
+
+        boolean hasForgeRegistry();
+
+        void register(ResourceLocation identifier, T object);
+
+        ResourceLocation getIdentifier(T object);
+
+        boolean hasIdentifier(ResourceLocation identifier);
+
+        T getValue(ResourceLocation identifier);
+
+        Collection<ResourceLocation> getIdentifiers();
+
+        Stream<T> getValues();
+
+        Set<Map.Entry<ResourceKey<T>,T>> getEntries();
+
+        Class<T> getValueClass();
     }
 
-    public void register(ResourceLocation identifier, T object){
-        Registry.register(this.registry, identifier, object);
-    }
+    private static class VanillaRegistryWrapper<T> implements Registry<T> {
 
-    public ResourceLocation getIdentifier(T object){
-        return this.registry.getKey(object);
-    }
+        private final net.minecraft.core.Registry<T> registry;
+        private final Class<T> valueClass;
 
-    public T getValue(ResourceLocation identifier){
-        return this.registry.get(identifier);
-    }
+        private VanillaRegistryWrapper(net.minecraft.core.Registry<T> registry, Class<? super T> valueClass){
+            this.registry = registry;
+            //noinspection unchecked
+            this.valueClass = (Class<T>)valueClass;
 
-    public Collection<ResourceLocation> getIdentifiers(){
-        return this.registry.keySet();
-    }
+            addRegistry(this);
+        }
 
-    public Stream<T> getValues(){
-        return this.registry.stream();
-    }
+        @Deprecated
+        public net.minecraft.core.Registry<T> getVanillaRegistry(){
+            return this.registry;
+        }
 
-    public Set<Map.Entry<ResourceKey<T>,T>> getEntries(){
-        return this.registry.entrySet();
-    }
+        @Override
+        public boolean hasForgeRegistry(){
+            return false;
+        }
 
-    public Class<T> getValueClass(){
-        return this.valueClass;
+        public void register(ResourceLocation identifier, T object){
+            net.minecraft.core.Registry.register(this.registry, identifier, object);
+        }
+
+        public ResourceLocation getIdentifier(T object){
+            return this.registry.getKey(object);
+        }
+
+        @Override
+        public boolean hasIdentifier(ResourceLocation identifier){
+            return this.registry.containsKey(identifier);
+        }
+
+        public T getValue(ResourceLocation identifier){
+            return this.registry.get(identifier);
+        }
+
+        public Collection<ResourceLocation> getIdentifiers(){
+            return this.registry.keySet();
+        }
+
+        public Stream<T> getValues(){
+            return this.registry.stream();
+        }
+
+        public Set<Map.Entry<ResourceKey<T>,T>> getEntries(){
+            return this.registry.entrySet();
+        }
+
+        public Class<T> getValueClass(){
+            return this.valueClass;
+        }
+
+        @Override
+        public int hashCode(){
+            int result = this.registry.hashCode();
+            result = 31 * result + this.valueClass.hashCode();
+            return result;
+        }
     }
 }

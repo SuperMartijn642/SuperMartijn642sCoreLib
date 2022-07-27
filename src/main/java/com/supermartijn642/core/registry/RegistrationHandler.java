@@ -66,8 +66,8 @@ public class RegistrationHandler {
     }
 
     private final String modid;
-    private final Map<Registries<?>,Map<ResourceLocation,Supplier<?>>> entryMap = new HashMap<>();
-    private final Map<Registries<?>,List<Consumer<Helper<?>>>> callbacks = new HashMap<>();
+    private final Map<Registries.Registry<?>,Map<ResourceLocation,Supplier<?>>> entryMap = new HashMap<>();
+    private final Map<Registries.Registry<?>,List<Consumer<Helper<?>>>> callbacks = new HashMap<>();
 
     private RegistrationHandler(String modid){
         this.modid = modid;
@@ -373,11 +373,11 @@ public class RegistrationHandler {
         this.addCallback(Registries.STAT_TYPES, callback);
     }
 
-    private <T> void addEntry(Registries<T> registry, String identifier, Supplier<T> entry){
+    private <T> void addEntry(Registries.Registry<T> registry, String identifier, Supplier<T> entry){
         this.addEntry(registry, this.modid, identifier, entry);
     }
 
-    private <T> void addEntry(Registries<T> registry, String namespace, String identifier, Supplier<T> entry){
+    private <T> void addEntry(Registries.Registry<T> registry, String namespace, String identifier, Supplier<T> entry){
         if(hasBeenRegistered)
             throw new IllegalStateException("Cannot register new entries after mod initialization!");
         if(!RegistryUtil.isValidNamespace(namespace))
@@ -390,12 +390,12 @@ public class RegistrationHandler {
         ResourceLocation fullIdentifier = new ResourceLocation(namespace, identifier);
         Map<ResourceLocation,Supplier<?>> entries = this.entryMap.computeIfAbsent(registry, o -> new HashMap<>());
         if(entries.containsKey(fullIdentifier))
-            throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + registry.getUnderlying().key().location() + "'!");
+            throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + registry.getVanillaRegistry().key().location() + "'!");
 
         entries.put(fullIdentifier, entry);
     }
 
-    private <T> void addCallback(Registries<T> registry, Consumer<Helper<T>> callback){
+    private <T> void addCallback(Registries.Registry<T> registry, Consumer<Helper<T>> callback){
         if(hasBeenRegistered)
             throw new IllegalStateException("Cannot register new entries after mod initialization!");
         if(callback == null)
@@ -423,7 +423,7 @@ public class RegistrationHandler {
         this.handleRegistry(Registries.STAT_TYPES);
     }
 
-    private <T> void handleRegistry(Registries<T> registry){
+    private <T> void handleRegistry(Registries.Registry<T> registry){
         // Register entries
         if(this.entryMap.containsKey(registry))
             this.registerEntries(registry);
@@ -434,7 +434,7 @@ public class RegistrationHandler {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> void registerEntries(Registries<T> registry){
+    private <T> void registerEntries(Registries.Registry<T> registry){
         Map<ResourceLocation,Supplier<?>> entries = this.entryMap.get(registry);
         for(Map.Entry<ResourceLocation,Supplier<?>> entry : entries.entrySet()){
             T object = (T)entry.getValue().get();
@@ -442,7 +442,7 @@ public class RegistrationHandler {
         }
     }
 
-    private void callCallbacks(Registries<?> registry){
+    private void callCallbacks(Registries.Registry<?> registry){
         Helper<?> helper = new Helper<>(registry);
         List<Consumer<Helper<?>>> callbacks = this.callbacks.get(registry);
         for(Consumer<Helper<?>> callback : callbacks)
@@ -451,9 +451,9 @@ public class RegistrationHandler {
 
     public class Helper<T> {
 
-        private final Registries<T> registry;
+        private final Registries.Registry<T> registry;
 
-        public Helper(Registries<T> registry){
+        public Helper(Registries.Registry<T> registry){
             this.registry = registry;
         }
 
@@ -476,7 +476,7 @@ public class RegistrationHandler {
             ResourceLocation fullIdentifier = new ResourceLocation(namespace, identifier);
             Map<ResourceLocation,Supplier<?>> entries = RegistrationHandler.this.entryMap.computeIfAbsent(this.registry, o -> new HashMap<>());
             if(entries.containsKey(fullIdentifier))
-                throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + this.registry.getUnderlying().key().location() + "'!");
+                throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + this.registry.getVanillaRegistry().key().location() + "'!");
 
             this.registry.register(fullIdentifier, object);
         }

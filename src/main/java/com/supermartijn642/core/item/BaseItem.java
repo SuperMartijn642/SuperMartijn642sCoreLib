@@ -52,7 +52,7 @@ public class BaseItem extends Item {
      * Called when a player right-clicks with this item.
      * @return whether the player's interaction should be consumed or passed on, together with the new item stack
      */
-    protected ItemUseResult interact(ItemStack stack, Player player, InteractionHand hand, Level level){
+    public ItemUseResult interact(ItemStack stack, Player player, InteractionHand hand, Level level){
         return ItemUseResult.fromUnderlying(super.use(level, player, hand));
     }
 
@@ -68,7 +68,7 @@ public class BaseItem extends Item {
      * Called when a player right-clicks on a block with this item, after the block is interacted with.
      * @return whether the player's interaction should be consumed or passed on
      */
-    protected InteractionFeedback interactWithBlock(ItemStack stack, Player player, InteractionHand hand, Level level, BlockPos hitPos, Direction hitSide, Vec3 hitLocation){
+    public InteractionFeedback interactWithBlock(ItemStack stack, Player player, InteractionHand hand, Level level, BlockPos hitPos, Direction hitSide, Vec3 hitLocation){
         return InteractionFeedback.PASS;
     }
 
@@ -76,14 +76,14 @@ public class BaseItem extends Item {
      * Called when a player right-clicks on an entity.
      * @return whether the player's interaction should be consumed or passed on
      */
-    protected InteractionFeedback interactWithEntity(ItemStack stack, LivingEntity target, Player player, InteractionHand hand){
+    public InteractionFeedback interactWithEntity(ItemStack stack, LivingEntity target, Player player, InteractionHand hand){
         return InteractionFeedback.PASS;
     }
 
     /**
      * Called once every tick when this item is in an entity's inventory.
      */
-    protected void inventoryUpdate(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected){
+    public void inventoryUpdate(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected){
     }
 
     @Override

@@ -51,9 +51,9 @@ public @interface RegistryEntryAcceptor {
         ATTRIBUTES(Registries.ATTRIBUTES),
         STAT_TYPES(Registries.STAT_TYPES);
 
-        public final Registries<?> registry;
+        public final Registries.Registry<?> registry;
 
-        Registry(Registries<?> registry){
+        Registry(Registries.Registry<?> registry){
             this.registry = registry;
         }
     }
@@ -62,8 +62,8 @@ public @interface RegistryEntryAcceptor {
 
         private static final Type TYPE = Type.getType(RegistryEntryAcceptor.class);
 
-        private static final Map<net.minecraft.core.Registry<?>,Map<ResourceLocation,Set<Field>>> FIELDS = new HashMap<>();
-        private static final Map<net.minecraft.core.Registry<?>,Map<ResourceLocation,Set<Method>>> METHODS = new HashMap<>();
+        private static final Map<Registries.Registry<?>,Map<ResourceLocation,Set<Field>>> FIELDS = new HashMap<>();
+        private static final Map<Registries.Registry<?>,Map<ResourceLocation,Set<Method>>> METHODS = new HashMap<>();
 
         public static void gatherAnnotatedFields(){
             for(EntrypointContainer<ModInitializer> entrypoint : FabricLoader.getInstance().getEntrypointContainers("main", ModInitializer.class)){
@@ -97,7 +97,7 @@ public @interface RegistryEntryAcceptor {
                     field.setAccessible(true);
 
                     // Add the field
-                    FIELDS.computeIfAbsent(registry.registry.getUnderlying(), o -> new HashMap<>())
+                    FIELDS.computeIfAbsent(registry.registry, o -> new HashMap<>())
                         .computeIfAbsent(new ResourceLocation(namespace, identifier), o -> new HashSet<>())
                         .add(field);
                 }
@@ -132,27 +132,26 @@ public @interface RegistryEntryAcceptor {
                     method.setAccessible(true);
 
                     // Add the method
-                    METHODS.computeIfAbsent(registry.registry.getUnderlying(), o -> new HashMap<>())
+                    METHODS.computeIfAbsent(registry.registry, o -> new HashMap<>())
                         .computeIfAbsent(new ResourceLocation(namespace, identifier), o -> new HashSet<>())
                         .add(method);
                 }
             }
 
             // Register event listeners
-            Set<net.minecraft.core.Registry<?>> registries = new HashSet<>();
+            Set<Registries.Registry<?>> registries = new HashSet<>();
             registries.addAll(FIELDS.keySet());
             registries.addAll(METHODS.keySet());
-            for(net.minecraft.core.Registry<?> registry : registries){
-                RegistryEntryAddedCallback.event(registry).register((rawId, id, object) -> onRegisterEvent(registry, id, object));
-            }
+            for(Registries.Registry<?> registry : registries)
+                RegistryEntryAddedCallback.event(registry.getVanillaRegistry()).register((rawId, id, object) -> onRegisterEvent(registry, id, object));
         }
 
-        public static void onRegisterEvent(net.minecraft.core.Registry<?> registry, ResourceLocation identifier, Object object){
+        public static void onRegisterEvent(Registries.Registry<?> registry, ResourceLocation identifier, Object object){
             applyToFields(registry, identifier, object);
             applyToMethods(registry, identifier, object);
         }
 
-        private static void applyToFields(net.minecraft.core.Registry<?> registry, ResourceLocation identifier, Object object){
+        private static void applyToFields(Registries.Registry<?> registry, ResourceLocation identifier, Object object){
             if(registry == null || !FIELDS.containsKey(registry))
                 return;
 
@@ -177,7 +176,7 @@ public @interface RegistryEntryAcceptor {
             }
         }
 
-        private static void applyToMethods(net.minecraft.core.Registry<?> registry, ResourceLocation identifier, Object object){
+        private static void applyToMethods(Registries.Registry<?> registry, ResourceLocation identifier, Object object){
             if(registry == null || !METHODS.containsKey(registry))
                 return;
 
@@ -204,25 +203,25 @@ public @interface RegistryEntryAcceptor {
         }
 
         public static void reportMissing(){
-            Set<net.minecraft.core.Registry<?>> registries = new HashSet<>();
+            Set<Registries.Registry<?>> registries = new HashSet<>();
             registries.addAll(FIELDS.keySet());
             registries.addAll(METHODS.keySet());
             registries.forEach(Handler::reportMissing);
         }
 
-        private static void reportMissing(net.minecraft.core.Registry<?> registry){
+        private static void reportMissing(Registries.Registry<?> registry){
             // Fields
             if(FIELDS.containsKey(registry)){
                 for(Map.Entry<ResourceLocation,Set<Field>> entry : FIELDS.get(registry).entrySet()){
-                    if(!registry.containsKey(entry.getKey()))
-                        CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.key().location() + "' for @RegistryEntryAcceptor!");
+                    if(!registry.hasIdentifier(entry.getKey()))
+                        CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getVanillaRegistry().key().location() + "' for @RegistryEntryAcceptor!");
                 }
             }
             // Methods
             if(METHODS.containsKey(registry)){
                 for(Map.Entry<ResourceLocation,Set<Method>> entry : METHODS.get(registry).entrySet()){
-                    if(!registry.containsKey(entry.getKey()))
-                        CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.key().location() + "' for @RegistryEntryAcceptor!");
+                    if(!registry.hasIdentifier(entry.getKey()))
+                        CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getVanillaRegistry().key().location() + "' for @RegistryEntryAcceptor!");
                 }
             }
         }

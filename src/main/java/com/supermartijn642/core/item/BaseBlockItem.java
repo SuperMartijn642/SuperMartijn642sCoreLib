@@ -45,7 +45,7 @@ public class BaseBlockItem extends BlockItem {
      * Called when a player right-clicks with this item.
      * @return whether the player's interaction should be consumed or passed on, together with the new item stack
      */
-    protected ItemUseResult interact(ItemStack stack, Player player, InteractionHand hand, Level level){
+    public ItemUseResult interact(ItemStack stack, Player player, InteractionHand hand, Level level){
         return ItemUseResult.fromUnderlying(super.use(level, player, hand));
     }
 
@@ -53,14 +53,14 @@ public class BaseBlockItem extends BlockItem {
      * Called when a player right-clicks on an entity.
      * @return whether the player's interaction should be consumed or passed on
      */
-    protected InteractionFeedback interactWithEntity(ItemStack stack, LivingEntity target, Player player, InteractionHand hand){
+    public InteractionFeedback interactWithEntity(ItemStack stack, LivingEntity target, Player player, InteractionHand hand){
         return InteractionFeedback.PASS;
     }
 
     /**
      * Called once every tick when this item is in an entity's inventory.
      */
-    protected void inventoryUpdate(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected){
+    public void inventoryUpdate(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected){
     }
 
     @Override
@@ -84,7 +84,7 @@ public class BaseBlockItem extends BlockItem {
         this.inventoryUpdate(stack, level, entity, slot, isSelected);
     }
 
-    protected static class ItemUseResult {
+    public static class ItemUseResult {
 
         public static ItemUseResult pass(ItemStack stack){
             return new ItemUseResult(InteractionResult.SUCCESS, stack);
@@ -121,7 +121,7 @@ public class BaseBlockItem extends BlockItem {
         }
     }
 
-    protected enum InteractionFeedback {
+    public enum InteractionFeedback {
         PASS(InteractionResult.PASS), CONSUME(InteractionResult.CONSUME), SUCCESS(InteractionResult.SUCCESS);
 
         private final InteractionResult interactionResult;
