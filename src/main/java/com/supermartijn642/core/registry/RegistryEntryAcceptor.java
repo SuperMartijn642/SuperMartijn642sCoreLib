@@ -8,8 +8,6 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.moddiscovery.ModAnnotation;
 import net.minecraftforge.forgespi.language.ModFileScanData;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.objectweb.asm.Type;
 
 import java.lang.annotation.ElementType;
@@ -55,9 +53,9 @@ public @interface RegistryEntryAcceptor {
         ATTRIBUTES(Registries.ATTRIBUTES),
         STAT_TYPES(Registries.STAT_TYPES);
 
-        public final Registries<?> registry;
+        public final Registries.Registry<?> registry;
 
-        Registry(Registries<?> registry){
+        Registry(Registries.Registry<?> registry){
             this.registry = registry;
         }
     }
@@ -66,8 +64,8 @@ public @interface RegistryEntryAcceptor {
 
         private static final Type TYPE = Type.getType(RegistryEntryAcceptor.class);
 
-        private static final Map<IForgeRegistry<?>,Map<ResourceLocation,Set<Field>>> FIELDS = new HashMap<>();
-        private static final Map<IForgeRegistry<?>,Map<ResourceLocation,Set<Method>>> METHODS = new HashMap<>();
+        private static final Map<Registries.Registry<?>,Map<ResourceLocation,Set<Field>>> FIELDS = new HashMap<>();
+        private static final Map<Registries.Registry<?>,Map<ResourceLocation,Set<Method>>> METHODS = new HashMap<>();
 
         public static void gatherAnnotatedFields(){
             for(ModFileScanData scanData : ModList.get().getAllScanData()){
@@ -107,7 +105,7 @@ public @interface RegistryEntryAcceptor {
                             field.setAccessible(true);
 
                             // Add the field
-                            FIELDS.computeIfAbsent(registry.registry.getUnderlying(), o -> new HashMap<>())
+                            FIELDS.computeIfAbsent(registry.registry, o -> new HashMap<>())
                                 .computeIfAbsent(new ResourceLocation(namespace, identifier), o -> new HashSet<>())
                                 .add(field);
                         }else if(annotationData.targetType().equals(ElementType.METHOD)){
@@ -127,7 +125,7 @@ public @interface RegistryEntryAcceptor {
                             method.setAccessible(true);
 
                             // Add the method
-                            METHODS.computeIfAbsent(registry.registry.getUnderlying(), o -> new HashMap<>())
+                            METHODS.computeIfAbsent(registry.registry, o -> new HashMap<>())
                                 .computeIfAbsent(new ResourceLocation(namespace, identifier), o -> new HashSet<>())
                                 .add(method);
                         }else
@@ -143,8 +141,8 @@ public @interface RegistryEntryAcceptor {
         }
 
         public static void onRegisterEvent(RegistryEvent.Register<?> e){
-            applyToFields(e.getRegistry());
-            applyToMethods(e.getRegistry());
+            applyToFields(Registries.fromUnderlying(e.getRegistry()));
+            applyToMethods(Registries.fromUnderlying(e.getRegistry()));
         }
 
         public static void onIdRemapping(RegistryEvent.IdMappingEvent e){
@@ -152,14 +150,14 @@ public @interface RegistryEntryAcceptor {
             METHODS.keySet().forEach(Handler::applyToMethods);
         }
 
-        private static <T extends IForgeRegistryEntry<T>> void applyToFields(IForgeRegistry<T> registry){
+        private static <T> void applyToFields(Registries.Registry<T> registry){
             if(registry == null || !FIELDS.containsKey(registry))
                 return;
 
             for(Map.Entry<ResourceLocation,Set<Field>> entry : FIELDS.get(registry).entrySet()){
                 // Skip if no value is registered with the identifier
-                if(!registry.containsKey(entry.getKey())){
-                    CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getRegistryName() + "' for @RegistryEntryAcceptor!");
+                if(!registry.hasIdentifier(entry.getKey())){
+                    CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getVanillaRegistry().key().location() + "' for @RegistryEntryAcceptor!");
                     continue;
                 }
 
@@ -182,14 +180,16 @@ public @interface RegistryEntryAcceptor {
             }
         }
 
-        private static <T extends IForgeRegistryEntry<T>> void applyToMethods(IForgeRegistry<T> registry){
+        private static <T> void applyToMethods(Registries.Registry<T> registry){
             if(registry == null || !METHODS.containsKey(registry))
                 return;
 
             for(Map.Entry<ResourceLocation,Set<Method>> entry : METHODS.get(registry).entrySet()){
                 // Skip if no value is registered with the identifier
-                if(!registry.containsKey(entry.getKey()))
+                if(!registry.hasIdentifier(entry.getKey())){
+                    CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getVanillaRegistry().key().location() + "' for @RegistryEntryAcceptor!");
                     continue;
+                }
 
                 // Get the value
                 T value = registry.getValue(entry.getKey());

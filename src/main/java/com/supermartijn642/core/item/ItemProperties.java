@@ -21,7 +21,6 @@ public class ItemProperties {
     private Rarity rarity = Rarity.COMMON;
     private FoodProperties foodProperties;
     private boolean isFireResistant;
-    private boolean canBeRepaired = true;
 
     private ItemProperties(){
     }
@@ -75,11 +74,6 @@ public class ItemProperties {
         return this;
     }
 
-    public ItemProperties notRepairable(){
-        this.canBeRepaired = false;
-        return this;
-    }
-
     /**
      * Converts the properties into {@link Item.Properties}.
      */
@@ -94,8 +88,6 @@ public class ItemProperties {
         properties.food(this.foodProperties);
         if(this.isFireResistant)
             properties.fireResistant();
-        if(!this.canBeRepaired)
-            properties.setNoRepair();
         return properties;
     }
 }
