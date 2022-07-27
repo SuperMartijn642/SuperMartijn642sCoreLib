@@ -152,7 +152,7 @@ public class ClientRegistrationHandler {
      */
     public void registerModelOverwrite(ResourceLocation identifier, Function<BakedModel,BakedModel> modelOverwrite){
         if(this.passedModelBake)
-            throw new IllegalStateException("Cannot register new models overwrites after ModelBakeEvent has been fired!");
+            throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
         if(this.modelOverwrites.containsKey(identifier))
             throw new RuntimeException("Duplicate model overwrite '" + identifier + "'!");
         if(this.specialModels.containsKey(identifier))
@@ -223,7 +223,7 @@ public class ClientRegistrationHandler {
     @SuppressWarnings("unchecked")
     public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, Function<EntityRendererProvider.Context,EntityRenderer<? super T>> entityRenderer){
         if(this.passedRegisterRenderers)
-            throw new IllegalStateException("Cannot register new models after RegisterRenderers has been fired!");
+            throw new IllegalStateException("Cannot register new renderers after RegisterRenderers has been fired!");
 
         this.entityRenderers.add(Pair.of((Supplier<EntityType<?>>)(Object)entityType, (Function<EntityRendererProvider.Context,EntityRenderer<?>>)(Object)entityRenderer));
     }
@@ -248,7 +248,7 @@ public class ClientRegistrationHandler {
     @SuppressWarnings("unchecked")
     public <T extends BlockEntity> void registerBlockEntityRenderer(Supplier<BlockEntityType<T>> entityType, Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<? super T>> blockEntityRenderer){
         if(this.passedRegisterRenderers)
-            throw new IllegalStateException("Cannot register new models after RegisterRenderers has been fired!");
+            throw new IllegalStateException("Cannot register new renderers after RegisterRenderers has been fired!");
 
         this.blockEntityRenderers.add(Pair.of((Supplier<BlockEntityType<?>>)(Object)entityType, (Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?>>)(Object)blockEntityRenderer));
     }
@@ -304,8 +304,8 @@ public class ClientRegistrationHandler {
      * Registers the given custom item renderer for the given item. The given item must provide an instance of {@link EditableClientItemExtensions} in its {@link Item#initializeClient(Consumer)} method.
      */
     public void registerItemRenderer(Supplier<Item> item, Supplier<BlockEntityWithoutLevelRenderer> itemRenderer){
-        if(this.passedModelBake)
-            throw new IllegalStateException("Cannot register new models after item RegistryEvent has been fired!");
+        if(this.passedItemRegistry)
+            throw new IllegalStateException("Cannot register new renderers after item RegistryEvent has been fired!");
 
         this.customItemRenderers.add(Pair.of(item, itemRenderer));
     }
