@@ -442,29 +442,30 @@ public class ClientRegistrationHandler {
     }
 
     private void handleItemRegistryEvent(RegistryEvent.Register<Item> e){
+        if(!Registries.ITEMS.getForgeRegistry().equals(e.getRegistry()))
+            return;
+
         this.passedItemRegistry = true;
 
         // Custom item renderers
         Set<Item> items = new HashSet<>();
-        if(Registries.ITEMS.getForgeRegistry().equals(e.getRegistry())){
-            for(Pair<Supplier<Item>,Supplier<BlockEntityWithoutLevelRenderer>> entry : this.customItemRenderers){
-                Item item = entry.left().get();
-                if(item == null)
-                    throw new RuntimeException("Custom item renderer registered with null item!");
-                if(items.contains(item))
-                    throw new RuntimeException("Duplicate custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "'!");
+        for(Pair<Supplier<Item>,Supplier<BlockEntityWithoutLevelRenderer>> entry : this.customItemRenderers){
+            Item item = entry.left().get();
+            if(item == null)
+                throw new RuntimeException("Custom item renderer registered with null item!");
+            if(items.contains(item))
+                throw new RuntimeException("Duplicate custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "'!");
 
-                Object renderProperties = item.getRenderPropertiesInternal();
-                if(!(renderProperties instanceof EditableClientItemExtensions))
-                    throw new RuntimeException("Cannot register custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "' without EditableClientItemExtensions render properties!");
+            Object renderProperties = item.getRenderPropertiesInternal();
+            if(!(renderProperties instanceof EditableClientItemExtensions))
+                throw new RuntimeException("Cannot register custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "' without EditableClientItemExtensions render properties!");
 
-                BlockEntityWithoutLevelRenderer customRenderer = entry.right().get();
-                if(customRenderer == null)
-                    throw new RuntimeException("Got null custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "'!");
+            BlockEntityWithoutLevelRenderer customRenderer = entry.right().get();
+            if(customRenderer == null)
+                throw new RuntimeException("Got null custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "'!");
 
-                items.add(item);
-                ((EditableClientItemExtensions)renderProperties).setCustomRenderer(customRenderer);
-            }
+            items.add(item);
+            ((EditableClientItemExtensions)renderProperties).setCustomRenderer(customRenderer);
         }
     }
 }
