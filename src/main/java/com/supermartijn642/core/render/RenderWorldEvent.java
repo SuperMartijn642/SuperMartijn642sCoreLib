@@ -6,7 +6,7 @@ import net.minecraftforge.eventbus.api.Event;
 /**
  * Created 17/11/2021 by SuperMartijn642
  * <p>
- * Fired right after blocks are rendered and the {@link net.minecraftforge.client.event.DrawSelectionEvent} is fired.
+ * Fired right after blocks are rendered and the {@link net.minecraftforge.client.event.DrawSelectionEvent.HighlightBlock} is fired.
  */
 public class RenderWorldEvent extends Event {
 
