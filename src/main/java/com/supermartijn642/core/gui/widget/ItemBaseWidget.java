@@ -45,6 +45,6 @@ public abstract class ItemBaseWidget extends ObjectBaseWidget<ItemStack> {
 
     @Override
     protected boolean validateObject(ItemStack object){
-        return this.stackValidator.test(object);
+        return object != null && this.stackValidator.test(object);
     }
 }
