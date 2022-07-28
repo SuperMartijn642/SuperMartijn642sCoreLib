@@ -11,11 +11,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 /**
  * Created 5/30/2021 by SuperMartijn642
  */
-public abstract class TileEntityBasePacket<T extends BlockEntity> extends BlockPosBasePacket {
+public abstract class BlockEntityBasePacket<T extends BlockEntity> extends BlockPosBasePacket {
 
     public ResourceKey<Level> dimension;
 
-    public TileEntityBasePacket(){
+    public BlockEntityBasePacket(){
     }
 
     /**
@@ -23,7 +23,7 @@ public abstract class TileEntityBasePacket<T extends BlockEntity> extends BlockP
      * @param dimension dimension of the tile entity
      * @param pos       position of the tile entity
      */
-    public TileEntityBasePacket(ResourceKey<Level> dimension, BlockPos pos){
+    public BlockEntityBasePacket(ResourceKey<Level> dimension, BlockPos pos){
         super(pos);
         this.dimension = dimension;
     }
@@ -33,7 +33,7 @@ public abstract class TileEntityBasePacket<T extends BlockEntity> extends BlockP
      * @param world world the tile entity is in
      * @param pos   position of the tile entity
      */
-    public TileEntityBasePacket(Level world, BlockPos pos){
+    public BlockEntityBasePacket(Level world, BlockPos pos){
         this(world == null ? null : world.dimension(), pos);
     }
 
@@ -41,7 +41,7 @@ public abstract class TileEntityBasePacket<T extends BlockEntity> extends BlockP
      * Grabs the tile entity at {@code pos} in the relevant player's dimension.
      * @param pos position of the tile entity
      */
-    public TileEntityBasePacket(BlockPos pos){
+    public BlockEntityBasePacket(BlockPos pos){
         this((ResourceKey<Level>)null, pos);
     }
 
