@@ -11,35 +11,34 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  */
 public abstract class BlockEntityBaseContainer<T extends BlockEntity> extends ObjectBaseContainer<T> {
 
-    protected final Level tileWorld;
-    protected final BlockPos tilePos;
+    protected final Level blockEntityLevel;
+    protected final BlockPos blockEntityPos;
 
-    public BlockEntityBaseContainer(MenuType<?> type, int id, Player player, Level tileWorld, BlockPos tilePos){
+    public BlockEntityBaseContainer(MenuType<?> type, int id, Player player, Level blockEntityLevel, BlockPos blockEntityPos){
         super(type, id, player);
-        this.tileWorld = tileWorld;
-        this.tilePos = tilePos;
+        this.blockEntityLevel = blockEntityLevel;
+        this.blockEntityPos = blockEntityPos;
     }
 
-    public BlockEntityBaseContainer(MenuType<?> type, int id, Player player, BlockPos tilePos){
-        this(type, id, player, player.level, tilePos);
-    }
-
-    @Override
-    public boolean stillValid(Player playerIn){
-        return super.stillValid(playerIn);
+    public BlockEntityBaseContainer(MenuType<?> type, int id, Player player, BlockPos blockEntityPos){
+        this(type, id, player, player.level, blockEntityPos);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected T getObject(){
-        BlockEntity tile = this.tileWorld.getBlockEntity(this.tilePos);
-
-        if(tile == null)
+    protected T getObject(T oldObject){
+        BlockEntity entity = this.blockEntityLevel.getBlockEntity(this.blockEntityPos);
+        if(entity == null)
             return null;
 
         try{
-            return (T)tile;
+            return (T)entity;
         }catch(ClassCastException ignore){}
         return null;
+    }
+
+    @Override
+    protected boolean validateObject(T object){
+        return object != null && !object.isRemoved();
     }
 }

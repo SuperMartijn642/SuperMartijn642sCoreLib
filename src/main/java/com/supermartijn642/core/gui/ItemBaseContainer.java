@@ -6,6 +6,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -14,22 +15,29 @@ import java.util.function.Supplier;
 public abstract class ItemBaseContainer extends ObjectBaseContainer<ItemStack> {
 
     private final Supplier<ItemStack> stackSupplier;
+    protected final Predicate<ItemStack> stackValidator;
 
-    private ItemBaseContainer(MenuType<?> type, int id, Player player, Supplier<ItemStack> itemStackSupplier){
+    private ItemBaseContainer(MenuType<?> type, int id, Player player, Supplier<ItemStack> itemStackSupplier, Predicate<ItemStack> stackValidator){
         super(type, id, player);
         this.stackSupplier = itemStackSupplier;
+        this.stackValidator = stackValidator;
     }
 
-    protected ItemBaseContainer(MenuType<?> type, int id, Player player, int playerSlot){
-        this(type, id, player, () -> player.getInventory().getItem(playerSlot));
+    protected ItemBaseContainer(MenuType<?> type, int id, Player player, int playerSlot, Predicate<ItemStack> stackValidator){
+        this(type, id, player, () -> player.getInventory().getItem(playerSlot), stackValidator);
     }
 
-    protected ItemBaseContainer(MenuType<?> type, int id, Player player, InteractionHand hand){
-        this(type, id, player, () -> ClientUtils.getPlayer().getItemInHand(hand));
+    protected ItemBaseContainer(MenuType<?> type, int id, Player player, InteractionHand hand, Predicate<ItemStack> stackValidator){
+        this(type, id, player, () -> ClientUtils.getPlayer().getItemInHand(hand), stackValidator);
     }
 
     @Override
-    protected ItemStack getObject(){
+    protected ItemStack getObject(ItemStack oldObject){
         return this.stackSupplier.get();
+    }
+
+    @Override
+    protected boolean validateObject(ItemStack object){
+        return object != null && this.stackValidator.test(object);
     }
 }
