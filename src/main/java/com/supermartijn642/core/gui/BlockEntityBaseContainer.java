@@ -9,18 +9,18 @@ import net.minecraft.world.World;
 /**
  * Created 1/26/2021 by SuperMartijn642
  */
-public abstract class TileEntityBaseContainer<T extends TileEntity> extends ObjectBaseContainer<T> {
+public abstract class BlockEntityBaseContainer<T extends TileEntity> extends ObjectBaseContainer<T> {
 
     protected final World tileWorld;
     protected final BlockPos tilePos;
 
-    public TileEntityBaseContainer(ContainerType<?> type, int id, PlayerEntity player, World tileWorld, BlockPos tilePos){
+    public BlockEntityBaseContainer(ContainerType<?> type, int id, PlayerEntity player, World tileWorld, BlockPos tilePos){
         super(type, id, player);
         this.tileWorld = tileWorld;
         this.tilePos = tilePos;
     }
 
-    public TileEntityBaseContainer(ContainerType<?> type, int id, PlayerEntity player, BlockPos tilePos){
+    public BlockEntityBaseContainer(ContainerType<?> type, int id, PlayerEntity player, BlockPos tilePos){
         this(type, id, player, player.level, tilePos);
     }
 

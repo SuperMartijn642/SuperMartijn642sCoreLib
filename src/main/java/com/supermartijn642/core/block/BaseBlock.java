@@ -2,6 +2,7 @@ package com.supermartijn642.core.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
@@ -10,12 +11,20 @@ import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameters;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Created 1/26/2021 by SuperMartijn642
@@ -24,10 +33,13 @@ public class BaseBlock extends Block {
 
     private final boolean saveTileData;
 
-    public BaseBlock(String registryName, boolean saveTileData, Properties properties){
+    public BaseBlock(boolean saveTileData, Properties properties){
         super(properties);
-        this.setRegistryName(registryName);
         this.saveTileData = saveTileData;
+    }
+
+    public BaseBlock(boolean saveTileData, BlockProperties properties){
+        this(saveTileData, properties.toUnderlying());
     }
 
     @Override
@@ -40,9 +52,9 @@ public class BaseBlock extends Block {
         if(tag == null || tag.isEmpty())
             return;
 
-        TileEntity tile = worldIn.getBlockEntity(pos);
-        if(tile instanceof BaseTileEntity)
-            ((BaseTileEntity)tile).readData(tag);
+        TileEntity entity = worldIn.getBlockEntity(pos);
+        if(entity instanceof BaseBlockEntity)
+            ((BaseBlockEntity)entity).readData(tag);
     }
 
     @Override
@@ -52,16 +64,16 @@ public class BaseBlock extends Block {
         if(!this.saveTileData)
             return items;
 
-        TileEntity tile = builder.getOptionalParameter(LootParameters.BLOCK_ENTITY);
-        if(!(tile instanceof BaseTileEntity))
+        TileEntity entity = builder.getOptionalParameter(LootParameters.BLOCK_ENTITY);
+        if(!(entity instanceof BaseBlockEntity))
             return items;
 
-        CompoundNBT tileTag = ((BaseTileEntity)tile).writeItemStackData();
-        if(tileTag == null || tileTag.isEmpty())
+        CompoundNBT entityTag = ((BaseBlockEntity)entity).writeItemStackData();
+        if(entityTag == null || entityTag.isEmpty())
             return items;
 
         CompoundNBT tag = new CompoundNBT();
-        tag.put("tileData", tileTag);
+        tag.put("tileData", entityTag);
 
         for(ItemStack stack : items){
             if(stack.getItem() instanceof BlockItem && ((BlockItem)stack.getItem()).getBlock() == this){
@@ -79,20 +91,59 @@ public class BaseBlock extends Block {
         if(!this.saveTileData)
             return stack;
 
-        TileEntity tile = world.getBlockEntity(pos);
-        if(!(tile instanceof BaseTileEntity))
+        TileEntity entity = world.getBlockEntity(pos);
+        if(!(entity instanceof BaseBlockEntity))
             return stack;
 
-        CompoundNBT tileTag = ((BaseTileEntity)tile).writeItemStackData();
-        if(tileTag == null || tileTag.isEmpty())
+        CompoundNBT entityTag = ((BaseBlockEntity)entity).writeItemStackData();
+        if(entityTag == null || entityTag.isEmpty())
             return stack;
 
         CompoundNBT tag = new CompoundNBT();
-        tag.put("tileData", tileTag);
+        tag.put("tileData", entityTag);
 
         if(stack.getItem() instanceof BlockItem && ((BlockItem)stack.getItem()).getBlock() == this)
             stack.setTag(tag);
 
         return stack;
+    }
+
+    @Override
+    public ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hitResult){
+        return this.interact(state, level, pos, player, hand, hitResult.getDirection(), hitResult.getLocation()).interactionResult;
+    }
+
+    /**
+     * Called when a player interacts with this block.
+     * @return whether the player's interaction should be consumed or passed on
+     */
+    protected InteractionFeedback interact(BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, Direction hitSide, Vector3d hitLocation){
+        return InteractionFeedback.PASS;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, @Nullable IBlockReader level, List<ITextComponent> information, ITooltipFlag flag){
+        this.appendItemInformation(stack, level, information::add, flag.isAdvanced());
+        super.appendHoverText(stack, level, information, flag);
+    }
+
+    /**
+     * Adds information to be displayed when hovering over the item corresponding to this block in the inventory.
+     * @param stack    the stack being hovered over
+     * @param level    the world the player is in, may be {@code null}
+     * @param info     consumes the information which should be added
+     * @param advanced whether advanced tooltips is enabled
+     */
+    protected void appendItemInformation(ItemStack stack, @Nullable IBlockReader level, Consumer<ITextComponent> info, boolean advanced){
+    }
+
+    protected enum InteractionFeedback {
+        PASS(ActionResultType.PASS), CONSUME(ActionResultType.CONSUME), SUCCESS(ActionResultType.SUCCESS);
+
+        private final ActionResultType interactionResult;
+
+        InteractionFeedback(ActionResultType interactionResult){
+            this.interactionResult = interactionResult;
+        }
     }
 }

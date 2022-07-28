@@ -5,13 +5,23 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created 1/20/2021 by SuperMartijn642
@@ -215,14 +225,14 @@ public class ScreenUtils {
         RenderSystem.defaultBlendFunc();
 
         Matrix4f matrix = matrixStack.last().pose();
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
+        Tessellator tesselator = Tessellator.getInstance();
+        BufferBuilder buffer = tesselator.getBuilder();
         buffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
         buffer.vertex(matrix, x, y + height, 0).color(red, green, blue, alpha).endVertex();
         buffer.vertex(matrix, x + width, y + height, 0).color(red, green, blue, alpha).endVertex();
         buffer.vertex(matrix, x + width, y, 0).color(red, green, blue, alpha).endVertex();
         buffer.vertex(matrix, x, y, 0).color(red, green, blue, alpha).endVertex();
-        tessellator.end();
+        tesselator.end();
 
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
@@ -230,5 +240,103 @@ public class ScreenUtils {
 
     public static void bindTexture(ResourceLocation location){
         Minecraft.getInstance().textureManager.bind(location);
+    }
+
+    public static void drawTooltip(MatrixStack poseStack, FontRenderer fontRenderer, List<ITextComponent> text, int x, int y){
+        drawTooltipInternal(poseStack, fontRenderer, text.stream().map(ITextComponent::getVisualOrderText).collect(Collectors.toList()), x, y);
+    }
+
+    public static void drawTooltip(MatrixStack poseStack, FontRenderer fontRenderer, ITextComponent text, int x, int y){
+        drawTooltip(poseStack, fontRenderer, Collections.singletonList(text), x, y);
+    }
+
+    public static void drawTooltip(MatrixStack poseStack, FontRenderer fontRenderer, String text, int x, int y){
+        drawTooltip(poseStack, fontRenderer, new StringTextComponent(text), x, y);
+    }
+
+    public static void drawTooltip(MatrixStack poseStack, List<ITextComponent> text, int x, int y){
+        drawTooltip(poseStack, ClientUtils.getFontRenderer(), text, x, y);
+    }
+
+    public static void drawTooltip(MatrixStack poseStack, ITextComponent text, int x, int y){
+        drawTooltip(poseStack, ClientUtils.getFontRenderer(), text, x, y);
+    }
+
+    public static void drawTooltip(MatrixStack poseStack, String text, int x, int y){
+        drawTooltip(poseStack, ClientUtils.getFontRenderer(), text, x, y);
+    }
+
+    /**
+     * Copied from {@link Screen#renderToolTip(MatrixStack, List, int, int, FontRenderer)}.
+     */
+    private static void drawTooltipInternal(MatrixStack poseStack, FontRenderer fontRenderer, List<? extends IReorderingProcessor> components, int x, int y){
+        if(components.isEmpty())
+            return;
+
+        int windowWidth = ClientUtils.getMinecraft().getWindow().getGuiScaledWidth();
+        int windowHeight = ClientUtils.getMinecraft().getWindow().getGuiScaledHeight();
+
+        int tooltipWidth = 0;
+        int tooltipHeight = components.size() == 1 ? -2 : 0;
+
+        for(IReorderingProcessor component : components){
+            int componentWidth = fontRenderer.width(component);
+            if(componentWidth > tooltipWidth)
+                tooltipWidth = componentWidth;
+
+            tooltipHeight += 10;
+        }
+
+        int tooltipX = x + 12;
+        int tooltipY = y - 12;
+        if(tooltipX + tooltipWidth > windowWidth){
+            tooltipX -= 28 + tooltipWidth;
+        }
+
+        if(tooltipY + tooltipHeight + 6 > windowHeight){
+            tooltipY = windowHeight - tooltipHeight - 6;
+        }
+
+        if(y - tooltipHeight - 8 < 0){
+            tooltipY = y + 8;
+        }
+
+        poseStack.pushPose();
+
+        Tessellator tesselator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tesselator.getBuilder();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        Matrix4f matrix4f = poseStack.last().pose();
+        AbstractGui.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY - 4, tooltipX + tooltipWidth + 3, tooltipY - 3, 400, -267386864, -267386864);
+        AbstractGui.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipWidth + 3, tooltipY + tooltipHeight + 4, 400, -267386864, -267386864);
+        AbstractGui.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY - 3, tooltipX + tooltipWidth + 3, tooltipY + tooltipHeight + 3, 400, -267386864, -267386864);
+        AbstractGui.fillGradient(matrix4f, bufferbuilder, tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, 400, -267386864, -267386864);
+        AbstractGui.fillGradient(matrix4f, bufferbuilder, tooltipX + tooltipWidth + 3, tooltipY - 3, tooltipX + tooltipWidth + 4, tooltipY + tooltipHeight + 3, 400, -267386864, -267386864);
+        AbstractGui.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, 400, 1347420415, 1344798847);
+        AbstractGui.fillGradient(matrix4f, bufferbuilder, tooltipX + tooltipWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipWidth + 3, tooltipY + tooltipHeight + 3 - 1, 400, 1347420415, 1344798847);
+        AbstractGui.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY - 3, tooltipX + tooltipWidth + 3, tooltipY - 3 + 1, 400, 1347420415, 1347420415);
+        AbstractGui.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipWidth + 3, tooltipY + tooltipHeight + 3, 400, 1344798847, 1344798847);
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableTexture();
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.shadeModel(7425);
+        bufferbuilder.end();
+        WorldVertexBufferUploader.end(bufferbuilder);
+        RenderSystem.shadeModel(7424);
+        RenderSystem.disableBlend();
+        RenderSystem.enableTexture();
+        IRenderTypeBuffer.Impl bufferSource = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+        poseStack.translate(0.0D, 0.0D, 400.0D);
+
+        for(int index = 0; index < components.size(); ++index){
+            IReorderingProcessor component = components.get(index);
+            if(component != null)
+                fontRenderer.drawInBatch(component, tooltipX, tooltipY, -1, true, matrix4f, bufferSource, false, 0, 15728880);
+            tooltipY += index == 0 ? 12 : 10;
+        }
+
+        bufferSource.endBatch();
+        poseStack.popPose();
     }
 }
