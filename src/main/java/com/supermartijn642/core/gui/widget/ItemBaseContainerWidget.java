@@ -46,6 +46,6 @@ public abstract class ItemBaseContainerWidget<C extends AbstractContainerMenu> e
 
     @Override
     protected boolean validateObject(ItemStack object){
-        return this.stackValidator.test(object);
+        return object != null && this.stackValidator.test(object);
     }
 }
