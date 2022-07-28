@@ -18,7 +18,7 @@ public abstract class ItemBaseContainer extends ObjectBaseContainer<ItemStack> {
     protected final Predicate<ItemStack> stackValidator;
 
     private ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, Supplier<ItemStack> itemStackSupplier, Predicate<ItemStack> stackValidator){
-        super(type, id, player);
+        super(type, id, player, true);
         this.stackSupplier = itemStackSupplier;
         this.stackValidator = stackValidator;
     }
