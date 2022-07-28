@@ -13,29 +13,29 @@ import java.util.function.Supplier;
 /**
  * Created 24/07/2022 by SuperMartijn642
  */
-public class ItemGroup extends CreativeModeTab {
+public class CreativeItemGroup extends CreativeModeTab {
 
-    public static ItemGroup create(String modid, String name, Supplier<ItemStack> icon){
+    public static CreativeItemGroup create(String modid, String name, Supplier<ItemStack> icon){
         if(!RegistryUtil.isValidNamespace(modid))
             throw new IllegalArgumentException("Modid '" + modid + "' must only contain characters [a-z0-9_.-]!");
         if(!RegistryUtil.isValidNamespace(modid))
             throw new IllegalArgumentException("Item group name '" + name + "' must only contain characters [a-z0-9_.-]!");
 
         String identifier = modid + "." + name;
-        String translationKey = modid + ".itemGroup." + name;
-        return new ItemGroup(identifier, translationKey, icon);
+        String translationKey = modid + ".item_group." + name;
+        return new CreativeItemGroup(identifier, translationKey, icon);
     }
 
-    public static ItemGroup create(String modid, String name, ItemLike icon){
+    public static CreativeItemGroup create(String modid, String name, ItemLike icon){
         return create(modid, name, () -> icon.asItem().getDefaultInstance());
     }
 
-    public static ItemGroup create(String modid, Supplier<ItemStack> icon){
+    public static CreativeItemGroup create(String modid, Supplier<ItemStack> icon){
         if(!RegistryUtil.isValidNamespace(modid))
             throw new IllegalArgumentException("Modid '" + modid + "' must only contain characters [a-z0-9_.-]!");
 
         String translationKey = modid + ".itemGroup";
-        return new ItemGroup(modid, translationKey, icon);
+        return new CreativeItemGroup(modid, translationKey, icon);
     }
 
     public static CreativeModeTab getBuildingBlocks(){
@@ -78,7 +78,7 @@ public class ItemGroup extends CreativeModeTab {
         return CreativeModeTab.TAB_DECORATIONS;
     }
 
-    public static ItemGroup create(String modid, ItemLike icon){
+    public static CreativeItemGroup create(String modid, ItemLike icon){
         ((ItemGroupExtensions)CreativeModeTab.TAB_BUILDING_BLOCKS).fabric_expandArray();
         return create(modid, () -> icon.asItem().getDefaultInstance());
     }
@@ -87,7 +87,7 @@ public class ItemGroup extends CreativeModeTab {
     private final Component displayName;
     private final Supplier<ItemStack> icon;
 
-    private ItemGroup(String identifier, String translationKey, Supplier<ItemStack> icon){
+    private CreativeItemGroup(String identifier, String translationKey, Supplier<ItemStack> icon){
         super(CreativeModeTab.TABS.length - 1, identifier);
         this.identifier = identifier;
         this.displayName = TextComponents.translation(translationKey).get();
