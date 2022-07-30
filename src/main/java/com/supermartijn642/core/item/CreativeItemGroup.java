@@ -21,6 +21,8 @@ public class CreativeItemGroup extends CreativeModeTab {
         if(!RegistryUtil.isValidNamespace(modid))
             throw new IllegalArgumentException("Item group name '" + name + "' must only contain characters [a-z0-9_.-]!");
 
+        ((ItemGroupExtensions)CreativeModeTab.TAB_BUILDING_BLOCKS).fabric_expandArray();
+
         String identifier = modid + "." + name;
         String translationKey = modid + ".item_group." + name;
         return new CreativeItemGroup(identifier, translationKey, icon);
@@ -34,8 +36,14 @@ public class CreativeItemGroup extends CreativeModeTab {
         if(!RegistryUtil.isValidNamespace(modid))
             throw new IllegalArgumentException("Modid '" + modid + "' must only contain characters [a-z0-9_.-]!");
 
-        String translationKey = modid + ".itemGroup";
+        ((ItemGroupExtensions)CreativeModeTab.TAB_BUILDING_BLOCKS).fabric_expandArray();
+
+        String translationKey = modid + ".item_group";
         return new CreativeItemGroup(modid, translationKey, icon);
+    }
+
+    public static CreativeItemGroup create(String modid, ItemLike icon){
+        return create(modid, () -> icon.asItem().getDefaultInstance());
     }
 
     public static CreativeModeTab getBuildingBlocks(){
@@ -76,11 +84,6 @@ public class CreativeItemGroup extends CreativeModeTab {
 
     public static CreativeModeTab getBrewing(){
         return CreativeModeTab.TAB_DECORATIONS;
-    }
-
-    public static CreativeItemGroup create(String modid, ItemLike icon){
-        ((ItemGroupExtensions)CreativeModeTab.TAB_BUILDING_BLOCKS).fabric_expandArray();
-        return create(modid, () -> icon.asItem().getDefaultInstance());
     }
 
     private final String identifier;
