@@ -33,8 +33,12 @@ public class CreativeItemGroup extends ItemGroup {
         if(!RegistryUtil.isValidNamespace(modid))
             throw new IllegalArgumentException("Modid '" + modid + "' must only contain characters [a-z0-9_.-]!");
 
-        String translationKey = modid + ".itemGroup";
+        String translationKey = modid + ".item_group";
         return new CreativeItemGroup(modid, translationKey, icon);
+    }
+
+    public static CreativeItemGroup create(String modid, IItemProvider icon){
+        return create(modid, () -> icon.asItem().getDefaultInstance());
     }
 
     public static ItemGroup getBuildingBlocks(){
@@ -75,10 +79,6 @@ public class CreativeItemGroup extends ItemGroup {
 
     public static ItemGroup getBrewing(){
         return ItemGroup.TAB_DECORATIONS;
-    }
-
-    public static CreativeItemGroup create(String modid, IItemProvider icon){
-        return create(modid, () -> icon.asItem().getDefaultInstance());
     }
 
     private final String identifier;
