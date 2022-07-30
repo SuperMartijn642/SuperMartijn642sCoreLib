@@ -1,5 +1,7 @@
 package com.supermartijn642.core.registry;
 
+import com.supermartijn642.core.util.MappedSetView;
+import com.supermartijn642.core.util.Pair;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
@@ -26,7 +28,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static net.minecraft.util.registry.Registry.*;
 
@@ -103,11 +104,11 @@ public final class Registries {
 
         T getValue(ResourceLocation identifier);
 
-        Collection<ResourceLocation> getIdentifiers();
+        Set<ResourceLocation> getIdentifiers();
 
-        Stream<T> getValues();
+        Collection<T> getValues();
 
-        Set<Map.Entry<ResourceLocation,T>> getEntries();
+        Set<Pair<ResourceLocation,T>> getEntries();
 
         Class<T> getValueClass();
     }
@@ -161,16 +162,16 @@ public final class Registries {
             return this.registry.get(identifier);
         }
 
-        public Collection<ResourceLocation> getIdentifiers(){
+        public Set<ResourceLocation> getIdentifiers(){
             return this.registry.keySet();
         }
 
-        public Stream<T> getValues(){
-            return this.registry.stream();
+        public Collection<T> getValues(){
+            return ((SimpleRegistry<T>)this.registry).storage.values();
         }
 
-        public Set<Map.Entry<ResourceLocation,T>> getEntries(){
-            return ((SimpleRegistry<T>)this.registry).storage.entrySet();
+        public Set<Pair<ResourceLocation,T>> getEntries(){
+            return MappedSetView.map(((SimpleRegistry<T>)this.registry).storage.entrySet(), entry -> Pair.of(entry.getKey(), entry.getValue()));
         }
 
         public Class<T> getValueClass(){
@@ -235,16 +236,16 @@ public final class Registries {
             return this.forgeRegistry.getValue(identifier);
         }
 
-        public Collection<ResourceLocation> getIdentifiers(){
+        public Set<ResourceLocation> getIdentifiers(){
             return this.forgeRegistry.getKeys();
         }
 
-        public Stream<T> getValues(){
-            return this.forgeRegistry.getValues().stream();
+        public Collection<T> getValues(){
+            return this.forgeRegistry.getValues();
         }
 
-        public Set<Map.Entry<ResourceLocation,T>> getEntries(){
-            return this.forgeRegistry.getEntries();
+        public Set<Pair<ResourceLocation,T>> getEntries(){
+            return MappedSetView.map(this.forgeRegistry.getEntries(), entry -> Pair.of(entry.getKey(), entry.getValue()));
         }
 
         public Class<T> getValueClass(){
