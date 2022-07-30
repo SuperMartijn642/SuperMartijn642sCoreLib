@@ -9,11 +9,11 @@ import net.minecraft.tileentity.TileEntityType;
 /**
  * Created 1/26/2021 by SuperMartijn642
  */
-public abstract class BaseTileEntity extends TileEntity {
+public abstract class BaseBlockEntity extends TileEntity {
 
     private boolean dataChanged = false;
 
-    public BaseTileEntity(TileEntityType<?> tileEntityTypeIn){
+    public BaseBlockEntity(TileEntityType<?> tileEntityTypeIn){
         super(tileEntityTypeIn);
     }
 

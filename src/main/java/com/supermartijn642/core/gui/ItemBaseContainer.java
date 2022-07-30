@@ -6,6 +6,7 @@ import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -14,22 +15,29 @@ import java.util.function.Supplier;
 public abstract class ItemBaseContainer extends ObjectBaseContainer<ItemStack> {
 
     private final Supplier<ItemStack> stackSupplier;
+    protected final Predicate<ItemStack> stackValidator;
 
-    private ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, Supplier<ItemStack> itemStackSupplier){
-        super(type, id, player);
+    private ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, Supplier<ItemStack> itemStackSupplier, Predicate<ItemStack> stackValidator){
+        super(type, id, player, true);
         this.stackSupplier = itemStackSupplier;
+        this.stackValidator = stackValidator;
     }
 
-    protected ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, int playerSlot){
-        this(type, id, player, () -> player.inventory.getItem(playerSlot));
+    protected ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, int playerSlot, Predicate<ItemStack> stackValidator){
+        this(type, id, player, () -> player.inventory.getItem(playerSlot), stackValidator);
     }
 
-    protected ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, Hand hand){
-        this(type, id, player, () -> ClientUtils.getPlayer().getItemInHand(hand));
+    protected ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, Hand hand, Predicate<ItemStack> stackValidator){
+        this(type, id, player, () -> ClientUtils.getPlayer().getItemInHand(hand), stackValidator);
     }
 
     @Override
-    protected ItemStack getObject(){
+    protected ItemStack getObject(ItemStack oldObject){
         return this.stackSupplier.get();
+    }
+
+    @Override
+    protected boolean validateObject(ItemStack object){
+        return object != null && this.stackValidator.test(object);
     }
 }

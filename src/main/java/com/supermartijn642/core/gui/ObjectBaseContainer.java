@@ -1,25 +1,32 @@
 package com.supermartijn642.core.gui;
 
+import com.supermartijn642.core.ClientUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.ContainerType;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Created 1/26/2021 by SuperMartijn642
  */
 public abstract class ObjectBaseContainer<T> extends BaseContainer {
 
-    public ObjectBaseContainer(ContainerType<?> type, int id, PlayerEntity player){
+    protected T object;
+    private final boolean alwaysRenewObject;
+
+    public ObjectBaseContainer(ContainerType<?> type, int id, PlayerEntity player, boolean alwaysRenewObject){
         super(type, id, player);
+        this.alwaysRenewObject = alwaysRenewObject;
+    }
+
+    public ObjectBaseContainer(ContainerType<?> type, int id, PlayerEntity player){
+        this(type, id, player, false);
     }
 
     @Override
     protected void addSlots(PlayerEntity player){
-        T object = this.getObjectOrClose();
-        if(object != null)
-            this.addSlots(player, object);
+        if(!this.validateObjectOrClose())
+            this.addSlots(player, this.object);
     }
 
     /**
@@ -28,21 +35,32 @@ public abstract class ObjectBaseContainer<T> extends BaseContainer {
     protected abstract void addSlots(PlayerEntity player, @Nonnull T object);
 
     /**
-     * Gets the object from {@link #getObject()}, if {@code null} the screen
-     * will be closed, the object from {@link #getObject()} will be returned.
-     * @return the object from {@link #getObject()} or {@code null}
-     */
-    @Nullable
-    protected T getObjectOrClose(){
-        T object = this.getObject();
-        if(object == null)
-            this.player.closeContainer();
-        return object;
-    }
-
-    /**
+     * Called to obtain object needed for this widget to remain active. May be called at any time.
+     * @param oldObject the old object, will be {@code null} when the widget is first added
      * @return the object required for the container to remain open
      */
-    @Nullable
-    protected abstract T getObject();
+    protected abstract T getObject(T oldObject);
+
+    /**
+     * Validates the object obtained from {@link #getObject(Object)}.
+     * The associated screen will be closed if {@code false} is returned.
+     * @param object object to be validated, may be null
+     * @return true if the object is valid
+     */
+    protected abstract boolean validateObject(T object);
+
+    /**
+     * Validates the object. If the object is not valid the screen will be closed.
+     * @return true if the object is valid
+     */
+    protected boolean validateObjectOrClose(){
+        if(this.alwaysRenewObject || !this.validateObject(this.object)){
+            this.object = this.getObject(this.object);
+            if(!this.validateObject(this.object)){
+                ClientUtils.closeScreen();
+                return false;
+            }
+        }
+        return true;
+    }
 }

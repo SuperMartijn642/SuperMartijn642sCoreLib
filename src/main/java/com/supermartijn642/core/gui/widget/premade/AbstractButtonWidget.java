@@ -1,13 +1,14 @@
-package com.supermartijn642.core.gui.widget;
+package com.supermartijn642.core.gui.widget.premade;
 
-import net.minecraft.client.Minecraft;
+import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.gui.widget.BaseWidget;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.util.SoundEvents;
 
 /**
  * Created 10/8/2020 by SuperMartijn642
  */
-public abstract class AbstractButtonWidget extends Widget {
+public abstract class AbstractButtonWidget extends BaseWidget {
 
     private final Runnable pressable;
 
@@ -30,15 +31,18 @@ public abstract class AbstractButtonWidget extends Widget {
     }
 
     @Override
-    public void mouseClicked(int mouseX, int mouseY, int button){
-        if(this.active && mouseX >= this.x && mouseX < this.x + this.width && mouseY >= this.y && mouseY < this.y + this.height)
+    public boolean mousePressed(int mouseX, int mouseY, int button, boolean hasBeenHandled){
+        if(!hasBeenHandled && mouseX >= this.x && mouseX < this.x + this.width && mouseY >= this.y && mouseY < this.y + this.height){
             this.onPress();
+            return true;
+        }
+        return false;
     }
 
     /**
      * Plays the default Minecraft button sound.
      */
     public static void playClickSound(){
-        Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        ClientUtils.getMinecraft().getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 }
