@@ -4,14 +4,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 
 /**
  * Created 1/26/2021 by SuperMartijn642
  */
-public abstract class BaseBlockEntity extends TileEntity implements ITickableTileEntity {
+public abstract class BaseBlockEntity extends TileEntity {
 
     private boolean dataChanged = false;
 
