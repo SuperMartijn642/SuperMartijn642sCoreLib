@@ -26,7 +26,7 @@ public class ForgeHooksMixin {
         cancellable = true,
         remap = false
     )
-    public static void canHarvestBlock(BlockState state, PlayerEntity player, IBlockReader world, BlockPos pos, CallbackInfoReturnable<Boolean> ci){
+    private static void canHarvestBlock(BlockState state, PlayerEntity player, IBlockReader world, BlockPos pos, CallbackInfoReturnable<Boolean> ci){
         if(state.getBlock() instanceof BaseBlock){
             if(!((BaseBlock)state.getBlock()).requiresCorrectToolForDrops()){
                 ci.setReturnValue(ForgeEventFactory.doPlayerHarvestCheck(player, state, true));

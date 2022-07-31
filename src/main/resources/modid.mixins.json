@@ -6,8 +6,13 @@
   "refmap": "${mod_id}.mixins.refmap.json",
   "mixins": [],
   "client": [
+    "EntityMixin",
+    "ForgeHooksMixin",
     "GameDataMixin",
-    "LevelRendererMixin"
+    "ItemEntityMixin",
+    "ItemRendererMixin",
+    "LevelRendererMixin",
+    "PlayerEntityMixin"
   ],
   "server": [],
   "injectors": {

@@ -1,7 +1,7 @@
 package com.supermartijn642.core.mixin;
 
+import com.supermartijn642.core.extensions.EntityExtension;
 import com.supermartijn642.core.item.BaseItem;
-import com.supermartijn642.core.mixin.extensions.EntityExtension;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;

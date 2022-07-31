@@ -21,7 +21,7 @@ public class PlayerEntityMixin {
         at = @At("HEAD"),
         cancellable = true
     )
-    public void canDestroy(BlockState state, CallbackInfoReturnable<Boolean> ci){
+    private void canDestroy(BlockState state, CallbackInfoReturnable<Boolean> ci){
         if(state.getBlock() instanceof BaseBlock)
             ci.setReturnValue(ForgeEventFactory.doPlayerHarvestCheck((PlayerEntity)(Object)this, state, !((BaseBlock)state.getBlock()).requiresCorrectToolForDrops() || ((PlayerEntity)(Object)this).inventory.canDestroy(state)));
     }

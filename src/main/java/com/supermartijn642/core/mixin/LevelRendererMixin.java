@@ -21,13 +21,13 @@ public class LevelRendererMixin {
     private float partialTicks;
 
     @ModifyVariable(method = "renderLevel", at = @At("HEAD"))
-    public MatrixStack modifyPoseStack(MatrixStack poseStack){
+    private MatrixStack modifyPoseStack(MatrixStack poseStack){
         this.poseStack = poseStack;
         return poseStack;
     }
 
     @ModifyVariable(method = "renderLevel", at = @At("HEAD"))
-    public float modifyPartialTicks(float partialTicks){
+    private float modifyPartialTicks(float partialTicks){
         this.partialTicks = partialTicks;
         return partialTicks;
     }
@@ -40,8 +40,7 @@ public class LevelRendererMixin {
             from = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/BlockRayTraceResult;getBlockPos()Lnet/minecraft/util/math/BlockPos;"),
             to = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;multMatrix(Lnet/minecraft/client/renderer/Matrix4f;)V")
         ))
-    public void renderLevel(CallbackInfo ci){
+    private void renderLevel(CallbackInfo ci){
         MinecraftForge.EVENT_BUS.post(new RenderWorldEvent(this.poseStack, this.partialTicks));
     }
-
 }

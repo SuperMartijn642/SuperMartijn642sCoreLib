@@ -1,6 +1,6 @@
 package com.supermartijn642.core.mixin;
 
-import com.supermartijn642.core.mixin.extensions.EntityExtension;
+import com.supermartijn642.core.extensions.EntityExtension;
 import net.minecraft.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,7 +18,7 @@ public class EntityMixin implements EntityExtension {
         at = @At("HEAD"),
         cancellable = true
     )
-    public void fireImmune(CallbackInfoReturnable<Boolean> ci){
+    private void fireImmune(CallbackInfoReturnable<Boolean> ci){
         if(this.coreLibIsFireImmune())
             ci.setReturnValue(true);
     }
