@@ -4,11 +4,18 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.fml.client.config.GuiUtils;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created 1/20/2021 by SuperMartijn642
@@ -21,71 +28,67 @@ public class ScreenUtils {
     public static final int DEFAULT_TEXT_COLOR = 4210752, ACTIVE_TEXT_COLOR = 14737632, INACTIVE_TEXT_COLOR = 7368816;
 
     public static void drawString(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
-        fontRenderer.draw(text.getColoredString(), x, y, color);
+        drawString(fontRenderer, text.getColoredString(), x, y, color);
     }
 
     public static void drawString(FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        fontRenderer.draw(text.getColoredString(), x, y, DEFAULT_TEXT_COLOR);
+        drawString(fontRenderer, text.getColoredString(), x, y);
     }
 
     public static void drawString(ITextComponent text, float x, float y, int color){
-        drawString(ClientUtils.getFontRenderer(), text, x, y, color);
+        drawString(text.getColoredString(), x, y, color);
     }
 
     public static void drawString(ITextComponent text, float x, float y){
-        drawString(ClientUtils.getFontRenderer(), text, x, y);
+        drawString(text.getColoredString(), x, y);
     }
 
     public static void drawStringWithShadow(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
-        fontRenderer.drawShadow(text.getColoredString(), x, y, color);
+        drawStringWithShadow(fontRenderer, text.getColoredString(), x, y, color);
     }
 
     public static void drawStringWithShadow(FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        fontRenderer.drawShadow(text.getColoredString(), x, y, DEFAULT_TEXT_COLOR);
+        drawStringWithShadow(fontRenderer, text.getColoredString(), x, y);
     }
 
     public static void drawStringWithShadow(ITextComponent text, float x, float y, int color){
-        drawStringWithShadow(ClientUtils.getFontRenderer(), text, x, y, color);
+        drawStringWithShadow(text.getColoredString(), x, y, color);
     }
 
     public static void drawStringWithShadow(ITextComponent text, float x, float y){
-        drawStringWithShadow(ClientUtils.getFontRenderer(), text, x, y);
+        drawStringWithShadow(text.getColoredString(), x, y);
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
-        String s = text.getColoredString();
-        fontRenderer.draw(s, x - fontRenderer.width(s) / 2f, y, color);
+        drawCenteredString(fontRenderer, text.getColoredString(), x, y, color);
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        String s = text.getColoredString();
-        fontRenderer.draw(s, x - fontRenderer.width(s) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawCenteredString(fontRenderer, text.getColoredString(), x, y);
     }
 
     public static void drawCenteredString(ITextComponent text, float x, float y, int color){
-        drawCenteredString(ClientUtils.getFontRenderer(), text, x, y, color);
+        drawCenteredString(text.getColoredString(), x, y, color);
     }
 
     public static void drawCenteredString(ITextComponent text, float x, float y){
-        drawCenteredString(ClientUtils.getFontRenderer(), text, x, y);
+        drawCenteredString(text.getColoredString(), x, y);
     }
 
     public static void drawCenteredStringWithShadow(FontRenderer fontRenderer, ITextComponent text, float x, float y, int color){
-        String s = text.getColoredString();
-        fontRenderer.drawShadow(s, x - fontRenderer.width(s) / 2f, y, color);
+        drawCenteredStringWithShadow(fontRenderer, text.getColoredString(), x, y, color);
     }
 
     public static void drawCenteredStringWithShadow(FontRenderer fontRenderer, ITextComponent text, float x, float y){
-        String s = text.getColoredString();
-        fontRenderer.drawShadow(s, x - fontRenderer.width(s) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawCenteredStringWithShadow(fontRenderer, text.getColoredString(), x, y);
     }
 
     public static void drawCenteredStringWithShadow(ITextComponent text, float x, float y, int color){
-        drawCenteredStringWithShadow(ClientUtils.getFontRenderer(), text, x, y, color);
+        drawCenteredStringWithShadow(text.getColoredString(), x, y, color);
     }
 
     public static void drawCenteredStringWithShadow(ITextComponent text, float x, float y){
-        drawCenteredStringWithShadow(ClientUtils.getFontRenderer(), text, x, y);
+        drawCenteredStringWithShadow(text.getColoredString(), x, y);
     }
 
     public static void drawString(FontRenderer fontRenderer, String text, float x, float y, int color){
@@ -93,7 +96,7 @@ public class ScreenUtils {
     }
 
     public static void drawString(FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.draw(text, x, y, DEFAULT_TEXT_COLOR);
+        drawString(fontRenderer, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawString(String text, float x, float y, int color){
@@ -105,11 +108,11 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(FontRenderer fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawShadow(text, x - fontRenderer.width(text) / 2f, y, color);
+        fontRenderer.drawShadow(text, x, y, color);
     }
 
     public static void drawStringWithShadow(FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.drawShadow(text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawStringWithShadow(fontRenderer, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawStringWithShadow(String text, float x, float y, int color){
@@ -121,11 +124,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, String text, float x, float y, int color){
-        fontRenderer.draw(text, x - fontRenderer.width(text) / 2f, y, color);
+        drawString(text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.draw(text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawString(text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredString(String text, float x, float y, int color){
@@ -137,11 +140,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredStringWithShadow(FontRenderer fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawShadow(text, x - fontRenderer.width(text) / 2f, y, color);
+        drawStringWithShadow(text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredStringWithShadow(FontRenderer fontRenderer, String text, float x, float y){
-        fontRenderer.drawShadow(text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawStringWithShadow(text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredStringWithShadow(String text, float x, float y, int color){
@@ -228,5 +231,41 @@ public class ScreenUtils {
 
     public static void bindTexture(ResourceLocation location){
         Minecraft.getInstance().textureManager.bind(location);
+    }
+
+    public static void drawTooltip(FontRenderer fontRenderer, List<ITextComponent> text, int x, int y){
+        drawTooltipInternal(fontRenderer, text.stream().map(ITextComponent::getColoredString).collect(Collectors.toList()), x, y);
+    }
+
+    public static void drawTooltip(FontRenderer fontRenderer, ITextComponent text, int x, int y){
+        drawTooltip(fontRenderer, Collections.singletonList(text), x, y);
+    }
+
+    public static void drawTooltip(FontRenderer fontRenderer, String text, int x, int y){
+        drawTooltip(fontRenderer, new StringTextComponent(text), x, y);
+    }
+
+    public static void drawTooltip(List<ITextComponent> text, int x, int y){
+        drawTooltip(ClientUtils.getFontRenderer(), text, x, y);
+    }
+
+    public static void drawTooltip(ITextComponent text, int x, int y){
+        drawTooltip(ClientUtils.getFontRenderer(), text, x, y);
+    }
+
+    public static void drawTooltip(String text, int x, int y){
+        drawTooltip(ClientUtils.getFontRenderer(), text, x, y);
+    }
+
+    /**
+     * Copied from {@link Screen#renderTooltip(List, int, int, FontRenderer)}.
+     */
+    private static void drawTooltipInternal(FontRenderer fontRenderer, List<String> components, int x, int y){
+        if(components.isEmpty())
+            return;
+
+        int screenWidth = ClientUtils.getMinecraft().window.getGuiScaledWidth();
+        int screenHeight = ClientUtils.getMinecraft().window.getGuiScaledHeight();
+        GuiUtils.drawHoveringText(components, x, y, screenWidth, screenHeight, -1, fontRenderer);
     }
 }

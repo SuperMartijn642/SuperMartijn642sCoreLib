@@ -21,6 +21,9 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(project.java_target)
 
 println("Java: " + System.getProperty("java.version") + " JVM: " + System.getProperty("java.vm.version") + "(" + System.getProperty("java.vendor") + ") Arch: " + System.getProperty("os.arch"))
 
+// Keep parameter names when compiling
+compileJava.options.compilerArgs.add '-parameters'
+
 repositories {
     maven {
         url "https://www.cursemaven.com"
@@ -62,7 +65,7 @@ processResources {
 minecraft {
     mappings channel: "official", version: project.minecraft_version
 
-    // accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
+    accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
 
     runs {
         client {
@@ -71,7 +74,12 @@ minecraft {
             property "forge.logging.markers", "REGISTRIES"
 
             mods {
-                source sourceSets.main
+                supermartijn642corelib {
+                    source sourceSets.main
+                }
+                corelibtestmod {
+                    source sourceSets.test
+                }
             }
         }
 
@@ -81,7 +89,12 @@ minecraft {
             property "forge.logging.markers", "REGISTRIES"
 
             mods {
-                source sourceSets.main
+                supermartijn642corelib {
+                    source sourceSets.main
+                }
+                corelibtestmod {
+                    source sourceSets.test
+                }
             }
         }
 
@@ -93,7 +106,12 @@ minecraft {
             args "--mod", project.mod_id, "--all", "--output", file("src/generated/resources/"), "--existing", file("src/main/resources/")
 
             mods {
-                source sourceSets.main
+                supermartijn642corelib {
+                    source sourceSets.main
+                }
+                corelibtestmod {
+                    source sourceSets.test
+                }
             }
         }
     }
@@ -106,4 +124,16 @@ mixin {
 
     debug.verbose = true
     debug.export = true
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    group = "documentation"
+    classifier = "javadoc"
+    from javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    group = "documentation"
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }

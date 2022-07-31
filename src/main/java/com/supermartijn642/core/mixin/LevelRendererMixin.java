@@ -23,8 +23,7 @@ public class LevelRendererMixin {
             from = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/debug/DebugRenderer;shouldRender()Z"),
             to = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;disableBlend()V")
         ))
-    public void renderLevel(float partialTicks, CallbackInfo ci){
+    public void renderLevel(float partialTicks, long currentTime, CallbackInfo ci){
         MinecraftForge.EVENT_BUS.post(new RenderWorldEvent(partialTicks));
     }
-
 }
