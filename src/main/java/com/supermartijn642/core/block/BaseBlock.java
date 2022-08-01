@@ -10,6 +10,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameters;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ITag;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
@@ -21,6 +23,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ToolType;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -30,6 +33,14 @@ import java.util.function.Consumer;
  * Created 1/26/2021 by SuperMartijn642
  */
 public class BaseBlock extends Block {
+
+    public static final ITag.INamedTag<Block> MINEABLE_WITH_AXE = BlockTags.bind("mineable/axe");
+    public static final ITag.INamedTag<Block> MINEABLE_WITH_HOE = BlockTags.bind("mineable/hoe");
+    public static final ITag.INamedTag<Block> MINEABLE_WITH_PICKAXE = BlockTags.bind("mineable/pickaxe");
+    public static final ITag.INamedTag<Block> MINEABLE_WITH_SHOVEL = BlockTags.bind("mineable/shovel");
+    public static final ITag.INamedTag<Block> NEEDS_DIAMOND_TOOL = BlockTags.bind("needs_diamond_tool");
+    public static final ITag.INamedTag<Block> NEEDS_IRON_TOOL = BlockTags.bind("needs_iron_tool");
+    public static final ITag.INamedTag<Block> NEEDS_STONE_TOOL = BlockTags.bind("needs_stone_tool");
 
     private final boolean saveTileData;
 
@@ -135,6 +146,32 @@ public class BaseBlock extends Block {
      * @param advanced whether advanced tooltips is enabled
      */
     protected void appendItemInformation(ItemStack stack, @Nullable IBlockReader level, Consumer<ITextComponent> info, boolean advanced){
+    }
+
+    @Override
+    public boolean isToolEffective(BlockState state, ToolType tool){
+        return (tool == ToolType.AXE && this.is(MINEABLE_WITH_AXE))
+            || (tool == ToolType.HOE && this.is(MINEABLE_WITH_HOE))
+            || (tool == ToolType.PICKAXE && this.is(MINEABLE_WITH_PICKAXE))
+            || (tool == ToolType.SHOVEL && this.is(MINEABLE_WITH_SHOVEL));
+    }
+
+    @Nullable
+    @Override
+    public ToolType getHarvestTool(BlockState state){
+        return this.is(MINEABLE_WITH_AXE) ? ToolType.AXE
+            : this.is(MINEABLE_WITH_HOE) ? ToolType.HOE
+            : this.is(MINEABLE_WITH_PICKAXE) ? ToolType.PICKAXE
+            : this.is(MINEABLE_WITH_SHOVEL) ? ToolType.SHOVEL
+            : null;
+    }
+
+    @Override
+    public int getHarvestLevel(BlockState state){
+        return this.is(NEEDS_DIAMOND_TOOL) ? 3
+            : this.is(NEEDS_IRON_TOOL) ? 2
+            : this.is(NEEDS_STONE_TOOL) ? 1
+            : -1;
     }
 
     protected enum InteractionFeedback {
