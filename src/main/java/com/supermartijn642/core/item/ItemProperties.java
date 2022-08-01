@@ -80,8 +80,8 @@ public class ItemProperties {
     @Deprecated
     public Item.Properties toUnderlying(){
         Item.Properties properties = new Item.Properties();
-        properties.stacksTo(this.maxStackSize);
         properties.durability(this.durability);
+        properties.stacksTo(this.maxStackSize);
         properties.craftRemainder(this.craftingRemainingItem);
         properties.tab(this.group);
         properties.rarity(this.rarity);
