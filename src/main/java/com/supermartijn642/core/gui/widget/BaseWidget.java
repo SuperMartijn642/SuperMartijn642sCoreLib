@@ -1,9 +1,14 @@
 package com.supermartijn642.core.gui.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.gui.ScreenUtils;
+import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -13,10 +18,33 @@ import java.util.function.Consumer;
  */
 public abstract class BaseWidget implements Widget {
 
+    private static final Consumer<String> NARRATOR;
+
+    static{
+        Consumer<String> narrator;
+        try{ // Try to load the 1.19 narrator, if that fails use the 1.19.1 narrator
+            Class<?> clazz = Class.forName("net.minecraft.client.gui.chat.NarratorChatListener");
+            Field instanceField = ObfuscationReflectionHelper.findField(clazz, "f_9331" + "1_");
+            Object instance = instanceField.get(null);
+            Method sayNowMethod = ObfuscationReflectionHelper.findMethod(clazz, "m_9331" + "9_", String.class);
+            narrator = s -> {
+                try{
+                    sayNowMethod.invoke(instance, s);
+                }catch(Exception e){
+                    throw new RuntimeException(e);
+                }
+            };
+        }catch(Exception ignore){
+            narrator = ClientUtils.getMinecraft().getNarrator()::sayNow;
+        }
+        NARRATOR = narrator;
+    }
+
     protected final List<Widget> widgets = new ArrayList<>();
     protected Widget focusedWidget = null;
     protected int x, y, width, height;
     private boolean focused;
+    protected long nextNarration = Long.MAX_VALUE;
 
     public BaseWidget(int x, int y, int width, int height){
         this.x = x;
@@ -53,6 +81,8 @@ public abstract class BaseWidget implements Widget {
 
     @Override
     public void setFocused(boolean focused){
+        if(this.focused != focused)
+            this.nextNarration = focused ? Util.getMillis() + 750 : Long.MAX_VALUE;
         this.focused = focused;
     }
 
@@ -101,14 +131,27 @@ public abstract class BaseWidget implements Widget {
         // Update the focused widget
         if(!this.focused)
             this.focusedWidget = null;
-        else if(this.focusedWidget != null && !(mouseX > this.focusedWidget.left() && mouseX < this.focusedWidget.left() + this.focusedWidget.width() && mouseY > this.focusedWidget.top() && mouseY < this.focusedWidget.top() + this.focusedWidget.height()))
+        else if(this.focusedWidget != null && !(mouseX > this.focusedWidget.left() && mouseX < this.focusedWidget.left() + this.focusedWidget.width() && mouseY > this.focusedWidget.top() && mouseY < this.focusedWidget.top() + this.focusedWidget.height())){
             this.focusedWidget = null;
+            this.nextNarration = Util.getMillis() + 750;
+        }
         for(Widget widget : this.widgets){
             if(this.focusedWidget == null && mouseX >= widget.left() && mouseX < widget.left() + widget.width() && mouseY >= widget.top() && mouseY < widget.top() + widget.height()){
                 this.focusedWidget = widget;
                 widget.setFocused(true);
+                this.nextNarration = Long.MAX_VALUE;
             }else
                 widget.setFocused(widget == this.focusedWidget);
+        }
+
+        // Narrate this widget's narration message
+        if(this.focused && this.focusedWidget == null && Util.getMillis() > this.nextNarration){
+            Component message = this.getNarrationMessage();
+            String s = message == null ? "" : message.getString();
+            if(!s.isEmpty()){
+                NARRATOR.accept(s);
+                this.nextNarration = Long.MAX_VALUE;
+            }
         }
 
         // Render internal widgets' background
