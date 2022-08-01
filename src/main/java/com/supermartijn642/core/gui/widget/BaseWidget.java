@@ -1,6 +1,8 @@
 package com.supermartijn642.core.gui.widget;
 
 import com.supermartijn642.core.gui.ScreenUtils;
+import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ public abstract class BaseWidget implements Widget {
     protected Widget focusedWidget = null;
     protected int x, y, width, height;
     private boolean focused;
+    protected long nextNarration = Long.MAX_VALUE;
 
     public BaseWidget(int x, int y, int width, int height){
         this.x = x;
@@ -52,6 +55,8 @@ public abstract class BaseWidget implements Widget {
 
     @Override
     public void setFocused(boolean focused){
+        if(this.focused != focused)
+            this.nextNarration = focused ? Util.getMillis() + 750 : Long.MAX_VALUE;
         this.focused = focused;
     }
 
@@ -100,14 +105,27 @@ public abstract class BaseWidget implements Widget {
         // Update the focused widget
         if(!this.focused)
             this.focusedWidget = null;
-        else if(this.focusedWidget != null && !(mouseX > this.focusedWidget.left() && mouseX < this.focusedWidget.left() + this.focusedWidget.width() && mouseY > this.focusedWidget.top() && mouseY < this.focusedWidget.top() + this.focusedWidget.height()))
+        else if(this.focusedWidget != null && !(mouseX > this.focusedWidget.left() && mouseX < this.focusedWidget.left() + this.focusedWidget.width() && mouseY > this.focusedWidget.top() && mouseY < this.focusedWidget.top() + this.focusedWidget.height())){
             this.focusedWidget = null;
+            this.nextNarration = Util.getMillis() + 750;
+        }
         for(Widget widget : this.widgets){
             if(this.focusedWidget == null && mouseX >= widget.left() && mouseX < widget.left() + widget.width() && mouseY >= widget.top() && mouseY < widget.top() + widget.height()){
                 this.focusedWidget = widget;
                 widget.setFocused(true);
+                this.nextNarration = Long.MAX_VALUE;
             }else
                 widget.setFocused(widget == this.focusedWidget);
+        }
+
+        // Narrate this widget's narration message
+        if(this.focused && this.focusedWidget == null && Util.getMillis() > this.nextNarration){
+            ITextComponent message = this.getNarrationMessage();
+            String s = message == null ? "" : message.getString();
+            if(!s.isEmpty()){
+                NarratorChatListener.INSTANCE.sayNow(s);
+                this.nextNarration = Long.MAX_VALUE;
+            }
         }
 
         // Render internal widgets' background
