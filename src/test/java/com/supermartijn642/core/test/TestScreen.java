@@ -1,26 +1,23 @@
 package com.supermartijn642.core.test;
 
 import com.supermartijn642.core.TextComponents;
-import com.supermartijn642.core.gui.BaseScreen;
-import com.supermartijn642.core.gui.widget.TextFieldWidget;
+import com.supermartijn642.core.gui.ScreenUtils;
+import com.supermartijn642.core.gui.widget.BaseWidget;
+import com.supermartijn642.core.gui.widget.premade.TextFieldWidget;
+import net.minecraft.util.text.ITextComponent;
 
 /**
  * Created 1/22/2021 by SuperMartijn642
  */
-public class TestScreen extends BaseScreen {
+public class TestScreen extends BaseWidget {
 
     protected TestScreen(){
-        super(TextComponents.string("Test Screen").get());
+        super(0, 0, 100, 100);
     }
 
     @Override
-    protected float sizeX(){
-        return 100;
-    }
-
-    @Override
-    protected float sizeY(){
-        return 100;
+    public ITextComponent getNarrationMessage(){
+        return TextComponents.string("Test Screen").get();
     }
 
     @Override
@@ -30,7 +27,8 @@ public class TestScreen extends BaseScreen {
     }
 
     @Override
-    protected void render(int mouseX, int mouseY){
-        this.drawScreenBackground();
+    public void renderBackground(int mouseX, int mouseY){
+        ScreenUtils.drawScreenBackground(this.x, this.y, this.width, this.height);
+        super.renderBackground(mouseX, mouseY);
     }
 }

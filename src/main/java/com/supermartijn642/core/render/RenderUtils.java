@@ -3,35 +3,74 @@ package com.supermartijn642.core.render;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.block.BlockShape;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
-import org.lwjgl.opengl.GL11;
 
 /**
  * Created 6/12/2021 by SuperMartijn642
  */
 public class RenderUtils {
 
-    public static boolean depthTest = true;
-
-    public static void enableDepthTest(){
-        depthTest = true;
-    }
-
-    public static void disableDepthTest(){
-        depthTest = false;
-    }
-
-    /**
-     * Resets all settings to their defaults
-     */
-    public static void resetState(){
-        depthTest = true;
-    }
+    private static final RenderConfiguration LINES = RenderConfiguration.create(
+        "supermartijn642corelib",
+        "lines",
+        DefaultVertexFormats.POSITION_COLOR,
+        RenderConfiguration.PrimitiveType.LINES,
+        RenderStateConfiguration.builder()
+            .useDefaultLineWidth()
+            .useTranslucentTransparency()
+            .useViewOffsetZLayering()
+            .disableCulling()
+            .useLessThanOrEqualDepthTest()
+            .disableDepthMask()
+            .disableLighting()
+            .build()
+    );
+    private static final RenderConfiguration LINES_NO_DEPTH = RenderConfiguration.create(
+        "supermartijn642corelib",
+        "lines_no_depth",
+        DefaultVertexFormats.POSITION_COLOR,
+        RenderConfiguration.PrimitiveType.LINES,
+        RenderStateConfiguration.builder()
+            .useDefaultLineWidth()
+            .useTranslucentTransparency()
+            .useViewOffsetZLayering()
+            .disableCulling()
+            .disableDepthTest()
+            .disableDepthMask()
+            .disableLighting()
+            .build()
+    );
+    private static final RenderConfiguration QUADS = RenderConfiguration.create(
+        "supermartijn642corelib",
+        "quads",
+        DefaultVertexFormats.POSITION_COLOR,
+        RenderConfiguration.PrimitiveType.QUADS,
+        RenderStateConfiguration.builder()
+            .useTranslucentTransparency()
+            .disableTexture()
+            .disableCulling()
+            .useLessThanOrEqualDepthTest()
+            .disableDepthMask()
+            .disableLighting()
+            .build()
+    );
+    private static final RenderConfiguration QUADS_NO_DEPTH = RenderConfiguration.create(
+        "supermartijn642corelib",
+        "quads_no_depth",
+        DefaultVertexFormats.POSITION_COLOR,
+        RenderConfiguration.PrimitiveType.QUADS,
+        RenderStateConfiguration.builder()
+            .useTranslucentTransparency()
+            .disableTexture()
+            .disableCulling()
+            .disableDepthTest()
+            .disableDepthMask()
+            .disableLighting()
+            .build()
+    );
 
     /**
      * @return the current interpolated camera position
@@ -44,67 +83,22 @@ public class RenderUtils {
     /**
      * Draws an outline for the given shape
      */
-    public static void renderShape(BlockShape shape, float red, float green, float blue, float alpha){
-        boolean depthTest = GL11.glIsEnabled(GL11.GL_DEPTH_TEST);
-        boolean texture = GL11.glIsEnabled(GL11.GL_TEXTURE_2D);
-        boolean lighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
-        boolean blend = GL11.glIsEnabled(GL11.GL_BLEND);
-        boolean cull = GL11.glIsEnabled(GL11.GL_CULL_FACE);
-
-        if(RenderUtils.depthTest){
-            GlStateManager.enableDepth();
-//            GlStateManager.depthFunc(515);
-//            GlStateManager.depthMask(false);
-        }else GlStateManager.disableDepth();
-        GlStateManager.disableTexture2D();
-        GlStateManager.disableLighting();
-        GlStateManager.enableBlend();
-        GlStateManager.alphaFunc(516, 0);
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.disableCull();
-
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
+    public static void renderShape(BlockShape shape, float red, float green, float blue, float alpha, boolean depthTest){
+        RenderConfiguration renderConfiguration = depthTest ? LINES : LINES_NO_DEPTH;
+        BufferBuilder builder = renderConfiguration.begin();
         shape.forEachEdge((x1, y1, z1, x2, y2, z2) -> {
-            buffer.pos(x1, y1, z1).color(red, green, blue, alpha).endVertex();
-            buffer.pos(x2, y2, z2).color(red, green, blue, alpha).endVertex();
+            builder.pos(x1, y1, z1).color(red, green, blue, alpha).endVertex();
+            builder.pos(x2, y2, z2).color(red, green, blue, alpha).endVertex();
         });
-        tessellator.draw();
-
-        if(depthTest) GlStateManager.enableDepth();
-        else GlStateManager.disableDepth();
-        if(texture) GlStateManager.enableTexture2D();
-        if(lighting) GlStateManager.enableLighting();
-        if(!blend) GlStateManager.disableBlend();
-        if(cull) GlStateManager.enableCull();
+        renderConfiguration.end();
     }
 
     /**
      * Draws the sides of the given shape
      */
-    public static void renderShapeSides(BlockShape shape, float red, float green, float blue, float alpha){
-        boolean depthTest = GL11.glIsEnabled(GL11.GL_DEPTH_TEST);
-        boolean texture = GL11.glIsEnabled(GL11.GL_TEXTURE_2D);
-        boolean lighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
-        boolean blend = GL11.glIsEnabled(GL11.GL_BLEND);
-        boolean cull = GL11.glIsEnabled(GL11.GL_CULL_FACE);
-
-        if(RenderUtils.depthTest){
-            GlStateManager.enableDepth();
-            GlStateManager.depthFunc(515);
-            GlStateManager.depthMask(false);
-        }else GlStateManager.disableDepth();
-        GlStateManager.disableTexture2D();
-        GlStateManager.disableLighting();
-        GlStateManager.enableBlend();
-        GlStateManager.alphaFunc(516, 0);
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.disableCull();
-
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder builder = tessellator.getBuffer();
-        builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+    public static void renderShapeSides(BlockShape shape, float red, float green, float blue, float alpha, boolean depthTest){
+        RenderConfiguration renderConfiguration = depthTest ? QUADS : QUADS_NO_DEPTH;
+        BufferBuilder builder = renderConfiguration.begin();
         shape.forEachBox(box -> {
             float minX = (float)box.minX, maxX = (float)box.maxX;
             float minY = (float)box.minY, maxY = (float)box.maxY;
@@ -142,59 +136,48 @@ public class RenderUtils {
             builder.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
             builder.pos(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
         });
-        tessellator.draw();
-
-        if(depthTest){
-            GlStateManager.enableDepth();
-            GlStateManager.depthMask(true);
-        }
-        else GlStateManager.disableDepth();
-        if(texture) GlStateManager.enableTexture2D();
-        if(lighting) GlStateManager.enableLighting();
-        if(!blend) GlStateManager.disableBlend();
-        if(cull) GlStateManager.enableCull();
+        renderConfiguration.end();
     }
 
     /**
      * Draws an outline for the given box
      */
-    public static void renderBox(AxisAlignedBB box, float red, float green, float blue, float alpha){
-        renderShape(BlockShape.create(box), red, green, blue, alpha);
+    public static void renderBox(AxisAlignedBB box, float red, float green, float blue, float alpha, boolean depthTest){
+        renderShape(BlockShape.create(box), red, green, blue, alpha, depthTest);
     }
 
     /**
      * Draws the sides of the given box
      */
-    public static void renderBoxSides(AxisAlignedBB box, float red, float green, float blue, float alpha){
-        renderShapeSides(BlockShape.create(box), red, green, blue, alpha);
+    public static void renderBoxSides(AxisAlignedBB box, float red, float green, float blue, float alpha, boolean depthTest){
+        renderShapeSides(BlockShape.create(box), red, green, blue, alpha, depthTest);
     }
 
     /**
      * Draws an outline for the given shape
      */
-    public static void renderShape(BlockShape shape, float red, float green, float blue){
-        renderShape(shape, red, green, blue, 1);
+    public static void renderShape(BlockShape shape, float red, float green, float blue, boolean depthTest){
+        renderShape(shape, red, green, blue, 1, depthTest);
     }
 
     /**
      * Draws the sides of the given shape
      */
-    public static void renderShapeSides(BlockShape shape, float red, float green, float blue){
-        renderShapeSides(shape, red, green, blue, 1);
+    public static void renderShapeSides(BlockShape shape, float red, float green, float blue, boolean depthTest){
+        renderShapeSides(shape, red, green, blue, 1, depthTest);
     }
 
     /**
      * Draws an outline for the given box
      */
-    public static void renderBox(AxisAlignedBB box, float red, float green, float blue){
-        renderShape(BlockShape.create(box), red, green, blue, 1);
+    public static void renderBox(AxisAlignedBB box, float red, float green, float blue, boolean depthTest){
+        renderShape(BlockShape.create(box), red, green, blue, 1, depthTest);
     }
 
     /**
      * Draws the sides of the given box
      */
-    public static void renderBoxSides(AxisAlignedBB box, float red, float green, float blue){
-        renderShapeSides(BlockShape.create(box), red, green, blue, 1);
+    public static void renderBoxSides(AxisAlignedBB box, float red, float green, float blue, boolean depthTest){
+        renderShapeSides(BlockShape.create(box), red, green, blue, 1, depthTest);
     }
-
 }

@@ -14,8 +14,21 @@ public enum CoreSide {
         this.side = side;
     }
 
+    public boolean isClient(){
+        return this == CLIENT;
+    }
+
+    public boolean isServer(){
+        return this == SERVER;
+    }
+
     @Deprecated
     public Side getUnderlyingSide(){
         return side;
+    }
+
+    @Deprecated
+    public static CoreSide fromUnderlying(Side environment){
+        return environment == Side.CLIENT ? CLIENT : SERVER;
     }
 }

@@ -4,9 +4,23 @@
   "package": "${mod_package}.${mixin_package}",
   "compatibilityLevel": "${mixin_compatibility_level}",
   "refmap": "${mod_id}.mixins.refmap.json",
-  "mixins": [],
+  "mixins": [
+    "AbstractHorseEntityMixin",
+    "EntityMixin",
+    "ForgeHooksMixin",
+    "GameDataMixin",
+    "ItemEntityMixin",
+    "LivingEntityMixin",
+    "PlayerEntityMixin",
+    "RegistrySimpleMixin",
+    "TileEntityMixin"
+  ],
   "client": [
-    "LevelRendererMixin"
+    "ClientPlayerEntityMixin",
+    "LevelRendererMixin",
+    "LocaleMixin",
+    "ModelBakeryMixin",
+    "TileEntityRendererDispatcherMixin"
   ],
   "server": [],
   "injectors": {

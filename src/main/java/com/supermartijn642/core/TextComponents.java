@@ -195,7 +195,7 @@ public class TextComponents {
         }
 
         /**
-         * Makes the text component <i>italic<i/>.
+         * Makes the text component <i>italic</i>.
          */
         public TextComponentBuilder italic(){
             this.updateStyle(style -> style.setItalic(true));
@@ -203,7 +203,7 @@ public class TextComponents {
         }
 
         /**
-         * Makes the text component <u>underlined<u/>.
+         * Makes the text component <u>underlined</u>.
          */
         public TextComponentBuilder underline(){
             this.updateStyle(style -> style.setUnderlined(true));
@@ -211,7 +211,7 @@ public class TextComponents {
         }
 
         /**
-         * Makes the text component <s>strikethrough<s/>.
+         * Makes the text component <s>strikethrough</s>.
          */
         public TextComponentBuilder strikethrough(){
             this.updateStyle(style -> style.setStrikethrough(true));

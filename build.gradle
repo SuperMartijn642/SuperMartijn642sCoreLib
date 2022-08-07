@@ -21,6 +21,9 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(project.java_target)
 
 println("Java: " + System.getProperty("java.version") + " JVM: " + System.getProperty("java.vm.version") + "(" + System.getProperty("java.vendor") + ") Arch: " + System.getProperty("os.arch"))
 
+// Keep parameter names when compiling
+compileJava.options.compilerArgs.add '-parameters'
+
 repositories {
     maven {
         url "https://www.cursemaven.com"
@@ -66,7 +69,7 @@ processResources {
 minecraft {
     mappings channel: project.mappings_channel, version: project.mappings_version
 
-    // accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
+    accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
 
     String resolved_core_plugin = "${project.mod_package}.${project.coremod_package}.${project.coremod_class}"
     String resolved_core_config = "${project.mod_id}.mixins.json"
@@ -81,7 +84,12 @@ minecraft {
             args "--mixin", resolved_core_config
 
             mods {
-                source sourceSets.main
+                supermartijn642corelib {
+                    source sourceSets.main
+                }
+                corelibtestmod {
+                    source sourceSets.test
+                }
             }
         }
 
@@ -94,13 +102,46 @@ minecraft {
             args "--mixin", resolved_core_config
 
             mods {
-                source sourceSets.main
+                supermartijn642corelib {
+                    source sourceSets.main
+                }
+                corelibtestmod {
+                    source sourceSets.test
+                }
             }
+        }
+
+        data {
+            parent runs.client
+            property "--generatorModid", project.mod_id
+            property "--output", file("src/generated/resources/")
+            property "--existing", file("src/main/resources/")
         }
     }
 }
 
+task processSources(type: Sync) {
+    from sourceSets.main.java
+    into "$buildDir/sources"
+    inputs.property 'version', version
+
+    // Replace mod properties in main mod class
+    Hashtable<String,String> properties = new Hashtable<>()
+    project.properties.entrySet().stream()
+            .filter(entry -> entry.key instanceof String && entry.value instanceof String)
+            .forEach(entry -> properties.put(entry.key, entry.value))
+    filesMatching(project.mod_package.replace('.','/') + "/" + project.mod_main_class + ".java") {
+        //noinspection UnnecessaryQualifiedReference
+        filter(org.apache.tools.ant.filters.ReplaceTokens, tokens : properties)
+    }
+}
+
+compileJava {
+    source = processSources.outputs
+}
+
 mixin {
+    // MixinGradle Settings
     add sourceSets.main, "${project.mod_id}.mixins.refmap.json"
 }
 
@@ -123,4 +164,16 @@ jar {
     }
 }
 
-jar.finalizedBy('reobfJar')
+//jar.finalizedBy('reobfJar')
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    group = "documentation"
+    classifier = "javadoc"
+    from javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    group = "documentation"
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}

@@ -1,6 +1,5 @@
 package com.supermartijn642.core.render;
 
-
 import net.minecraftforge.fml.common.eventhandler.Event;
 
 /**
