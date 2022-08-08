@@ -272,7 +272,7 @@ public class RenderStateConfiguration {
                 @Override
                 public void setup(){
                     GlStateManager.activeTexture(GLX.GL_TEXTURE1);
-                    this.enableLightmap = GL11.glIsEnabled(GL11.GL_TEXTURE);
+                    this.enableLightmap = GL11.glIsEnabled(GL11.GL_TEXTURE_2D);
                     GlStateManager.activeTexture(GLX.GL_TEXTURE0);
 
                     ClientUtils.getMinecraft().gameRenderer.turnOffLightLayer();
@@ -294,7 +294,7 @@ public class RenderStateConfiguration {
                 @Override
                 public void setup(){
                     GlStateManager.activeTexture(GLX.GL_TEXTURE1);
-                    this.enableLightmap = GL11.glIsEnabled(GL11.GL_TEXTURE);
+                    this.enableLightmap = GL11.glIsEnabled(GL11.GL_TEXTURE_2D);
                     GlStateManager.activeTexture(GLX.GL_TEXTURE0);
 
                     ClientUtils.getMinecraft().gameRenderer.turnOnLightLayer();

@@ -36,13 +36,13 @@ import java.util.function.Consumer;
  */
 public class BaseBlock extends Block {
 
-    public static final Tag<Block> MINEABLE_WITH_AXE = BlockTags.bind("mineable/axe");
-    public static final Tag<Block> MINEABLE_WITH_HOE = BlockTags.bind("mineable/hoe");
-    public static final Tag<Block> MINEABLE_WITH_PICKAXE = BlockTags.bind("mineable/pickaxe");
-    public static final Tag<Block> MINEABLE_WITH_SHOVEL = BlockTags.bind("mineable/shovel");
-    public static final Tag<Block> NEEDS_DIAMOND_TOOL = BlockTags.bind("needs_diamond_tool");
-    public static final Tag<Block> NEEDS_IRON_TOOL = BlockTags.bind("needs_iron_tool");
-    public static final Tag<Block> NEEDS_STONE_TOOL = BlockTags.bind("needs_stone_tool");
+    private static final Tag<Block> MINEABLE_WITH_AXE = BlockTags.bind("mineable/axe");
+    private static final Tag<Block> MINEABLE_WITH_HOE = BlockTags.bind("mineable/hoe");
+    private static final Tag<Block> MINEABLE_WITH_PICKAXE = BlockTags.bind("mineable/pickaxe");
+    private static final Tag<Block> MINEABLE_WITH_SHOVEL = BlockTags.bind("mineable/shovel");
+    private static final Tag<Block> NEEDS_DIAMOND_TOOL = BlockTags.bind("needs_diamond_tool");
+    private static final Tag<Block> NEEDS_IRON_TOOL = BlockTags.bind("needs_iron_tool");
+    private static final Tag<Block> NEEDS_STONE_TOOL = BlockTags.bind("needs_stone_tool");
 
     private final boolean saveTileData;
     private final BlockProperties properties;
