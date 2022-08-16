@@ -89,7 +89,10 @@ public final class Registries {
 
     public interface Registry<T> {
 
+        @Nullable
         net.minecraft.util.registry.Registry<T> getVanillaRegistry();
+
+        boolean hasVanillaRegistry();
 
         @Nullable
         <X extends IForgeRegistryEntry<X>> IForgeRegistry<X> getForgeRegistry();
@@ -126,9 +129,15 @@ public final class Registries {
             addRegistry(this);
         }
 
+        @Nullable
         @Deprecated
         public net.minecraft.util.registry.Registry<T> getVanillaRegistry(){
             return this.registry;
+        }
+
+        @Override
+        public boolean hasVanillaRegistry(){
+            return true;
         }
 
         @Nullable
@@ -198,9 +207,15 @@ public final class Registries {
             addRegistry(this);
         }
 
+        @Nullable
         @Deprecated
         public net.minecraft.util.registry.Registry<T> getVanillaRegistry(){
             return this.registry;
+        }
+
+        @Override
+        public boolean hasVanillaRegistry(){
+            return this.registry != null;
         }
 
         @Nullable

@@ -1,5 +1,6 @@
 package com.supermartijn642.core.block;
 
+import com.supermartijn642.core.registry.Registries;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.util.ITooltipFlag;
@@ -16,6 +17,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
@@ -34,13 +36,13 @@ import java.util.function.Consumer;
  */
 public class BaseBlock extends Block {
 
-    public static final ITag.INamedTag<Block> MINEABLE_WITH_AXE = BlockTags.bind("mineable/axe");
-    public static final ITag.INamedTag<Block> MINEABLE_WITH_HOE = BlockTags.bind("mineable/hoe");
-    public static final ITag.INamedTag<Block> MINEABLE_WITH_PICKAXE = BlockTags.bind("mineable/pickaxe");
-    public static final ITag.INamedTag<Block> MINEABLE_WITH_SHOVEL = BlockTags.bind("mineable/shovel");
-    public static final ITag.INamedTag<Block> NEEDS_DIAMOND_TOOL = BlockTags.bind("needs_diamond_tool");
-    public static final ITag.INamedTag<Block> NEEDS_IRON_TOOL = BlockTags.bind("needs_iron_tool");
-    public static final ITag.INamedTag<Block> NEEDS_STONE_TOOL = BlockTags.bind("needs_stone_tool");
+    private static final ITag.INamedTag<Block> MINEABLE_WITH_AXE = BlockTags.bind("mineable/axe");
+    private static final ITag.INamedTag<Block> MINEABLE_WITH_HOE = BlockTags.bind("mineable/hoe");
+    private static final ITag.INamedTag<Block> MINEABLE_WITH_PICKAXE = BlockTags.bind("mineable/pickaxe");
+    private static final ITag.INamedTag<Block> MINEABLE_WITH_SHOVEL = BlockTags.bind("mineable/shovel");
+    private static final ITag.INamedTag<Block> NEEDS_DIAMOND_TOOL = BlockTags.bind("needs_diamond_tool");
+    private static final ITag.INamedTag<Block> NEEDS_IRON_TOOL = BlockTags.bind("needs_iron_tool");
+    private static final ITag.INamedTag<Block> NEEDS_STONE_TOOL = BlockTags.bind("needs_stone_tool");
 
     private final boolean saveTileData;
 
@@ -146,6 +148,12 @@ public class BaseBlock extends Block {
      * @param advanced whether advanced tooltips is enabled
      */
     protected void appendItemInformation(ItemStack stack, @Nullable IBlockReader level, Consumer<ITextComponent> info, boolean advanced){
+    }
+
+    @Override
+    public String getDescriptionId(){
+        ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
+        return identifier.getNamespace() + ".block." + identifier.getPath();
     }
 
     @Override

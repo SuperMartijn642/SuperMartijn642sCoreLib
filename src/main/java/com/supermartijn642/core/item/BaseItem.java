@@ -1,5 +1,6 @@
 package com.supermartijn642.core.item;
 
+import com.supermartijn642.core.registry.Registries;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -7,10 +8,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
@@ -111,6 +109,12 @@ public class BaseItem extends Item {
     @Override
     public void inventoryTick(ItemStack stack, World level, Entity entity, int slot, boolean isSelected){
         this.inventoryUpdate(stack, level, entity, slot, isSelected);
+    }
+
+    @Override
+    protected String getOrCreateDescriptionId(){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(this);
+        return identifier.getNamespace() + ".item." + identifier.getPath();
     }
 
     protected static class ItemUseResult {

@@ -32,4 +32,14 @@ public class RegistryUtil {
     public static boolean isValidIdentifier(String namespace, String path){
         return isValidNamespace(namespace) && isValidPath(path);
     }
+
+    /**
+     * Checks whether given identifier contains illegal characters
+     * @param identifier identifier to be checked
+     * @return {@code true} if the identifier is valid
+     */
+    public static boolean isValidIdentifier(String identifier){
+        String[] parts = identifier.split(":");
+        return (parts.length == 1 && isValidPath(parts[0])) || (parts.length == 2 && isValidIdentifier(parts[0], parts[1]));
+    }
 }
