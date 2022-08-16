@@ -1,10 +1,10 @@
 package com.supermartijn642.core.gui;
 
+import com.supermartijn642.core.util.TriFunction;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.function.BiConsumer;
 

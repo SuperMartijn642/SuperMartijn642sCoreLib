@@ -4,6 +4,7 @@ import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.render.CustomBlockEntityRenderer;
 import com.supermartijn642.core.render.CustomItemRenderer;
 import com.supermartijn642.core.util.Pair;
+import com.supermartijn642.core.util.TriFunction;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
@@ -33,7 +34,6 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;

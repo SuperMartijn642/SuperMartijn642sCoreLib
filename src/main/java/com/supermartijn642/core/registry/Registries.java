@@ -36,10 +36,11 @@ public final class Registries {
     static final Map<net.minecraft.core.Registry<?>,Registry<?>> VANILLA_REGISTRY_MAP = new HashMap<>();
 
     private static void addRegistry(Registry<?> registry){
-        if(VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
+        if(registry.hasVanillaRegistry() && VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
             throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
 
-        VANILLA_REGISTRY_MAP.put(registry.getVanillaRegistry(), registry);
+        if(registry.hasVanillaRegistry())
+            VANILLA_REGISTRY_MAP.put(registry.getVanillaRegistry(), registry);
     }
 
     @SuppressWarnings("unchecked")
