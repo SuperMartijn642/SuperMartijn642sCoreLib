@@ -1,10 +1,13 @@
 package com.supermartijn642.core.network;
 
 import com.supermartijn642.core.CommonUtils;
+import com.supermartijn642.core.CoreLib;
+import com.supermartijn642.core.registry.RegistryUtil;
 import io.netty.util.collection.IntObjectHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
@@ -25,27 +28,36 @@ import java.util.function.Supplier;
 public class PacketChannel {
 
     /**
-     * Creates a channel with the given {@code registryName}.
-     * @param registryName registry name of the channel
-     * @return a new channel with the given {@code registryName}
-     * @throws IllegalArgumentException if {@code registryName == null}
+     * Creates a channel with the given {@code channelName}.
+     * @param channelName registry channelName of the channel
+     * @return a new channel with the given {@code channelName}
+     * @throws IllegalArgumentException if {@code channelName == null}
      */
-    public static PacketChannel create(String modid, String registryName){
-        if(modid == null || modid.isEmpty())
-            throw new IllegalArgumentException("Modid must not be null!");
-        if(registryName == null)
-            throw new IllegalArgumentException("Registry name must not be null!");
-        return new PacketChannel(modid, registryName);
+    public static PacketChannel create(String modid, String channelName){
+        if(!RegistryUtil.isValidNamespace(modid))
+            throw new IllegalArgumentException("Modid '" + modid + "' must only contain characters [a-z0-9_.-]!");
+        if(!RegistryUtil.isValidNamespace(channelName))
+            throw new IllegalArgumentException("Channel name '" + channelName + "' must only contain characters [a-z0-9_.-]!");
+        if(modid.equals("minecraft"))
+            CoreLib.LOGGER.warn("Mod is requesting registration helper for modid '" + modid + "'!");
+        else{
+            ModContainer container = FabricLoader.getInstance().getModContainer(modid).orElse(null);
+            if(container == null)
+                CoreLib.LOGGER.warn("Mod is requesting registration helper for unknown modid '" + modid + "'!");
+        }
+
+        return new PacketChannel(modid, channelName);
     }
 
     /**
      * Creates a new channel.
-     * @return a new channel with registry name 'main'
+     * @return a new channel with channel name 'main'
      */
     public static PacketChannel create(String modid){
         return create(modid, "main");
     }
 
+    private final String modid, name;
     private final ResourceLocation channelName;
 
     private int index = 0;
@@ -57,6 +69,8 @@ public class PacketChannel {
     private final HashMap<Class<? extends BasePacket>,Boolean> packet_to_queued = new HashMap<>();
 
     private PacketChannel(String modid, String name){
+        this.modid = modid;
+        this.name = name;
         this.channelName = new ResourceLocation(modid, name);
 
         if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT)
@@ -182,7 +196,7 @@ public class PacketChannel {
 
     private void checkRegistration(BasePacket packet){
         if(!this.packet_to_index.containsKey(packet.getClass()))
-            throw new IllegalArgumentException("Tried to send unregistered packet '" + packet.getClass() + "'!");
+            throw new IllegalArgumentException("Tried to send unregistered packet '" + packet.getClass() + "' on channel '" + this.modid + ":" + this.name + "'!");
     }
 
     void write(BasePacket packet, FriendlyByteBuf buffer){
@@ -195,7 +209,7 @@ public class PacketChannel {
     BasePacket read(FriendlyByteBuf buffer){
         int index = buffer.readInt();
         if(!this.index_to_packet.containsKey(index))
-            throw new IllegalStateException("Received an unregistered packet with index '" + index + "'!");
+            throw new RuntimeException("Received an unregistered packet with index '" + index + "' on channel '" + this.modid + ":" + this.name + "'!");
 
         BasePacket packet = this.index_to_packet.get(index).get();
         packet.read(buffer);

@@ -162,6 +162,12 @@ public class BaseBlock extends Block {
     protected void appendItemInformation(ItemStack stack, @Nullable BlockGetter level, Consumer<Component> info, boolean advanced){
     }
 
+    @Override
+    public String getDescriptionId(){
+        ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
+        return identifier.getNamespace() + ".block." + identifier.getPath();
+    }
+
     protected enum InteractionFeedback {
         PASS(InteractionResult.PASS), CONSUME(InteractionResult.CONSUME), SUCCESS(InteractionResult.SUCCESS);
 

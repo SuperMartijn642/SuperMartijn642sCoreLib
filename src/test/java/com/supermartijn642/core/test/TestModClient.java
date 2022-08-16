@@ -19,11 +19,11 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Created 1/22/2021 by SuperMartijn642
  */
-public class ClientProxy {
+public class TestModClient {
 
     static{
-        WorldRenderEvents.BLOCK_OUTLINE.register(ClientProxy::onDrawSelection);
-        AttackBlockCallback.EVENT.register(ClientProxy::onBlockBreak);
+        WorldRenderEvents.BLOCK_OUTLINE.register(TestModClient::onDrawSelection);
+        AttackBlockCallback.EVENT.register(TestModClient::onBlockBreak);
     }
 
     public static InteractionResult onBlockBreak(Player player, Level world, InteractionHand hand, BlockPos pos, Direction direction){

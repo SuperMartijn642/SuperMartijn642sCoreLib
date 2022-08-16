@@ -19,6 +19,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -70,9 +71,9 @@ public final class Registries {
 
     public interface Registry<T> {
 
-        net.minecraft.core.Registry<T> getVanillaRegistry();
+        @Nullable net.minecraft.core.Registry<T> getVanillaRegistry();
 
-        boolean hasForgeRegistry();
+        boolean hasVanillaRegistry();
 
         void register(ResourceLocation identifier, T object);
 
@@ -104,14 +105,15 @@ public final class Registries {
             addRegistry(this);
         }
 
+        @Nullable
         @Deprecated
         public net.minecraft.core.Registry<T> getVanillaRegistry(){
             return this.registry;
         }
 
         @Override
-        public boolean hasForgeRegistry(){
-            return false;
+        public boolean hasVanillaRegistry(){
+            return true;
         }
 
         public void register(ResourceLocation identifier, T object){

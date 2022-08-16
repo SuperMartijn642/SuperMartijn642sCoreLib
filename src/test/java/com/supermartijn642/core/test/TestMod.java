@@ -21,7 +21,7 @@ public class TestMod implements ModInitializer {
     @Override
     public void onInitialize(){
         if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT)
-            Reflection.initialize(ClientProxy.class);
+            Reflection.initialize(TestModClient.class);
 
         RegistrationHandler handler = RegistrationHandler.get("corelibtestmod");
         handler.registerItem("test_item", () -> new BaseItem(ItemProperties.create()));

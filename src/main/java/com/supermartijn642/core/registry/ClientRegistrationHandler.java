@@ -12,6 +12,9 @@ import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.fabricmc.fabric.impl.client.texture.SpriteRegistryCallbackHolder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -19,13 +22,18 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -90,6 +98,8 @@ public class ClientRegistrationHandler {
     private final Map<ResourceLocation,Set<ResourceLocation>> textureAtlasSprites = new HashMap<>();
 
     private final List<Pair<Supplier<Item>,Supplier<BuiltinItemRendererRegistry.DynamicItemRenderer>>> customItemRenderers = new ArrayList<>();
+
+    private final List<Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>>> containerScreens = new ArrayList<>();
 
     private boolean passedModelRegistry;
     private boolean passedTextureStitch;
@@ -370,6 +380,38 @@ public class ClientRegistrationHandler {
         this.registerItemRenderer(() -> item, () -> CustomItemRenderer.of(itemRenderer));
     }
 
+    /**
+     * Registers the given screen constructor for the given menu type.
+     */
+    public <T extends AbstractContainerMenu, U extends Screen & MenuAccess<T>> void registerContainerScreen(Supplier<MenuType<T>> menuType, TriFunction<T,Inventory,Component,U> screenSupplier){
+        if(haveRenderersBeenRegistered)
+            throw new IllegalStateException("Cannot register new menu screens after the ClientInitialization event has been fired!");
+
+        //noinspection unchecked
+        this.containerScreens.add(Pair.of((Supplier<MenuType<?>>)(Object)menuType, (TriFunction<AbstractContainerMenu,Inventory,Component,Screen>)(Object)screenSupplier));
+    }
+
+    /**
+     * Registers the given screen constructor for the given menu type.
+     */
+    public <T extends AbstractContainerMenu, U extends Screen & MenuAccess<T>> void registerContainerScreen(Supplier<MenuType<T>> menuType, Function<T,U> screenSupplier){
+        this.registerContainerScreen(menuType, (container, inventory, title) -> screenSupplier.apply(container));
+    }
+
+    /**
+     * Registers the given screen constructor for the given menu type.
+     */
+    public <T extends AbstractContainerMenu, U extends Screen & MenuAccess<T>> void registerContainerScreen(MenuType<T> menuType, TriFunction<T,Inventory,Component,U> screenSupplier){
+        this.registerContainerScreen(() -> menuType, screenSupplier);
+    }
+
+    /**
+     * Registers the given screen constructor for the given menu type.
+     */
+    public <T extends AbstractContainerMenu, U extends Screen & MenuAccess<T>> void registerContainerScreen(MenuType<T> menuType, Function<T,U> screenSupplier){
+        this.registerContainerScreen(() -> menuType, (container, inventory, title) -> screenSupplier.apply(container));
+    }
+
     private void registerRenderers(){
         // Entity renderers
         Set<EntityType<?>> entityTypes = new HashSet<>();
@@ -414,6 +456,20 @@ public class ClientRegistrationHandler {
 
             items.add(item);
             BuiltinItemRendererRegistry.INSTANCE.register(item, customRenderer);
+        }
+
+        // Container Screens
+        Set<MenuType<?>> menuTypes = new HashSet<>();
+        for(Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>> entry : this.containerScreens){
+            MenuType<?> menuType = entry.left().get();
+            if(menuType == null)
+                throw new RuntimeException("Container screen registered with null menu type!");
+            if(menuTypes.contains(menuType))
+                throw new RuntimeException("Duplicate container screen for menu type '" + Registries.MENU_TYPES.getIdentifier(menuType) + "'!");
+
+            menuTypes.add(menuType);
+            //noinspection unchecked,rawtypes
+            MenuScreens.register((MenuType)menuType, (MenuScreens.ScreenConstructor)entry.right()::apply);
         }
     }
 
