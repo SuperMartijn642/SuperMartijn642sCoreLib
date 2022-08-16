@@ -5,6 +5,7 @@ import com.supermartijn642.core.item.EditableClientItemExtensions;
 import com.supermartijn642.core.render.CustomBlockEntityRenderer;
 import com.supermartijn642.core.render.CustomItemRenderer;
 import com.supermartijn642.core.util.Pair;
+import com.supermartijn642.core.util.TriFunction;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
@@ -29,9 +30,7 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -85,7 +84,6 @@ public class ClientRegistrationHandler {
     private boolean passedModelBake;
     private boolean passedRegisterRenderers;
     private boolean passedTextureStitch;
-    private boolean passedClientInit;
 
     private ClientRegistrationHandler(String modid){
         this.modid = modid;
@@ -369,7 +367,7 @@ public class ClientRegistrationHandler {
      * Registers the given screen constructor for the given menu type.
      */
     public <T extends AbstractContainerMenu, U extends Screen & MenuAccess<T>> void registerContainerScreen(Supplier<MenuType<T>> menuType, TriFunction<T,Inventory,Component,U> screenSupplier){
-        if(this.passedClientInit)
+        if(this.passedRegisterRenderers)
             throw new IllegalStateException("Cannot register new menu screens after the ClientInitialization event has been fired!");
 
         //noinspection unchecked
@@ -512,9 +510,5 @@ public class ClientRegistrationHandler {
             return;
 
         sprites.forEach(e::addSprite);
-    }
-
-    private void handleClientSetupEvent(FMLClientSetupEvent e){
-        this.passedClientInit = true;
     }
 }
