@@ -43,13 +43,22 @@ public class ForgeHooksMixin {
                 return;
             }
 
-            int toolLevel = stack.getHarvestLevel(tool, player, state);
-            if(toolLevel < 0){
+            int bestHarvestLevel = -1;
+            for(ToolType toolType : stack.getToolTypes()){
+                if(state.isToolEffective(toolType)){
+                    int harvestLevel = stack.getHarvestLevel(toolType, player, state);
+                    if(harvestLevel > bestHarvestLevel)
+                        bestHarvestLevel = harvestLevel;
+                }
+            }
+            if(bestHarvestLevel == -1)
+                bestHarvestLevel = stack.getHarvestLevel(tool, player, state);
+            if(bestHarvestLevel < 0){
                 ci.setReturnValue(player.canDestroy(state));
                 return;
             }
 
-            ci.setReturnValue(ForgeEventFactory.doPlayerHarvestCheck(player, state, toolLevel >= state.getHarvestLevel()));
+            ci.setReturnValue(ForgeEventFactory.doPlayerHarvestCheck(player, state, bestHarvestLevel >= state.getHarvestLevel()));
         }
     }
 
@@ -88,8 +97,8 @@ public class ForgeHooksMixin {
         if(stack.isEmpty())
             return;
         BlockState state = world.getBlockState(pos);
-        int harvestLevel = state.getHarvestLevel();
         if(state.getBlock() instanceof BaseBlock){
+            int harvestLevel = state.getHarvestLevel();
             for(ToolType toolType : stack.getToolTypes()){
                 if(state.isToolEffective(toolType) && stack.getHarvestLevel(toolType, null, state) >= harvestLevel){
                     ci.setReturnValue(true);

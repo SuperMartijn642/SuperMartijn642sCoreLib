@@ -16,7 +16,7 @@ import net.minecraftforge.fml.common.Mod;
  * Created 1/22/2021 by SuperMartijn642
  */
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class ClientProxy {
+public class TestModClient {
 
     @SubscribeEvent
     public static void onBlockBreak(LivingEvent.LivingJumpEvent e){

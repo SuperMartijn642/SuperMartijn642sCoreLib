@@ -4,15 +4,16 @@
   "package": "${mod_package}.${mixin_package}",
   "compatibilityLevel": "${mixin_compatibility_level}",
   "refmap": "${mod_id}.mixins.refmap.json",
-  "mixins": [],
-  "client": [
+  "mixins": [
     "EntityMixin",
     "ForgeHooksMixin",
     "GameDataMixin",
     "ItemEntityMixin",
-    "ItemRendererMixin",
-    "LevelRendererMixin",
     "PlayerEntityMixin"
+  ],
+  "client": [
+    "ItemRendererMixin",
+    "LevelRendererMixin"
   ],
   "server": [],
   "injectors": {

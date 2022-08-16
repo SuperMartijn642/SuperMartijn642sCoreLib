@@ -1,5 +1,6 @@
 package com.supermartijn642.core.item;
 
+import com.supermartijn642.core.registry.Registries;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -114,11 +115,17 @@ public class BaseItem extends Item {
         this.inventoryUpdate(stack, level, entity, slot, isSelected);
     }
 
+    @Override
+    protected String getOrCreateDescriptionId(){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(this);
+        return identifier.getNamespace() + ".item." + identifier.getPath();
+    }
+
     public boolean isFireResistant(){
         return this.properties != null && this.properties.isFireResistant;
     }
 
-    public boolean canBeHurtBy(DamageSource source) {
+    public boolean canBeHurtBy(DamageSource source){
         return !this.isFireResistant() || !source.isFire();
     }
 

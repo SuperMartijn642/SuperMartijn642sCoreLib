@@ -5,6 +5,10 @@ import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.render.CustomBlockEntityRenderer;
 import com.supermartijn642.core.render.CustomItemRenderer;
 import com.supermartijn642.core.util.Pair;
+import com.supermartijn642.core.util.TriFunction;
+import net.minecraft.client.gui.IHasContainer;
+import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
@@ -13,10 +17,14 @@ import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -101,6 +109,8 @@ public class ClientRegistrationHandler {
     private final Map<ResourceLocation,Set<ResourceLocation>> textureAtlasSprites = new HashMap<>();
 
     private final List<Pair<Supplier<Item>,Supplier<ItemStackTileEntityRenderer>>> customItemRenderers = new ArrayList<>();
+
+    private final List<Pair<Supplier<ContainerType<?>>,TriFunction<Container,PlayerInventory,ITextComponent,Screen>>> containerScreens = new ArrayList<>();
 
     private boolean passedModelRegistry;
     private boolean passedModelBake;
@@ -378,6 +388,38 @@ public class ClientRegistrationHandler {
         this.registerItemRenderer(() -> item, () -> CustomItemRenderer.of(itemRenderer));
     }
 
+    /**
+     * Registers the given screen constructor for the given menu type.
+     */
+    public <T extends Container, U extends Screen & IHasContainer<T>> void registerContainerScreen(Supplier<ContainerType<T>> menuType, TriFunction<T,PlayerInventory,ITextComponent,U> screenSupplier){
+        if(this.passedClientSetup)
+            throw new IllegalStateException("Cannot register new menu screens after the ClientInitialization event has been fired!");
+
+        //noinspection unchecked
+        this.containerScreens.add(Pair.of((Supplier<ContainerType<?>>)(Object)menuType, (TriFunction<Container,PlayerInventory,ITextComponent,Screen>)(Object)screenSupplier));
+    }
+
+    /**
+     * Registers the given screen constructor for the given menu type.
+     */
+    public <T extends Container, U extends Screen & IHasContainer<T>> void registerContainerScreen(Supplier<ContainerType<T>> menuType, Function<T,U> screenSupplier){
+        this.registerContainerScreen(menuType, (container, inventory, title) -> screenSupplier.apply(container));
+    }
+
+    /**
+     * Registers the given screen constructor for the given menu type.
+     */
+    public <T extends Container, U extends Screen & IHasContainer<T>> void registerContainerScreen(ContainerType<T> menuType, TriFunction<T,PlayerInventory,ITextComponent,U> screenSupplier){
+        this.registerContainerScreen(() -> menuType, screenSupplier);
+    }
+
+    /**
+     * Registers the given screen constructor for the given menu type.
+     */
+    public <T extends Container, U extends Screen & IHasContainer<T>> void registerContainerScreen(ContainerType<T> menuType, Function<T,U> screenSupplier){
+        this.registerContainerScreen(() -> menuType, (container, inventory, title) -> screenSupplier.apply(container));
+    }
+
     private void handleModelRegistryEvent(ModelRegistryEvent e){
         this.passedModelRegistry = true;
 
@@ -469,6 +511,20 @@ public class ClientRegistrationHandler {
 
             items.add(item);
             setItemCustomRenderer(item, () -> customRenderer);
+        }
+
+        // Container Screens
+        Set<ContainerType<?>> menuTypes = new HashSet<>();
+        for(Pair<Supplier<ContainerType<?>>,TriFunction<Container,PlayerInventory,ITextComponent,Screen>> entry : this.containerScreens){
+            ContainerType<?> menuType = entry.left().get();
+            if(menuType == null)
+                throw new RuntimeException("Container screen registered with null menu type!");
+            if(menuTypes.contains(menuType))
+                throw new RuntimeException("Duplicate container screen for menu type '" + Registries.MENU_TYPES.getIdentifier(menuType) + "'!");
+
+            menuTypes.add(menuType);
+            //noinspection unchecked,rawtypes,NullableProblems
+            ScreenManager.register((ContainerType)menuType, (ScreenManager.IScreenFactory)entry.right()::apply);
         }
     }
 
