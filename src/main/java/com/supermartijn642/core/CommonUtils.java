@@ -83,6 +83,11 @@ public class CommonUtils {
         return Loader.isModLoaded(modid);
     }
 
+    /**
+     * Preferably use {@link net.minecraftforge.fml.common.Mod.EventBusSubscriber} whenever possible.
+     * @param modid
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public static EventBus getEventBus(String modid){
         try{
@@ -95,6 +100,12 @@ public class CommonUtils {
         return null;
     }
 
+    /**
+     * Opens the given container for the given player. This method will do nothing if called client-side.
+     * @param player            player to show the container to
+     * @param baseContainerType type of the container, used to send the container's data to the client
+     * @param container         the container to be opened
+     */
     public <T extends Container> void openContainer(EntityPlayer player, BaseContainerType<T> baseContainerType, T container){
         if(!(player instanceof EntityPlayerMP))
             return;

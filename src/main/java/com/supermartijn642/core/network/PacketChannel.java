@@ -1,12 +1,13 @@
 package com.supermartijn642.core.network;
 
+import com.supermartijn642.core.CoreLib;
+import com.supermartijn642.core.registry.RegistryUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.collection.IntObjectHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
@@ -30,22 +31,30 @@ public class PacketChannel {
     private static final HashMap<String,PacketChannel> NAME_TO_CHANNEL = new HashMap<>();
 
     /**
-     * Creates a channel with the given {@code registryName}.
-     * @param registryName registry name of the channel
-     * @return a new channel with the given {@code registryName}
-     * @throws IllegalArgumentException if {@code registryName == null}
+     * Creates a channel with the given {@code channelName}.
+     * @param channelName registry channelName of the channel
+     * @return a new channel with the given {@code channelName}
+     * @throws IllegalArgumentException if {@code channelName == null}
      */
-    public static PacketChannel create(String modid, String registryName){
-        if(modid == null || modid.isEmpty())
-            throw new IllegalArgumentException("Modid must not be null!");
-        if(registryName == null)
-            throw new IllegalArgumentException("Registry name must not be null!");
-        return new PacketChannel(modid, registryName);
+    public static PacketChannel create(String modid, String channelName){
+        if(!RegistryUtil.isValidNamespace(modid))
+            throw new IllegalArgumentException("Modid '" + modid + "' must only contain characters [a-z0-9_.-]!");
+        if(!RegistryUtil.isValidNamespace(channelName))
+            throw new IllegalArgumentException("Channel name '" + channelName + "' must only contain characters [a-z0-9_.-]!");
+        String activeMod = Loader.instance().activeModContainer() == null ? null : Loader.instance().activeModContainer().getModId();
+        boolean validActiveMod = activeMod != null && !activeMod.equals("minecraft") && !activeMod.equals("forge");
+        if(validActiveMod){
+            if(!activeMod.equals(modid))
+                CoreLib.LOGGER.warn("Mod '" + Loader.instance().activeModContainer().getName() + "' is creating a packet channel for different modid '" + modid + "'!");
+        }else if(modid.equals("minecraft") || modid.equals("forge"))
+            CoreLib.LOGGER.warn("Mod is creating a packet channel for modid '" + modid + "'!");
+
+        return new PacketChannel(modid, channelName);
     }
 
     /**
      * Creates a new channel.
-     * @return a new channel with registry name 'main'
+     * @return a new channel with channel name 'main'
      */
     public static PacketChannel create(String modid){
         return create(modid, "main");
@@ -57,9 +66,9 @@ public class PacketChannel {
         return create(modContainer == null ? "unknown" : modContainer.getModId(), "main");
     }
 
+    private final String modid, name;
     private final SimpleNetworkWrapper channel;
 
-    private final String name;
     private int index = 0;
     private final HashMap<Class<? extends BasePacket>,Integer> packet_to_index = new HashMap<>();
     private final IntObjectHashMap<Supplier<? extends BasePacket>> index_to_packet = new IntObjectHashMap<>();
@@ -69,12 +78,13 @@ public class PacketChannel {
     private final HashMap<Class<? extends BasePacket>,Boolean> packet_to_queued = new HashMap<>();
 
     private PacketChannel(String modid, String name){
-        this.name = new ResourceLocation(modid, name).toString();
-        this.channel = NetworkRegistry.INSTANCE.newSimpleChannel(this.name);
+        this.modid = modid;
+        this.name = name;
+        this.channel = NetworkRegistry.INSTANCE.newSimpleChannel(modid + ":" + name);
         this.channel.registerMessage(new InternalPacket(this), InternalPacket.class, 0, Side.SERVER);
         this.channel.registerMessage(new InternalPacket(this), InternalPacket.class, 1, Side.CLIENT);
 
-        NAME_TO_CHANNEL.put(this.name, this);
+        NAME_TO_CHANNEL.put(modid + ":" + name, this);
     }
 
     /**
@@ -195,7 +205,7 @@ public class PacketChannel {
 
     private void checkRegistration(BasePacket packet){
         if(!this.packet_to_index.containsKey(packet.getClass()))
-            throw new IllegalArgumentException("Tried to send unregistered packet '" + packet.getClass() + "'!");
+            throw new IllegalArgumentException("Tried to send unregistered packet '" + packet.getClass() + "' on channel '" + this.modid + ":" + this.name + "'!");
     }
 
     private void write(BasePacket packet, PacketBuffer buffer){
@@ -208,7 +218,7 @@ public class PacketChannel {
     private BasePacket read(PacketBuffer buffer){
         int index = buffer.readInt();
         if(!this.index_to_packet.containsKey(index))
-            throw new IllegalStateException("Received an unregistered packet with index '" + index + "'!");
+            throw new RuntimeException("Received an unregistered packet with index '" + index + "' on channel '" + this.modid + ":" + this.name + "'!");
 
         BasePacket packet = this.index_to_packet.get(index).get();
         packet.read(buffer);
@@ -259,7 +269,7 @@ public class PacketChannel {
         @Override
         public void toBytes(ByteBuf buffer){
             PacketBuffer packetBuffer = new PacketBuffer(buffer);
-            packetBuffer.writeString(this.channel.name);
+            packetBuffer.writeString(this.channel.modid + ":" + this.channel.name);
 
             this.channel.write(this.packet, packetBuffer);
         }
