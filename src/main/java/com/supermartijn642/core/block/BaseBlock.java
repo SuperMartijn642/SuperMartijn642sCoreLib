@@ -1,9 +1,11 @@
 package com.supermartijn642.core.block;
 
+import com.supermartijn642.core.registry.Registries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -135,6 +137,12 @@ public class BaseBlock extends Block {
      * @param advanced whether advanced tooltips is enabled
      */
     protected void appendItemInformation(ItemStack stack, @Nullable BlockGetter level, Consumer<Component> info, boolean advanced){
+    }
+
+    @Override
+    public String getDescriptionId(){
+        ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
+        return identifier.getNamespace() + ".block." + identifier.getPath();
     }
 
     protected enum InteractionFeedback {

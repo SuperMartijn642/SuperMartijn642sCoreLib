@@ -1,5 +1,7 @@
 package com.supermartijn642.core.util;
 
+import com.google.common.base.Objects;
+
 /**
  * Created 23/07/2022 by SuperMartijn642
  */
@@ -23,5 +25,18 @@ public class Pair<X, Y> {
 
     public Y right(){
         return this.right;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if(this == o) return true;
+        if(o == null || this.getClass() != o.getClass()) return false;
+        Pair<?,?> pair = (Pair<?,?>)o;
+        return Objects.equal(this.left, pair.left) && Objects.equal(this.right, pair.right);
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hashCode(this.left, this.right);
     }
 }

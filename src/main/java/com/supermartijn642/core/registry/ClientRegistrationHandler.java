@@ -5,6 +5,9 @@ import com.supermartijn642.core.item.EditableClientItemExtensions;
 import com.supermartijn642.core.render.CustomBlockEntityRenderer;
 import com.supermartijn642.core.render.CustomItemRenderer;
 import com.supermartijn642.core.util.Pair;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -12,19 +15,23 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.RegisterEvent;
+import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -72,11 +79,13 @@ public class ClientRegistrationHandler {
 
     private final List<Pair<Supplier<Item>,Supplier<BlockEntityWithoutLevelRenderer>>> customItemRenderers = new ArrayList<>();
 
+    private final List<Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>>> containerScreens = new ArrayList<>();
+
     private boolean passedModelRegistry;
     private boolean passedModelBake;
     private boolean passedRegisterRenderers;
     private boolean passedTextureStitch;
-    private boolean passedItemRegistry;
+    private boolean passedClientInit;
 
     private ClientRegistrationHandler(String modid){
         this.modid = modid;
@@ -84,7 +93,6 @@ public class ClientRegistrationHandler {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleModelBakeEvent);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleRegisterRenderersEvent);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleTextureStitchEvent);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.LOW, this::handleItemRegistryEvent);
     }
 
     /**
@@ -302,7 +310,7 @@ public class ClientRegistrationHandler {
      * Registers the given custom item renderer for the given item. The given item must provide an instance of {@link EditableClientItemExtensions} in its {@link Item#initializeClient(Consumer)} method.
      */
     public void registerItemRenderer(Supplier<Item> item, Supplier<BlockEntityWithoutLevelRenderer> itemRenderer){
-        if(this.passedItemRegistry)
+        if(this.passedRegisterRenderers)
             throw new IllegalStateException("Cannot register new renderers after item RegistryEvent has been fired!");
 
         this.customItemRenderers.add(Pair.of(item, itemRenderer));
@@ -355,6 +363,38 @@ public class ClientRegistrationHandler {
      */
     public void registerCustomItemRenderer(Item item, CustomItemRenderer itemRenderer){
         this.registerItemRenderer(() -> item, () -> CustomItemRenderer.of(itemRenderer));
+    }
+
+    /**
+     * Registers the given screen constructor for the given menu type.
+     */
+    public <T extends AbstractContainerMenu, U extends Screen & MenuAccess<T>> void registerContainerScreen(Supplier<MenuType<T>> menuType, TriFunction<T,Inventory,Component,U> screenSupplier){
+        if(this.passedClientInit)
+            throw new IllegalStateException("Cannot register new menu screens after the ClientInitialization event has been fired!");
+
+        //noinspection unchecked
+        this.containerScreens.add(Pair.of((Supplier<MenuType<?>>)(Object)menuType, (TriFunction<AbstractContainerMenu,Inventory,Component,Screen>)(Object)screenSupplier));
+    }
+
+    /**
+     * Registers the given screen constructor for the given menu type.
+     */
+    public <T extends AbstractContainerMenu, U extends Screen & MenuAccess<T>> void registerContainerScreen(Supplier<MenuType<T>> menuType, Function<T,U> screenSupplier){
+        this.registerContainerScreen(menuType, (container, inventory, title) -> screenSupplier.apply(container));
+    }
+
+    /**
+     * Registers the given screen constructor for the given menu type.
+     */
+    public <T extends AbstractContainerMenu, U extends Screen & MenuAccess<T>> void registerContainerScreen(MenuType<T> menuType, TriFunction<T,Inventory,Component,U> screenSupplier){
+        this.registerContainerScreen(() -> menuType, screenSupplier);
+    }
+
+    /**
+     * Registers the given screen constructor for the given menu type.
+     */
+    public <T extends AbstractContainerMenu, U extends Screen & MenuAccess<T>> void registerContainerScreen(MenuType<T> menuType, Function<T,U> screenSupplier){
+        this.registerContainerScreen(() -> menuType, (container, inventory, title) -> screenSupplier.apply(container));
     }
 
     private void handleModelRegistryEvent(ModelEvent.RegisterAdditional e){
@@ -426,24 +466,6 @@ public class ClientRegistrationHandler {
             //noinspection unchecked,rawtypes,NullableProblems
             e.registerBlockEntityRenderer((BlockEntityType)blockEntityType, (BlockEntityRendererProvider)entry.right()::apply);
         }
-    }
-
-    private void handleTextureStitchEvent(TextureStitchEvent.Pre e){
-        this.passedTextureStitch = true;
-
-        // Texture atlas sprites
-        Set<ResourceLocation> sprites = this.textureAtlasSprites.get(e.getAtlas().location());
-        if(sprites == null)
-            return;
-
-        sprites.forEach(e::addSprite);
-    }
-
-    private void handleItemRegistryEvent(RegisterEvent e){
-        if(!Registries.ITEMS.getVanillaRegistry().equals(e.getVanillaRegistry()))
-            return;
-
-        this.passedItemRegistry = true;
 
         // Custom item renderers
         Set<Item> items = new HashSet<>();
@@ -465,5 +487,34 @@ public class ClientRegistrationHandler {
             items.add(item);
             ((EditableClientItemExtensions)renderProperties).setCustomRenderer(customRenderer);
         }
+
+        // Container Screens
+        Set<MenuType<?>> menuTypes = new HashSet<>();
+        for(Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>> entry : this.containerScreens){
+            MenuType<?> menuType = entry.left().get();
+            if(menuType == null)
+                throw new RuntimeException("Container screen registered with null menu type!");
+            if(menuTypes.contains(menuType))
+                throw new RuntimeException("Duplicate container screen for menu type '" + Registries.MENU_TYPES.getIdentifier(menuType) + "'!");
+
+            menuTypes.add(menuType);
+            //noinspection unchecked,rawtypes,NullableProblems
+            MenuScreens.register((MenuType)menuType, (MenuScreens.ScreenConstructor)entry.right()::apply);
+        }
+    }
+
+    private void handleTextureStitchEvent(TextureStitchEvent.Pre e){
+        this.passedTextureStitch = true;
+
+        // Texture atlas sprites
+        Set<ResourceLocation> sprites = this.textureAtlasSprites.get(e.getAtlas().location());
+        if(sprites == null)
+            return;
+
+        sprites.forEach(e::addSprite);
+    }
+
+    private void handleClientSetupEvent(FMLClientSetupEvent e){
+        this.passedClientInit = true;
     }
 }

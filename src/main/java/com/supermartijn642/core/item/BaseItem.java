@@ -1,8 +1,10 @@
 package com.supermartijn642.core.item;
 
+import com.supermartijn642.core.registry.Registries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -117,6 +119,12 @@ public class BaseItem extends Item {
     @Override
     public void initializeClient(Consumer<IClientItemExtensions> consumer){
         consumer.accept(new EditableClientItemExtensions());
+    }
+
+    @Override
+    protected String getOrCreateDescriptionId(){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(this);
+        return identifier.getNamespace() + ".item." + identifier.getPath();
     }
 
     protected static class ItemUseResult {
