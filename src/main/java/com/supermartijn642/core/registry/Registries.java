@@ -40,12 +40,13 @@ public final class Registries {
     static final Map<IForgeRegistry<?>,Registry<?>> FORGE_REGISTRY_MAP = new HashMap<>();
 
     private static void addRegistry(Registry<?> registry){
-        if(VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
+        if(registry.hasVanillaRegistry() && VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
             throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
         if(registry.hasForgeRegistry() && FORGE_REGISTRY_MAP.containsKey(registry.getForgeRegistry()))
             throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
 
-        VANILLA_REGISTRY_MAP.put(registry.getVanillaRegistry(), registry);
+        if(registry.hasVanillaRegistry())
+            VANILLA_REGISTRY_MAP.put(registry.getVanillaRegistry(), registry);
         if(registry.hasForgeRegistry())
             FORGE_REGISTRY_MAP.put(registry.getForgeRegistry(), registry);
     }
@@ -89,7 +90,10 @@ public final class Registries {
 
     public interface Registry<T> {
 
+        @Nullable
         net.minecraft.core.Registry<T> getVanillaRegistry();
+
+        boolean hasVanillaRegistry();
 
         @Nullable
         <X extends IForgeRegistryEntry<X>> IForgeRegistry<X> getForgeRegistry();
@@ -126,9 +130,15 @@ public final class Registries {
             addRegistry(this);
         }
 
+        @Nullable
         @Deprecated
         public net.minecraft.core.Registry<T> getVanillaRegistry(){
             return this.registry;
+        }
+
+        @Override
+        public boolean hasVanillaRegistry(){
+            return true;
         }
 
         @Nullable
@@ -198,9 +208,15 @@ public final class Registries {
             addRegistry(this);
         }
 
+        @Nullable
         @Deprecated
         public net.minecraft.core.Registry<T> getVanillaRegistry(){
             return this.registry;
+        }
+
+        @Override
+        public boolean hasVanillaRegistry(){
+            return this.registry != null;
         }
 
         @Nullable
