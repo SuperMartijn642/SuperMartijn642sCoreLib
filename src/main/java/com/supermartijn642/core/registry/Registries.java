@@ -40,12 +40,13 @@ public final class Registries {
     static final Map<IForgeRegistry<?>,Registry<?>> FORGE_REGISTRY_MAP = new HashMap<>();
 
     private static void addRegistry(Registry<?> registry){
-        if(VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
+        if(registry.hasVanillaRegistry() && VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
             throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
         if(registry.hasForgeRegistry() && FORGE_REGISTRY_MAP.containsKey(registry.getForgeRegistry()))
             throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
 
-        VANILLA_REGISTRY_MAP.put(registry.getVanillaRegistry(), registry);
+        if(registry.hasVanillaRegistry())
+            VANILLA_REGISTRY_MAP.put(registry.getVanillaRegistry(), registry);
         if(registry.hasForgeRegistry())
             FORGE_REGISTRY_MAP.put(registry.getForgeRegistry(), registry);
     }
