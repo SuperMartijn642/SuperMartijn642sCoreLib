@@ -174,6 +174,12 @@ public class BaseBlock extends Block {
     }
 
     @Override
+    public String getDescriptionId(){
+        ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
+        return identifier.getNamespace() + ".block." + identifier.getPath();
+    }
+
+    @Override
     public boolean isToolEffective(BlockState state, ToolType tool){
         return (tool == ToolType.AXE && this.is(MINEABLE_WITH_AXE))
             || ("hoe".equals(tool.getName()) && this.is(MINEABLE_WITH_HOE))
