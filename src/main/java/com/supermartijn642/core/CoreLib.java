@@ -1,5 +1,7 @@
 package com.supermartijn642.core;
 
+import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
+import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
@@ -17,6 +19,9 @@ public class CoreLib {
 
     public CoreLib(){
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onConstructMod);
+
+        // Register generator for default tags
+        GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));
     }
 
     private void onConstructMod(FMLConstructModEvent e){
