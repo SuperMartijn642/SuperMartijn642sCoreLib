@@ -1,6 +1,10 @@
 package com.supermartijn642.core;
 
+import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
+import com.supermartijn642.core.recipe.ConditionalRecipeSerializer;
+import com.supermartijn642.core.recipe.condition.ModLoadedRecipeCondition;
 import com.supermartijn642.core.registry.ClientRegistrationHandler;
+import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
 import net.fabricmc.api.ClientModInitializer;
@@ -20,6 +24,14 @@ public class CoreLib implements ModInitializer {
     @Override
     public void onInitialize(){
         CommonUtils.initialize();
+
+        // Register conditional recipe type
+        RegistrationHandler handler = RegistrationHandler.get("supermartijn642corelib");
+        handler.registerRecipeSerializer("conditional", ConditionalRecipeSerializer.INSTANCE);
+        handler.registerRecipeConditionSerializer("mod_loaded", ModLoadedRecipeCondition.SERIALIZER);
+
+        // Register generator for default tags
+        GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));
 
         // Load test mod stuff
         if(FabricLoader.getInstance().isDevelopmentEnvironment()){

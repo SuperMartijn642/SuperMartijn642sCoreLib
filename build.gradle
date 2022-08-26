@@ -51,6 +51,23 @@ processResources {
 loom {
     accessWidenerPath = file("src/main/resources/modid.accesswidener")
 
+    loom {
+        runs {
+            // This adds a new gradle task that runs the datagen API: "gradlew runDatagenClient"
+            datagenClient {
+                inherit client
+                name "Minecraft Datagen"
+                vmArg "-Dfabric-api.datagen"
+                vmArg "-Dfabric-api.datagen.modid=${project.mod_id}"
+                vmArg "-Dfabric-api.datagen.output-dir=${file("src/generated/resources")}"
+                vmArg "-Dfabric-api.datagen.manual-dir=${file("src/main/resources")}"
+
+                ideConfigGenerated = true
+                runDir "build/datagen"
+            }
+        }
+    }
+
     // TODO make test classes get loaded somehow ¯\(o_o)/¯
 //    runs {
 //        client {

@@ -1,6 +1,7 @@
 package com.supermartijn642.core.registry;
 
 import com.supermartijn642.core.CoreLib;
+import com.supermartijn642.core.recipe.condition.RecipeConditionSerializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.core.particles.ParticleType;
@@ -371,6 +372,26 @@ public class RegistrationHandler {
 
     public void registerStatTypeCallback(Consumer<Helper<StatType<?>>> callback){
         this.addCallback(Registries.STAT_TYPES, callback);
+    }
+
+    public void registerRecipeConditionSerializer(String identifier, Supplier<RecipeConditionSerializer<?>> recipeSerializer){
+        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, identifier, recipeSerializer);
+    }
+
+    public void registerRecipeConditionSerializer(String identifier, RecipeConditionSerializer<?> recipeSerializer){
+        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, identifier, () -> recipeSerializer);
+    }
+
+    public void registerRecipeConditionSerializerOverride(String namespace, String identifier, Supplier<RecipeConditionSerializer<?>> recipeSerializer){
+        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, namespace, identifier, recipeSerializer);
+    }
+
+    public void registerRecipeConditionSerializerOverride(String namespace, String identifier, RecipeConditionSerializer<?> recipeSerializer){
+        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, namespace, identifier, () -> recipeSerializer);
+    }
+
+    public void registerRecipeConditionSerializerCallback(Consumer<Helper<RecipeConditionSerializer<?>>> callback){
+        this.addCallback(Registries.RECIPE_CONDITION_SERIALIZERS, callback);
     }
 
     private <T> void addEntry(Registries.Registry<T> registry, String identifier, Supplier<T> entry){

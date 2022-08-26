@@ -121,7 +121,7 @@ public class PacketChannel {
      */
     public void sendToAllPlayers(BasePacket packet){
         this.checkRegistration(packet);
-        PlayerLookup.all(CommonUtils.getServer()).forEach(player -> this.sendToPlayer(player, packet)); // TODO
+        PlayerLookup.all(CommonUtils.getServer()).forEach(player -> this.sendToPlayer(player, packet));
     }
 
     /**

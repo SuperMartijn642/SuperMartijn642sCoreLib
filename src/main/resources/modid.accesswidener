@@ -22,7 +22,24 @@ accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties isSuffocating Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate; # isSuffocating
 # BlockEntityType$BlockEntitySupplier
 extendable class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
+# CreativeModeTab
+accessible field net/minecraft/world/item/CreativeModeTab langId Ljava/lang/String; # langId
 # GuiComponent
 accessible method net/minecraft/client/gui/GuiComponent fillGradient (Lcom/mojang/math/Matrix4f;Lcom/mojang/blaze3d/vertex/BufferBuilder;IIIIIII)V # fillGradient
+# HashCache
+accessible field net/minecraft/data/HashCache newCache Ljava/util/Map; # newCache
+accessible field net/minecraft/data/HashCache oldCache Ljava/util/Map; # oldCache
+# Ingredient
+accessible field net/minecraft/world/item/crafting/Ingredient values [Lnet/minecraft/world/item/crafting/Ingredient$Value; # values
+accessible method net/minecraft/world/item/crafting/Ingredient fromValues (Ljava/util/stream/Stream;)Lnet/minecraft/world/item/crafting/Ingredient; # fromValues
+accessible class net/minecraft/world/item/crafting/Ingredient$Value
 # ItemRenderer
 accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V # renderModelLists
+# ItemTransform$Deserializer
+accessible field net/minecraft/client/renderer/block/model/ItemTransform$Deserializer DEFAULT_ROTATION Lcom/mojang/math/Vector3f; # DEFAULT_ROTATION
+accessible field net/minecraft/client/renderer/block/model/ItemTransform$Deserializer DEFAULT_TRANSLATION Lcom/mojang/math/Vector3f; # DEFAULT_TRANSLATION
+accessible field net/minecraft/client/renderer/block/model/ItemTransform$Deserializer DEFAULT_SCALE Lcom/mojang/math/Vector3f; # DEFAULT_SCALE
+accessible class net/minecraft/client/renderer/block/model/ItemTransform$Deserializer
+# Minecraft
+accessible field net/minecraft/client/Minecraft options Lnet/minecraft/client/Options; # options
+accessible field net/minecraft/client/Minecraft resourcePackRepository Lnet/minecraft/server/packs/repository/PackRepository; # resourcePackRepository
