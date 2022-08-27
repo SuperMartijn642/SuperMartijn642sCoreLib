@@ -288,6 +288,7 @@ public final class Registries {
         static{
             try{
                 Field field = CraftingHelper.class.getDeclaredField("conditions");
+                field.setAccessible(true);
                 craftingHelperConditions = () -> {
                     try{
                         //noinspection unchecked
