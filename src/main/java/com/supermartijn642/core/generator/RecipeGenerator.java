@@ -2,6 +2,9 @@ package com.supermartijn642.core.generator;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.supermartijn642.core.recipe.ConditionalRecipeSerializer;
+import com.supermartijn642.core.recipe.condition.ModLoadedRecipeCondition;
+import com.supermartijn642.core.recipe.condition.RecipeCondition;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
@@ -16,7 +19,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
 
 import java.util.*;
 
@@ -144,16 +146,12 @@ public abstract class RecipeGenerator extends ResourceGenerator {
             // Conditions
             if(!recipeBuilder.conditions.isEmpty()){
                 JsonObject newJson = new JsonObject();
-                newJson.addProperty("type", "forge:conditional");
+                newJson.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE).toString());
                 JsonArray conditionsJson = new JsonArray();
                 for(ICondition condition : recipeBuilder.conditions)
                     conditionsJson.add(CraftingHelper.serialize(condition));
-                JsonObject entryJson = new JsonObject();
-                entryJson.add("conditions", conditionsJson);
-                entryJson.add("recipe", json);
-                JsonArray array = new JsonArray(1);
-                array.add(entryJson);
-                newJson.add("recipes", array);
+                newJson.add("conditions", conditionsJson);
+                newJson.add("recipe", json);
                 json = newJson;
             }
 
@@ -603,7 +601,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param group group for the recipe
          */
         public T group(String group){
-            this.group = group == null || group.isBlank() ? null : group;
+            this.group = group == null || group.trim().isEmpty() ? null : group;
             return this.self();
         }
 
@@ -616,11 +614,18 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         }
 
         /**
+         * Adds a condition for this recipe to be loaded.
+         */
+        public T condition(RecipeCondition condition){
+            this.conditions.add(RecipeCondition.createForgeCondition(condition));
+            return this.self();
+        }
+
+        /**
          * Adds a condition to only load this recipe when a mod with the given modid is present.
          */
         public T modLoadedCondition(String modid){
-            this.conditions.add(new ModLoadedCondition(modid));
-            return this.self();
+            return this.condition(new ModLoadedRecipeCondition(modid));
         }
 
         /**
