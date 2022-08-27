@@ -9,14 +9,15 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created 16/08/2022 by SuperMartijn642
@@ -70,22 +71,25 @@ public abstract class ResourceCache {
         this.saveResource(resourceType, bytes, namespace, directory, fileName, fileName.endsWith(".json") ? "" : ".json");
     }
 
+    @ApiStatus.Internal
     static ResourceCache wrap(ExistingFileHelper existingFileHelper, CachedOutput cachedOutput, Path outputDirectory){
         return new ExistingFileHelperWrapper(existingFileHelper, cachedOutput, outputDirectory);
     }
 
     private static class ExistingFileHelperWrapper extends ResourceCache {
 
-        private final ExistingFileHelper existingFileHelper;
-        private final CachedOutput cachedOutput;
-        private final Path outputDirectory;
-        private final Set<Path> toBeGeneratedFiles = new HashSet<>();
-        private final Set<Path> writtenFiles = new HashSet<>();
+        private final Map<Path,HashCode> writtenFiles = new HashMap<>();
 
-        private ExistingFileHelperWrapper(ExistingFileHelper existingFileHelper, CachedOutput cachedOutput, Path outputDirectory){
+        private final ExistingFileHelper existingFileHelper;
+        private final Path outputDirectory;
+        private final CachedOutput cache;
+
+        private ExistingFileHelperWrapper(ExistingFileHelper existingFileHelper, CachedOutput cache, Path outputFolder){
+            if(outputFolder == null)
+                throw new IllegalArgumentException("Output directory must not be null!");
+            this.outputDirectory = outputFolder;
             this.existingFileHelper = existingFileHelper;
-            this.cachedOutput = cachedOutput;
-            this.outputDirectory = outputDirectory;
+            this.cache = cache;
         }
 
         @Override
@@ -108,20 +112,20 @@ public abstract class ResourceCache {
         @Override
         public void saveResource(ResourceType resourceType, byte[] data, String namespace, String directory, String fileName, String extension){
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
-            if(this.writtenFiles.contains(path))
+            Path fullPath = this.outputDirectory.resolve(path);
+            if(this.writtenFiles.containsKey(path))
                 throw new RuntimeException("Duplicate file '" + path + "'!");
 
             // Skip writing if the present file matches the one to be written
-            Path fullPath = this.outputDirectory.resolve(path);
             HashCode hashCode = Hashing.sha1().hashBytes(data);
 
             // Write the data to file
             try{
-                this.cachedOutput.writeIfNeeded(fullPath, data, hashCode);
+                this.cache.writeIfNeeded(fullPath, data, hashCode);
             }catch(IOException e){
                 throw new RuntimeException(e);
             }
-            this.writtenFiles.add(path);
+            this.writtenFiles.put(path, hashCode);
         }
     }
 }
