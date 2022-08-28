@@ -40,7 +40,7 @@ public abstract class TagGenerator extends ResourceGenerator {
     public void save(){
         // Loop over all registries
         for(Map.Entry<Registries.Registry<?>,Map<ResourceLocation,TagBuilder<?>>> registryEntry : this.tags.entrySet()){
-            String directoryName = TAG_DIRECTORIES.computeIfAbsent(registryEntry.getKey(), registry -> ((ForgeRegistry<?>)registry).getTagFolder());
+            String directoryName = getTagDirectoryName(registryEntry.getKey());
             if(directoryName.startsWith("tags/"))
                 directoryName = directoryName.substring("tags/".length());
             // Loop over all tags
@@ -97,8 +97,7 @@ public abstract class TagGenerator extends ResourceGenerator {
     }
 
     private static String getTagDirectoryName(Registries.Registry<?> registry){
-        //noinspection ConstantConditions
-        return ((ForgeRegistry<?>)registry.getForgeRegistry()).getTagFolder();
+        return TAG_DIRECTORIES.computeIfAbsent(registry, r -> ((ForgeRegistry<?>)r).getTagFolder());
     }
 
     /**
