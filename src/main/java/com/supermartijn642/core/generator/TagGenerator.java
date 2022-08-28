@@ -10,7 +10,6 @@ import net.minecraft.tags.Tag;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistry;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,7 +31,7 @@ public abstract class TagGenerator extends ResourceGenerator {
     public void save(){
         // Loop over all registries
         for(Map.Entry<Registries.Registry<?>,Map<ResourceLocation,TagBuilder<?>>> registryEntry : this.tags.entrySet()){
-            String directoryName = StaticTags.get(registryEntry.getKey().getForgeRegistry().getRegistryName()).getDirectory();
+            String directoryName = getTagDirectoryName(registryEntry.getKey());
             if(directoryName.startsWith("tags/"))
                 directoryName = directoryName.substring("tags/".length());
             // Loop over all tags
@@ -89,8 +88,7 @@ public abstract class TagGenerator extends ResourceGenerator {
     }
 
     private static String getTagDirectoryName(Registries.Registry<?> registry){
-        //noinspection ConstantConditions
-        return ((ForgeRegistry<?>)registry.getForgeRegistry()).getTagFolder();
+        return StaticTags.get(registry.getForgeRegistry().getRegistryName()).getDirectory();
     }
 
     /**
