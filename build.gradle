@@ -103,7 +103,7 @@ minecraft {
 
             property "forge.logging.markers", "REGISTRIES"
 
-            args "--mod", project.mod_id, "--all", "--output", file("src/generated/resources/"), "--existing", file("src/main/resources/")
+            args "--mod", project.mod_id, "--all", "--output", file("src/generated/resources/"), "--existing", file("$buildDir/data_resources")
 
             mods {
                 supermartijn642corelib {
@@ -136,4 +136,25 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     group = "documentation"
     classifier = 'sources'
     from sourceSets.main.allSource
+}
+
+task prepareDataResources(type: Sync) {
+    from file("src/main/resources")
+    into "$buildDir/data_resources"
+    inputs.property "version", version
+
+    filesMatching(["META-INF/mods.toml", "modid.mixins.json", "pack.mcmeta"]) {
+        expand project.properties
+    }
+
+    exclude "**/*.pdn"
+
+    rename "^modid.mixins.json\$", "${project.mod_id}.mixins.json"
+    rename "^icon.png\$", "${project.mod_id}.png"
+}
+
+// Run prepareDataResources before prepareRunData
+tasks.whenTaskAdded {
+    if(it.name == "prepareRunData")
+        it.dependsOn "prepareDataResources"
 }

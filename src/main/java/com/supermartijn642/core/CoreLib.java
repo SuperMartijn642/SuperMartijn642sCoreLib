@@ -1,5 +1,10 @@
 package com.supermartijn642.core;
 
+import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
+import com.supermartijn642.core.recipe.ConditionalRecipeSerializer;
+import com.supermartijn642.core.recipe.condition.ModLoadedRecipeCondition;
+import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
+import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -17,6 +22,14 @@ public class CoreLib {
 
     public CoreLib(){
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onRegisterRegistries);
+
+        // Register conditional recipe type
+        RegistrationHandler handler = RegistrationHandler.get("supermartijn642corelib");
+        handler.registerRecipeSerializer("conditional", ConditionalRecipeSerializer.INSTANCE);
+        handler.registerRecipeConditionSerializer("mod_loaded", ModLoadedRecipeCondition.SERIALIZER);
+
+        // Register generator for default tags
+        GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));
     }
 
     private void onRegisterRegistries(RegistryEvent.NewRegistry e){
