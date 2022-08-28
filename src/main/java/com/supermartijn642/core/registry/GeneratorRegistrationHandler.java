@@ -40,7 +40,7 @@ public class GeneratorRegistrationHandler {
      * @param modid modid of the mod registering entries
      * @return a unique registration handler for the given modid
      */
-    public static GeneratorRegistrationHandler get(String modid){
+    public static synchronized GeneratorRegistrationHandler get(String modid){
         if(!RegistryUtil.isValidNamespace(modid))
             throw new IllegalArgumentException("Modid '" + modid + "' must only contain characters [a-z0-9_.-]!");
         if(modid.equals("minecraft"))
