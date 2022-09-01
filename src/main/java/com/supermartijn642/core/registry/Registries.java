@@ -1,5 +1,6 @@
 package com.supermartijn642.core.registry;
 
+import com.google.common.collect.Lists;
 import com.supermartijn642.core.recipe.condition.RecipeConditionSerializer;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
@@ -32,6 +33,7 @@ import static net.minecraft.core.Registry.*;
 public final class Registries {
 
     static final Map<net.minecraft.core.Registry<?>,Registry<?>> VANILLA_REGISTRY_MAP = new HashMap<>();
+    static final List<Registry<?>> REGISTRATION_ORDER;
 
     private static void addRegistry(Registry<?> registry){
         if(registry.hasVanillaRegistry() && VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
@@ -64,6 +66,27 @@ public final class Registries {
     public static final Registry<Attribute> ATTRIBUTES = vanilla(ATTRIBUTE, Attribute.class);
     public static final Registry<StatType<?>> STAT_TYPES = vanilla(STAT_TYPE, StatType.class);
     public static final Registry<RecipeConditionSerializer<?>> RECIPE_CONDITION_SERIALIZERS = new MapBackedRegistry<>(RecipeConditionSerializer.class);
+
+    static{
+        REGISTRATION_ORDER = Lists.newArrayList(
+            Registries.BLOCKS,
+            Registries.FLUIDS,
+            Registries.ITEMS,
+            Registries.MOB_EFFECTS,
+            Registries.SOUND_EVENTS,
+            Registries.POTIONS,
+            Registries.ENCHANTMENTS,
+            Registries.ENTITY_TYPES,
+            Registries.BLOCK_ENTITY_TYPES,
+            Registries.PARTICLE_TYPES,
+            Registries.MENU_TYPES,
+            Registries.PAINTING_VARIANTS,
+            Registries.RECIPE_SERIALIZERS,
+            Registries.ATTRIBUTES,
+            Registries.STAT_TYPES,
+            Registries.RECIPE_CONDITION_SERIALIZERS
+        );
+    }
 
     private static <T> Registry<T> vanilla(net.minecraft.core.Registry<T> registry, Class<? super T> valueClass){
         return new VanillaRegistryWrapper<>(registry, valueClass);
@@ -190,6 +213,8 @@ public final class Registries {
             this.identifierToObject.put(identifier, object);
             this.objectToIdentifier.put(object, identifier);
             this.entries.add(Pair.of(identifier, object));
+
+            RegistryEntryAcceptor.Handler.onRegisterEvent(this, identifier, object);
         }
 
         @Override

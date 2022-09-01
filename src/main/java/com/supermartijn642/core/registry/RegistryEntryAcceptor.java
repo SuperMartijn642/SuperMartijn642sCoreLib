@@ -49,7 +49,8 @@ public @interface RegistryEntryAcceptor {
         PAINTING_VARIANTS(Registries.PAINTING_VARIANTS),
         RECIPE_SERIALIZERS(Registries.RECIPE_SERIALIZERS),
         ATTRIBUTES(Registries.ATTRIBUTES),
-        STAT_TYPES(Registries.STAT_TYPES);
+        STAT_TYPES(Registries.STAT_TYPES),
+        RECIPE_CONDITION_SERIALIZERS(Registries.RECIPE_CONDITION_SERIALIZERS);
 
         public final Registries.Registry<?> registry;
 
@@ -142,8 +143,10 @@ public @interface RegistryEntryAcceptor {
             Set<Registries.Registry<?>> registries = new HashSet<>();
             registries.addAll(FIELDS.keySet());
             registries.addAll(METHODS.keySet());
-            for(Registries.Registry<?> registry : registries)
-                RegistryEntryAddedCallback.event(registry.getVanillaRegistry()).register((rawId, id, object) -> onRegisterEvent(registry, id, object));
+            for(Registries.Registry<?> registry : registries){
+                if(registry.hasVanillaRegistry())
+                    RegistryEntryAddedCallback.event(registry.getVanillaRegistry()).register((rawId, id, object) -> onRegisterEvent(registry, id, object));
+            }
         }
 
         public static void onRegisterEvent(Registries.Registry<?> registry, ResourceLocation identifier, Object object){

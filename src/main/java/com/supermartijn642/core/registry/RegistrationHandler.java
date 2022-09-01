@@ -427,21 +427,8 @@ public class RegistrationHandler {
     }
 
     private void registerAll(){
-        this.handleRegistry(Registries.BLOCKS);
-        this.handleRegistry(Registries.FLUIDS);
-        this.handleRegistry(Registries.ITEMS);
-        this.handleRegistry(Registries.MOB_EFFECTS);
-        this.handleRegistry(Registries.SOUND_EVENTS);
-        this.handleRegistry(Registries.POTIONS);
-        this.handleRegistry(Registries.ENCHANTMENTS);
-        this.handleRegistry(Registries.ENTITY_TYPES);
-        this.handleRegistry(Registries.BLOCK_ENTITY_TYPES);
-        this.handleRegistry(Registries.PARTICLE_TYPES);
-        this.handleRegistry(Registries.MENU_TYPES);
-        this.handleRegistry(Registries.PAINTING_VARIANTS);
-        this.handleRegistry(Registries.RECIPE_SERIALIZERS);
-        this.handleRegistry(Registries.ATTRIBUTES);
-        this.handleRegistry(Registries.STAT_TYPES);
+        for(Registries.Registry<?> registry : Registries.REGISTRATION_ORDER)
+            this.handleRegistry(registry);
     }
 
     private <T> void handleRegistry(Registries.Registry<T> registry){
