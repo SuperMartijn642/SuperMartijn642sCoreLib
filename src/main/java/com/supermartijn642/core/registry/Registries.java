@@ -1,6 +1,7 @@
 package com.supermartijn642.core.registry;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import com.supermartijn642.core.CommonUtils;
 import com.supermartijn642.core.block.BaseBlockEntityType;
 import com.supermartijn642.core.extensions.RegistrySimpleExtension;
@@ -38,6 +39,10 @@ public final class Registries {
 
     static final Map<IRegistry<ResourceLocation,?>,Registry<?>> VANILLA_REGISTRY_MAP = new HashMap<>();
     static final Map<IForgeRegistry<?>,Registry<?>> FORGE_REGISTRY_MAP = new HashMap<>();
+    /**
+     * Each entry is a registry which has a vanilla registry and a list of registries which do not have a vanilla registry.
+     */
+    static final Map<Registry<?>,List<Registry<?>>> REGISTRATION_ORDER_MAP = new HashMap<>();
 
     private static void addRegistry(Registry<?> registry){
         if(registry.hasVanillaRegistry() && VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
@@ -89,8 +94,13 @@ public final class Registries {
     public static final Registry<Class<? extends TileEntity>> BLOCK_ENTITY_CLASSES = vanilla(TileEntity.REGISTRY, Class.class);
     public static final Registry<BaseContainerType<?>> MENU_TYPES = new MapBackedRegistry<>(BaseContainerType.class);
     public static final Registry<IConditionFactory> RECIPE_CONDITION_SERIALIZERS = new RecipeConditionSerializerRegistry();
-    static {
+
+    static{
         ((RecipeConditionSerializerRegistry)RECIPE_CONDITION_SERIALIZERS).initializeMap();
+
+        // Add all registries which don't have a forge registry
+        REGISTRATION_ORDER_MAP.put(BLOCKS, Lists.newArrayList(BLOCK_ENTITY_TYPES, BLOCK_ENTITY_CLASSES, FLUIDS));
+        REGISTRATION_ORDER_MAP.put(ENTITY_TYPES, Lists.newArrayList(MENU_TYPES, RECIPE_CONDITION_SERIALIZERS));
     }
 
     private static <T> Registry<T> vanilla(IRegistry<ResourceLocation,T> registry, Class<? super T> valueClass){

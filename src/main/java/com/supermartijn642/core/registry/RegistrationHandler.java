@@ -59,14 +59,7 @@ public class RegistrationHandler {
 
         @SubscribeEvent
         public static void handleItemRegistryEvent(RegistryEvent.Register<Item> event){
-            // Special case for registries which don't have a register event
-            handleRegistry(Registries.BLOCK_ENTITY_TYPES, event);
-            handleRegistry(Registries.BLOCK_ENTITY_CLASSES, event);
-
             handleRegistry(Registries.ITEMS, event);
-
-            // Special case for registries which don't have a register event
-            handleRegistry(Registries.MENU_TYPES, event);
         }
 
         @SubscribeEvent
@@ -422,6 +415,12 @@ public class RegistrationHandler {
     }
 
     private void handleRegisterEvent(Registries.Registry<?> registry){
+        this.handleRegistry(registry);
+        for(Registries.Registry<?> otherRegistry : Registries.REGISTRATION_ORDER_MAP.getOrDefault(registry, Collections.emptyList()))
+            this.handleRegistry(otherRegistry);
+    }
+
+    private void handleRegistry(Registries.Registry<?> registry){
         this.encounteredEvents.add(registry);
 
         // Register entries

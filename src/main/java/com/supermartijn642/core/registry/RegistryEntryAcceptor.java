@@ -8,7 +8,6 @@ import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.discovery.asm.ModAnnotation;
 import net.minecraftforge.fml.common.event.FMLModIdMappingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -43,7 +42,8 @@ public @interface RegistryEntryAcceptor {
         ENCHANTMENTS(Registries.ENCHANTMENTS),
         ENTITY_TYPES(Registries.ENTITY_TYPES),
         BLOCK_ENTITY_TYPES(Registries.BLOCK_ENTITY_TYPES),
-        MENU_TYPES(Registries.MENU_TYPES);
+        MENU_TYPES(Registries.MENU_TYPES),
+        RECIPE_CONDITION_SERIALIZERS(Registries.RECIPE_CONDITION_SERIALIZERS);
 
         public final Registries.Registry<?> registry;
 
@@ -130,17 +130,16 @@ public @interface RegistryEntryAcceptor {
         }
 
         public static void onRegisterEvent(RegistryEvent.Register<?> e){
-            applyToFields(Registries.fromUnderlying(e.getRegistry()));
-            applyToMethods(Registries.fromUnderlying(e.getRegistry()));
+            Registries.Registry<?> registry = Registries.fromUnderlying(e.getRegistry());
+            if(registry == null)
+                return;
 
-            // Special case for registries which don't have a register event
-            if(e.getRegistry() == ForgeRegistries.ITEMS){
-                applyToFields(Registries.BLOCK_ENTITY_TYPES);
-                applyToMethods(Registries.BLOCK_ENTITY_TYPES);
-                applyToFields(Registries.BLOCK_ENTITY_CLASSES);
-                applyToMethods(Registries.BLOCK_ENTITY_CLASSES);
-                applyToFields(Registries.MENU_TYPES);
-                applyToMethods(Registries.MENU_TYPES);
+            applyToFields(registry);
+            applyToMethods(registry);
+
+            for(Registries.Registry<?> otherRegistry : Registries.REGISTRATION_ORDER_MAP.getOrDefault(registry, Collections.emptyList())){
+                applyToFields(otherRegistry);
+                applyToMethods(otherRegistry);
             }
         }
 
