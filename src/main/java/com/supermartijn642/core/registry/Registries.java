@@ -1,5 +1,6 @@
 package com.supermartijn642.core.registry;
 
+import com.google.common.collect.Lists;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
 import net.minecraft.core.particles.ParticleType;
@@ -39,6 +40,10 @@ public final class Registries {
 
     static final Map<net.minecraft.core.Registry<?>,Registry<?>> VANILLA_REGISTRY_MAP = new HashMap<>();
     static final Map<IForgeRegistry<?>,Registry<?>> FORGE_REGISTRY_MAP = new HashMap<>();
+    /**
+     * Each entry is a registry which has a vanilla registry and a list of registries which do not have a vanilla registry.
+     */
+    static final Map<Registry<?>,List<Registry<?>>> REGISTRATION_ORDER_MAP = new HashMap<>();
 
     private static void addRegistry(Registry<?> registry){
         if(registry.hasVanillaRegistry() && VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
@@ -87,6 +92,11 @@ public final class Registries {
     public static final Registry<Attribute> ATTRIBUTES = forge(ATTRIBUTE, ForgeRegistries.ATTRIBUTES, Attribute.class);
     public static final Registry<StatType<?>> STAT_TYPES = forge(STAT_TYPE, ForgeRegistries.STAT_TYPES, StatType.class);
     public static final Registry<IConditionSerializer<?>> RECIPE_CONDITION_SERIALIZERS = new RecipeConditionSerializerRegistry();
+
+    static{
+        // Add all registries which don't have a forge registry
+        REGISTRATION_ORDER_MAP.put(RECIPE_SERIALIZERS, Lists.newArrayList(RECIPE_CONDITION_SERIALIZERS));
+    }
 
     private static <T> Registry<T> vanilla(net.minecraft.core.Registry<T> registry, Class<? super T> valueClass){
         return new VanillaRegistryWrapper<>(registry, valueClass);

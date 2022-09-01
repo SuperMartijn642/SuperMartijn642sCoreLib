@@ -22,7 +22,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegisterEvent;
 
 import java.util.*;
@@ -472,8 +471,18 @@ public class RegistrationHandler {
     }
 
     private void handleRegisterEvent(RegisterEvent event){
-        IForgeRegistry<?> underlyingRegistry = event.getForgeRegistry();
-        Registries.Registry<?> registry = Registries.fromUnderlying(underlyingRegistry);
+        Registries.Registry<?> registry = event.getForgeRegistry() == null ?
+            Registries.fromUnderlying(event.getVanillaRegistry()) :
+            Registries.fromUnderlying(event.getForgeRegistry());
+        if(registry == null)
+            return;
+
+        this.handleRegistry(registry);
+        for(Registries.Registry<?> otherRegistry : Registries.REGISTRATION_ORDER_MAP.getOrDefault(registry, Collections.emptyList()))
+            this.handleRegistry(otherRegistry);
+    }
+
+    private void handleRegistry(Registries.Registry<?> registry){
         this.encounteredEvents.add(registry);
 
         // Register entries
