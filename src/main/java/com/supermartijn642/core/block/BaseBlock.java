@@ -47,7 +47,7 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
 
     private final boolean saveTileData;
     private final BlockProperties properties;
-    private BlockRenderLayer renderLayer;
+    private BlockRenderLayer renderLayer = BlockRenderLayer.SOLID;
 
     private BaseBlock(boolean saveTileData, Properties properties, BlockProperties blockProperties){
         super(properties);

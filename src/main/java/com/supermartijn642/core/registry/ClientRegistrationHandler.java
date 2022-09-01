@@ -2,7 +2,6 @@ package com.supermartijn642.core.registry;
 
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.CoreLib;
-import com.supermartijn642.core.block.BaseBlock;
 import com.supermartijn642.core.block.EditableBlockRenderLayer;
 import com.supermartijn642.core.extensions.EntityRendererManagerExtension;
 import com.supermartijn642.core.extensions.TileEntityRendererDispatcherExtension;
@@ -626,7 +625,7 @@ public class ClientRegistrationHandler {
                 throw new RuntimeException("Got null render type for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
 
             blocks.add(block);
-            ((BaseBlock)block).setRenderLayer(renderType);
+            ((EditableBlockRenderLayer)block).setRenderLayer(renderType);
         }
     }
 
