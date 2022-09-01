@@ -275,62 +275,6 @@ public abstract class ModelGenerator extends ResourceGenerator {
             return this.parent(new ResourceLocation(namespace, path));
         }
 
-//        /** TODO
-//         * Sets the render type to be used for this model. Render types must be registered through {@link NamedRenderTypeManager}.
-//         * @param renderType identifier of the render type
-//         */
-//        public ModelBuilder renderType(ResourceLocation renderType){
-//            if(!isRenderTypeRegistered(renderType))
-//                throw new RuntimeException("Could not find any object registered under '" + renderType + "'!");
-//
-//            this.renderType = renderType;
-//            return this;
-//        }
-
-//        /**
-//         * Sets the render type to be used for this model. Render types must be registered through {@link NamedRenderTypeManager}.
-//         * @param namespace  namespace of the render type
-//         * @param identifier path of the render type
-//         */
-//        public ModelBuilder renderType(String namespace, String identifier){
-//            return this.renderType(new ResourceLocation(namespace, identifier));
-//        }
-
-//        /**
-//         * Sets the render type for this model to <b>minecraft:solid</b>.
-//         */
-//        public ModelBuilder renderTypeSolid(){
-//            return this.renderType(new ResourceLocation("solid"));
-//        }
-
-//        /**
-//         * Sets the render type for this model to <b>minecraft:cutout</b>.
-//         */
-//        public ModelBuilder renderTypeCutout(){
-//            return this.renderType(new ResourceLocation("cutout"));
-//        }
-
-//        /**
-//         * Sets the render type for this model to <b>minecraft:cutout_mipped</b>.
-//         */
-//        public ModelBuilder renderTypeCutoutMipped(){
-//            return this.renderType(new ResourceLocation("cutout_mipped"));
-//        }
-
-//        /**
-//         * Sets the render type for this model to <b>minecraft:cutout_mipped_all</b>.
-//         */
-//        public ModelBuilder renderTypeCutoutMippedAll(){
-//            return this.renderType(new ResourceLocation("cutout_mipped_all"));
-//        }
-
-//        /**
-//         * Sets the render type for this model to <b>minecraft:translucent</b>.
-//         */
-//        public ModelBuilder renderTypeTranslucent(){
-//            return this.renderType(new ResourceLocation("translucent"));
-//        }
-
         /**
          * Sets whether ambient occlusion should be applied when rendering this model.
          */

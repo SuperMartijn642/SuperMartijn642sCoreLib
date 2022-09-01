@@ -2,12 +2,15 @@ package com.supermartijn642.core.registry;
 
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.CoreLib;
+import com.supermartijn642.core.block.BaseBlock;
+import com.supermartijn642.core.block.EditableBlockRenderLayer;
 import com.supermartijn642.core.extensions.EntityRendererManagerExtension;
 import com.supermartijn642.core.extensions.TileEntityRendererDispatcherExtension;
 import com.supermartijn642.core.render.CustomBlockEntityRenderer;
 import com.supermartijn642.core.render.CustomItemRenderer;
 import com.supermartijn642.core.util.Pair;
 import com.supermartijn642.core.util.TriFunction;
+import net.minecraft.block.Block;
 import net.minecraft.client.gui.IHasContainer;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.gui.screen.Screen;
@@ -25,6 +28,7 @@ import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -48,6 +52,7 @@ public class ClientRegistrationHandler {
     /**
      * {@link Item.teisr}
      */
+    @SuppressWarnings("JavadocReference")
     private static final Field itemIster;
 
     static{
@@ -112,6 +117,7 @@ public class ClientRegistrationHandler {
     private final List<Pair<Supplier<Item>,Supplier<ItemStackTileEntityRenderer>>> customItemRenderers = new ArrayList<>();
 
     private final List<Pair<Supplier<ContainerType<?>>,TriFunction<Container,PlayerInventory,ITextComponent,Screen>>> containerScreens = new ArrayList<>();
+    private final List<Pair<Supplier<Block>,BlockRenderLayer>> blockRenderTypes = new ArrayList<>();
 
     private boolean passedModelRegistry;
     private boolean passedModelBake;
@@ -421,6 +427,79 @@ public class ClientRegistrationHandler {
         this.registerContainerScreen(() -> menuType, (container, inventory, title) -> screenSupplier.apply(container));
     }
 
+    /**
+     * Registers the given render type to be used when rendering the given block.
+     */
+    public void registerBlockModelRenderType(Supplier<Block> block, BlockRenderLayer renderType){
+        if(this.passedClientSetup)
+            throw new IllegalStateException("Cannot register new menu screens after the ClientInitialization event has been fired!");
+
+        this.blockRenderTypes.add(Pair.of(block, renderType));
+    }
+
+    /**
+     * Registers the given render type to be used when rendering the given block.
+     */
+    public void registerBlockModelRenderType(Block block, BlockRenderLayer renderType){
+        this.registerBlockModelRenderType(() -> block, renderType);
+    }
+
+    /**
+     * Registers the solid render type to be used when rendering the given block.
+     */
+    public void registerBlockModelSolidRenderType(Supplier<Block> block){
+        this.registerBlockModelRenderType(block, BlockRenderLayer.SOLID);
+    }
+
+    /**
+     * Registers the solid render type to be used when rendering the given block.
+     */
+    public void registerBlockModelSolidRenderType(Block block){
+        this.registerBlockModelRenderType(block, BlockRenderLayer.SOLID);
+    }
+
+    /**
+     * Registers the cutout mipped render type to be used when rendering the given block.
+     */
+    public void registerBlockModelCutoutMippedRenderType(Supplier<Block> block){
+        this.registerBlockModelRenderType(block, BlockRenderLayer.CUTOUT_MIPPED);
+    }
+
+    /**
+     * Registers the cutout mipped render type to be used when rendering the given block.
+     */
+    public void registerBlockModelCutoutMippedRenderType(Block block){
+        this.registerBlockModelRenderType(block, BlockRenderLayer.CUTOUT_MIPPED);
+    }
+
+    /**
+     * Registers the cutout render type to be used when rendering the given block.
+     */
+    public void registerBlockModelCutoutRenderType(Supplier<Block> block){
+        this.registerBlockModelRenderType(block, BlockRenderLayer.CUTOUT);
+    }
+
+    /**
+     * Registers the cutout render type to be used when rendering the given block.
+     */
+    public void registerBlockModelCutoutRenderType(Block block){
+        this.registerBlockModelRenderType(block, BlockRenderLayer.CUTOUT);
+    }
+
+    /**
+     * Registers the translucent render type to be used when rendering the given block.
+     */
+    public void registerBlockModelTranslucentRenderType(Supplier<Block> block){
+        this.registerBlockModelRenderType(block, BlockRenderLayer.TRANSLUCENT);
+    }
+
+    /**
+     * Registers the translucent render type to be used when rendering the given block.
+     */
+    public void registerBlockModelTranslucentRenderType(Block block){
+        this.registerBlockModelRenderType(block, BlockRenderLayer.TRANSLUCENT);
+    }
+
     private void handleModelRegistryEvent(ModelRegistryEvent e){
         this.passedModelRegistry = true;
 
@@ -530,6 +609,24 @@ public class ClientRegistrationHandler {
             menuTypes.add(menuType);
             //noinspection unchecked,rawtypes,NullableProblems
             ScreenManager.register((ContainerType)menuType, (ScreenManager.IScreenFactory)entry.right()::apply);
+        }
+
+        // Block render types
+        Set<Block> blocks = new HashSet<>();
+        for(Pair<Supplier<Block>,BlockRenderLayer> entry : this.blockRenderTypes){
+            Block block = entry.left().get();
+            if(block == null)
+                throw new RuntimeException("Block render type registered for null block!");
+            if(blocks.contains(block))
+                throw new RuntimeException("Duplicate render type for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
+            if(!(block instanceof EditableBlockRenderLayer))
+                throw new RuntimeException("Block '" + Registries.BLOCKS.getIdentifier(block) + "' must implement EditableBlockRenderLayer to set it's render type!");
+            BlockRenderLayer renderType = entry.right();
+            if(renderType == null)
+                throw new RuntimeException("Got null render type for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
+
+            blocks.add(block);
+            ((BaseBlock)block).setRenderLayer(renderType);
         }
     }
 

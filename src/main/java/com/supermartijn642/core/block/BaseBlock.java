@@ -13,6 +13,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
@@ -34,7 +35,7 @@ import java.util.function.Consumer;
 /**
  * Created 1/26/2021 by SuperMartijn642
  */
-public class BaseBlock extends Block {
+public class BaseBlock extends Block implements EditableBlockRenderLayer {
 
     private static final Tag<Block> MINEABLE_WITH_AXE = BlockTags.bind("mineable/axe");
     private static final Tag<Block> MINEABLE_WITH_HOE = BlockTags.bind("mineable/hoe");
@@ -46,6 +47,7 @@ public class BaseBlock extends Block {
 
     private final boolean saveTileData;
     private final BlockProperties properties;
+    private BlockRenderLayer renderLayer;
 
     private BaseBlock(boolean saveTileData, Properties properties, BlockProperties blockProperties){
         super(properties);
@@ -244,6 +246,16 @@ public class BaseBlock extends Block {
     @Override
     public boolean canOcclude(BlockState state){
         return this.properties != null ? this.properties.canOcclude : super.canOcclude(state);
+    }
+
+    @Override
+    public BlockRenderLayer getRenderLayer(){
+        return this.renderLayer;
+    }
+
+    @Override
+    public void setRenderLayer(BlockRenderLayer layer){
+        this.renderLayer = layer;
     }
 
     protected enum InteractionFeedback {
