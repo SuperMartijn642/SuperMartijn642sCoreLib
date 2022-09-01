@@ -30,7 +30,7 @@ public class GeneratorRegistrationHandler {
      * @param modid modid of the mod registering entries
      * @return a unique registration handler for the given modid
      */
-    public static GeneratorRegistrationHandler get(String modid){
+    public static synchronized GeneratorRegistrationHandler get(String modid){
         if(!RegistryUtil.isValidNamespace(modid))
             throw new IllegalArgumentException("Modid '" + modid + "' must only contain characters [a-z0-9_.-]!");
         String activeMod = Loader.instance().activeModContainer() == null ? null : Loader.instance().activeModContainer().getModId();
@@ -91,13 +91,13 @@ public class GeneratorRegistrationHandler {
     }
 
     private void handlerGatherDataEvent(GatherDataEvent e){
+        this.hasEventBeenFired = true;
+
         // Resolve and add all the generators
         for(Function<ResourceCache,ResourceGenerator> generatorFunction : this.generators){
             ResourceGenerator generator = generatorFunction.apply(e.getResourceCache());
-            if(generator == null){
-                CoreLib.LOGGER.error("Received null generator from a registered generator supplier from mod '" + this.modid + "'!");
-                continue;
-            }
+            if(generator == null)
+                throw new RuntimeException("Received null generator from a registered generator supplier from mod '" + this.modid + "'!");
 
             e.addGenerator(generator);
         }

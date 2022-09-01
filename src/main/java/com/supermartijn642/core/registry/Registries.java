@@ -17,6 +17,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.registry.IRegistry;
 import net.minecraft.util.registry.RegistrySimple;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.IConditionFactory;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.registry.EntityEntry;
@@ -25,7 +27,9 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
@@ -47,6 +51,11 @@ public final class Registries {
             FORGE_REGISTRY_MAP.put(registry.getForgeRegistry(), registry);
     }
 
+    @Deprecated
+    public static void onRecipeConditionSerializerAdded(ResourceLocation identifier, IConditionFactory serializer){
+        ((RecipeConditionSerializerRegistry)RECIPE_CONDITION_SERIALIZERS).onObjectAdded(identifier, serializer);
+    }
+
     @SuppressWarnings("unchecked")
     @Deprecated
     public static <T> Registry<T> fromUnderlying(IRegistry<ResourceLocation,T> registry){
@@ -61,7 +70,7 @@ public final class Registries {
 
     public static final Registry<Block> BLOCKS = forge(Block.REGISTRY, ForgeRegistries.BLOCKS, Block.class);
     public static final Registry<Fluid> FLUIDS = new FluidRegistryWrapper();
-    public static final Registry<Item> ITEMS = new ForgeRegistryWrapper<Item>(Item.REGISTRY, ForgeRegistries.ITEMS, Item.class){
+    public static final Registry<Item> ITEMS = new ForgeRegistryWrapper<Item>(Item.REGISTRY, ForgeRegistries.ITEMS, Item.class) {
         @Override
         public void register(ResourceLocation identifier, Item object){
             super.register(identifier, object);
@@ -79,6 +88,10 @@ public final class Registries {
     public static final Registry<BaseBlockEntityType<?>> BLOCK_ENTITY_TYPES = new MapBackedRegistry<>(BaseBlockEntityType.class);
     public static final Registry<Class<? extends TileEntity>> BLOCK_ENTITY_CLASSES = vanilla(TileEntity.REGISTRY, Class.class);
     public static final Registry<BaseContainerType<?>> MENU_TYPES = new MapBackedRegistry<>(BaseContainerType.class);
+    public static final Registry<IConditionFactory> RECIPE_CONDITION_SERIALIZERS = new RecipeConditionSerializerRegistry();
+    static {
+        ((RecipeConditionSerializerRegistry)RECIPE_CONDITION_SERIALIZERS).initializeMap();
+    }
 
     private static <T> Registry<T> vanilla(IRegistry<ResourceLocation,T> registry, Class<? super T> valueClass){
         return new VanillaRegistryWrapper<>(registry, valueClass);
@@ -423,6 +436,113 @@ public final class Registries {
 
         @Override
         public Class<T> getValueClass(){
+            return this.valueClass;
+        }
+    }
+
+    private static class RecipeConditionSerializerRegistry implements Registry<IConditionFactory> {
+
+        private static final Supplier<Map<ResourceLocation,IConditionFactory>> craftingHelperConditions;
+
+        static{
+            try{
+                Field field = CraftingHelper.class.getDeclaredField("conditions");
+                field.setAccessible(true);
+                craftingHelperConditions = () -> {
+                    try{
+                        //noinspection unchecked
+                        return (Map<ResourceLocation,IConditionFactory>)field.get(null);
+                    }catch(IllegalAccessException e){
+                        throw new RuntimeException(e);
+                    }
+                };
+            }catch(NoSuchFieldException e){
+                throw new RuntimeException(e);
+            }
+        }
+
+        private Map<ResourceLocation,IConditionFactory> identifierToObject;
+        private final Map<IConditionFactory,ResourceLocation> objectToIdentifier = new HashMap<>();
+        private final Set<Pair<ResourceLocation,IConditionFactory>> entries = new HashSet<>();
+        private final Class<IConditionFactory> valueClass = IConditionFactory.class;
+
+        private RecipeConditionSerializerRegistry(){
+        }
+
+        private void initializeMap(){
+            this.identifierToObject = craftingHelperConditions.get();
+            this.identifierToObject.forEach((id, o) -> this.objectToIdentifier.put(o, id));
+            this.identifierToObject.forEach((id, o) -> this.entries.add(Pair.of(id, o)));
+        }
+
+        @Nullable
+        @Override
+        public IRegistry<ResourceLocation,IConditionFactory> getVanillaRegistry(){
+            return null;
+        }
+
+        @Override
+        public boolean hasVanillaRegistry(){
+            return false;
+        }
+
+        @Override
+        public @Nullable <X extends IForgeRegistryEntry<X>> IForgeRegistry<X> getForgeRegistry(){
+            return null;
+        }
+
+        @Override
+        public boolean hasForgeRegistry(){
+            return false;
+        }
+
+        @Override
+        public void register(ResourceLocation identifier, IConditionFactory object){
+            if(this.identifierToObject.containsKey(identifier))
+                throw new RuntimeException("Duplicate registry for identifier '" + identifier + "'!");
+            if(this.objectToIdentifier.containsKey(object))
+                throw new RuntimeException("Duplicate registry for object under '" + this.objectToIdentifier.get(object) + "' and '" + identifier + "'!");
+
+            CraftingHelper.register(identifier, object);
+        }
+
+        public void onObjectAdded(ResourceLocation identifier, IConditionFactory object){
+            this.objectToIdentifier.put(object, identifier);
+            this.entries.add(Pair.of(identifier, object));
+        }
+
+        @Override
+        public ResourceLocation getIdentifier(IConditionFactory object){
+            return this.objectToIdentifier.get(object);
+        }
+
+        @Override
+        public boolean hasIdentifier(ResourceLocation identifier){
+            return this.identifierToObject.containsKey(identifier);
+        }
+
+        @Override
+        public IConditionFactory getValue(ResourceLocation identifier){
+            return this.identifierToObject.get(identifier);
+        }
+
+        @Override
+        public Set<ResourceLocation> getIdentifiers(){
+            return Collections.unmodifiableSet(this.identifierToObject.keySet());
+        }
+
+        @Override
+        public Collection<IConditionFactory> getValues(){
+            return Collections.unmodifiableCollection(this.objectToIdentifier.keySet());
+        }
+
+        @Override
+        public Set<Pair<ResourceLocation,IConditionFactory>> getEntries(){
+            return Collections.unmodifiableSet(this.entries);
+        }
+
+        @Override
+        public Class<IConditionFactory> getValueClass(){
             return this.valueClass;
         }
     }

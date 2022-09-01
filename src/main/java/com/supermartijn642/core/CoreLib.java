@@ -3,11 +3,15 @@ package com.supermartijn642.core;
 import com.supermartijn642.core.data.TagLoader;
 import com.supermartijn642.core.generator.GeneratorManager;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
+import com.supermartijn642.core.loot_table.SurvivesExplosionLootCondition;
 import com.supermartijn642.core.network.OpenContainerPacket;
 import com.supermartijn642.core.network.PacketChannel;
+import com.supermartijn642.core.recipe.condition.ModLoadedRecipeCondition;
 import com.supermartijn642.core.registry.ClientRegistrationHandler;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
+import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
+import net.minecraft.world.storage.loot.conditions.LootConditionManager;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -28,6 +32,13 @@ public class CoreLib {
 
     public CoreLib(){
         CHANNEL.registerMessage(OpenContainerPacket.class, OpenContainerPacket::new, true);
+
+        // Register conditional recipe type
+        RegistrationHandler handler = RegistrationHandler.get("supermartijn642corelib");
+        handler.registerRecipeConditionSerializer("mod_loaded", ModLoadedRecipeCondition.SERIALIZER);
+
+        // Register loot condition
+        LootConditionManager.registerCondition(SurvivesExplosionLootCondition.SERIALIZER);
 
         // Register generator for default tags
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));

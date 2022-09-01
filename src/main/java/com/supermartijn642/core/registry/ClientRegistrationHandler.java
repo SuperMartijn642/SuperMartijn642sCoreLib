@@ -70,7 +70,7 @@ public class ClientRegistrationHandler {
      * @param modid modid of the mod registering entries
      * @return a unique registration handler for the given modid
      */
-    public static ClientRegistrationHandler get(String modid){
+    public static synchronized ClientRegistrationHandler get(String modid){
         if(!RegistryUtil.isValidNamespace(modid))
             throw new IllegalArgumentException("Modid '" + modid + "' must only contain characters [a-z0-9_.-]!");
         String activeMod = Loader.instance().activeModContainer() == null ? null : Loader.instance().activeModContainer().getModId();

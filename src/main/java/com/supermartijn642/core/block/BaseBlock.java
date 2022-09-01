@@ -1,6 +1,8 @@
 package com.supermartijn642.core.block;
 
+import com.supermartijn642.core.CommonUtils;
 import com.supermartijn642.core.data.TagLoader;
+import com.supermartijn642.core.extensions.LootContextExtension;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -22,10 +24,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.storage.loot.LootContext;
+import net.minecraft.world.storage.loot.LootTable;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -90,13 +97,11 @@ public class BaseBlock extends Block {
 
     @Override
     public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune){
-        drops.addAll(this.getActualDrops(world, pos, state, fortune));
+        drops.addAll(this.getActualDrops(world, pos, state, fortune, -1));
     }
 
-    public List<ItemStack> getActualDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune){
-        NonNullList<ItemStack> drops = NonNullList.create();
-
-        super.getDrops(drops, world, pos, state, fortune);
+    public List<ItemStack> getActualDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune, float explosionRadius){
+        List<ItemStack> drops = this.resolveLootTable(world, pos, state, fortune, explosionRadius);
 
         if(!this.saveTileData)
             return drops;
@@ -106,7 +111,7 @@ public class BaseBlock extends Block {
             return drops;
 
         if(((BaseBlockEntity)entity).destroyedByCreativePlayer)
-            return NonNullList.create();
+            return Collections.emptyList();
 
         NBTTagCompound tileTag = ((BaseBlockEntity)entity).writeItemStackData();
         if(tileTag == null || tileTag.hasNoTags())
@@ -122,6 +127,40 @@ public class BaseBlock extends Block {
         }
 
         return drops;
+    }
+
+    private List<ItemStack> resolveLootTable(IBlockAccess level, BlockPos pos, IBlockState state, int fortune, float explosionRadius){
+        if(this.properties.lootTableBlock != null){
+            NonNullList<ItemStack> drops = NonNullList.create();
+            this.properties.lootTableBlock.get().getDrops(drops, level, pos, state, fortune);
+            return drops;
+        }
+        if(!(level instanceof WorldServer) || this.properties.noLootTable)
+            return Collections.emptyList();
+
+        LootContext.Builder contextBuilder = new LootContext.Builder((WorldServer)level);
+        if(this.harvesters.get() != null)
+            contextBuilder.withPlayer(this.harvesters.get());
+        LootContext context = contextBuilder.build();
+        ((LootContextExtension)context).coreLibSetExplosionRadius(explosionRadius);
+
+        ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
+        ResourceLocation lootTableLocation = new ResourceLocation(identifier.getResourceDomain(), "blocks/" + identifier.getResourcePath());
+        LootTable lootTable = CommonUtils.getLevel(DimensionType.OVERWORLD).getLootTableManager().getLootTableFromLocation(lootTableLocation);
+        return lootTable.generateLootForPools(((WorldServer)level).rand, context);
+    }
+
+    public void dropItemsFromExplosion(World level, BlockPos pos, IBlockState state, float explosionRadius){
+        if(!level.isRemote && !level.restoringBlockSnapshots){
+            List<ItemStack> drops = this.getActualDrops(level, pos, state, 0, explosionRadius);
+            for(ItemStack drop : drops)
+                spawnAsEntity(level, pos, drop);
+        }
+    }
+
+    @Override
+    public void dropBlockAsItemWithChance(World p_180653_1_, BlockPos p_180653_2_, IBlockState p_180653_3_, float p_180653_4_, int p_180653_5_){
+        super.dropBlockAsItemWithChance(p_180653_1_, p_180653_2_, p_180653_3_, p_180653_4_, p_180653_5_);
     }
 
     @Override

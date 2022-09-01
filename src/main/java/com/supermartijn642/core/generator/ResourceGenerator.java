@@ -32,14 +32,14 @@ public abstract class ResourceGenerator {
     }
 
     /**
-     * Generates all data. {@link #cache} may be used to check for existing files and to save any generated files.
+     * Generates all data. All files that will be generated should be tracked using {@link ResourceCache#trackToBeGeneratedResource(ResourceType, String, String, String, String)}.
      */
     public abstract void generate();
 
     /**
-     * Saves any remaining resources. Called directly after {@link #generate()}.
+     * Saves any generated resources. {@link #cache} may be used to check for existing files and to save the generated files.
      */
-    public void finish(){
+    public void save(){
     }
 
     /**

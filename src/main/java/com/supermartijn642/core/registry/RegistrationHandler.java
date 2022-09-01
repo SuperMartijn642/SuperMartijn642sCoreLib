@@ -3,6 +3,7 @@ package com.supermartijn642.core.registry;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.block.BaseBlockEntityType;
 import com.supermartijn642.core.gui.BaseContainerType;
+import com.supermartijn642.core.recipe.condition.RecipeConditionSerializer;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.Item;
@@ -11,6 +12,7 @@ import net.minecraft.potion.PotionType;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraftforge.common.crafting.IConditionFactory;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -98,7 +100,7 @@ public class RegistrationHandler {
      * @param modid modid of the mod registering entries
      * @return a unique registration handler for the given modid
      */
-    public static RegistrationHandler get(String modid){
+    public static synchronized RegistrationHandler get(String modid){
         if(!RegistryUtil.isValidNamespace(modid))
             throw new IllegalArgumentException("Modid '" + modid + "' must only contain characters [a-z0-9_.-]!");
         String activeMod = Loader.instance().activeModContainer() == null ? null : Loader.instance().activeModContainer().getModId();
@@ -333,6 +335,58 @@ public class RegistrationHandler {
 
     public void registerMenuTypeCallback(Consumer<Helper<BaseContainerType<?>>> callback){
         this.addCallback(Registries.MENU_TYPES, callback);
+    }
+
+    public void registerConditionSerializer(String identifier, Supplier<IConditionFactory> recipeSerializer){
+        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, identifier, recipeSerializer);
+    }
+
+    public void registerConditionSerializer(String identifier, IConditionFactory recipeSerializer){
+        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, identifier, () -> recipeSerializer);
+    }
+
+    public void registerConditionSerializerOverride(String namespace, String identifier, Supplier<IConditionFactory> recipeSerializer){
+        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, namespace, identifier, recipeSerializer);
+    }
+
+    public void registerConditionSerializerOverride(String namespace, String identifier, IConditionFactory recipeSerializer){
+        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, namespace, identifier, () -> recipeSerializer);
+    }
+
+    public void registerConditionSerializerCallback(Consumer<Helper<IConditionFactory>> callback){
+        this.addCallback(Registries.RECIPE_CONDITION_SERIALIZERS, callback);
+    }
+
+    public void registerRecipeConditionSerializer(String identifier, Supplier<RecipeConditionSerializer<?>> recipeSerializer){
+        this.registerConditionSerializer(identifier, () -> RecipeConditionSerializer.createForgeConditionSerializer(new ResourceLocation(this.modid, identifier), recipeSerializer.get()));
+    }
+
+    public void registerRecipeConditionSerializer(String identifier, RecipeConditionSerializer<?> recipeSerializer){
+        this.registerConditionSerializer(identifier, () -> RecipeConditionSerializer.createForgeConditionSerializer(new ResourceLocation(this.modid, identifier), recipeSerializer));
+    }
+
+    public void registerRecipeConditionSerializerOverride(String namespace, String identifier, Supplier<RecipeConditionSerializer<?>> recipeSerializer){
+        this.registerConditionSerializerOverride(namespace, identifier, () -> RecipeConditionSerializer.createForgeConditionSerializer(new ResourceLocation(namespace, identifier), recipeSerializer.get()));
+    }
+
+    public void registerRecipeConditionSerializerOverride(String namespace, String identifier, RecipeConditionSerializer<?> recipeSerializer){
+        this.registerConditionSerializerOverride(namespace, identifier, () -> RecipeConditionSerializer.createForgeConditionSerializer(new ResourceLocation(namespace, identifier), recipeSerializer));
+    }
+
+    public void registerRecipeConditionSerializerCallback(Consumer<Helper<RecipeConditionSerializer<?>>> callback){
+        this.registerConditionSerializerCallback(helper -> callback.accept(new Helper<RecipeConditionSerializer<?>>(null) {
+            @Override
+            public <X extends RecipeConditionSerializer<?>> X register(String identifier, X object){
+                helper.register(identifier, RecipeConditionSerializer.createForgeConditionSerializer(new ResourceLocation(RegistrationHandler.this.modid, identifier), object));
+                return object;
+            }
+
+            @Override
+            public <X extends RecipeConditionSerializer<?>> X registerOverride(String namespace, String identifier, X object){
+                helper.register(namespace, identifier, RecipeConditionSerializer.createForgeConditionSerializer(new ResourceLocation(namespace, identifier), object));
+                return object;
+            }
+        }));
     }
 
     private <T> void addEntry(Registries.Registry<T> registry, String identifier, Supplier<T> entry){
