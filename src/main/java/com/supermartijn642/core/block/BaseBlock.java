@@ -16,10 +16,7 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -40,7 +37,7 @@ import java.util.function.Consumer;
 /**
  * Created 1/26/2021 by SuperMartijn642
  */
-public class BaseBlock extends Block {
+public class BaseBlock extends Block implements EditableBlockRenderLayer {
 
     private static final ResourceLocation MINEABLE_WITH_AXE = new ResourceLocation("mineable/axe");
     private static final ResourceLocation MINEABLE_WITH_HOE = new ResourceLocation("mineable/hoe");
@@ -52,6 +49,7 @@ public class BaseBlock extends Block {
 
     private final boolean saveTileData;
     private final BlockProperties properties;
+    private BlockRenderLayer renderLayer = BlockRenderLayer.SOLID;
 
     public BaseBlock(boolean saveTileData, BlockProperties properties){
         super(properties.material, properties.mapColor);
@@ -291,6 +289,16 @@ public class BaseBlock extends Block {
     @Override
     public String getUnlocalizedName(){
         return this.getRegistryName().getResourceDomain() + ".block." + this.getRegistryName().getResourcePath();
+    }
+
+    @Override
+    public BlockRenderLayer getBlockLayer(){
+        return this.renderLayer;
+    }
+
+    @Override
+    public void setRenderLayer(BlockRenderLayer layer){
+        this.renderLayer = layer;
     }
 
     protected enum InteractionFeedback {
