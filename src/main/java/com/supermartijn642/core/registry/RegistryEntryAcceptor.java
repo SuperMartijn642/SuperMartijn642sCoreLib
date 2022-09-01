@@ -18,10 +18,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
@@ -141,8 +138,17 @@ public @interface RegistryEntryAcceptor {
         }
 
         public static void onRegisterEvent(RegistryEvent.Register<?> e){
-            applyToFields(Registries.fromUnderlying(e.getRegistry()));
-            applyToMethods(Registries.fromUnderlying(e.getRegistry()));
+            Registries.Registry<?> registry = Registries.fromUnderlying(e.getRegistry());
+            if(registry == null)
+                return;
+
+            applyToFields(registry);
+            applyToMethods(registry);
+
+            for(Registries.Registry<?> otherRegistry : Registries.REGISTRATION_ORDER_MAP.getOrDefault(registry, Collections.emptyList())){
+                applyToFields(otherRegistry);
+                applyToMethods(otherRegistry);
+            }
         }
 
         public static void onIdRemapping(RegistryEvent.IdMappingEvent e){
