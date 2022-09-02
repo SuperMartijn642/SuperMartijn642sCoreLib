@@ -11,7 +11,6 @@ import net.minecraft.server.packs.PackType;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -96,7 +95,7 @@ public abstract class ResourceCache {
 
         @Override
         public boolean doesResourceExist(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
-            ResourceLocation location = new ResourceLocation(namespace, directory + File.separator + fileName + extension);
+            ResourceLocation location = new ResourceLocation(namespace, directory + "/" + fileName + extension);
             return this.existingFileHelper.exists(location, resourceType == ResourceType.DATA ? PackType.SERVER_DATA : PackType.CLIENT_RESOURCES);
         }
 
