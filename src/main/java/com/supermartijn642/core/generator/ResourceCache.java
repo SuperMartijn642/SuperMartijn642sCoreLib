@@ -10,7 +10,6 @@ import net.minecraft.resources.ResourcePackType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.generators.ExistingFileHelper;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -98,7 +97,7 @@ public abstract class ResourceCache {
         @Override
         public boolean doesResourceExist(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
-            ResourceLocation location = new ResourceLocation(namespace, directory + File.separator + fileName + extension);
+            ResourceLocation location = new ResourceLocation(namespace, directory + "/" + fileName + extension);
             return this.toBeGenerated.contains(path)
                 || this.existingFileHelper.exists(location, resourceType == ResourceType.DATA ? ResourcePackType.SERVER_DATA : ResourcePackType.CLIENT_RESOURCES, "", "");
         }
