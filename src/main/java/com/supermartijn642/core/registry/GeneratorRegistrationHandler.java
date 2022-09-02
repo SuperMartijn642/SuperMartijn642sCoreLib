@@ -11,7 +11,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -47,8 +47,8 @@ public class GeneratorRegistrationHandler {
     }
 
     private final String modid;
-    private final Set<Function<ResourceCache,ResourceGenerator>> generators = new HashSet<>();
-    private final Set<BiFunction<DataGenerator,ExistingFileHelper,DataProvider>> providers = new HashSet<>();
+    private final Set<Function<ResourceCache,ResourceGenerator>> generators = new LinkedHashSet<>();
+    private final Set<BiFunction<DataGenerator,ExistingFileHelper,DataProvider>> providers = new LinkedHashSet<>();
 
     private boolean hasEventBeenFired;
 
