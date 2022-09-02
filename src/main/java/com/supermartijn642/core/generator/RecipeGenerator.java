@@ -1545,8 +1545,10 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 .parent(new ResourceLocation("minecraft", "recipes/root"))
                 .criterion("has_the_recipe", new RecipeUnlockedTrigger.Instance(recipe.identifier))
                 .criterion("can_unlock_recipe", recipe.unlockedBy)
-                .requirementGroup("has_the_recipe")
-                .requirementGroup("can_unlock_recipe")
+                .requirementGroup("has_the_recipe", "can_unlock_recipe")
+                .icon(recipe.output, recipe.outputTag)
+                .dontShowToast()
+                .dontAnnounceToChat()
                 .rewardRecipe(recipe.identifier);
         }
     }
