@@ -55,13 +55,15 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             // Display
             JsonObject displayJson = new JsonObject();
             // Icon
-            if(advancementBuilder.icon == null)
+            if(advancementBuilder.icon == null && !new ResourceLocation("minecraft", "recipes/root").equals(advancementBuilder.parent))
                 throw new RuntimeException("Advancement '" + advancementBuilder.identifier + "' must have an icon!");
-            JsonObject iconJson = new JsonObject();
-            iconJson.addProperty("item", Registries.ITEMS.getIdentifier(advancementBuilder.icon).toString());
-            if(advancementBuilder.iconTag != null)
-                iconJson.addProperty("nbt", advancementBuilder.iconTag.toString());
-            displayJson.add("icon", iconJson);
+            if(advancementBuilder.icon != null){
+                JsonObject iconJson = new JsonObject();
+                iconJson.addProperty("item", Registries.ITEMS.getIdentifier(advancementBuilder.icon).toString());
+                if(advancementBuilder.iconTag != null)
+                    iconJson.addProperty("nbt", advancementBuilder.iconTag.toString());
+                displayJson.add("icon", iconJson);
+            }
             // Title
             JsonObject titleJson = new JsonObject();
             titleJson.addProperty("translate", advancementBuilder.titleKey);
@@ -150,7 +152,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             throw new RuntimeException("Duplicate advancement with identifier '" + identifier + "'!");
 
         this.cache.trackToBeGeneratedResource(ResourceType.DATA, identifier.getNamespace(), "advancements", identifier.getPath(), ".json");
-        return this.advancements.computeIfAbsent(identifier, AdvancementBuilder::new);
+        return this.advancements.computeIfAbsent(identifier, i -> new AdvancementBuilder(this.modid, i));
     }
 
     /**
@@ -159,7 +161,15 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
      * @param path      path of the advancement
      */
     public AdvancementBuilder advancement(String namespace, String path){
-        return this.advancement(namespace, path);
+        return this.advancement(new ResourceLocation(namespace, path));
+    }
+
+    /**
+     * Creates a new advancement builder for the given namespace and path.
+     * @param identifier location of the advancement
+     */
+    public AdvancementBuilder advancement(String identifier){
+        return this.advancement(this.modid, identifier);
     }
 
     @Override
@@ -169,6 +179,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
 
     protected static class AdvancementBuilder {
 
+        protected final String modid;
         protected final ResourceLocation identifier;
         private final Map<String,CriterionInstance> criteria = new HashMap<>();
         private final List<String[]> requirements = new ArrayList<>();
@@ -186,7 +197,8 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
         private boolean hidden;
         private int rewardExperience;
 
-        public AdvancementBuilder(ResourceLocation identifier){
+        public AdvancementBuilder(String modid, ResourceLocation identifier){
+            this.modid = modid;
             this.identifier = identifier;
             this.titleKey = identifier.getNamespace() + ".advancement." + identifier.getPath() + ".title";
             this.descriptionKey = identifier.getNamespace() + ".advancement." + identifier.getPath() + ".description";
@@ -211,6 +223,14 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
          */
         public AdvancementBuilder parent(String namespace, String path){
             return this.parent(new ResourceLocation(namespace, path));
+        }
+
+        /**
+         * Sets the parent advancement for this advancement.
+         * @param advancement location of the parent advancement
+         */
+        public AdvancementBuilder parent(String advancement){
+            return this.parent(this.modid, advancement);
         }
 
         /**
