@@ -2,9 +2,11 @@ package com.supermartijn642.core.generator;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.color.IBlockColor;
+import net.minecraft.item.Item;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.util.vector.Vector3f;
@@ -141,11 +143,11 @@ public abstract class ModelGenerator extends ResourceGenerator {
                     elementsJson.add(elementJson);
                 }
                 json.add("elements", elementsJson);
-
-                // Save the object to the cache
-                ResourceLocation identifier = modelBuilder.identifier;
-                this.cache.saveJsonResource(ResourceType.ASSET, json, identifier.getResourceDomain(), "models", identifier.getResourcePath());
             }
+
+            // Save the object to the cache
+            ResourceLocation identifier = modelBuilder.identifier;
+            this.cache.saveJsonResource(ResourceType.ASSET, json, identifier.getResourceDomain(), "models", identifier.getResourcePath());
         }
     }
 
@@ -163,7 +165,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
      */
     protected ModelBuilder model(ResourceLocation location){
         this.cache.trackToBeGeneratedResource(ResourceType.ASSET, location.getResourceDomain(), "models", location.getResourcePath(), ".json");
-        return this.models.computeIfAbsent(location, ModelBuilder::new);
+        return this.models.computeIfAbsent(location, i -> new ModelBuilder(this.modid, i));
     }
 
     /**
@@ -173,6 +175,14 @@ public abstract class ModelGenerator extends ResourceGenerator {
      */
     protected ModelBuilder model(String namespace, String path){
         return this.model(new ResourceLocation(namespace, path));
+    }
+
+    /**
+     * Gets a model builder for the given location. The returned model builder may be a new model builder or an existing one if requested before.
+     * @param location path of the model location
+     */
+    protected ModelBuilder model(String location){
+        return this.model(this.modid, location);
     }
 
     /**
@@ -190,11 +200,59 @@ public abstract class ModelGenerator extends ResourceGenerator {
     }
 
     /**
+     * Creates a new model with parent 'minecraft:block/cube' and the given textures for the faces.
+     * @param namespace namespace of the model location
+     * @param path      path of the model location
+     * @param up        resource location of the texture for the top face
+     * @param down      resource location of the texture for the bottom face
+     * @param north     resource location of the texture for the north face
+     * @param east      resource location of the texture for the east face
+     * @param south     resource location of the texture for the south face
+     * @param west      resource location of the texture for the west face
+     */
+    protected ModelBuilder cube(String namespace, String path, ResourceLocation up, ResourceLocation down, ResourceLocation north, ResourceLocation east, ResourceLocation south, ResourceLocation west){
+        return this.model(namespace, path).parent("minecraft", "block/cube").texture("up", "#up").texture("down", "#down").texture("north", "#north").texture("east", "#east").texture("south", "#south").texture("west", "#west");
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:block/cube' and the given textures for the faces.
+     * @param location resource location of the model
+     * @param up       resource location of the texture for the top face
+     * @param down     resource location of the texture for the bottom face
+     * @param north    resource location of the texture for the north face
+     * @param east     resource location of the texture for the east face
+     * @param south    resource location of the texture for the south face
+     * @param west     resource location of the texture for the west face
+     */
+    protected ModelBuilder cube(String location, ResourceLocation up, ResourceLocation down, ResourceLocation north, ResourceLocation east, ResourceLocation south, ResourceLocation west){
+        return this.model(location).parent("minecraft", "block/cube").texture("up", "#up").texture("down", "#down").texture("north", "#north").texture("east", "#east").texture("south", "#south").texture("west", "#west");
+    }
+
+    /**
      * Creates a new model with parent 'minecraft:block/cube_all' and the given texture for '#all'.
      * @param location resource location of the model
      * @param texture  resource location of the texture for the cube's sides
      */
     protected ModelBuilder cubeAll(ResourceLocation location, ResourceLocation texture){
+        return this.model(location).parent("minecraft", "block/cube_all").texture("all", texture);
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:block/cube_all' and the given texture for '#all'.
+     * @param namespace namespace of the model location
+     * @param path      path of the model location
+     * @param texture   resource location of the texture for the cube's sides
+     */
+    protected ModelBuilder cubeAll(String namespace, String path, ResourceLocation texture){
+        return this.model(namespace, path).parent("minecraft", "block/cube_all").texture("all", texture);
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:block/cube_all' and the given texture for '#all'.
+     * @param location resource location of the model
+     * @param texture  resource location of the texture for the cube's sides
+     */
+    protected ModelBuilder cubeAll(String location, ResourceLocation texture){
         return this.model(location).parent("minecraft", "block/cube_all").texture("all", texture);
     }
 
@@ -210,6 +268,29 @@ public abstract class ModelGenerator extends ResourceGenerator {
     }
 
     /**
+     * Creates a new model with parent 'minecraft:block/slab' and the given textures for the faces.
+     * @param namespace namespace of the model location
+     * @param path      path of the model location
+     * @param side      resource location of the texture for the side faces
+     * @param top       resource location of the texture for the top face
+     * @param bottom    resource location of the texture for bottom face
+     */
+    protected ModelBuilder slabBottom(String namespace, String path, ResourceLocation side, ResourceLocation top, ResourceLocation bottom){
+        return this.model(namespace, path).parent("minecraft", "block/slab").texture("side", side).texture("top", top).texture("bottom", bottom);
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:block/slab' and the given textures for the faces.
+     * @param location resource location of the model
+     * @param side     resource location of the texture for the side faces
+     * @param top      resource location of the texture for the top face
+     * @param bottom   resource location of the texture for bottom face
+     */
+    protected ModelBuilder slabBottom(String location, ResourceLocation side, ResourceLocation top, ResourceLocation bottom){
+        return this.model(location).parent("minecraft", "block/slab").texture("side", side).texture("top", top).texture("bottom", bottom);
+    }
+
+    /**
      * Creates a new model with parent 'minecraft:block/slab_top' and the given textures for the faces.
      * @param location resource location of the model
      * @param side     resource location of the texture for the side faces
@@ -217,6 +298,29 @@ public abstract class ModelGenerator extends ResourceGenerator {
      * @param bottom   resource location of the texture for bottom face
      */
     protected ModelBuilder slabTop(ResourceLocation location, ResourceLocation side, ResourceLocation top, ResourceLocation bottom){
+        return this.model(location).parent("minecraft", "block/slab_top").texture("side", side).texture("top", top).texture("bottom", bottom);
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:block/slab_top' and the given textures for the faces.
+     * @param namespace namespace of the model location
+     * @param path      path of the model location
+     * @param side      resource location of the texture for the side faces
+     * @param top       resource location of the texture for the top face
+     * @param bottom    resource location of the texture for bottom face
+     */
+    protected ModelBuilder slabTop(String namespace, String path, ResourceLocation side, ResourceLocation top, ResourceLocation bottom){
+        return this.model(namespace, path).parent("minecraft", "block/slab_top").texture("side", side).texture("top", top).texture("bottom", bottom);
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:block/slab_top' and the given textures for the faces.
+     * @param location resource location of the model
+     * @param side     resource location of the texture for the side faces
+     * @param top      resource location of the texture for the top face
+     * @param bottom   resource location of the texture for bottom face
+     */
+    protected ModelBuilder slabTop(String location, ResourceLocation side, ResourceLocation top, ResourceLocation bottom){
         return this.model(location).parent("minecraft", "block/slab_top").texture("side", side).texture("top", top).texture("bottom", bottom);
     }
 
@@ -231,13 +335,113 @@ public abstract class ModelGenerator extends ResourceGenerator {
         return this.model(location).parent("minecraft", "block/stairs").texture("side", side).texture("top", top).texture("bottom", bottom);
     }
 
+    /**
+     * Creates a new model with parent 'minecraft:block/stairs' and the given textures for the faces.
+     * @param namespace namespace of the model location
+     * @param path      path of the model location
+     * @param side      resource location of the texture for the side faces
+     * @param top       resource location of the texture for the top face
+     * @param bottom    resource location of the texture for bottom face
+     */
+    protected ModelBuilder stairs(String namespace, String path, ResourceLocation side, ResourceLocation top, ResourceLocation bottom){
+        return this.model(namespace, path).parent("minecraft", "block/stairs").texture("side", side).texture("top", top).texture("bottom", bottom);
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:block/stairs' and the given textures for the faces.
+     * @param location resource location of the model
+     * @param side     resource location of the texture for the side faces
+     * @param top      resource location of the texture for the top face
+     * @param bottom   resource location of the texture for bottom face
+     */
+    protected ModelBuilder stairs(String location, ResourceLocation side, ResourceLocation top, ResourceLocation bottom){
+        return this.model(location).parent("minecraft", "block/stairs").texture("side", side).texture("top", top).texture("bottom", bottom);
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:item/generated' and the given textures for '#layer0'.
+     * @param location resource location of the model
+     * @param texture  resource location of the texture for the item
+     */
+    protected ModelBuilder itemGenerated(ResourceLocation location, ResourceLocation texture){
+        return this.model(location).parent("minecraft", "item/generated").texture("layer0", texture);
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:item/generated' and the given textures for '#layer0'.
+     * @param namespace namespace of the model location
+     * @param path      path of the model location
+     * @param texture   resource location of the texture for the item
+     */
+    protected ModelBuilder itemGenerated(String namespace, String path, ResourceLocation texture){
+        return this.model(namespace, path).parent("minecraft", "item/generated").texture("layer0", texture);
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:item/generated' and the given textures for '#layer0'.
+     * @param location resource location of the model
+     * @param texture  resource location of the texture for the item
+     */
+    protected ModelBuilder itemGenerated(String location, ResourceLocation texture){
+        return this.model(location).parent("minecraft", "item/generated").texture("layer0", texture);
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:item/generated' and the given textures for '#layer0'.
+     * @param item    item to use the location of
+     * @param texture resource location of the texture for the item
+     */
+    protected ModelBuilder itemGenerated(Item item, ResourceLocation texture){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(item);
+        return this.model(identifier.getResourceDomain(), "item/" + identifier.getResourcePath()).parent("minecraft", "item/generated").texture("layer0", texture);
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:item/handheld' and the given textures for '#layer0'.
+     * @param location resource location of the model
+     * @param texture  resource location of the texture for the item
+     */
+    protected ModelBuilder itemHandheld(ResourceLocation location, ResourceLocation texture){
+        return this.model(location).parent("minecraft", "item/generated").texture("layer0", texture);
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:item/handheld' and the given textures for '#layer0'.
+     * @param namespace namespace of the model location
+     * @param path      path of the model location
+     * @param texture   resource location of the texture for the item
+     */
+    protected ModelBuilder itemHandheld(String namespace, String path, ResourceLocation texture){
+        return this.model(namespace, path).parent("minecraft", "item/generated").texture("layer0", texture);
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:item/handheld' and the given textures for '#layer0'.
+     * @param location resource location of the model
+     * @param texture  resource location of the texture for the item
+     */
+    protected ModelBuilder itemHandheld(String location, ResourceLocation texture){
+        return this.model(location).parent("minecraft", "item/generated").texture("layer0", texture);
+    }
+
+    /**
+     * Creates a new model with parent 'minecraft:item/handheld' and the given textures for '#layer0'.
+     * @param item    item to use the location of
+     * @param texture resource location of the texture for the item
+     */
+    protected ModelBuilder itemHandheld(Item item, ResourceLocation texture){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(item);
+        return this.model(identifier.getResourceDomain(), "item/" + identifier.getResourcePath()).parent("minecraft", "item/generated").texture("layer0", texture);
+    }
+
     @Override
     public String getName(){
         return this.modName + " Model Generator";
     }
 
-    protected class ModelBuilder {
+    protected static class ModelBuilder {
 
+        protected final String modid;
         protected final ResourceLocation identifier;
         private final Map<String,String> textures = new HashMap<>();
         private final Map<ItemCameraTransforms.TransformType,TransformBuilder> transforms = new HashMap<>();
@@ -247,7 +451,8 @@ public abstract class ModelGenerator extends ResourceGenerator {
         private boolean ambientOcclusion = true;
         private Boolean lighting = null;
 
-        protected ModelBuilder(ResourceLocation identifier){
+        protected ModelBuilder(String modid, ResourceLocation identifier){
+            this.modid = modid;
             this.identifier = identifier;
         }
 
@@ -270,6 +475,14 @@ public abstract class ModelGenerator extends ResourceGenerator {
          */
         public ModelBuilder parent(String namespace, String path){
             return this.parent(new ResourceLocation(namespace, path));
+        }
+
+        /**
+         * Sets the parent model.
+         * @param model the parent model location
+         */
+        public ModelBuilder parent(String model){
+            return this.parent(this.modid, model);
         }
 
         /**

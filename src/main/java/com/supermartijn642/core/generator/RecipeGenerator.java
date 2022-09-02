@@ -17,6 +17,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.advancements.critereon.OredictItemPredicate;
 import net.minecraftforge.oredict.OreIngredient;
 
 import java.util.*;
@@ -74,7 +75,8 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 resultJson.addProperty("item", Registries.ITEMS.getIdentifier(recipeBuilder.output).toString());
                 if(recipeBuilder.output.getHasSubtypes() || (recipeBuilder.output.isDamageable() && recipeBuilder.outputData >= 0))
                     resultJson.addProperty("data", Math.max(recipeBuilder.outputData, 0));
-                resultJson.addProperty("count", recipeBuilder.outputCount);
+                if(recipeBuilder.outputCount != 1)
+                    resultJson.addProperty("count", recipeBuilder.outputCount);
                 if(recipeBuilder.outputTag != null)
                     resultJson.addProperty("nbt", recipeBuilder.outputTag.toString());
                 json.add("result", resultJson);
@@ -94,7 +96,8 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 resultJson.addProperty("item", Registries.ITEMS.getIdentifier(recipeBuilder.output).toString());
                 if(recipeBuilder.output.getHasSubtypes() || (recipeBuilder.output.isDamageable() && recipeBuilder.outputData >= 0))
                     resultJson.addProperty("data", Math.max(recipeBuilder.outputData, 0));
-                resultJson.addProperty("count", recipeBuilder.outputCount);
+                if(recipeBuilder.outputCount != 1)
+                    resultJson.addProperty("count", recipeBuilder.outputCount);
                 if(recipeBuilder.outputTag != null)
                     resultJson.addProperty("nbt", recipeBuilder.outputTag.toString());
                 json.add("result", resultJson);
@@ -130,7 +133,8 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 resultJson.addProperty("item", Registries.ITEMS.getIdentifier(recipeBuilder.output).toString());
                 if(recipeBuilder.output.getHasSubtypes() || (recipeBuilder.output.isDamageable() && recipeBuilder.outputData >= 0))
                     resultJson.addProperty("data", Math.max(recipeBuilder.outputData, 0));
-                resultJson.addProperty("count", recipeBuilder.outputCount);
+                if(recipeBuilder.outputCount != 1)
+                    resultJson.addProperty("count", recipeBuilder.outputCount);
                 if(recipeBuilder.outputTag != null)
                     resultJson.addProperty("nbt", recipeBuilder.outputTag.toString());
                 json.add("result", resultJson);
@@ -189,7 +193,8 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         else{
             JsonObject resultJson = new JsonObject();
             resultJson.addProperty("item", Registries.ITEMS.getIdentifier(((RecipeBuilder<?>)recipeBuilder).output).toString());
-            resultJson.addProperty("count", ((RecipeBuilder<?>)recipeBuilder).outputCount);
+            if(((RecipeBuilder<?>)recipeBuilder).outputCount != 1)
+                resultJson.addProperty("count", ((RecipeBuilder<?>)recipeBuilder).outputCount);
             if(((RecipeBuilder<?>)recipeBuilder).outputTag != null)
                 resultJson.addProperty("nbt", ((RecipeBuilder<?>)recipeBuilder).outputTag.toString());
             json.add("result", resultJson);
@@ -267,6 +272,50 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     /**
      * Creates a new shaped recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param nbt        nbt tag of the recipe result
+     * @param amount     count of the recipe result
+     */
+    protected ShapedRecipeBuilder shaped(String identifier, Item output, int data, NBTTagCompound nbt, int amount){
+        return this.shaped(this.modid, identifier, output, data, nbt, amount);
+    }
+
+    /**
+     * Creates a new shaped recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param nbt        nbt tag of the recipe result
+     * @param amount     count of the recipe result
+     */
+    protected ShapedRecipeBuilder shaped(String identifier, Item output, NBTTagCompound nbt, int amount){
+        return this.shaped(this.modid, identifier, output, nbt, amount);
+    }
+
+    /**
+     * Creates a new shaped recipe builder with the output's identifier as location.
+     * @param output recipe result
+     * @param nbt    nbt tag of the recipe result
+     * @param amount count of the recipe result
+     */
+    protected ShapedRecipeBuilder shaped(Item output, int data, NBTTagCompound nbt, int amount){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output);
+        return this.shaped(identifier, output, data, nbt, amount);
+    }
+
+    /**
+     * Creates a new shaped recipe builder with the output's identifier as location.
+     * @param output recipe result
+     * @param nbt    nbt tag of the recipe result
+     * @param amount count of the recipe result
+     */
+    protected ShapedRecipeBuilder shaped(Item output, NBTTagCompound nbt, int amount){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output);
+        return this.shaped(identifier, output, nbt, amount);
+    }
+
+    /**
+     * Creates a new shaped recipe builder for the given location.
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      * @param amount         count of the recipe result
@@ -309,6 +358,44 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     /**
      * Creates a new shaped recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param amount     count of the recipe result
+     */
+    protected ShapedRecipeBuilder shaped(String identifier, Item output, int data, int amount){
+        return this.shaped(this.modid, identifier, output, data, null, amount);
+    }
+
+    /**
+     * Creates a new shaped recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param amount     count of the recipe result
+     */
+    protected ShapedRecipeBuilder shaped(String identifier, Item output, int amount){
+        return this.shaped(this.modid, identifier, output, null, amount);
+    }
+
+    /**
+     * Creates a new shaped recipe builder with the output's identifier as location.
+     * @param output recipe result
+     * @param amount count of the recipe result
+     */
+    protected ShapedRecipeBuilder shaped(Item output, int data, int amount){
+        return this.shaped(output, data, null, amount);
+    }
+
+    /**
+     * Creates a new shaped recipe builder with the output's identifier as location.
+     * @param output recipe result
+     * @param amount count of the recipe result
+     */
+    protected ShapedRecipeBuilder shaped(Item output, int amount){
+        return this.shaped(output, null, amount);
+    }
+
+    /**
+     * Creates a new shaped recipe builder for the given location.
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
@@ -328,6 +415,23 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     /**
      * Creates a new shaped recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     */
+    protected ShapedRecipeBuilder shaped(String identifier, Item output){
+        return this.shaped(this.modid, identifier, output, null, 1);
+    }
+
+    /**
+     * Creates a new shaped recipe builder with the output's identifier as location.
+     * @param output recipe result
+     */
+    protected ShapedRecipeBuilder shaped(Item output){
+        return this.shaped(output, null, 1);
+    }
+
+    /**
+     * Creates a new shaped recipe builder for the given location.
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
@@ -343,6 +447,23 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      */
     protected ShapedRecipeBuilder shaped(String namespace, String identifier, ItemStack output){
         return this.shaped(new ResourceLocation(namespace, identifier), output.getItem(), output.getHasSubtypes() ? output.getMetadata() : -1, output.hasTagCompound() && !output.getTagCompound().hasNoTags() ? output.getTagCompound() : null, output.getCount());
+    }
+
+    /**
+     * Creates a new shaped recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     */
+    protected ShapedRecipeBuilder shaped(String identifier, ItemStack output){
+        return this.shaped(this.modid, identifier, output.getItem(), output.getHasSubtypes() ? output.getMetadata() : -1, output.hasTagCompound() && !output.getTagCompound().hasNoTags() ? output.getTagCompound() : null, output.getCount());
+    }
+
+    /**
+     * Creates a new shaped recipe builder with the output's identifier as location.
+     * @param output recipe result
+     */
+    protected ShapedRecipeBuilder shaped(ItemStack output){
+        return this.shaped(output.getItem(), output.getHasSubtypes() ? output.getMetadata() : -1, output.hasTagCompound() && !output.getTagCompound().hasNoTags() ? output.getTagCompound() : null, output.getCount());
     }
 
     /**
@@ -393,6 +514,50 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     /**
      * Creates a new shapeless recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param nbt        nbt tag of the recipe result
+     * @param amount     count of the recipe result
+     */
+    protected ShapelessRecipeBuilder shapeless(String identifier, Item output, int data, NBTTagCompound nbt, int amount){
+        return this.shapeless(this.modid, identifier, output, data, nbt, amount);
+    }
+
+    /**
+     * Creates a new shapeless recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param nbt        nbt tag of the recipe result
+     * @param amount     count of the recipe result
+     */
+    protected ShapelessRecipeBuilder shapeless(String identifier, Item output, NBTTagCompound nbt, int amount){
+        return this.shapeless(this.modid, identifier, output, nbt, amount);
+    }
+
+    /**
+     * Creates a new shapeless recipe builder with the output's identifier as location.
+     * @param output recipe result
+     * @param nbt    nbt tag of the recipe result
+     * @param amount count of the recipe result
+     */
+    protected ShapelessRecipeBuilder shapeless(Item output, int data, NBTTagCompound nbt, int amount){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output);
+        return this.shapeless(identifier, output, data, nbt, amount);
+    }
+
+    /**
+     * Creates a new shapeless recipe builder with the output's identifier as location.
+     * @param output recipe result
+     * @param nbt    nbt tag of the recipe result
+     * @param amount count of the recipe result
+     */
+    protected ShapelessRecipeBuilder shapeless(Item output, NBTTagCompound nbt, int amount){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output);
+        return this.shapeless(identifier, output, nbt, amount);
+    }
+
+    /**
+     * Creates a new shapeless recipe builder for the given location.
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      * @param amount         count of the recipe result
@@ -435,6 +600,44 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     /**
      * Creates a new shapeless recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param amount     count of the recipe result
+     */
+    protected ShapelessRecipeBuilder shapeless(String identifier, Item output, int data, int amount){
+        return this.shapeless(this.modid, identifier, output, data, null, amount);
+    }
+
+    /**
+     * Creates a new shapeless recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param amount     count of the recipe result
+     */
+    protected ShapelessRecipeBuilder shapeless(String identifier, Item output, int amount){
+        return this.shapeless(this.modid, identifier, output, null, amount);
+    }
+
+    /**
+     * Creates a new shapeless recipe builder with the output's identifier as location.
+     * @param output recipe result
+     * @param amount count of the recipe result
+     */
+    protected ShapelessRecipeBuilder shapeless(Item output, int data, int amount){
+        return this.shapeless(output, data, null, amount);
+    }
+
+    /**
+     * Creates a new shapeless recipe builder with the output's identifier as location.
+     * @param output recipe result
+     * @param amount count of the recipe result
+     */
+    protected ShapelessRecipeBuilder shapeless(Item output, int amount){
+        return this.shapeless(output, null, amount);
+    }
+
+    /**
+     * Creates a new shapeless recipe builder for the given location.
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
@@ -454,6 +657,23 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     /**
      * Creates a new shapeless recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     */
+    protected ShapelessRecipeBuilder shapeless(String identifier, Item output){
+        return this.shapeless(this.modid, identifier, output, null, 1);
+    }
+
+    /**
+     * Creates a new shapeless recipe builder with the output's identifier as location.
+     * @param output recipe result
+     */
+    protected ShapelessRecipeBuilder shapeless(Item output){
+        return this.shapeless(output, null, 1);
+    }
+
+    /**
+     * Creates a new shapeless recipe builder for the given location.
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
@@ -469,6 +689,23 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      */
     protected ShapelessRecipeBuilder shapeless(String namespace, String identifier, ItemStack output){
         return this.shapeless(new ResourceLocation(namespace, identifier), output.getItem(), output.getHasSubtypes() ? output.getMetadata() : -1, output.hasTagCompound() && !output.getTagCompound().hasNoTags() ? output.getTagCompound() : null, output.getCount());
+    }
+
+    /**
+     * Creates a new shapeless recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     */
+    protected ShapelessRecipeBuilder shapeless(String identifier, ItemStack output){
+        return this.shapeless(this.modid, identifier, output.getItem(), output.getHasSubtypes() ? output.getMetadata() : -1, output.hasTagCompound() && !output.getTagCompound().hasNoTags() ? output.getTagCompound() : null, output.getCount());
+    }
+
+    /**
+     * Creates a new shapeless recipe builder with the output's identifier as location.
+     * @param output recipe result
+     */
+    protected ShapelessRecipeBuilder shapeless(ItemStack output){
+        return this.shapeless(output.getItem(), output.getHasSubtypes() ? output.getMetadata() : -1, output.hasTagCompound() && !output.getTagCompound().hasNoTags() ? output.getTagCompound() : null, output.getCount());
     }
 
     /**
@@ -519,6 +756,50 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     /**
      * Creates a new smelting recipe builder for the given location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param nbt        nbt tag of the recipe result
+     * @param amount     count of the recipe result
+     */
+    protected SmeltingRecipeBuilder smelting(String identifier, Item output, int data, NBTTagCompound nbt, int amount){
+        return this.smelting(this.modid, identifier, output, data, nbt, amount);
+    }
+
+    /**
+     * Creates a new smelting recipe builder for the given location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param nbt        nbt tag of the recipe result
+     * @param amount     count of the recipe result
+     */
+    protected SmeltingRecipeBuilder smelting(String identifier, Item output, NBTTagCompound nbt, int amount){
+        return this.smelting(this.modid, identifier, output, nbt, amount);
+    }
+
+    /**
+     * Creates a new smelting recipe builder with the output's identifier as location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
+     * @param output recipe result
+     * @param nbt    nbt tag of the recipe result
+     * @param amount count of the recipe result
+     */
+    protected SmeltingRecipeBuilder smelting(Item output, int data, NBTTagCompound nbt, int amount){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output);
+        return this.smelting(identifier, output, data, nbt, amount);
+    }
+
+    /**
+     * Creates a new smelting recipe builder with the output's identifier as location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
+     * @param output recipe result
+     * @param nbt    nbt tag of the recipe result
+     * @param amount count of the recipe result
+     */
+    protected SmeltingRecipeBuilder smelting(Item output, NBTTagCompound nbt, int amount){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output);
+        return this.smelting(identifier, output, nbt, amount);
+    }
+
+    /**
+     * Creates a new smelting recipe builder for the given location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      * @param amount         count of the recipe result
@@ -561,6 +842,44 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     /**
      * Creates a new smelting recipe builder for the given location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param amount     count of the recipe result
+     */
+    protected SmeltingRecipeBuilder smelting(String identifier, Item output, int data, int amount){
+        return this.smelting(this.modid, identifier, output, data, null, amount);
+    }
+
+    /**
+     * Creates a new smelting recipe builder for the given location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param amount     count of the recipe result
+     */
+    protected SmeltingRecipeBuilder smelting(String identifier, Item output, int amount){
+        return this.smelting(this.modid, identifier, output, null, amount);
+    }
+
+    /**
+     * Creates a new smelting recipe builder with the output's identifier as location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
+     * @param output recipe result
+     * @param amount count of the recipe result
+     */
+    protected SmeltingRecipeBuilder smelting(Item output, int data, int amount){
+        return this.smelting(output, data, null, amount);
+    }
+
+    /**
+     * Creates a new smelting recipe builder with the output's identifier as location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
+     * @param output recipe result
+     * @param amount count of the recipe result
+     */
+    protected SmeltingRecipeBuilder smelting(Item output, int amount){
+        return this.smelting(output, null, amount);
+    }
+
+    /**
+     * Creates a new smelting recipe builder for the given location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
@@ -580,6 +899,23 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     /**
      * Creates a new smelting recipe builder for the given location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     */
+    protected SmeltingRecipeBuilder smelting(String identifier, Item output){
+        return this.smelting(this.modid, identifier, output, null, 1);
+    }
+
+    /**
+     * Creates a new smelting recipe builder with the output's identifier as location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
+     * @param output recipe result
+     */
+    protected SmeltingRecipeBuilder smelting(Item output){
+        return this.smelting(output, null, 1);
+    }
+
+    /**
+     * Creates a new smelting recipe builder for the given location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
@@ -595,6 +931,23 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      */
     protected SmeltingRecipeBuilder smelting(String namespace, String identifier, ItemStack output){
         return this.smelting(new ResourceLocation(namespace, identifier), output.getItem(), output.getHasSubtypes() ? output.getMetadata() : -1, output.hasTagCompound() && !output.getTagCompound().hasNoTags() ? output.getTagCompound() : null, output.getCount());
+    }
+
+    /**
+     * Creates a new smelting recipe builder for the given location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     */
+    protected SmeltingRecipeBuilder smelting(String identifier, ItemStack output){
+        return this.smelting(this.modid, identifier, output.getItem(), output.getHasSubtypes() ? output.getMetadata() : -1, output.hasTagCompound() && !output.getTagCompound().hasNoTags() ? output.getTagCompound() : null, output.getCount());
+    }
+
+    /**
+     * Creates a new smelting recipe builder with the output's identifier as location. The smelting recipe builder can be used for furnace, blasting, smoking, campfire recipes.
+     * @param output recipe result
+     */
+    protected SmeltingRecipeBuilder smelting(ItemStack output){
+        return this.smelting(output.getItem(), output.getHasSubtypes() ? output.getMetadata() : -1, output.hasTagCompound() && !output.getTagCompound().hasNoTags() ? output.getTagCompound() : null, output.getCount());
     }
 
     /**
@@ -645,6 +998,50 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     /**
      * Creates a new smithing recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param nbt        nbt tag of the recipe result
+     * @param amount     count of the recipe result
+     */
+    protected SmithingRecipeBuilder smithing(String identifier, Item output, int data, NBTTagCompound nbt, int amount){
+        return this.smithing(this.modid, identifier, output, data, nbt, amount);
+    }
+
+    /**
+     * Creates a new smithing recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param nbt        nbt tag of the recipe result
+     * @param amount     count of the recipe result
+     */
+    protected SmithingRecipeBuilder smithing(String identifier, Item output, NBTTagCompound nbt, int amount){
+        return this.smithing(this.modid, identifier, output, nbt, amount);
+    }
+
+    /**
+     * Creates a new smithing recipe builder with the output's identifier as location.
+     * @param output recipe result
+     * @param nbt    nbt tag of the recipe result
+     * @param amount count of the recipe result
+     */
+    protected SmithingRecipeBuilder smithing(Item output, int data, NBTTagCompound nbt, int amount){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output);
+        return this.smithing(identifier, output, data, nbt, amount);
+    }
+
+    /**
+     * Creates a new smithing recipe builder with the output's identifier as location.
+     * @param output recipe result
+     * @param nbt    nbt tag of the recipe result
+     * @param amount count of the recipe result
+     */
+    protected SmithingRecipeBuilder smithing(Item output, NBTTagCompound nbt, int amount){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output);
+        return this.smithing(identifier, output, nbt, amount);
+    }
+
+    /**
+     * Creates a new smithing recipe builder for the given location.
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      * @param amount         count of the recipe result
@@ -687,6 +1084,44 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     /**
      * Creates a new smithing recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param amount     count of the recipe result
+     */
+    protected SmithingRecipeBuilder smithing(String identifier, Item output, int data, int amount){
+        return this.smithing(this.modid, identifier, output, data, null, amount);
+    }
+
+    /**
+     * Creates a new smithing recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param amount     count of the recipe result
+     */
+    protected SmithingRecipeBuilder smithing(String identifier, Item output, int amount){
+        return this.smithing(this.modid, identifier, output, null, amount);
+    }
+
+    /**
+     * Creates a new smithing recipe builder with the output's identifier as location.
+     * @param output recipe result
+     * @param amount count of the recipe result
+     */
+    protected SmithingRecipeBuilder smithing(Item output, int data, int amount){
+        return this.smithing(output, data, null, amount);
+    }
+
+    /**
+     * Creates a new smithing recipe builder with the output's identifier as location.
+     * @param output recipe result
+     * @param amount count of the recipe result
+     */
+    protected SmithingRecipeBuilder smithing(Item output, int amount){
+        return this.smithing(output, null, amount);
+    }
+
+    /**
+     * Creates a new smithing recipe builder for the given location.
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
@@ -706,6 +1141,23 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     /**
      * Creates a new smithing recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     */
+    protected SmithingRecipeBuilder smithing(String identifier, Item output){
+        return this.smithing(this.modid, identifier, output, null, 1);
+    }
+
+    /**
+     * Creates a new smithing recipe builder with the output's identifier as location.
+     * @param output recipe result
+     */
+    protected SmithingRecipeBuilder smithing(Item output){
+        return this.smithing(output, null, 1);
+    }
+
+    /**
+     * Creates a new smithing recipe builder for the given location.
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
@@ -721,6 +1173,23 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      */
     protected SmithingRecipeBuilder smithing(String namespace, String identifier, ItemStack output){
         return this.smithing(new ResourceLocation(namespace, identifier), output.getItem(), output.getHasSubtypes() ? output.getMetadata() : -1, output.hasTagCompound() && !output.getTagCompound().hasNoTags() ? output.getTagCompound() : null, output.getCount());
+    }
+
+    /**
+     * Creates a new smithing recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     */
+    protected SmithingRecipeBuilder smithing(String identifier, ItemStack output){
+        return this.smithing(this.modid, identifier, output.getItem(), output.getHasSubtypes() ? output.getMetadata() : -1, output.hasTagCompound() && !output.getTagCompound().hasNoTags() ? output.getTagCompound() : null, output.getCount());
+    }
+
+    /**
+     * Creates a new smithing recipe builder with the output's identifier as location.
+     * @param output recipe result
+     */
+    protected SmithingRecipeBuilder smithing(ItemStack output){
+        return this.smithing(output.getItem(), output.getHasSubtypes() ? output.getMetadata() : -1, output.hasTagCompound() && !output.getTagCompound().hasNoTags() ? output.getTagCompound() : null, output.getCount());
     }
 
     /**
@@ -767,6 +1236,46 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     /**
      * Creates a new stonecutting recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param amount     count of the recipe result
+     */
+    protected StoneCuttingRecipeBuilder stoneCutting(String identifier, Item output, int data, int amount){
+        return this.stoneCutting(this.modid, identifier, output, data, amount);
+    }
+
+    /**
+     * Creates a new stonecutting recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     * @param amount     count of the recipe result
+     */
+    protected StoneCuttingRecipeBuilder stoneCutting(String identifier, Item output, int amount){
+        return this.stoneCutting(this.modid, identifier, output, amount);
+    }
+
+    /**
+     * Creates a new stonecutting recipe builder with the output's identifier as location.
+     * @param output recipe result
+     * @param amount count of the recipe result
+     */
+    protected StoneCuttingRecipeBuilder stoneCutting(Item output, int data, int amount){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output);
+        return this.stoneCutting(identifier, output, data, amount);
+    }
+
+    /**
+     * Creates a new stonecutting recipe builder with the output's identifier as location.
+     * @param output recipe result
+     * @param amount count of the recipe result
+     */
+    protected StoneCuttingRecipeBuilder stoneCutting(Item output, int amount){
+        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output);
+        return this.stoneCutting(identifier, output, amount);
+    }
+
+    /**
+     * Creates a new stonecutting recipe builder for the given location.
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
@@ -782,6 +1291,23 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      */
     protected StoneCuttingRecipeBuilder stoneCutting(String namespace, String identifier, Item output){
         return this.stoneCutting(new ResourceLocation(namespace, identifier), output, 1);
+    }
+
+    /**
+     * Creates a new stonecutting recipe builder for the given location.
+     * @param identifier path of the recipe
+     * @param output     recipe result
+     */
+    protected StoneCuttingRecipeBuilder stoneCutting(String identifier, Item output){
+        return this.stoneCutting(this.modid, identifier, output, 1);
+    }
+
+    /**
+     * Creates a new stonecutting recipe builder with the output's identifier as location.
+     * @param output recipe result
+     */
+    protected StoneCuttingRecipeBuilder stoneCutting(Item output){
+        return this.stoneCutting(output, 1);
     }
 
     @Override
@@ -869,6 +1395,18 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                     Arrays.stream(items).map(item -> new ItemPredicate(item, 0, MinMaxBounds.UNBOUNDED, MinMaxBounds.UNBOUNDED, new EnchantmentPredicate[0], null, NBTPredicate.ANY)).toArray(ItemPredicate[]::new)
                 )
             );
+        }
+
+        /**
+         * Sets which items the player should have to unlock this recipe in its generated advancement.
+         */
+        public T unlockedByOreDict(String ore){
+            return this.unlockedBy(new InventoryChangeTrigger.Instance(
+                MinMaxBounds.UNBOUNDED,
+                MinMaxBounds.UNBOUNDED,
+                MinMaxBounds.UNBOUNDED,
+                new ItemPredicate[]{new OredictItemPredicate(ore)}
+            ));
         }
 
         private T self(){
@@ -1418,8 +1956,10 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 .parent(new ResourceLocation("minecraft", "recipes/root"))
                 .criterion("has_the_recipe", new FakeRecipeUnlockedTrigger(recipe.identifier))
                 .criterion("can_unlock_recipe", recipe.unlockedBy)
-                .requirementGroup("has_the_recipe")
-                .requirementGroup("can_unlock_recipe")
+                .requirementGroup("has_the_recipe", "can_unlock_recipe")
+                .icon(recipe.output, recipe.outputTag)
+                .dontShowToast()
+                .dontAnnounceToChat()
                 .rewardRecipe(recipe.identifier);
         }
 

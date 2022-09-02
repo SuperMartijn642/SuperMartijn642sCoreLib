@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -44,7 +44,7 @@ public class GeneratorRegistrationHandler {
     }
 
     private final String modid;
-    private final Set<Function<ResourceCache,ResourceGenerator>> generators = new HashSet<>();
+    private final Set<Function<ResourceCache,ResourceGenerator>> generators = new LinkedHashSet<>();
 
     private boolean hasEventBeenFired;
 
