@@ -91,7 +91,7 @@ public abstract class TagGenerator extends ResourceGenerator {
 
                 // Save the object to the cache
                 ResourceLocation identifier = tag.identifier;
-                this.cache.saveJsonResource(ResourceType.DATA, object, identifier.getNamespace(), directoryName, identifier.getPath());
+                this.cache.saveJsonResource(ResourceType.DATA, object, identifier.getNamespace(), "tags/" + directoryName, identifier.getPath());
             }
         }
     }
