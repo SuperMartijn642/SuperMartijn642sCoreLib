@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public abstract class ResourceCache {
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     /**
      * Checks whether a resource exists. The resource may be either a generated file, or a file from a loaded resource pack.
