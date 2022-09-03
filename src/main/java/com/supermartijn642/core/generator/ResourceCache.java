@@ -73,7 +73,11 @@ public abstract class ResourceCache {
         this.saveResource(resourceType, bytes, namespace, directory, fileName, fileName.endsWith(".json") ? "" : ".json");
     }
 
-    static ResourceCache wrap(ExistingFileHelper existingFileHelper, DirectoryCache cachedOutput, Path outputDirectory){
+    /**
+     * Only for internal use. Do NOT use!
+     */
+    @Deprecated
+    public static ResourceCache wrap(ExistingFileHelper existingFileHelper, DirectoryCache cachedOutput, Path outputDirectory){
         return new ExistingFileHelperWrapper(existingFileHelper, cachedOutput, outputDirectory);
     }
 
@@ -99,6 +103,7 @@ public abstract class ResourceCache {
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
             ResourceLocation location = new ResourceLocation(namespace, fileName);
             return this.toBeGenerated.contains(path)
+                || this.writtenFiles.containsKey(path)
                 || this.existingFileHelper.exists(location, resourceType == ResourceType.DATA ? ResourcePackType.SERVER_DATA : ResourcePackType.CLIENT_RESOURCES, extension, directory);
         }
 
