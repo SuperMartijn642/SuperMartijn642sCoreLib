@@ -381,22 +381,25 @@ public class ScreenUtils {
         MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostBackground(ItemStack.EMPTY, components, tooltipX, tooltipY, fontRenderer, tooltipTextWidth, tooltipHeight));
 
         IRenderTypeBuffer.Impl renderType = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-        MatrixStack textStack = new MatrixStack();
-        textStack.translate(0.0D, 0.0D, (double)zLevel);
-        Matrix4f textLocation = textStack.last().pose();
+
+        poseStack.pushPose();
+        poseStack.translate(0.0D, 0.0D, zLevel);
+        Matrix4f matrix = poseStack.last().pose();
 
         int tooltipTop = tooltipY;
 
         for(int lineNumber = 0; lineNumber < components.size(); ++lineNumber){
             String line = components.get(lineNumber);
             if(line != null)
-                fontRenderer.drawInBatch(line, (float)tooltipX, (float)tooltipY, -1, true, textLocation, renderType, false, 0, 15728880);
+                fontRenderer.drawInBatch(line, (float)tooltipX, (float)tooltipY, -1, true, matrix, renderType, false, 0, 15728880);
 
             if(lineNumber + 1 == titleLinesCount)
                 tooltipY += 2;
 
             tooltipY += 10;
         }
+
+        poseStack.popPose();
 
         renderType.endBatch();
 
