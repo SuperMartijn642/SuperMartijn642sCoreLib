@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagManager;
 import net.minecraft.world.entity.EntityType;
@@ -118,6 +119,14 @@ public abstract class TagGenerator extends ResourceGenerator {
 
     /**
      * Gets a tag builder for the given identifier. The returned tag builder may be a new tag builder or an existing one if requested before.
+     * @param identifier path of the tag's identifier
+     */
+    protected <T> TagBuilder<T> tag(Registries.Registry<T> registry, String identifier){
+        return this.tag(registry, this.modid, identifier);
+    }
+
+    /**
+     * Gets a tag builder for the given identifier. The returned tag builder may be a new tag builder or an existing one if requested before.
      * @param identifier resource location of the tag
      */
     protected TagBuilder<Block> blockTag(ResourceLocation identifier){
@@ -139,6 +148,14 @@ public abstract class TagGenerator extends ResourceGenerator {
      */
     protected TagBuilder<Block> blockTag(String namespace, String identifier){
         return this.tag(Registries.BLOCKS, namespace, identifier);
+    }
+
+    /**
+     * Gets a tag builder for the given identifier. The returned tag builder may be a new tag builder or an existing one if requested before.
+     * @param identifier path of the tag's identifier
+     */
+    protected TagBuilder<Block> blockTag(String identifier){
+        return this.tag(Registries.BLOCKS, identifier);
     }
 
     /**
@@ -168,6 +185,14 @@ public abstract class TagGenerator extends ResourceGenerator {
 
     /**
      * Gets a tag builder for the given identifier. The returned tag builder may be a new tag builder or an existing one if requested before.
+     * @param identifier path of the tag's identifier
+     */
+    protected TagBuilder<Item> itemTag(String identifier){
+        return this.tag(Registries.ITEMS, identifier);
+    }
+
+    /**
+     * Gets a tag builder for the given identifier. The returned tag builder may be a new tag builder or an existing one if requested before.
      * @param identifier resource location of the tag
      */
     protected TagBuilder<EntityType<?>> entityTag(ResourceLocation identifier){
@@ -189,6 +214,63 @@ public abstract class TagGenerator extends ResourceGenerator {
      */
     protected TagBuilder<EntityType<?>> entityTag(String namespace, String identifier){
         return this.tag(Registries.ENTITY_TYPES, namespace, identifier);
+    }
+
+    /**
+     * Gets a tag builder for the given identifier. The returned tag builder may be a new tag builder or an existing one if requested before.
+     * @param identifier path of the tag's identifier
+     */
+    protected TagBuilder<EntityType<?>> entityTag(String identifier){
+        return this.tag(Registries.ENTITY_TYPES, identifier);
+    }
+
+    /**
+     * Gets a tag builder for the 'minecraft:mineable/axe' tag.
+     */
+    protected TagBuilder<Block> blockMineableWithAxe(){
+        return this.blockTag(BlockTags.MINEABLE_WITH_AXE);
+    }
+
+    /**
+     * Gets a tag builder for the 'minecraft:mineable/hoe' tag.
+     */
+    protected TagBuilder<Block> blockMineableWithHoe(){
+        return this.blockTag(BlockTags.MINEABLE_WITH_HOE);
+    }
+
+    /**
+     * Gets a tag builder for the 'minecraft:mineable/pickaxe' tag.
+     */
+    protected TagBuilder<Block> blockMineableWithPickaxe(){
+        return this.blockTag(BlockTags.MINEABLE_WITH_PICKAXE);
+    }
+
+    /**
+     * Gets a tag builder for the 'minecraft:mineable/shovel' tag.
+     */
+    protected TagBuilder<Block> blockMineableWithShovel(){
+        return this.blockTag(BlockTags.MINEABLE_WITH_SHOVEL);
+    }
+
+    /**
+     * Gets a tag builder for the 'minecraft:needs_stone_tool' tag.
+     */
+    protected TagBuilder<Block> blockNeedsStoneTool(){
+        return this.blockTag(BlockTags.NEEDS_STONE_TOOL);
+    }
+
+    /**
+     * Gets a tag builder for the 'minecraft:needs_iron_tool' tag.
+     */
+    protected TagBuilder<Block> blockNeedsIronTool(){
+        return this.blockTag(BlockTags.NEEDS_IRON_TOOL);
+    }
+
+    /**
+     * Gets a tag builder for the 'minecraft:needs_diamond_tool' tag.
+     */
+    protected TagBuilder<Block> blockNeedsDiamondTool(){
+        return this.blockTag(BlockTags.NEEDS_DIAMOND_TOOL);
     }
 
     @Override
