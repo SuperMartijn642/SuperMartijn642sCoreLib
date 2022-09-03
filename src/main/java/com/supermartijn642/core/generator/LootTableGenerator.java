@@ -309,7 +309,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param entry entry to be added
          */
         public LootPoolBuilder entry(LootEntry entry){
-            if(!LootEntryManager.CLASS_TO_SERIALIZER.containsKey(entry))
+            if(!LootEntryManager.CLASS_TO_SERIALIZER.containsKey(entry.getClass()))
                 throw new IllegalArgumentException("Cannot use unregistered loot pool entry '" + entry + "'!");
 
             this.entries.add(entry);

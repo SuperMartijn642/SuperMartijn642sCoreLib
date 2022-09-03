@@ -3,7 +3,9 @@ package com.supermartijn642.core.registry;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.generator.ResourceCache;
 import com.supermartijn642.core.generator.ResourceGenerator;
+import com.supermartijn642.core.util.Holder;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.DirectoryCache;
 import net.minecraft.data.IDataProvider;
 import net.minecraftforge.client.model.generators.ExistingFileHelper;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -140,10 +142,24 @@ public class GeneratorRegistrationHandler {
     private void handleGatherDataEvent(GatherDataEvent e){
         this.hasEventBeenFired = true;
 
+        // Create a resource cache from the hash cache supplied when providers run
+        Holder<ResourceCache> cacheHolder = new Holder<>();
+        e.getGenerator().addProvider(new IDataProvider() {
+            @Override
+            public void run(DirectoryCache hashCache){
+                cacheHolder.set(ResourceCache.wrap(e.getExistingFileHelper(), hashCache, e.getGenerator().getOutputFolder()));
+            }
+
+            @Override
+            public String getName(){
+                return "Dummy Data Provider";
+            }
+        });
+
         // Resolve and add all the generators
         this.generators
             .stream()
-            .map(generator -> ResourceGenerator.createDataProvider(generator, e.getExistingFileHelper(), e.getGenerator()))
+            .map(generator -> ResourceGenerator.createDataProvider(generator, cacheHolder::get))
             .forEach(provider -> e.getGenerator().addProvider(provider));
         // Resolve and add all regular data providers
         this.providers

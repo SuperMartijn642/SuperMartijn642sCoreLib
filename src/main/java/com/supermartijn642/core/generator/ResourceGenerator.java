@@ -2,10 +2,8 @@ package com.supermartijn642.core.generator;
 
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.RegistryUtil;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DirectoryCache;
 import net.minecraft.data.IDataProvider;
-import net.minecraftforge.client.model.generators.ExistingFileHelper;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -13,6 +11,7 @@ import net.minecraftforge.forgespi.language.IModInfo;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Created 04/08/2022 by SuperMartijn642
@@ -23,23 +22,26 @@ public abstract class ResourceGenerator {
      * Wraps the given resource generator in a data provider using the given file helper and data generator.
      * @return a data provider wrapping the resource generator
      */
-    public static IDataProvider createDataProvider(Function<ResourceCache,ResourceGenerator> generator, ExistingFileHelper existingFileHelper, DataGenerator dataGenerator){
+    public static IDataProvider createDataProvider(Function<ResourceCache,ResourceGenerator> generatorProvider, Supplier<ResourceCache> cacheSupplier){
         return new IDataProvider() {
-            private String name = "Resource Generator";
+            private ResourceGenerator generator;
+
+            private ResourceGenerator getGenerator(){
+                if(this.generator == null)
+                    this.generator = generatorProvider.apply(cacheSupplier.get());
+                return this.generator;
+            }
 
             @Override
             public void run(DirectoryCache cachedOutput){
-                ResourceCache resourceCache = ResourceCache.wrap(existingFileHelper, cachedOutput, dataGenerator.getOutputFolder());
-                ResourceGenerator resourceGenerator = generator.apply(resourceCache);
-                this.name = resourceGenerator.getName();
                 // Run the resource generator
-                resourceGenerator.generate();
-                resourceGenerator.save();
+                this.getGenerator().generate();
+                this.getGenerator().save();
             }
 
             @Override
             public String getName(){
-                return this.name;
+                return this.getGenerator().getName();
             }
         };
     }
