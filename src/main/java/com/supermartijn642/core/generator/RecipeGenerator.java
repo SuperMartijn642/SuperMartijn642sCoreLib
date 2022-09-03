@@ -15,7 +15,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.crafting.CraftingHelper;
@@ -1004,7 +1004,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         /**
          * Sets which items the player should have to unlock this recipe in its generated advancement.
          */
-        public T unlockedBy(Tag<Item> tagKey){
+        public T unlockedBy(ITag<Item> tagKey){
             return this.unlockedBy(InventoryChangeTrigger.Instance.hasItems(ItemPredicate.Builder.item().of(tagKey).build()));
         }
 
@@ -1100,7 +1100,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param key key to be defined
          * @param tag tag to be associated with the key
          */
-        public ShapedRecipeBuilder input(char key, Tag<Item> tag){
+        public ShapedRecipeBuilder input(char key, ITag<Item> tag){
             return this.input(key, Ingredient.of(tag));
         }
     }
@@ -1176,7 +1176,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param tag   ingredient to be added
          * @param count the number of times to add the ingredient
          */
-        public ShapelessRecipeBuilder input(Tag<Item> tag, int count){
+        public ShapelessRecipeBuilder input(ITag<Item> tag, int count){
             return this.input(Ingredient.of(tag), count);
         }
 
@@ -1184,7 +1184,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * Adds a tag ingredient for this recipe. The ingredient will be added {@code count} times.
          * @param tag ingredient to be added
          */
-        public ShapelessRecipeBuilder input(Tag<Item> tag){
+        public ShapelessRecipeBuilder input(ITag<Item> tag){
             return this.input(Ingredient.of(tag), 1);
         }
 
@@ -1330,7 +1330,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * Sets the input for this recipe.
          * @param tag item tag to be accepted as input
          */
-        public SmeltingRecipeBuilder input(Tag<Item> tag){
+        public SmeltingRecipeBuilder input(ITag<Item> tag){
             return this.input(Ingredient.of(tag));
         }
 
@@ -1414,7 +1414,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * Sets the base ingredient for this recipe.
          * @param tag item tag to be accepted as base
          */
-        public SmithingRecipeBuilder base(Tag<Item> tag){
+        public SmithingRecipeBuilder base(ITag<Item> tag){
             return this.base(Ingredient.of(tag));
         }
 
@@ -1455,7 +1455,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * Sets the addition ingredient for this recipe.
          * @param tag item tag to be accepted as addition
          */
-        public SmithingRecipeBuilder addition(Tag<Item> tag){
+        public SmithingRecipeBuilder addition(ITag<Item> tag){
             return this.addition(Ingredient.of(tag));
         }
     }
@@ -1505,7 +1505,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * Sets the input ingredient for this recipe.
          * @param tag item tag to be accepted as input
          */
-        public StoneCuttingRecipeBuilder input(Tag<Item> tag){
+        public StoneCuttingRecipeBuilder input(ITag<Item> tag){
             return this.input(Ingredient.of(tag));
         }
     }
