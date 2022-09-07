@@ -104,4 +104,9 @@ public class CreativeItemGroup extends ItemGroup {
     public ITextComponent getDisplayName(){
         return this.displayName;
     }
+
+    @Override
+    public String getRecipeFolderName(){
+        return this.identifier;
+    }
 }
