@@ -47,7 +47,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             // Parent
             if(advancementBuilder.parent != null){
                 ResourceLocation parent = advancementBuilder.parent;
-                if(!this.advancements.containsKey(parent) && !this.cache.doesResourceExist(ResourceType.DATA, parent.getResourceDomain(), "advancements", parent.getResourcePath(), ".json"))
+                if(!this.advancements.containsKey(parent) && !this.cache.doesResourceExist(ResourceType.ASSET, parent.getResourceDomain(), "advancements", parent.getResourcePath(), ".json"))
                     throw new RuntimeException("Could not find parent '" + parent + "' for advancement '" + advancementBuilder.identifier + "'!");
                 json.addProperty("parent", parent.toString());
             }
@@ -113,7 +113,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             if(!advancementBuilder.rewardRecipes.isEmpty()){
                 JsonArray recipesJson = new JsonArray();
                 for(ResourceLocation rewardRecipe : advancementBuilder.rewardRecipes){
-                    if(!this.cache.doesResourceExist(ResourceType.DATA, rewardRecipe.getResourceDomain(), "recipes", rewardRecipe.getResourcePath(), ".json"))
+                    if(!this.cache.doesResourceExist(ResourceType.ASSET, rewardRecipe.getResourceDomain(), "recipes", rewardRecipe.getResourcePath(), ".json"))
                         throw new RuntimeException("Could not find reward recipe '" + rewardRecipe + "' for advancement '" + advancementBuilder.identifier + "'!");
 
                     recipesJson.add(rewardRecipe.toString());
@@ -124,7 +124,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             if(!advancementBuilder.rewardLootTables.isEmpty()){
                 JsonArray lootTablesJson = new JsonArray();
                 for(ResourceLocation rewardLootTable : advancementBuilder.rewardLootTables){
-                    if(!this.cache.doesResourceExist(ResourceType.DATA, rewardLootTable.getResourceDomain(), "loot_tables", rewardLootTable.getResourcePath(), ".json"))
+                    if(!this.cache.doesResourceExist(ResourceType.ASSET, rewardLootTable.getResourceDomain(), "loot_tables", rewardLootTable.getResourcePath(), ".json"))
                         throw new RuntimeException("Could not find reward loot table '" + rewardLootTable + "' for advancement '" + advancementBuilder.identifier + "'!");
 
                     lootTablesJson.add(rewardLootTable.toString());
@@ -139,7 +139,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
 
             // Save the object to the cache
             ResourceLocation identifier = advancementBuilder.identifier;
-            this.cache.saveJsonResource(ResourceType.DATA, json, identifier.getResourceDomain(), "advancements", identifier.getResourcePath());
+            this.cache.saveJsonResource(ResourceType.ASSET, json, identifier.getResourceDomain(), "advancements", identifier.getResourcePath());
         }
     }
 
@@ -151,7 +151,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
         if(this.advancements.containsKey(identifier))
             throw new RuntimeException("Duplicate advancement with identifier '" + identifier + "'!");
 
-        this.cache.trackToBeGeneratedResource(ResourceType.DATA, identifier.getResourceDomain(), "advancements", identifier.getResourcePath(), ".json");
+        this.cache.trackToBeGeneratedResource(ResourceType.ASSET, identifier.getResourceDomain(), "advancements", identifier.getResourcePath(), ".json");
         return this.advancements.computeIfAbsent(identifier, i -> new AdvancementBuilder(this.modid, i));
     }
 

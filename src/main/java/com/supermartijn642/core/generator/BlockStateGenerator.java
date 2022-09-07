@@ -117,7 +117,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
      */
     protected BlockStateBuilder blockState(Block block){
         ResourceLocation identifier = Registries.BLOCKS.getIdentifier(block);
-        this.cache.trackToBeGeneratedResource(ResourceType.DATA, identifier.getResourceDomain(), "blockstates", identifier.getResourcePath(), ".json");
+        this.cache.trackToBeGeneratedResource(ResourceType.ASSET, identifier.getResourceDomain(), "blockstates", identifier.getResourcePath(), ".json");
         return this.blockStates.computeIfAbsent(block, BlockStateBuilder::new);
     }
 

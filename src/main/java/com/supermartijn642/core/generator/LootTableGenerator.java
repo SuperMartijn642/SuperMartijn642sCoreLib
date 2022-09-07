@@ -102,7 +102,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
 
             // Save the object to the cache
             ResourceLocation identifier = lootTableBuilder.identifier;
-            this.cache.saveJsonResource(ResourceType.DATA, json, identifier.getResourceDomain(), "loot_tables", identifier.getResourcePath());
+            this.cache.saveJsonResource(ResourceType.ASSET, json, identifier.getResourceDomain(), "loot_tables", identifier.getResourcePath());
         }
     }
 
@@ -111,7 +111,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
      * @param identifier resource location of the loot table
      */
     protected LootTableBuilder lootTable(ResourceLocation identifier){
-        this.cache.trackToBeGeneratedResource(ResourceType.DATA, identifier.getResourceDomain(), "loot_tables", identifier.getResourcePath(), ".json");
+        this.cache.trackToBeGeneratedResource(ResourceType.ASSET, identifier.getResourceDomain(), "loot_tables", identifier.getResourcePath(), ".json");
         return this.lootTables.computeIfAbsent(identifier, LootTableBuilder::new);
     }
 
