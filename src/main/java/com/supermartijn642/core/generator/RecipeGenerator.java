@@ -46,7 +46,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
             // Filter by recipe builder
             if(recipeBuilder instanceof ShapedRecipeBuilder){
-                json.addProperty("type", "minecraft:crafting_shaped");
+                json.addProperty("type", "forge:ore_shaped");
 
                 // Verify all keys are defined
                 Set<Character> characters = new HashSet<>();
@@ -82,7 +82,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 json.add("result", resultJson);
 
             }else if(recipeBuilder instanceof ShapelessRecipeBuilder){
-                json.addProperty("type", "minecraft:crafting_shapeless");
+                json.addProperty("type", "forge:ore_shapeless");
 
                 // Group
                 json.addProperty("group", recipeBuilder.group);
@@ -1324,7 +1324,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private final NBTTagCompound outputTag;
         private final int outputCount;
         private String group;
-        private boolean hasAdvancement;
+        private boolean hasAdvancement = true;
         private ICriterionInstance unlockedBy;
 
         protected RecipeBuilder(ResourceLocation identifier, Item output, int outputData, NBTTagCompound outputTag, int outputCount){
