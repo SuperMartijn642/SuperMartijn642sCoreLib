@@ -8,7 +8,9 @@ import com.supermartijn642.core.registry.Registries;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Created 30/08/2022 by SuperMartijn642
@@ -16,8 +18,15 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(Ingredient.class)
 public class IngredientMixin implements IngredientExtension {
 
-    @Shadow
-    private final ItemStack[] matchingStacks = null;
+    private ItemStack[] coreLibOriginalInput;
+
+    @Inject(
+        method = "<init>([Lnet/minecraft/item/ItemStack;)V",
+        at = @At("TAIL")
+    )
+    private void constructor(ItemStack[] input, CallbackInfo ci){
+        this.coreLibOriginalInput = input;
+    }
 
     @Override
     public JsonElement coreLibSerialize(){
@@ -31,11 +40,11 @@ public class IngredientMixin implements IngredientExtension {
         //noinspection ConstantConditions
         if((Object)this.getClass() != Ingredient.class)
             throw new RuntimeException("Ingredient class '" + this.getClass().getCanonicalName() + "' does not override IngredientExtension#coreLibSerialize and thus is not supported!");
-        if(this.matchingStacks.length == 0)
+        if((this.coreLibOriginalInput == null || this.coreLibOriginalInput.length == 0))
             throw new RuntimeException("Cannot serialize an empty ingredient!");
 
         JsonArray arr = new JsonArray();
-        for(ItemStack stack : this.matchingStacks){
+        for(ItemStack stack : this.coreLibOriginalInput){
             JsonObject json = new JsonObject();
             json.addProperty("type", "minecraft:item");
             json.addProperty("item", Registries.ITEMS.getIdentifier(stack.getItem()).toString());
