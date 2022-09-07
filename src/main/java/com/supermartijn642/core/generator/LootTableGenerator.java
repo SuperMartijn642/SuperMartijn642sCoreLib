@@ -47,14 +47,14 @@ public abstract class LootTableGenerator extends ResourceGenerator {
                 json.add("functions", functionsJson);
             }
             // Pools
+            int poolNameCounter = 1;
             if(!lootTableBuilder.pools.isEmpty()){
                 JsonArray poolsJson = new JsonArray();
                 // Loop over all pools
                 for(LootPoolBuilder pool : lootTableBuilder.pools){
                     JsonObject poolJson = new JsonObject();
                     // Name
-                    if(pool.name != null && !pool.name.isEmpty())
-                        poolJson.addProperty("name", pool.name);
+                    poolJson.addProperty("name", pool.name == null || pool.name.isEmpty() ? "pool" + poolNameCounter++ : pool.name);
                     // Rolls
                     if(pool.rolls instanceof BinomialNumberProvider){
                         JsonObject rollsJson = new JsonObject();
