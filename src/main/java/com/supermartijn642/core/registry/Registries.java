@@ -99,7 +99,7 @@ public final class Registries {
         ((RecipeConditionSerializerRegistry)RECIPE_CONDITION_SERIALIZERS).initializeMap();
 
         // Add all registries which don't have a forge registry
-        REGISTRATION_ORDER_MAP.put(BLOCKS, Lists.newArrayList(BLOCK_ENTITY_TYPES, BLOCK_ENTITY_CLASSES, FLUIDS));
+        REGISTRATION_ORDER_MAP.put(ITEMS, Lists.newArrayList(BLOCK_ENTITY_TYPES, BLOCK_ENTITY_CLASSES, FLUIDS));
         REGISTRATION_ORDER_MAP.put(ENTITY_TYPES, Lists.newArrayList(MENU_TYPES, RECIPE_CONDITION_SERIALIZERS));
     }
 
