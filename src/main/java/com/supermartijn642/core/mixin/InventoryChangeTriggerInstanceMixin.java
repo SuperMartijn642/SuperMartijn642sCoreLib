@@ -8,6 +8,7 @@ import com.supermartijn642.core.extensions.MinMaxBoundsExtension;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -18,15 +19,18 @@ import org.spongepowered.asm.mixin.Shadow;
 public class InventoryChangeTriggerInstanceMixin implements ICriterionInstanceExtension {
 
     @Shadow
-    private final MinMaxBounds occupied = null;
+    @Final
+    private MinMaxBounds occupied;
     @Shadow
-    private final MinMaxBounds full = null;
+    @Final
+    private MinMaxBounds full;
     @Shadow
-    private final MinMaxBounds empty = null;
+    @Final
+    private MinMaxBounds empty;
     @Shadow
-    private final ItemPredicate[] items = null;
+    @Final
+    private ItemPredicate[] items;
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public void coreLibSerialize(JsonObject json){
         JsonObject slotsJson = new JsonObject();
@@ -39,7 +43,7 @@ public class InventoryChangeTriggerInstanceMixin implements ICriterionInstanceEx
         if(slotsJson.size() > 0)
             json.add("slots", slotsJson);
 
-        if(this.items.length > 0){
+        if(this.items != null && this.items.length > 0){
             JsonArray itemsJson = new JsonArray();
             for(ItemPredicate predicate : this.items)
                 itemsJson.add(((ItemPredicateExtension)predicate).coreLibSerialize());

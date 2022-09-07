@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.supermartijn642.core.extensions.MinMaxBoundsExtension;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -16,9 +17,11 @@ import org.spongepowered.asm.mixin.Shadow;
 public class MinMaxBoundsMixin implements MinMaxBoundsExtension {
 
     @Shadow
-    private final Float min = null;
+    @Final
+    private Float min;
     @Shadow
-    private final Float max = null;
+    @Final
+    private Float max;
 
     @SuppressWarnings("ConstantConditions")
     @Override

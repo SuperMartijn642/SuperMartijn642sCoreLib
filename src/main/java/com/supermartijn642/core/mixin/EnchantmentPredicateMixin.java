@@ -9,6 +9,7 @@ import com.supermartijn642.core.registry.Registries;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.enchantment.Enchantment;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -19,9 +20,11 @@ import org.spongepowered.asm.mixin.Shadow;
 public class EnchantmentPredicateMixin implements EnchantmentPredicateExtension {
 
     @Shadow
-    private final Enchantment enchantment = null;
+    @Final
+    private Enchantment enchantment;
     @Shadow
-    private final MinMaxBounds levels = null;
+    @Final
+    private MinMaxBounds levels;
 
     @SuppressWarnings("ConstantConditions")
     @Override

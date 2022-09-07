@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.supermartijn642.core.extensions.ICriterionInstanceExtension;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.item.crafting.IRecipe;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -14,7 +15,8 @@ import org.spongepowered.asm.mixin.Shadow;
 public class RecipeUnlockedTriggerInstanceMixin implements ICriterionInstanceExtension {
 
     @Shadow
-    private final IRecipe recipe = null;
+    @Final
+    private IRecipe recipe;
 
     @Override
     public void coreLibSerialize(JsonObject json){

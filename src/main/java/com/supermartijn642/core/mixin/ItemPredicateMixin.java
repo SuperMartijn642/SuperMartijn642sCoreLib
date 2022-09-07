@@ -15,6 +15,7 @@ import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.NBTPredicate;
 import net.minecraft.item.Item;
 import net.minecraft.potion.PotionType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -25,19 +26,26 @@ import org.spongepowered.asm.mixin.Shadow;
 public class ItemPredicateMixin implements ItemPredicateExtension {
 
     @Shadow
-    private final Item item = null;
+    @Final
+    private Item item;
     @Shadow
-    private final Integer data = null;
+    @Final
+    private Integer data;
     @Shadow
-    private final MinMaxBounds count = null;
+    @Final
+    private MinMaxBounds count;
     @Shadow
-    private final MinMaxBounds durability = null;
+    @Final
+    private MinMaxBounds durability;
     @Shadow
-    private final EnchantmentPredicate[] enchantments = null;
+    @Final
+    private EnchantmentPredicate[] enchantments;
     @Shadow
-    private final PotionType potion = null;
+    @Final
+    private PotionType potion;
     @Shadow
-    private final NBTPredicate nbt = null;
+    @Final
+    private NBTPredicate nbt;
 
     @Override
     public JsonElement coreLibSerialize(){

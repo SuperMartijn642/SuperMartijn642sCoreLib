@@ -6,6 +6,7 @@ import com.supermartijn642.core.extensions.IngredientExtension;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.crafting.IngredientNBT;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -16,7 +17,8 @@ import org.spongepowered.asm.mixin.Shadow;
 public class IngredientNBTMixin implements IngredientExtension {
 
     @Shadow(remap = false)
-    private final ItemStack stack = null;
+    @Final
+    private ItemStack stack;
 
     @Override
     public JsonElement coreLibSerialize(){

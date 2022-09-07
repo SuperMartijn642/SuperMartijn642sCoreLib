@@ -6,6 +6,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,7 +19,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class ExplosionMixin {
 
     @Shadow
-    private final float size = 0;
+    @Final
+    private float size;
 
     @Redirect(
         method = "doExplosionB",
