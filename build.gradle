@@ -155,7 +155,7 @@ jar {
     }
 
     manifest {
-        attributes "FMLCorePlugin": "com.supermartijn642.core.mixin.CoreModPlugin"
+        attributes "FMLCorePlugin": "com.supermartijn642.core.coremod.CoreModPlugin"
         attributes "FMLCorePluginContainsFMLMod": "true"
         attributes "ForceLoadAsMod": "true"
         attributes "TweakClass": "org.spongepowered.asm.launch.MixinTweaker"
