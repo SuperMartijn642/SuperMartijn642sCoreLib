@@ -107,4 +107,9 @@ public class CreativeItemGroup extends ItemGroup {
     public String getLangId(){
         return this.translationKey;
     }
+
+    @Override
+    public String getRecipeFolderName(){
+        return this.identifier;
+    }
 }
