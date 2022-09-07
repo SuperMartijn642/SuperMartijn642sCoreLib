@@ -104,4 +104,9 @@ public class CreativeItemGroup extends CreativeModeTab {
     public Component getDisplayName(){
         return this.displayName;
     }
+
+    @Override
+    public String getRecipeFolderName(){
+        return this.identifier;
+    }
 }
