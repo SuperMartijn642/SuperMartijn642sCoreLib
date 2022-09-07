@@ -210,7 +210,7 @@ public abstract class ResourceCache {
         private boolean existsInLoadedResources(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             // In 1.12, we only have to check resource packs
             IResourceManager resourceManager = ClientUtils.getMinecraft().getResourceManager();
-            try(IResource resource = resourceManager.getResource(new ResourceLocation(namespace, directory + "/" + fileName + "/" + extension))){
+            try(IResource resource = resourceManager.getResource(new ResourceLocation(namespace, directory + "/" + fileName + extension))){
                 return true;
             }catch(FileNotFoundException ignored){
                 return false;
