@@ -129,7 +129,7 @@ public abstract class ResourceCache {
             this.cache = hashCache;
             // Copy all the paths from the hash cache
             for(Map.Entry<Path,String> entry : this.cache.oldCache.entrySet())
-                this.presentFiles.put(this.outputDirectory.relativize(entry.getKey()), HashCode.fromString(entry.getValue()));
+                this.presentFiles.put(this.outputDirectory.relativize(entry.getKey()), entry.getValue().isEmpty() ? HashCode.fromInt(0) : HashCode.fromString(entry.getValue()));
 
             // Take all loaded resource packs and remove the one for the datagen modid
             this.otherResourcePacks = new ArrayList<>(ClientUtils.getMinecraft().resourcePackRepository.openAllSelected());
@@ -177,14 +177,6 @@ public abstract class ResourceCache {
             return Paths.get(resourceType.getDirectoryName(), namespace, directory, fileName + extension);
         }
 
-        /**
-         * Checks whether a resource exists. The resource may be either a generated file, or a file from a loaded resource pack.
-         * @param resourceType whether the resource is part of the server data or the client assets
-         * @param namespace    the namespace of the resource
-         * @param directory    name of the directory within the namespace
-         * @param fileName     name of the file
-         * @param extension    the file's extension
-         */
         public boolean doesResourceExist(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
             return this.existsInGeneratedFiles(path)
