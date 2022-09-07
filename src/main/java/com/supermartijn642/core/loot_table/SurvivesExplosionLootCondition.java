@@ -35,7 +35,7 @@ public class SurvivesExplosionLootCondition implements LootCondition {
 
         @Override
         public SurvivesExplosionLootCondition deserialize(JsonObject json, JsonDeserializationContext context){
-            return null;
+            return new SurvivesExplosionLootCondition();
         }
     }
 }
