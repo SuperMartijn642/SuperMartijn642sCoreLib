@@ -3,6 +3,7 @@ package com.supermartijn642.core.item;
 import net.minecraft.block.Block;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,6 +30,10 @@ public class BaseBlockItem extends ItemBlock {
     public BaseBlockItem(Block block, ItemProperties properties){
         super(block);
         this.properties = properties;
+        this.setMaxStackSize(properties.maxStackSize);
+        this.setMaxDamage(properties.durability);
+        this.setCreativeTab(properties.group);
+        this.setContainerItem(properties.craftingRemainingItem);
     }
 
     /**
@@ -82,6 +87,11 @@ public class BaseBlockItem extends ItemBlock {
     @Override
     public void onUpdate(ItemStack stack, World level, Entity entity, int slot, boolean isSelected){
         this.inventoryUpdate(stack, level, entity, slot, isSelected);
+    }
+
+    @Override
+    public CreativeTabs getCreativeTab(){
+        return this.properties.group != null ? this.properties.group : super.getCreativeTab();
     }
 
     @Override

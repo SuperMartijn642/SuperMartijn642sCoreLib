@@ -36,7 +36,7 @@
     "ClientPlayerEntityMixin",
     "LevelRendererMixin",
     "LocaleMixin",
-    "ModelBakeryMixin",
+    "ModelLoaderMixin",
     "TileEntityRendererDispatcherMixin",
     "VariantDeserializerMixin"
   ],
