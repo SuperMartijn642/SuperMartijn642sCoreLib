@@ -64,6 +64,7 @@ processResources {
 
     rename "^modid.mixins.json\$", "${project.mod_id}.mixins.json"
     rename "^icon.png\$", "${project.mod_id}.png"
+    rename "^accesstransformer.cfg\$", "${project.mod_id}-accesstransformer.cfg"
 }
 
 minecraft {
@@ -191,6 +192,7 @@ task prepareDataResources(type: Sync) {
 
     rename "^modid.mixins.json\$", "${project.mod_id}.mixins.json"
     rename "^icon.png\$", "${project.mod_id}.png"
+    rename "^accesstransformer.cfg\$", "${project.mod_id}-accesstransformer.cfg"
 }
 
 // Run prepareDataResources before prepareRunData

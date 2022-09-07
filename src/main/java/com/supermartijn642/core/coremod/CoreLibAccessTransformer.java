@@ -64,7 +64,7 @@ public class CoreLibAccessTransformer extends AccessTransformer {
     }
 
     public CoreLibAccessTransformer() throws IOException{
-        super("META-INF/accesstransformer.cfg");
+        super("META-INF/supermartijn642corelib-accesstransformer.cfg");
 
         // Make the access transformer work in dev environment
         if(FMLLaunchHandler.isDeobfuscatedEnvironment())
