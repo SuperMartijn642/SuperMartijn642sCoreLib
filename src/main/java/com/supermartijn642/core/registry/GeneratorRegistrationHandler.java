@@ -55,8 +55,8 @@ public class GeneratorRegistrationHandler {
     }
 
     private final String modid;
-    private final Set<Function<ResourceCache,ResourceGenerator>> generators = new HashSet<>();
-    private final Set<Function<FabricDataGenerator,DataProvider>> providers = new HashSet<>();
+    private final Set<Function<ResourceCache,ResourceGenerator>> generators = new LinkedHashSet<>();
+    private final Set<Function<FabricDataGenerator,DataProvider>> providers = new LinkedHashSet<>();
 
     private GeneratorRegistrationHandler(String modid){
         this.modid = modid;

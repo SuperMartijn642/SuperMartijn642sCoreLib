@@ -19,7 +19,6 @@ import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -170,7 +169,7 @@ public abstract class ResourceCache {
         }
 
         private boolean existsInLoadedResources(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
-            ResourceLocation location = new ResourceLocation(namespace, directory + File.separator + fileName + File.separator + extension);
+            ResourceLocation location = new ResourceLocation(namespace, directory + "/" + fileName + extension);
             return this.otherResourcePacks.stream().anyMatch(pack -> pack.hasResource(resourceType == ResourceType.ASSET ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA, location));
         }
 
@@ -198,27 +197,6 @@ public abstract class ResourceCache {
             this.toBeGenerated.add(this.constructPath(resourceType, namespace, directory, fileName, extension));
         }
 
-        /**
-         * Saves the given data in the appropriate location. Also checks if a file is already present to avoid redundant writes.
-         * @param resourceType whether the given data is part of the server data or the client assets
-         * @param json         the data to be saved
-         * @param namespace    the namespace which the data should be saved under
-         * @param directory    name of the directory within the namespace
-         * @param fileName     name of the file
-         */
-        public void saveJsonResource(ResourceType resourceType, JsonObject json, String namespace, String directory, String fileName){
-            byte[] bytes = GSON.toJson(json).getBytes(StandardCharsets.UTF_8);
-            this.saveResource(resourceType, bytes, namespace, directory, fileName, fileName.endsWith(".json") ? "" : ".json");
-        }
-
-        /**
-         * Saves the given data in the appropriate location. Also checks if a file is already present to avoid redundant writes.
-         * @param resourceType whether the given data is part of the server data or the client assets
-         * @param namespace    the namespace which the data should be saved under
-         * @param directory    name of the directory within the namespace
-         * @param fileName     name of the file
-         * @param extension    extension of the file
-         */
         public void saveResource(ResourceType resourceType, byte[] data, String namespace, String directory, String fileName, String extension){
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
             Path fullPath = this.outputDirectory.resolve(path);
