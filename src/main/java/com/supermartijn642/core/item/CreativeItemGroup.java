@@ -109,7 +109,7 @@ public class CreativeItemGroup extends CreativeTabs {
 
     @Override
     public String getTabLabel(){
-        return this.translationKey;
+        return this.identifier;
     }
 
     @Override
