@@ -1,5 +1,6 @@
 package com.supermartijn642.core.registry;
 
+import com.google.common.eventbus.Subscribe;
 import com.supermartijn642.core.CommonUtils;
 import com.supermartijn642.core.CoreLib;
 import net.minecraft.util.ResourceLocation;
@@ -7,7 +8,6 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.discovery.asm.ModAnnotation;
 import net.minecraftforge.fml.common.event.FMLModIdMappingEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -122,7 +122,7 @@ public @interface RegistryEntryAcceptor {
 
             // Register event handlers
             CommonUtils.getEventBus("supermartijn642corelib").register(new Object() {
-                @SubscribeEvent
+                @Subscribe
                 public void handleIdMappingEvent(FMLModIdMappingEvent e){
                     Handler.onIdRemapping(e);
                 }

@@ -33,6 +33,8 @@ public class CoreLib {
     public CoreLib(){
         CHANNEL.registerMessage(OpenContainerPacket.class, OpenContainerPacket::new, true);
 
+        CommonUtils.initialize();
+
         // Register conditional recipe type
         RegistrationHandler handler = RegistrationHandler.get("supermartijn642corelib");
         handler.registerRecipeConditionSerializer("mod_loaded", ModLoadedRecipeCondition.SERIALIZER);

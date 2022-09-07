@@ -1,6 +1,7 @@
 package com.supermartijn642.core;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.supermartijn642.core.gui.BaseContainerType;
 import com.supermartijn642.core.network.OpenContainerPacket;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,7 +17,6 @@ import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -45,12 +45,12 @@ public class CommonUtils {
     static void initialize(){
         EventBus eventBus = getEventBus("supermartijn642corelib");
         eventBus.register(new Object() {
-            @SubscribeEvent
+            @Subscribe
             public void serverAboutToStart(FMLServerAboutToStartEvent e){
                 server = e.getServer();
             }
 
-            @SubscribeEvent
+            @Subscribe
             public void serverStopped(FMLServerStoppedEvent e){
                 server = null;
             }
@@ -85,8 +85,6 @@ public class CommonUtils {
 
     /**
      * Preferably use {@link net.minecraftforge.fml.common.Mod.EventBusSubscriber} whenever possible.
-     * @param modid
-     * @return
      */
     @SuppressWarnings("unchecked")
     public static EventBus getEventBus(String modid){
