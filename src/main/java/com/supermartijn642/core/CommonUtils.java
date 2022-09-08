@@ -1,5 +1,6 @@
 package com.supermartijn642.core;
 
+import com.supermartijn642.core.gui.BaseContainer;
 import com.supermartijn642.core.gui.BaseContainerType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -59,15 +60,16 @@ public class CommonUtils {
     }
 
     /**
-     * Opens the given container for the given player. This method will do nothing if called client-side.
-     * @param player player to show the container to
-     * @param baseContainerType type of the container, used to send the container's data to the client
+     * Opens the given container. This method will do nothing if called client-side.
      * @param container the container to be opened
      */
-    public <T extends AbstractContainerMenu> void openContainer(Player player, BaseContainerType<T> baseContainerType, T container){
-        if(!(player instanceof ServerPlayer))
+    public static <T extends AbstractContainerMenu> void openContainer(BaseContainer container){
+        Player player = container.player;
+        if(!(container.player instanceof ServerPlayer))
             return;
 
+        // Open the container
+        //noinspection unchecked,rawtypes
         NetworkHooks.openScreen((ServerPlayer)player, new MenuProvider() {
             @Override
             public Component getDisplayName(){
@@ -77,8 +79,9 @@ public class CommonUtils {
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int windowId, Inventory inventory, Player player){
+                container.setContainerId(windowId);
                 return container;
             }
-        }, data -> baseContainerType.writeContainer(container, data));
+        }, data -> ((BaseContainerType)container.getContainerType()).writeContainer(container, data));
     }
 }

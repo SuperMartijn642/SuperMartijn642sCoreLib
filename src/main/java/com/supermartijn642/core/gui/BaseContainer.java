@@ -2,7 +2,6 @@ package com.supermartijn642.core.gui;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.Level;
 
@@ -12,12 +11,20 @@ import net.minecraft.world.level.Level;
 public abstract class BaseContainer extends AbstractContainerMenu {
 
     public final Player player;
-    public final Level world;
+    public final Level level;
 
-    public BaseContainer(MenuType<?> type, int id, Player player){
-        super(type, id);
+    public BaseContainer(BaseContainerType<?> type, Player player){
+        super(type, 0);
         this.player = player;
-        this.world = player.level;
+        this.level = player.level;
+    }
+
+    public void setContainerId(int id){
+        this.containerId = id;
+    }
+
+    public BaseContainerType<?> getContainerType(){
+        return (BaseContainerType<?>)this.getType();
     }
 
     /**
