@@ -3,11 +3,13 @@ package com.supermartijn642.core.gui;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.ContainerWidget;
 import com.supermartijn642.core.gui.widget.Widget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.Slot;
@@ -37,7 +39,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     private final boolean isPauseScreen;
 
     public WidgetContainerScreen(T widget, X container, boolean drawSlots, boolean isPauseScreen){
-        super(container, container.player.getInventory(), widget.getNarrationMessage());
+        super(container, container.player.getInventory(), TextComponents.empty().get());
         this.widget = widget;
         this.container = container;
         this.drawSlots = drawSlots;
@@ -223,5 +225,10 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     @Override
     public boolean isPauseScreen(){
         return this.isPauseScreen;
+    }
+
+    @Override
+    public Component getNarrationMessage(){
+        return this.widget.getNarrationMessage();
     }
 }
