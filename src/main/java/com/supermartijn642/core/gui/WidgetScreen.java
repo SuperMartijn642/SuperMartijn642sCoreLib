@@ -3,8 +3,10 @@ package com.supermartijn642.core.gui;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.Widget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
@@ -24,7 +26,7 @@ public class WidgetScreen<T extends Widget> extends Screen {
     private boolean isPauseScreen = false;
 
     public WidgetScreen(T widget, boolean isPauseScreen){
-        super(widget.getNarrationMessage());
+        super(TextComponents.empty().get());
         this.widget = widget;
         this.isPauseScreen = isPauseScreen;
     }
@@ -130,5 +132,10 @@ public class WidgetScreen<T extends Widget> extends Screen {
     @Override
     public boolean isPauseScreen(){
         return this.isPauseScreen;
+    }
+
+    @Override
+    public Component getNarrationMessage(){
+        return this.widget.getNarrationMessage();
     }
 }
