@@ -2,7 +2,6 @@ package com.supermartijn642.core.gui;
 
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.MenuType;
 
 import javax.annotation.Nonnull;
 
@@ -14,18 +13,18 @@ public abstract class ObjectBaseContainer<T> extends BaseContainer {
     protected T object;
     private final boolean alwaysRenewObject;
 
-    public ObjectBaseContainer(MenuType<?> type, int id, Player player, boolean alwaysRenewObject){
-        super(type, id, player);
+    public ObjectBaseContainer(BaseContainerType<?> type, Player player, boolean alwaysRenewObject){
+        super(type, player);
         this.alwaysRenewObject = alwaysRenewObject;
     }
 
-    public ObjectBaseContainer(MenuType<?> type, int id, Player player){
-        this(type, id, player, false);
+    public ObjectBaseContainer(BaseContainerType<?> type, Player player){
+        this(type, player, false);
     }
 
     @Override
     protected void addSlots(Player player){
-        if(!this.validateObjectOrClose())
+        if(this.validateObjectOrClose())
             this.addSlots(player, this.object);
     }
 

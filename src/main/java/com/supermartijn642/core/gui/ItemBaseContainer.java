@@ -3,7 +3,6 @@ package com.supermartijn642.core.gui;
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Predicate;
@@ -17,18 +16,18 @@ public abstract class ItemBaseContainer extends ObjectBaseContainer<ItemStack> {
     private final Supplier<ItemStack> stackSupplier;
     protected final Predicate<ItemStack> stackValidator;
 
-    private ItemBaseContainer(MenuType<?> type, int id, Player player, Supplier<ItemStack> itemStackSupplier, Predicate<ItemStack> stackValidator){
-        super(type, id, player, true);
+    private ItemBaseContainer(BaseContainerType<?> type, Player player, Supplier<ItemStack> itemStackSupplier, Predicate<ItemStack> stackValidator){
+        super(type, player, true);
         this.stackSupplier = itemStackSupplier;
         this.stackValidator = stackValidator;
     }
 
-    protected ItemBaseContainer(MenuType<?> type, int id, Player player, int playerSlot, Predicate<ItemStack> stackValidator){
-        this(type, id, player, () -> player.getInventory().getItem(playerSlot), stackValidator);
+    protected ItemBaseContainer(BaseContainerType<?> type, Player player, int playerSlot, Predicate<ItemStack> stackValidator){
+        this(type, player, () -> player.getInventory().getItem(playerSlot), stackValidator);
     }
 
-    protected ItemBaseContainer(MenuType<?> type, int id, Player player, InteractionHand hand, Predicate<ItemStack> stackValidator){
-        this(type, id, player, () -> ClientUtils.getPlayer().getItemInHand(hand), stackValidator);
+    protected ItemBaseContainer(BaseContainerType<?> type, Player player, InteractionHand hand, Predicate<ItemStack> stackValidator){
+        this(type, player, () -> ClientUtils.getPlayer().getItemInHand(hand), stackValidator);
     }
 
     @Override
