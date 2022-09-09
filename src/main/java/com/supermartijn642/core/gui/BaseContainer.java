@@ -2,7 +2,6 @@ package com.supermartijn642.core.gui;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.world.World;
 
@@ -14,7 +13,7 @@ public abstract class BaseContainer extends Container {
     public final PlayerEntity player;
     public final World level;
 
-    public BaseContainer(ContainerType<?> type, PlayerEntity player){
+    public BaseContainer(BaseContainerType<?> type, PlayerEntity player){
         super(type, 0);
         this.player = player;
         this.level = player.level;

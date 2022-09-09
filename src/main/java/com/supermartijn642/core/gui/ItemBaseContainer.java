@@ -2,7 +2,6 @@ package com.supermartijn642.core.gui;
 
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 
@@ -17,17 +16,17 @@ public abstract class ItemBaseContainer extends ObjectBaseContainer<ItemStack> {
     private final Supplier<ItemStack> stackSupplier;
     protected final Predicate<ItemStack> stackValidator;
 
-    private ItemBaseContainer(ContainerType<?> type, PlayerEntity player, Supplier<ItemStack> itemStackSupplier, Predicate<ItemStack> stackValidator){
+    private ItemBaseContainer(BaseContainerType<?> type, PlayerEntity player, Supplier<ItemStack> itemStackSupplier, Predicate<ItemStack> stackValidator){
         super(type, player, true);
         this.stackSupplier = itemStackSupplier;
         this.stackValidator = stackValidator;
     }
 
-    protected ItemBaseContainer(ContainerType<?> type, PlayerEntity player, int playerSlot, Predicate<ItemStack> stackValidator){
+    protected ItemBaseContainer(BaseContainerType<?> type, PlayerEntity player, int playerSlot, Predicate<ItemStack> stackValidator){
         this(type, player, () -> player.inventory.getItem(playerSlot), stackValidator);
     }
 
-    protected ItemBaseContainer(ContainerType<?> type, PlayerEntity player, Hand hand, Predicate<ItemStack> stackValidator){
+    protected ItemBaseContainer(BaseContainerType<?> type, PlayerEntity player, Hand hand, Predicate<ItemStack> stackValidator){
         this(type, player, () -> ClientUtils.getPlayer().getItemInHand(hand), stackValidator);
     }
 
