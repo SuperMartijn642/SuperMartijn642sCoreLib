@@ -11,6 +11,8 @@ accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScr
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackTime J # snapbackTime
 accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderFloatingItem (Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V # renderFloatingItem
 accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderSlot (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/inventory/Slot;)V # renderSlot
+# AbstractContainerMenu
+mutable field net/minecraft/world/inventory/AbstractContainerMenu containerId I # containerId
 # BlockBehaviour
 accessible field net/minecraft/world/level/block/state/BlockBehaviour properties Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties; # properties
 extendable method net/minecraft/world/level/block/state/BlockBehaviour getLootTable ()Lnet/minecraft/resources/ResourceLocation; # getLootTable

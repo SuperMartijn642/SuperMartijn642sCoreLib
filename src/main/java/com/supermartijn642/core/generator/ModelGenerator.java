@@ -541,7 +541,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
                 throw new IllegalArgumentException("Texture entry must either start with '#' or be a valid resource location, not '" + texture + "'!");
 
             if(texture.charAt(0) != '#')
-                return this.texture(key, new ResourceLocation(texture));
+                return this.texture(key, texture.contains(":") ? new ResourceLocation(texture) : new ResourceLocation(this.modid, texture));
             this.textures.put(key, texture);
             return this;
         }

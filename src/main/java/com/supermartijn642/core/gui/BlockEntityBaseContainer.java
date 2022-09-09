@@ -2,7 +2,6 @@ package com.supermartijn642.core.gui;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -14,14 +13,14 @@ public abstract class BlockEntityBaseContainer<T extends BlockEntity> extends Ob
     protected final Level blockEntityLevel;
     protected final BlockPos blockEntityPos;
 
-    public BlockEntityBaseContainer(MenuType<?> type, int id, Player player, Level blockEntityLevel, BlockPos blockEntityPos){
-        super(type, id, player);
+    public BlockEntityBaseContainer(BaseContainerType<?> type, Player player, Level blockEntityLevel, BlockPos blockEntityPos){
+        super(type, player);
         this.blockEntityLevel = blockEntityLevel;
         this.blockEntityPos = blockEntityPos;
     }
 
-    public BlockEntityBaseContainer(MenuType<?> type, int id, Player player, BlockPos blockEntityPos){
-        this(type, id, player, player.level, blockEntityPos);
+    public BlockEntityBaseContainer(BaseContainerType<?> type, Player player, BlockPos blockEntityPos){
+        this(type, player, player.level, blockEntityPos);
     }
 
     @SuppressWarnings("unchecked")

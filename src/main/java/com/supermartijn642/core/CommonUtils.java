@@ -1,5 +1,6 @@
 package com.supermartijn642.core;
 
+import com.supermartijn642.core.gui.BaseContainer;
 import com.supermartijn642.core.gui.BaseContainerType;
 import com.supermartijn642.core.registry.Registries;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
@@ -9,7 +10,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 
 /**
@@ -51,15 +51,17 @@ public class CommonUtils {
     }
 
     /**
-     * Opens the given container for the given player. This method will do nothing if called client-side.
-     * @param player            player to show the container to
-     * @param baseContainerType type of the container, used to send the container's data to the client
-     * @param container         the container to be opened
+     * Opens the given container. This method will do nothing if called client-side.
+     * @param container the container to be opened
      */
-    public <T extends AbstractContainerMenu> void openContainer(Player player, BaseContainerType<T> baseContainerType, T container){
+    public static void openContainer(BaseContainer container){
+        Player player = container.player;
         if(!(player instanceof ServerPlayer))
             return;
 
-        ContainerProviderRegistry.INSTANCE.openContainer(Registries.MENU_TYPES.getIdentifier(baseContainerType), (ServerPlayer)player, data -> baseContainerType.writeContainer(container, data));
+        // Open the container
+        BaseContainerType<?> containerType = container.getContainerType();
+        //noinspection unchecked,rawtypes
+        ContainerProviderRegistry.INSTANCE.openContainer(Registries.MENU_TYPES.getIdentifier(containerType), (ServerPlayer)player, data -> ((BaseContainerType)containerType).writeContainer(container, data));
     }
 }
