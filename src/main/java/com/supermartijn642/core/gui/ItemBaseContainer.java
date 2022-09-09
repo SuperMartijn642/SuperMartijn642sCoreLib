@@ -17,18 +17,18 @@ public abstract class ItemBaseContainer extends ObjectBaseContainer<ItemStack> {
     private final Supplier<ItemStack> stackSupplier;
     protected final Predicate<ItemStack> stackValidator;
 
-    private ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, Supplier<ItemStack> itemStackSupplier, Predicate<ItemStack> stackValidator){
-        super(type, id, player, true);
+    private ItemBaseContainer(ContainerType<?> type, PlayerEntity player, Supplier<ItemStack> itemStackSupplier, Predicate<ItemStack> stackValidator){
+        super(type, player, true);
         this.stackSupplier = itemStackSupplier;
         this.stackValidator = stackValidator;
     }
 
-    protected ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, int playerSlot, Predicate<ItemStack> stackValidator){
-        this(type, id, player, () -> player.inventory.getItem(playerSlot), stackValidator);
+    protected ItemBaseContainer(ContainerType<?> type, PlayerEntity player, int playerSlot, Predicate<ItemStack> stackValidator){
+        this(type, player, () -> player.inventory.getItem(playerSlot), stackValidator);
     }
 
-    protected ItemBaseContainer(ContainerType<?> type, int id, PlayerEntity player, Hand hand, Predicate<ItemStack> stackValidator){
-        this(type, id, player, () -> ClientUtils.getPlayer().getItemInHand(hand), stackValidator);
+    protected ItemBaseContainer(ContainerType<?> type, PlayerEntity player, Hand hand, Predicate<ItemStack> stackValidator){
+        this(type, player, () -> ClientUtils.getPlayer().getItemInHand(hand), stackValidator);
     }
 
     @Override

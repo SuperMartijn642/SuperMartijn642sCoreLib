@@ -2,9 +2,11 @@ package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.ContainerWidget;
 import com.supermartijn642.core.gui.widget.Widget;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
@@ -37,7 +39,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     private final boolean isPauseScreen;
 
     public WidgetContainerScreen(T widget, X container, boolean drawSlots, boolean isPauseScreen){
-        super(container, container.player.inventory, widget.getNarrationMessage());
+        super(container, container.player.inventory, TextComponents.empty().get());
         this.widget = widget;
         this.container = container;
         this.drawSlots = drawSlots;
@@ -108,16 +110,15 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         // Render the widget
         this.widget.render(offsetMouseX, offsetMouseY);
 
+        RenderHelper.turnOnGui();
+
+        this.hoveredSlot = null;
         for(Slot slot : this.container.slots){
             if(!slot.isActive())
                 continue;
 
-            slot.x += offsetX;
-            slot.y += offsetY;
             this.renderSlot(slot);
-            slot.x -= offsetX;
-            slot.y -= offsetY;
-            if(this.isHovering(slot.x, slot.y, 16, 16, offsetMouseX, offsetMouseY)){
+            if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
                 this.hoveredSlot = slot;
                 GlStateManager.disableLighting();
                 GlStateManager.disableDepthTest();
@@ -133,12 +134,11 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         // Render the widget's foreground
         this.widget.renderForeground(offsetMouseX, offsetMouseY);
 
+        this.renderTooltip(offsetMouseX, offsetMouseY);
+
         GlStateManager.popMatrix();
 
         MinecraftForge.EVENT_BUS.post(new GuiContainerEvent.DrawForeground(this, mouseX, mouseY));
-
-        GlStateManager.pushMatrix();
-        GlStateManager.translated(offsetX, offsetY, 0);
 
         ItemStack cursorStack = this.draggingItem.isEmpty() ? this.inventory.getCarried() : this.draggingItem;
         if(!cursorStack.isEmpty()){
@@ -171,6 +171,9 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             this.renderFloatingItem(this.snapbackItem, j1, k1, null);
         }
 
+        GlStateManager.pushMatrix();
+        GlStateManager.translated(offsetX, offsetY, 0);
+
         // Render the widget's overlay
         this.widget.renderOverlay(offsetMouseX, offsetMouseY);
         // Render the widget's tooltips
@@ -186,25 +189,19 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button){
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
-        return this.widget.mousePressed((int)mouseX, (int)mouseY, button, false) || super.mouseClicked(mouseX, mouseY, button);
+        return this.widget.mousePressed((int)mouseX - offsetX, (int)mouseY - offsetY, button, false) || super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button){
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
-        return this.widget.mouseReleased((int)mouseX, (int)mouseY, button, false) || super.mouseReleased(mouseX, mouseY, button);
+        return this.widget.mouseReleased((int)mouseX - offsetX, (int)mouseY - offsetY, button, false) || super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount){
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
-        return this.widget.mouseScrolled((int)mouseX, (int)mouseY, amount, false) || super.mouseScrolled(mouseX, mouseY, amount);
+        return this.widget.mouseScrolled((int)mouseX - offsetX, (int)mouseY - offsetY, amount, false) || super.mouseScrolled(mouseX, mouseY, amount);
     }
 
     @Override
@@ -234,5 +231,10 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     @Override
     public boolean isPauseScreen(){
         return this.isPauseScreen;
+    }
+
+    @Override
+    public String getNarrationMessage(){
+        return TextComponents.fromTextComponent(this.widget.getNarrationMessage()).format();
     }
 }

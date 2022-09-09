@@ -12,12 +12,20 @@ import net.minecraft.world.World;
 public abstract class BaseContainer extends Container {
 
     public final PlayerEntity player;
-    public final World world;
+    public final World level;
 
-    public BaseContainer(ContainerType<?> type, int id, PlayerEntity player){
-        super(type, id);
+    public BaseContainer(ContainerType<?> type, PlayerEntity player){
+        super(type, 0);
         this.player = player;
-        this.world = player.level;
+        this.level = player.level;
+    }
+
+    public void setContainerId(int id){
+        this.containerId = id;
+    }
+
+    public BaseContainerType<?> getContainerType(){
+        return (BaseContainerType<?>)this.getType();
     }
 
     /**
