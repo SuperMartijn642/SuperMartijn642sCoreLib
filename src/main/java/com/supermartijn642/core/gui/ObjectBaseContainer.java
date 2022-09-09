@@ -2,7 +2,6 @@ package com.supermartijn642.core.gui;
 
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.ContainerType;
 
 import javax.annotation.Nonnull;
 
@@ -14,12 +13,12 @@ public abstract class ObjectBaseContainer<T> extends BaseContainer {
     protected T object;
     private final boolean alwaysRenewObject;
 
-    public ObjectBaseContainer(ContainerType<?> type, PlayerEntity player, boolean alwaysRenewObject){
+    public ObjectBaseContainer(BaseContainerType<?> type, PlayerEntity player, boolean alwaysRenewObject){
         super(type, player);
         this.alwaysRenewObject = alwaysRenewObject;
     }
 
-    public ObjectBaseContainer(ContainerType<?> type, PlayerEntity player){
+    public ObjectBaseContainer(BaseContainerType<?> type, PlayerEntity player){
         this(type, player, false);
     }
 
