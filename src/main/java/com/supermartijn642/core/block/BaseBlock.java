@@ -56,6 +56,8 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
         this.saveTileData = saveTileData;
         this.properties = properties;
 
+        this.fullBlock = this.getDefaultState().isOpaqueCube();
+        this.lightOpacity = this.fullBlock ? 255 : 0;
         this.setSoundType(properties.soundType);
         this.setResistance(properties.explosionResistance);
         this.setHardness(properties.destroyTime);
@@ -273,7 +275,7 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
 
     @Override
     public boolean isOpaqueCube(IBlockState state){
-        return this.properties.canOcclude;
+        return this.properties == null || (state.isFullCube() && this.properties.canOcclude);
     }
 
     @Override

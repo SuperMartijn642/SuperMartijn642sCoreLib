@@ -93,7 +93,7 @@ public class WidgetScreen<T extends Widget> extends GuiScreen {
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
         mouseX -= offsetX;
         mouseY -= offsetY;
-        if(!this.widget.mousePressed(mouseX, mouseY, button, false))
+        if(!this.widget.mousePressed(mouseX - offsetX, mouseY - offsetY, button, false))
             super.mouseClicked(mouseX, mouseY, button);
     }
 
@@ -145,7 +145,7 @@ public class WidgetScreen<T extends Widget> extends GuiScreen {
         if(this.widget.keyPressed(keyCode, false))
             return true;
 
-        if(keyCode == 256 /* Escape */ || ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(keyCode)){
+        if(keyCode == 256 /* Escape */ || ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(Keyboard.getEventKey())){
             this.closeScreen();
             return true;
         }

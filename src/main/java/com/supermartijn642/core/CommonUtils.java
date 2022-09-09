@@ -2,11 +2,10 @@ package com.supermartijn642.core;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import com.supermartijn642.core.gui.BaseContainerType;
+import com.supermartijn642.core.gui.BaseContainer;
 import com.supermartijn642.core.network.OpenContainerPacket;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
@@ -99,18 +98,17 @@ public class CommonUtils {
     }
 
     /**
-     * Opens the given container for the given player. This method will do nothing if called client-side.
-     * @param player            player to show the container to
-     * @param baseContainerType type of the container, used to send the container's data to the client
-     * @param container         the container to be opened
+     * Opens the given container. This method will do nothing if called client-side.
+     * @param container the container to be opened
      */
-    public <T extends Container> void openContainer(EntityPlayer player, BaseContainerType<T> baseContainerType, T container){
+    public static void openContainer(BaseContainer container){
+        EntityPlayer player = container.player;
         if(!(player instanceof EntityPlayerMP))
             return;
 
         ((EntityPlayerMP)player).getNextWindowId();
         ((EntityPlayerMP)player).closeContainer();
-        CoreLib.CHANNEL.sendToPlayer(player, new OpenContainerPacket<>(baseContainerType, container));
+        CoreLib.CHANNEL.sendToPlayer(player, new OpenContainerPacket<>(container));
         player.openContainer = container;
         container.windowId = ((EntityPlayerMP)player).currentWindowId;
         container.addListener((EntityPlayerMP)player);

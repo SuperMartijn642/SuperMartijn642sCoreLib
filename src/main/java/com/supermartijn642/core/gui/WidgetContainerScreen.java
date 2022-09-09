@@ -6,6 +6,7 @@ import com.supermartijn642.core.gui.widget.Widget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -51,11 +52,6 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
     public WidgetContainerScreen(T widget, X container, boolean drawSlots){
         this(widget, container, drawSlots, false);
-    }
-
-    @Override
-    public void setWorldAndResolution(Minecraft p_146280_1_, int p_146280_2_, int p_146280_3_){
-        super.setWorldAndResolution(p_146280_1_, p_146280_2_, p_146280_3_);
     }
 
     @Override
@@ -111,16 +107,15 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         // Render the widget
         this.widget.render(offsetMouseX, offsetMouseY);
 
+        RenderHelper.enableGUIStandardItemLighting();
+
+        this.hoveredSlot = null;
         for(Slot slot : this.container.inventorySlots){
             if(!slot.isEnabled())
                 continue;
 
-            slot.xPos += offsetX;
-            slot.yPos += offsetY;
             this.drawSlot(slot);
-            slot.xPos -= offsetX;
-            slot.yPos -= offsetY;
-            if(this.isMouseOverSlot(slot, offsetMouseX, offsetMouseY)){
+            if(this.isMouseOverSlot(slot, mouseX, mouseY)){
                 this.hoveredSlot = slot;
                 GlStateManager.disableLighting();
                 GlStateManager.disableDepth();
@@ -135,12 +130,11 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         // Render the widget's foreground
         this.widget.renderForeground(offsetMouseX, offsetMouseY);
 
+        this.renderHoveredToolTip(offsetMouseX, offsetMouseY);
+
         GlStateManager.popMatrix();
 
         MinecraftForge.EVENT_BUS.post(new GuiContainerEvent.DrawForeground(this, mouseX, mouseY));
-
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(offsetX, offsetY, 0);
 
         ItemStack cursorStack = this.draggedStack.isEmpty() ? ClientUtils.getPlayer().inventory.getItemStack() : this.draggedStack;
         if(!cursorStack.isEmpty()){
@@ -173,6 +167,9 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             this.drawItemStack(this.returningStack, j1, k1, null);
         }
 
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(offsetX, offsetY, 0);
+
         // Render the widget's overlay
         this.widget.renderOverlay(offsetMouseX, offsetMouseY);
         // Render the widget's tooltips
@@ -188,18 +185,14 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     @Override
     public void mouseClicked(int mouseX, int mouseY, int button) throws IOException{
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
-        if(!this.widget.mousePressed(mouseX, mouseY, button, false))
+        if(!this.widget.mousePressed(mouseX - offsetX, mouseY - offsetY, button, false))
             super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public void mouseReleased(int mouseX, int mouseY, int button){
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
-        if(!this.widget.mouseReleased(mouseX, mouseY, button, false))
+        if(!this.widget.mouseReleased(mouseX - offsetX, mouseY - offsetY, button, false))
             super.mouseReleased(mouseX, mouseY, button);
     }
 
@@ -242,7 +235,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         if(this.widget.keyPressed(keyCode, false))
             return true;
 
-        if(keyCode == 256 /* Escape */ || ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(keyCode)){
+        if(keyCode == 256 /* Escape */ || ClientUtils.getMinecraft().gameSettings.keyBindInventory.isActiveAndMatches(Keyboard.getEventKey())){
             this.closeScreen();
             return true;
         }

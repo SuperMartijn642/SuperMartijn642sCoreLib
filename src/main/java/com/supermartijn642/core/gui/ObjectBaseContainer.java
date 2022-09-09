@@ -13,18 +13,18 @@ public abstract class ObjectBaseContainer<T> extends BaseContainer {
     protected T object;
     private final boolean alwaysRenewObject;
 
-    public ObjectBaseContainer(EntityPlayer player, boolean alwaysRenewObject){
-        super(player);
+    public ObjectBaseContainer(BaseContainerType<?> type, EntityPlayer player, boolean alwaysRenewObject){
+        super(type, player);
         this.alwaysRenewObject = alwaysRenewObject;
     }
 
-    public ObjectBaseContainer(EntityPlayer player){
-        this(player, false);
+    public ObjectBaseContainer(BaseContainerType<?> type, EntityPlayer player){
+        this(type, player, false);
     }
 
     @Override
     protected void addSlots(EntityPlayer player){
-        if(!this.validateObjectOrClose())
+        if(this.validateObjectOrClose())
             this.addSlots(player, this.object);
     }
 

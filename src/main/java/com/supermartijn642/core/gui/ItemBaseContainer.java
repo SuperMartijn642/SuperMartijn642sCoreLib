@@ -16,18 +16,18 @@ public abstract class ItemBaseContainer extends ObjectBaseContainer<ItemStack> {
     private final Supplier<ItemStack> stackSupplier;
     protected final Predicate<ItemStack> stackValidator;
 
-    private ItemBaseContainer(EntityPlayer player, Supplier<ItemStack> itemStackSupplier, Predicate<ItemStack> stackValidator){
-        super(player, true);
+    private ItemBaseContainer(BaseContainerType<?> type, EntityPlayer player, Supplier<ItemStack> itemStackSupplier, Predicate<ItemStack> stackValidator){
+        super(type, player, true);
         this.stackSupplier = itemStackSupplier;
         this.stackValidator = stackValidator;
     }
 
-    protected ItemBaseContainer(EntityPlayer player, int playerSlot, Predicate<ItemStack> stackValidator){
-        this(player, () -> player.inventory.getStackInSlot(playerSlot), stackValidator);
+    protected ItemBaseContainer(BaseContainerType<?> type, EntityPlayer player, int playerSlot, Predicate<ItemStack> stackValidator){
+        this(type, player, () -> player.inventory.getStackInSlot(playerSlot), stackValidator);
     }
 
-    protected ItemBaseContainer(EntityPlayer player, EnumHand hand, Predicate<ItemStack> stackValidator){
-        this(player, () -> ClientUtils.getPlayer().getHeldItem(hand), stackValidator);
+    protected ItemBaseContainer(BaseContainerType<?> type, EntityPlayer player, EnumHand hand, Predicate<ItemStack> stackValidator){
+        this(type, player, () -> ClientUtils.getPlayer().getHeldItem(hand), stackValidator);
     }
 
     @Override
