@@ -2,11 +2,15 @@ package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.util.Pair;
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.ContainerWidget;
 import com.supermartijn642.core.gui.widget.Widget;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -38,7 +42,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     private final boolean isPauseScreen;
 
     public WidgetContainerScreen(T widget, X container, boolean drawSlots, boolean isPauseScreen){
-        super(container, container.player.inventory, widget.getNarrationMessage());
+        super(container, container.player.inventory, TextComponents.empty().get());
         this.widget = widget;
         this.container = container;
         this.drawSlots = drawSlots;
@@ -99,22 +103,18 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             }
         }
 
-        poseStack.popPose();
-
         MinecraftForge.EVENT_BUS.post(new GuiContainerEvent.DrawBackground(this, poseStack, mouseX, mouseY));
-
-        poseStack.pushPose();
-        poseStack.translate(offsetX, offsetY, 0);
 
         // Render the widget
         this.widget.render(poseStack, offsetMouseX, offsetMouseY);
 
+        this.hoveredSlot = null;
         for(Slot slot : this.container.slots){
             if(!slot.isActive())
                 continue;
 
-            this.renderSlot(poseStack, slot);
-            if(this.isHovering(slot.x, slot.y, 16, 16, offsetMouseX, offsetMouseY)){
+            this.renderSlotOffset(poseStack, slot, offsetX, offsetY);
+            if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
                 this.hoveredSlot = slot;
                 RenderSystem.disableDepthTest();
                 RenderSystem.colorMask(true, true, true, false);
@@ -128,12 +128,9 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         // Render the widget's foreground
         this.widget.renderForeground(poseStack, offsetMouseX, offsetMouseY);
 
-        poseStack.popPose();
+        this.renderTooltip(poseStack, offsetMouseX, offsetMouseY);
 
         MinecraftForge.EVENT_BUS.post(new GuiContainerEvent.DrawForeground(this, poseStack, mouseX, mouseY));
-
-        poseStack.pushPose();
-        poseStack.translate(offsetX, offsetY, 0);
 
         ItemStack cursorStack = this.draggingItem.isEmpty() ? this.inventory.getCarried() : this.draggingItem;
         if(!cursorStack.isEmpty()){
@@ -174,6 +171,69 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         poseStack.popPose();
     }
 
+    /**
+     * Just a copy of {@link ContainerScreen#renderSlot(MatrixStack, Slot)} since the item rendering doesn't use the provided matrix stack 😑
+     */
+    private void renderSlotOffset(MatrixStack poseStack, Slot slot, int offsetX, int offsetY){
+        int slotX = slot.x;
+        int slotY = slot.y;
+
+        ItemStack slotItem = slot.getItem();
+        boolean drawHighlight = false;
+        boolean drawItem = slot == this.clickedSlot && !this.draggingItem.isEmpty() && !this.isSplittingStack;
+        ItemStack carried = this.inventory.getCarried();
+        String countText = null;
+        if(slot == this.clickedSlot && !this.draggingItem.isEmpty() && this.isSplittingStack && !slotItem.isEmpty()){
+            slotItem = slotItem.copy();
+            slotItem.setCount(slotItem.getCount() / 2);
+        }else if(this.isQuickCrafting && this.quickCraftSlots.contains(slot) && !carried.isEmpty()){
+            if(this.quickCraftSlots.size() == 1)
+                return;
+
+            if(Container.canItemQuickReplace(slot, carried, true) && this.menu.canDragTo(slot)){
+                slotItem = carried.copy();
+                drawHighlight = true;
+                Container.getQuickCraftSlotCount(this.quickCraftSlots, this.quickCraftingType, slotItem, slot.getItem().isEmpty() ? 0 : slot.getItem().getCount());
+                int k = Math.min(slotItem.getMaxStackSize(), slot.getMaxStackSize(slotItem));
+                if(slotItem.getCount() > k){
+                    countText = TextFormatting.YELLOW.toString() + k;
+                    slotItem.setCount(k);
+                }
+            }else{
+                this.quickCraftSlots.remove(slot);
+                this.recalculateQuickCraftRemaining();
+            }
+        }
+
+        this.setBlitOffset(100);
+        this.itemRenderer.blitOffset = 100;
+        if(slotItem.isEmpty() && slot.isActive()){
+            Pair<ResourceLocation,ResourceLocation> pair = slot.getNoItemIcon();
+            if(pair != null){
+                TextureAtlasSprite sprite = this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
+                this.minecraft.getTextureManager().bind(sprite.atlas().location());
+                blit(poseStack, slotX, slotY, this.getBlitOffset(), 16, 16, sprite);
+                drawItem = true;
+            }
+        }
+
+        if(!drawItem){
+            if(drawHighlight)
+                fill(poseStack, slotX, slotY, slotX + 16, slotY + 16, -2130706433);
+
+            // For some reason this part just ignores the given matrix stack, so we have to translate the position manually
+            slotX += offsetX;
+            slotY += offsetY;
+
+            RenderSystem.enableDepthTest();
+            this.itemRenderer.renderAndDecorateItem(this.minecraft.player, slotItem, slotX, slotY);
+            this.itemRenderer.renderGuiItemDecorations(this.font, slotItem, slotX, slotY, countText);
+        }
+
+        this.itemRenderer.blitOffset = 0;
+        this.setBlitOffset(0);
+    }
+
     @Override
     protected void renderBg(MatrixStack poseStack, float partialTicks, int mouseX, int mouseY){
     }
@@ -181,25 +241,19 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button){
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
-        return this.widget.mousePressed((int)mouseX, (int)mouseY, button, false) || super.mouseClicked(mouseX, mouseY, button);
+        return this.widget.mousePressed((int)mouseX - offsetX, (int)mouseY - offsetY, button, false) || super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button){
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
-        return this.widget.mouseReleased((int)mouseX, (int)mouseY, button, false) || super.mouseReleased(mouseX, mouseY, button);
+        return this.widget.mouseReleased((int)mouseX - offsetX, (int)mouseY - offsetY, button, false) || super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount){
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
-        return this.widget.mouseScrolled((int)mouseX, (int)mouseY, amount, false) || super.mouseScrolled(mouseX, mouseY, amount);
+        return this.widget.mouseScrolled((int)mouseX - offsetX, (int)mouseY - offsetY, amount, false) || super.mouseScrolled(mouseX, mouseY, amount);
     }
 
     @Override
@@ -229,5 +283,10 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     @Override
     public boolean isPauseScreen(){
         return this.isPauseScreen;
+    }
+
+    @Override
+    public String getNarrationMessage(){
+        return TextComponents.fromTextComponent(this.widget.getNarrationMessage()).format();
     }
 }

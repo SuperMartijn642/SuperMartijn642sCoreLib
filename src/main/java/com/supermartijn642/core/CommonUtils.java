@@ -1,5 +1,6 @@
 package com.supermartijn642.core;
 
+import com.supermartijn642.core.gui.BaseContainer;
 import com.supermartijn642.core.gui.BaseContainerType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -59,15 +60,16 @@ public class CommonUtils {
     }
 
     /**
-     * Opens the given container for the given player. This method will do nothing if called client-side.
-     * @param player            player to show the container to
-     * @param baseContainerType type of the container, used to send the container's data to the client
-     * @param container         the container to be opened
+     * Opens the given container. This method will do nothing if called client-side.
+     * @param container the container to be opened
      */
-    public <T extends Container> void openContainer(PlayerEntity player, BaseContainerType<T> baseContainerType, T container){
-        if(!(player instanceof ServerPlayerEntity))
+    public static void openContainer(BaseContainer container){
+        PlayerEntity player = container.player;
+        if(!(container.player instanceof ServerPlayerEntity))
             return;
 
+        // Open the container
+        //noinspection unchecked,rawtypes
         NetworkHooks.openGui((ServerPlayerEntity)player, new INamedContainerProvider() {
             @Override
             public ITextComponent getDisplayName(){
@@ -77,8 +79,9 @@ public class CommonUtils {
             @Nullable
             @Override
             public Container createMenu(int windowId, PlayerInventory inventory, PlayerEntity player){
+                container.setContainerId(windowId);
                 return container;
             }
-        }, data -> baseContainerType.writeContainer(container, data));
+        }, data -> ((BaseContainerType)container.getContainerType()).writeContainer(container, data));
     }
 }

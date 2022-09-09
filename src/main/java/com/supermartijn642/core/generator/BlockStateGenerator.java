@@ -112,7 +112,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
     protected BlockStateBuilder blockState(Block block){
         ResourceLocation identifier = Registries.BLOCKS.getIdentifier(block);
         this.cache.trackToBeGeneratedResource(ResourceType.ASSET, identifier.getNamespace(), "blockstates", identifier.getPath(), ".json");
-        return this.blockStates.computeIfAbsent(block, BlockStateBuilder::new);
+        return this.blockStates.computeIfAbsent(block, o -> new BlockStateBuilder(this.modid, o));
     }
 
     @Override
@@ -122,10 +122,12 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
 
     protected class BlockStateBuilder {
 
+        private final String modid;
         private final Block block;
         private final Map<PartialBlockState,VariantBuilder> variants = new HashMap<>();
 
-        public BlockStateBuilder(Block block){
+        public BlockStateBuilder(String modid, Block block){
+            this.modid = modid;
             this.block = block;
         }
 
@@ -138,7 +140,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
             if(state.block != this.block)
                 throw new IllegalArgumentException("Cannot use state from block '" + state.block + "' in block state builder for block '" + this.block + "'!");
 
-            variantBuilderConsumer.accept(this.variants.computeIfAbsent(state, o -> new VariantBuilder()));
+            variantBuilderConsumer.accept(this.variants.computeIfAbsent(state, o -> new VariantBuilder(this.modid)));
             return this;
         }
 
@@ -172,7 +174,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
             for(Comparable<?> value : property.getPossibleValues()){
                 //noinspection rawtypes,unchecked
                 PartialBlockState state = builder.set((Property)property, (Comparable)value).build();
-                variantBuilderConsumer.accept(state, this.variants.computeIfAbsent(state, o -> new VariantBuilder()));
+                variantBuilderConsumer.accept(state, this.variants.computeIfAbsent(state, o -> new VariantBuilder(this.modid)));
             }
             return this;
         }
@@ -192,7 +194,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
         private void loopThroughAll(PartialBlockStateBuilder builder, List<Property<?>> properties, int index, BiConsumer<PartialBlockState,VariantBuilder> variantBuilderConsumer){
             if(index == properties.size()){
                 PartialBlockState state = builder.build();
-                variantBuilderConsumer.accept(state, this.variants.computeIfAbsent(state, o -> new VariantBuilder()));
+                variantBuilderConsumer.accept(state, this.variants.computeIfAbsent(state, o -> new VariantBuilder(this.modid)));
                 return;
             }
 
@@ -215,9 +217,11 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
 
     protected static class VariantBuilder {
 
+        private final String modid;
         private final List<VariantModel> models = new ArrayList<>();
 
-        protected VariantBuilder(){
+        protected VariantBuilder(String modid){
+            this.modid = modid;
         }
 
         /**
@@ -235,6 +239,31 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
 
         /**
          * Adds a model to the list of options for this variant.
+         * @param namespace  namespace of the model
+         * @param identifier path of the model
+         * @param xRotation  rotation around the x-axis for the model
+         * @param yRotation  rotation around the y-axis for the model
+         * @param uvLock     whether to apply uv lock to the model
+         * @param weight     weight of the model when considering which model to pick
+         */
+        public VariantBuilder model(String namespace, String identifier, int xRotation, int yRotation, boolean uvLock, int weight){
+            return this.model(new ResourceLocation(namespace, identifier), xRotation, yRotation, uvLock, weight);
+        }
+
+        /**
+         * Adds a model to the list of options for this variant.
+         * @param identifier path of the model
+         * @param xRotation  rotation around the x-axis for the model
+         * @param yRotation  rotation around the y-axis for the model
+         * @param uvLock     whether to apply uv lock to the model
+         * @param weight     weight of the model when considering which model to pick
+         */
+        public VariantBuilder model(String identifier, int xRotation, int yRotation, boolean uvLock, int weight){
+            return this.model(this.modid, identifier, xRotation, yRotation, uvLock, weight);
+        }
+
+        /**
+         * Adds a model to the list of options for this variant.
          * @param modelLocation location of the model
          * @param xRotation     rotation around the x-axis for the model
          * @param yRotation     rotation around the y-axis for the model
@@ -242,6 +271,29 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          */
         public VariantBuilder model(ResourceLocation modelLocation, int xRotation, int yRotation, boolean uvLock){
             return this.model(modelLocation, xRotation, yRotation, uvLock, 1);
+        }
+
+        /**
+         * Adds a model to the list of options for this variant.
+         * @param namespace  namespace of the model
+         * @param identifier path of the model
+         * @param xRotation  rotation around the x-axis for the model
+         * @param yRotation  rotation around the y-axis for the model
+         * @param uvLock     whether to apply uv lock to the model
+         */
+        public VariantBuilder model(String namespace, String identifier, int xRotation, int yRotation, boolean uvLock){
+            return this.model(new ResourceLocation(namespace, identifier), xRotation, yRotation, uvLock);
+        }
+
+        /**
+         * Adds a model to the list of options for this variant.
+         * @param identifier path of the model
+         * @param xRotation  rotation around the x-axis for the model
+         * @param yRotation  rotation around the y-axis for the model
+         * @param uvLock     whether to apply uv lock to the model
+         */
+        public VariantBuilder model(String identifier, int xRotation, int yRotation, boolean uvLock){
+            return this.model(this.modid, identifier, xRotation, yRotation, uvLock);
         }
 
         /**
@@ -256,10 +308,48 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
 
         /**
          * Adds a model to the list of options for this variant.
+         * @param namespace  namespace of the model
+         * @param identifier path of the model
+         * @param xRotation  rotation around the x-axis for the model
+         * @param yRotation  rotation around the y-axis for the model
+         */
+        public VariantBuilder model(String namespace, String identifier, int xRotation, int yRotation){
+            return this.model(new ResourceLocation(namespace, identifier), xRotation, yRotation);
+        }
+
+        /**
+         * Adds a model to the list of options for this variant.
+         * @param identifier path of the model
+         * @param xRotation  rotation around the x-axis for the model
+         * @param yRotation  rotation around the y-axis for the model
+         */
+        public VariantBuilder model(String identifier, int xRotation, int yRotation){
+            return this.model(this.modid, identifier, xRotation, yRotation);
+        }
+
+        /**
+         * Adds a model to the list of options for this variant.
          * @param modelLocation location of the model
          */
         public VariantBuilder model(ResourceLocation modelLocation){
             return this.model(modelLocation, 0, 0, false, 1);
+        }
+
+        /**
+         * Adds a model to the list of options for this variant.
+         * @param namespace  namespace of the model
+         * @param identifier path of the model
+         */
+        public VariantBuilder model(String namespace, String identifier){
+            return this.model(new ResourceLocation(namespace, identifier));
+        }
+
+        /**
+         * Adds a model to the list of options for this variant.
+         * @param identifier path of the model
+         */
+        public VariantBuilder model(String identifier){
+            return this.model(this.modid, identifier);
         }
     }
 
