@@ -1,7 +1,6 @@
 package com.supermartijn642.core.gui;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -14,13 +13,13 @@ public abstract class BlockEntityBaseContainer<T extends TileEntity> extends Obj
     protected final World blockEntityLevel;
     protected final BlockPos blockEntityPos;
 
-    public BlockEntityBaseContainer(ContainerType<?> type, PlayerEntity player, World blockEntityLevel, BlockPos blockEntityPos){
+    public BlockEntityBaseContainer(BaseContainerType<?> type, PlayerEntity player, World blockEntityLevel, BlockPos blockEntityPos){
         super(type, player);
         this.blockEntityLevel = blockEntityLevel;
         this.blockEntityPos = blockEntityPos;
     }
 
-    public BlockEntityBaseContainer(ContainerType<?> type, PlayerEntity player, BlockPos blockEntityPos){
+    public BlockEntityBaseContainer(BaseContainerType<?> type, PlayerEntity player, BlockPos blockEntityPos){
         this(type, player, player.level, blockEntityPos);
     }
 
