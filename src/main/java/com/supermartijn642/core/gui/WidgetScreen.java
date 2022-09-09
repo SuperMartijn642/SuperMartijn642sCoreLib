@@ -2,6 +2,7 @@ package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.Widget;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputMappings;
@@ -24,7 +25,7 @@ public class WidgetScreen<T extends Widget> extends Screen {
     private boolean isPauseScreen = false;
 
     public WidgetScreen(T widget, boolean isPauseScreen){
-        super(widget.getNarrationMessage());
+        super(TextComponents.empty().get());
         this.widget = widget;
         this.isPauseScreen = isPauseScreen;
     }
@@ -131,5 +132,10 @@ public class WidgetScreen<T extends Widget> extends Screen {
     @Override
     public boolean isPauseScreen(){
         return this.isPauseScreen;
+    }
+
+    @Override
+    public String getNarrationMessage(){
+        return TextComponents.fromTextComponent(this.widget.getNarrationMessage()).format();
     }
 }

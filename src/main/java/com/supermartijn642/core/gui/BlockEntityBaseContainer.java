@@ -14,14 +14,14 @@ public abstract class BlockEntityBaseContainer<T extends TileEntity> extends Obj
     protected final World blockEntityLevel;
     protected final BlockPos blockEntityPos;
 
-    public BlockEntityBaseContainer(ContainerType<?> type, int id, PlayerEntity player, World blockEntityLevel, BlockPos blockEntityPos){
-        super(type, id, player);
+    public BlockEntityBaseContainer(ContainerType<?> type, PlayerEntity player, World blockEntityLevel, BlockPos blockEntityPos){
+        super(type, player);
         this.blockEntityLevel = blockEntityLevel;
         this.blockEntityPos = blockEntityPos;
     }
 
-    public BlockEntityBaseContainer(ContainerType<?> type, int id, PlayerEntity player, BlockPos blockEntityPos){
-        this(type, id, player, player.level, blockEntityPos);
+    public BlockEntityBaseContainer(ContainerType<?> type, PlayerEntity player, BlockPos blockEntityPos){
+        this(type, player, player.level, blockEntityPos);
     }
 
     @SuppressWarnings("unchecked")

@@ -96,7 +96,9 @@ public abstract class ObjectBaseContainerWidget<T, C extends Container> extends 
     /**
      * @return the x-position of this widget
      */
-    protected abstract int left(T object);
+    protected int left(T object){
+        return super.left();
+    }
 
     @Override
     public final int top(){
