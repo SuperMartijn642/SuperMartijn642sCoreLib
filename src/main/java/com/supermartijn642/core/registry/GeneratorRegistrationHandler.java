@@ -3,6 +3,7 @@ package com.supermartijn642.core.registry;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.generator.ResourceCache;
 import com.supermartijn642.core.generator.ResourceGenerator;
+import com.supermartijn642.core.util.Either;
 import com.supermartijn642.core.util.Holder;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DirectoryCache;
@@ -12,10 +13,10 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -49,8 +50,7 @@ public class GeneratorRegistrationHandler {
     }
 
     private final String modid;
-    private final Set<Function<ResourceCache,ResourceGenerator>> generators = new LinkedHashSet<>();
-    private final Set<BiFunction<DataGenerator,ExistingFileHelper,IDataProvider>> providers = new LinkedHashSet<>();
+    private final List<Either<Function<ResourceCache,ResourceGenerator>,BiFunction<DataGenerator,ExistingFileHelper,IDataProvider>>> generatorsAndProviders = new ArrayList<>();
 
     private boolean hasEventBeenFired;
 
@@ -68,7 +68,7 @@ public class GeneratorRegistrationHandler {
         if(this.hasEventBeenFired)
             throw new RuntimeException("Generators supplier must be added before the GatherDataEvent gets fired!");
 
-        this.generators.add(generator);
+        this.generatorsAndProviders.add(Either.left(generator));
     }
 
     /**
@@ -100,7 +100,7 @@ public class GeneratorRegistrationHandler {
         if(this.hasEventBeenFired)
             throw new RuntimeException("Providers supplier must be added before the GatherDataEvent gets fired!");
 
-        this.providers.add(provider);
+        this.generatorsAndProviders.add(Either.right(provider));
     }
 
     /**
@@ -109,10 +109,8 @@ public class GeneratorRegistrationHandler {
     public void addProvider(Function<DataGenerator,IDataProvider> provider){
         if(provider == null)
             throw new IllegalArgumentException("Provider must not be null!");
-        if(this.hasEventBeenFired)
-            throw new RuntimeException("Providers supplier must be added before the GatherDataEvent gets fired!");
 
-        this.providers.add((dataGenerator, existingFileHelper) -> provider.apply(dataGenerator));
+        this.addProvider((generator, existingFileHelper) -> provider.apply(generator));
     }
 
     /**
@@ -121,10 +119,8 @@ public class GeneratorRegistrationHandler {
     public void addProvider(Supplier<IDataProvider> provider){
         if(provider == null)
             throw new IllegalArgumentException("Provider must not be null!");
-        if(this.hasEventBeenFired)
-            throw new RuntimeException("Providers supplier must be added before the GatherDataEvent gets fired!");
 
-        this.providers.add((dataGenerator, existingFileHelper) -> provider.get());
+        this.addProvider((dataGenerator, existingFileHelper) -> provider.get());
     }
 
     /**
@@ -133,10 +129,8 @@ public class GeneratorRegistrationHandler {
     public void addProvider(IDataProvider provider){
         if(provider == null)
             throw new IllegalArgumentException("Provider must not be null!");
-        if(this.hasEventBeenFired)
-            throw new RuntimeException("Providers supplier must be added before the GatherDataEvent gets fired!");
 
-        this.providers.add((dataGenerator, existingFileHelper) -> provider);
+        this.addProvider((dataGenerator, existingFileHelper) -> provider);
     }
 
     private void handleGatherDataEvent(GatherDataEvent e){
@@ -156,15 +150,12 @@ public class GeneratorRegistrationHandler {
             }
         });
 
-        // Resolve and add all the generators
-        this.generators
+        // Resolve and add all the generators and providers
+        this.generatorsAndProviders
             .stream()
-            .map(generator -> ResourceGenerator.createDataProvider(generator, cacheHolder::get))
-            .forEach(provider -> e.getGenerator().addProvider(provider));
-        // Resolve and add all regular data providers
-        this.providers
-            .stream()
-            .map(provider -> provider.apply(e.getGenerator(), e.getExistingFileHelper()))
+            .map(either -> either.mapLeft(generator -> ResourceGenerator.createDataProvider(generator, cacheHolder::get)))
+            .map(either -> either.mapRight(provider -> provider.apply(e.getGenerator(), e.getExistingFileHelper())))
+            .map(either -> either.leftOrElseGet(either::right))
             .forEach(provider -> e.getGenerator().addProvider(provider));
     }
 }
