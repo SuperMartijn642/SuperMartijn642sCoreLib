@@ -3,6 +3,7 @@ package com.supermartijn642.core.registry;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.generator.ResourceCache;
 import com.supermartijn642.core.generator.ResourceGenerator;
+import com.supermartijn642.core.util.Either;
 import com.supermartijn642.core.util.Holder;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.loader.api.FabricLoader;
@@ -55,8 +56,7 @@ public class GeneratorRegistrationHandler {
     }
 
     private final String modid;
-    private final Set<Function<ResourceCache,ResourceGenerator>> generators = new LinkedHashSet<>();
-    private final Set<Function<FabricDataGenerator,DataProvider>> providers = new LinkedHashSet<>();
+    private final List<Either<Function<ResourceCache,ResourceGenerator>,Function<FabricDataGenerator,DataProvider>>> generatorsAndProviders = new ArrayList<>();
 
     private GeneratorRegistrationHandler(String modid){
         this.modid = modid;
@@ -71,7 +71,7 @@ public class GeneratorRegistrationHandler {
         if(haveProvidersBeenRegistered)
             throw new RuntimeException("Generators supplier must be added before the GatherDataEvent gets fired!");
 
-        this.generators.add(generator);
+        this.generatorsAndProviders.add(Either.left(generator));
     }
 
     /**
@@ -103,7 +103,7 @@ public class GeneratorRegistrationHandler {
         if(haveProvidersBeenRegistered)
             throw new RuntimeException("Providers supplier must be added before the GatherDataEvent gets fired!");
 
-        this.providers.add(provider);
+        this.generatorsAndProviders.add(Either.right(provider));
     }
 
     /**
@@ -112,10 +112,8 @@ public class GeneratorRegistrationHandler {
     public void addProvider(Supplier<DataProvider> provider){
         if(provider == null)
             throw new IllegalArgumentException("Provider must not be null!");
-        if(haveProvidersBeenRegistered)
-            throw new RuntimeException("Providers supplier must be added before the GatherDataEvent gets fired!");
 
-        this.providers.add(dataGenerator -> provider.get());
+        this.addProvider(dataGenerator -> provider.get());
     }
 
     /**
@@ -124,10 +122,8 @@ public class GeneratorRegistrationHandler {
     public void addProvider(DataProvider provider){
         if(provider == null)
             throw new IllegalArgumentException("Provider must not be null!");
-        if(haveProvidersBeenRegistered)
-            throw new RuntimeException("Providers supplier must be added before the GatherDataEvent gets fired!");
 
-        this.providers.add(dataGenerator -> provider);
+        this.addProvider(dataGenerator -> provider);
     }
 
     @ApiStatus.Internal
@@ -153,15 +149,12 @@ public class GeneratorRegistrationHandler {
             }
         });
 
-        // Resolve and add all the generators
-        this.generators
+        // Resolve and add all the generators and providers
+        this.generatorsAndProviders
             .stream()
-            .map(generator -> ResourceGenerator.createDataProvider(generator, cacheHolder::get))
-            .forEach(dataGenerator::addProvider);
-        // Resolve and add all regular data providers
-        this.providers
-            .stream()
-            .map(provider -> provider.apply(dataGenerator))
+            .map(either -> either.mapLeft(generator -> ResourceGenerator.createDataProvider(generator, cacheHolder::get)))
+            .map(either -> either.mapRight(provider -> provider.apply(dataGenerator)))
+            .map(either -> either.leftOrElseGet(either::right))
             .forEach(dataGenerator::addProvider);
     }
 }
