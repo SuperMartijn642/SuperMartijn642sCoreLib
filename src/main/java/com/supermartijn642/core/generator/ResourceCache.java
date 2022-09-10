@@ -104,6 +104,7 @@ public abstract class ResourceCache {
             ResourceLocation location = new ResourceLocation(namespace, fileName);
             return this.toBeGenerated.contains(path)
                 || this.writtenFiles.containsKey(path)
+                || this.cache.newCache.containsKey(this.outputDirectory.resolve(path))
                 || this.existingFileHelper.exists(location, resourceType == ResourceType.DATA ? ResourcePackType.SERVER_DATA : ResourcePackType.CLIENT_RESOURCES, extension, directory);
         }
 
