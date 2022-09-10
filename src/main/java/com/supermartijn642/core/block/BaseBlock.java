@@ -80,7 +80,7 @@ public class BaseBlock extends Block {
     @Override
     public ResourceLocation getLootTable(){
         if(this.drops == null){
-            if(this.properties.lootTableBlock == null)
+            if(this.properties == null || this.properties.lootTableBlock == null)
                 return super.getLootTable();
 
             Block block = this.properties.lootTableBlock.get();
@@ -232,7 +232,7 @@ public class BaseBlock extends Block {
     }
 
     public final boolean requiresCorrectToolForDrops(){
-        return this.properties.requiresCorrectTool;
+        return this.properties != null && this.properties.requiresCorrectTool;
     }
 
     protected enum InteractionFeedback {
