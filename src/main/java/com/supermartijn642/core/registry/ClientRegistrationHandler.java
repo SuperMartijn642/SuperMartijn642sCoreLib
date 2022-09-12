@@ -36,7 +36,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
@@ -90,7 +92,7 @@ public class ClientRegistrationHandler {
 
     private final Set<ResourceLocation> models = new HashSet<>();
     private final Map<ResourceLocation,Supplier<IBakedModel>> specialModels = new HashMap<>();
-    private final Map<ResourceLocation,Function<IBakedModel,IBakedModel>> modelOverwrites = new HashMap<>();
+    private final List<Pair<Predicate<ResourceLocation>,Function<IBakedModel,IBakedModel>>> modelOverwrites = new ArrayList<>();
 
     private final Map<Class<?>,Supplier<Render<?>>> entityRenderers = new HashMap<>();
     private final List<Pair<Supplier<BaseBlockEntityType<?>>,Function<TileEntityRendererDispatcher,TileEntitySpecialRenderer<?>>>> blockEntityRenderers = new ArrayList<>();
@@ -168,8 +170,6 @@ public class ClientRegistrationHandler {
         ResourceLocation fullIdentifier = new ResourceLocation(this.modid, identifier);
         if(this.specialModels.containsKey(fullIdentifier))
             throw new RuntimeException("Duplicate special model entry '" + fullIdentifier + "'!");
-        if(this.modelOverwrites.containsKey(fullIdentifier))
-            throw new RuntimeException("Overlapping special model and model overwrite '" + fullIdentifier + "'!");
 
         this.specialModels.put(fullIdentifier, model);
     }
@@ -187,12 +187,12 @@ public class ClientRegistrationHandler {
     public void registerModelOverwrite(ResourceLocation identifier, Function<IBakedModel,IBakedModel> modelOverwrite){
         if(this.passedModelBake)
             throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
-        if(this.modelOverwrites.containsKey(identifier))
-            throw new RuntimeException("Duplicate model overwrite '" + identifier + "'!");
         if(this.specialModels.containsKey(identifier))
             throw new RuntimeException("Overlapping special model and model overwrite '" + identifier + "'!");
 
-        this.modelOverwrites.put(identifier, modelOverwrite);
+        if(!(identifier instanceof ModelResourceLocation))
+            identifier = new ResourceLocation(identifier.toString());
+        this.modelOverwrites.add(Pair.of(identifier::equals, modelOverwrite));
     }
 
     /**
@@ -249,6 +249,62 @@ public class ClientRegistrationHandler {
      */
     public void registerModelOverwrite(String namespace, String identifier, IBakedModel modelOverwrite){
         this.registerModelOverwrite(namespace, identifier, model -> modelOverwrite);
+    }
+
+    /**
+     * Registers an overwrite for all models for the given block, including the block's item model.
+     */
+    public void registerBlockModelOverwrite(Supplier<Block> block, Function<IBakedModel,IBakedModel> modelOverwrite){
+        if(this.passedModelBake)
+            throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
+
+        this.modelOverwrites.add(Pair.of(identifier -> {
+            ResourceLocation blockIdentifier = Registries.BLOCKS.getIdentifier(block.get());
+            return identifier.getResourceDomain().equals(blockIdentifier.getResourceDomain());
+        }, modelOverwrite));
+    }
+
+    /**
+     * Registers an overwrite for all models for the given block, including the block's item model.
+     */
+    public void registerBlockModelOverwrite(Supplier<Block> block, Supplier<IBakedModel> modelOverwrite){
+        this.registerBlockModelOverwrite(block, model -> modelOverwrite.get());
+    }
+
+    /**
+     * Registers an overwrite for all models for the given block, including the block's item model.
+     */
+    public void registerBlockModelOverwrite(Supplier<Block> block, IBakedModel modelOverwrite){
+        this.registerBlockModelOverwrite(block, model -> modelOverwrite);
+    }
+
+    /**
+     * Registers an overwrite for the given item's model.
+     */
+    public void registerItemModelOverwrite(Supplier<Item> item, Function<IBakedModel,IBakedModel> modelOverwrite){
+        if(this.passedModelBake)
+            throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
+
+        this.modelOverwrites.add(Pair.of(identifier -> {
+            ResourceLocation itemIdentifier = Registries.ITEMS.getIdentifier(item.get());
+            return identifier.getResourceDomain().equals(itemIdentifier.getResourceDomain())
+                && identifier.getResourcePath().equals(itemIdentifier.getResourcePath())
+                && ((ModelResourceLocation)identifier).getVariant().equals("inventory");
+        }, modelOverwrite));
+    }
+
+    /**
+     * Registers an overwrite for the given item's model.
+     */
+    public void registerItemModelOverwrite(Supplier<Item> item, Supplier<IBakedModel> modelOverwrite){
+        this.registerItemModelOverwrite(item, model -> modelOverwrite.get());
+    }
+
+    /**
+     * Registers an overwrite for the given item's model.
+     */
+    public void registerItemModelOverwrite(Supplier<Item> item, IBakedModel modelOverwrite){
+        this.registerItemModelOverwrite(item, model -> modelOverwrite);
     }
 
     /**
@@ -546,18 +602,23 @@ public class ClientRegistrationHandler {
         }
 
         // Model overwrites
-        for(Map.Entry<ResourceLocation,Function<IBakedModel,IBakedModel>> entry : this.modelOverwrites.entrySet()){
-            ResourceLocation identifier = entry.getKey();
-            ModelResourceLocation modelIdentifier = identifier instanceof ModelResourceLocation ? (ModelResourceLocation)identifier : new ModelResourceLocation(identifier.toString());
-            if(e.getModelRegistry().getObject(modelIdentifier) == null)
-                throw new RuntimeException("No model registered for model overwrite '" + identifier + "'!");
+        for(Pair<Predicate<ResourceLocation>,Function<IBakedModel,IBakedModel>> pair : this.modelOverwrites){
+            // Find all the identifiers which should be replaced
+            List<ModelResourceLocation> modelIdentifiers = e.getModelRegistry().getKeys().stream()
+                .filter(identifier -> pair.left().test(identifier))
+                .collect(Collectors.toList());
 
-            IBakedModel model = e.getModelRegistry().getObject(modelIdentifier);
-            model = entry.getValue().apply(model);
-            if(model == null)
-                throw new RuntimeException("Model overwrite '" + identifier + "' returned a null model!");
+            for(ModelResourceLocation identifier : modelIdentifiers){
+                if(e.getModelRegistry().getObject(identifier) == null)
+                    throw new RuntimeException("No model registered for model overwrite '" + identifier + "'!");
 
-            e.getModelRegistry().putObject(modelIdentifier, model);
+                IBakedModel model = e.getModelRegistry().getObject(identifier);
+                model = pair.right().apply(model);
+                if(model == null)
+                    throw new RuntimeException("Model overwrite for '" + identifier + "' returned a null model!");
+
+                e.getModelRegistry().putObject(identifier, model);
+            }
         }
     }
 

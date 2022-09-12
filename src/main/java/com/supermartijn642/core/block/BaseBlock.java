@@ -216,6 +216,13 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
     protected void appendItemInformation(ItemStack stack, @Nullable IBlockAccess level, Consumer<ITextComponent> info, boolean advanced){
     }
 
+    /**
+     * Gets the item corresponding to this block.
+     */
+    public Item asItem(){
+        return Item.getItemFromBlock(this);
+    }
+
     @Override
     public boolean isToolEffective(String tool, IBlockState state){
         return ("axe".equals(tool) && this.is(MINEABLE_WITH_AXE))

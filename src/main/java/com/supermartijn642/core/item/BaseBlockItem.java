@@ -11,7 +11,10 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -55,6 +58,22 @@ public class BaseBlockItem extends ItemBlock {
     }
 
     /**
+     * Called when a player right-clicks on a block with this item, before the block is interacted with.
+     * @return whether the player's interaction should be consumed or passed on
+     */
+    public InteractionFeedback interactWithBlockFirst(ItemStack stack, EntityPlayer player, EnumHand hand, World level, BlockPos hitPos, EnumFacing hitSide, Vec3d hitLocation){
+        return InteractionFeedback.PASS;
+    }
+
+    /**
+     * Called when a player right-clicks on a block with this item, after the block is interacted with.
+     * @return whether the player's interaction should be consumed or passed on
+     */
+    public InteractionFeedback interactWithBlock(ItemStack stack, EntityPlayer player, EnumHand hand, World level, BlockPos hitPos, EnumFacing hitSide, Vec3d hitLocation){
+        return InteractionFeedback.fromUnderlying(super.onItemUse(player, level, hitPos, hand, hitSide, (float)hitLocation.x, (float)hitLocation.y, (float)hitLocation.z));
+    }
+
+    /**
      * Called when a player right-clicks on an entity.
      * @return whether the player's interaction should be consumed or passed on
      */
@@ -82,6 +101,16 @@ public class BaseBlockItem extends ItemBlock {
     @Override
     public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer player, EntityLivingBase target, EnumHand hand){
         return this.interactWithEntity(stack, target, player, hand).consumesAction();
+    }
+
+    @Override
+    public EnumActionResult onItemUse(EntityPlayer player, World level, BlockPos pos, EnumHand hand, EnumFacing hitSide, float hitX, float hitY, float hitZ){
+        return this.interactWithBlock(player.getHeldItem(hand), player, hand, level, pos, hitSide, new Vec3d(hitX, hitY, hitZ)).interactionResult;
+    }
+
+    @Override
+    public EnumActionResult onItemUseFirst(EntityPlayer player, World level, BlockPos pos, EnumFacing hitSide, float hitX, float hitY, float hitZ, EnumHand hand){
+        return this.interactWithBlockFirst(player.getHeldItem(hand), player, hand, level, pos, hitSide, new Vec3d(hitX, hitY, hitZ)).interactionResult;
     }
 
     @Override
@@ -147,6 +176,19 @@ public class BaseBlockItem extends ItemBlock {
 
         private boolean consumesAction(){
             return this == SUCCESS || this == CONSUME;
+        }
+
+        @Deprecated
+        public static InteractionFeedback fromUnderlying(EnumActionResult interactionResult){
+            switch(interactionResult){
+                case SUCCESS:
+                    return SUCCESS;
+                case FAIL:
+                    return CONSUME;
+                case PASS:
+                    return PASS;
+            }
+            return null;
         }
     }
 }

@@ -113,7 +113,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
                 JsonObject elementJson = new JsonObject();
                 // From & to
                 elementJson.add("from", createJsonArray(element.from.x, element.from.y, element.from.z));
-                elementJson.add("to", createJsonArray(element.from.x, element.from.y, element.from.z));
+                elementJson.add("to", createJsonArray(element.to.x, element.to.y, element.to.z));
                 // Rotation
                 if(element.rotation != null){
                     JsonObject rotationJson = new JsonObject();
