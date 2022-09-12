@@ -17,11 +17,13 @@ public final class OpenContainerPacket<T extends BaseContainer> implements BaseP
 
     private BaseContainerType<T> handler;
     private T container;
+    private int windowId;
 
-    public OpenContainerPacket(T container){
+    public OpenContainerPacket(T container, int windowId){
         //noinspection unchecked
         this.handler = (BaseContainerType<T>)container.getContainerType();
         this.container = container;
+        this.windowId = windowId;
     }
 
     public OpenContainerPacket(){
@@ -30,6 +32,7 @@ public final class OpenContainerPacket<T extends BaseContainer> implements BaseP
     @Override
     public void write(PacketBuffer buffer){
         buffer.writeString(Registries.MENU_TYPES.getIdentifier(this.handler).toString());
+        buffer.writeInt(this.windowId);
         this.handler.writeContainer(this.container, buffer);
     }
 
@@ -42,16 +45,19 @@ public final class OpenContainerPacket<T extends BaseContainer> implements BaseP
         this.handler = (BaseContainerType<T>)Registries.MENU_TYPES.getValue(new ResourceLocation(identifier));
         if(this.handler == null)
             throw new RuntimeException("Received unknown menu type identifier '" + identifier + "'!");
+        this.windowId = buffer.readInt();
         this.container = this.handler.readContainer(ClientUtils.getPlayer(), buffer);
     }
 
     @Override
     public boolean verify(PacketContext context){
-        return this.container != null;
+        return this.container != null && this.windowId >= 0;
     }
 
     @Override
     public void handle(PacketContext context){
+        this.container.windowId = this.windowId;
+        ClientUtils.getPlayer().openContainer = this.container;
         GuiScreen screen = ContainerScreenManager.createScreen(this.handler, this.container);
         if(screen != null)
             ClientUtils.displayScreen(screen);

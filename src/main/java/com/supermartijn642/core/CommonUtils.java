@@ -108,7 +108,7 @@ public class CommonUtils {
 
         ((EntityPlayerMP)player).getNextWindowId();
         ((EntityPlayerMP)player).closeContainer();
-        CoreLib.CHANNEL.sendToPlayer(player, new OpenContainerPacket<>(container));
+        CoreLib.CHANNEL.sendToPlayer(player, new OpenContainerPacket<>(container, ((EntityPlayerMP)player).currentWindowId));
         player.openContainer = container;
         container.windowId = ((EntityPlayerMP)player).currentWindowId;
         container.addListener((EntityPlayerMP)player);
