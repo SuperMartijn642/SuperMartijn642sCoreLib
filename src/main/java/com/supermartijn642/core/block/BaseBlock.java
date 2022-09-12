@@ -8,6 +8,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.BlockTags;
@@ -172,6 +173,14 @@ public class BaseBlock extends Block {
      * @param advanced whether advanced tooltips is enabled
      */
     protected void appendItemInformation(ItemStack stack, @Nullable IBlockReader level, Consumer<ITextComponent> info, boolean advanced){
+    }
+
+    /**
+     * Gets the item corresponding to this block.
+     */
+    @Override
+    public Item asItem(){
+        return super.asItem();
     }
 
     @Override

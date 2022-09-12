@@ -6,6 +6,7 @@ import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.Widget;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.util.text.ITextComponent;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
@@ -136,6 +137,7 @@ public class WidgetScreen<T extends Widget> extends Screen {
 
     @Override
     public String getNarrationMessage(){
-        return TextComponents.fromTextComponent(this.widget.getNarrationMessage()).format();
+        ITextComponent message = this.widget.getNarrationMessage();
+        return message == null ? "" : TextComponents.fromTextComponent(message).format();
     }
 }
