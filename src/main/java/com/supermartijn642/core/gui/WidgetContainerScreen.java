@@ -221,6 +221,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
     @Override
     public Component getNarrationMessage(){
-        return this.widget.getNarrationMessage();
+        Component message = this.widget.getNarrationMessage();
+        return message == null ? TextComponents.empty().get() : message;
     }
 }
