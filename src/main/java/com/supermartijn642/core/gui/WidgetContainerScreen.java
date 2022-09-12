@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.GuiContainerEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -235,6 +236,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
     @Override
     public String getNarrationMessage(){
-        return TextComponents.fromTextComponent(this.widget.getNarrationMessage()).format();
+        ITextComponent message = this.widget.getNarrationMessage();
+        return message == null ? "" : TextComponents.fromTextComponent(message).format();
     }
 }
