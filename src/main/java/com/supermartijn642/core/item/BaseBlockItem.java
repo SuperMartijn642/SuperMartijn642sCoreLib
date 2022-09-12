@@ -7,9 +7,13 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
@@ -50,6 +54,22 @@ public class BaseBlockItem extends BlockItem {
     }
 
     /**
+     * Called when a player right-clicks on a block with this item, before the block is interacted with.
+     * @return whether the player's interaction should be consumed or passed on
+     */
+    public InteractionFeedback interactWithBlockFirst(ItemStack stack, PlayerEntity player, Hand hand, World level, BlockPos hitPos, Direction hitSide, Vector3d hitLocation){
+        return InteractionFeedback.PASS;
+    }
+
+    /**
+     * Called when a player right-clicks on a block with this item, after the block is interacted with.
+     * @return whether the player's interaction should be consumed or passed on
+     */
+    public InteractionFeedback interactWithBlock(ItemStack stack, PlayerEntity player, Hand hand, World level, BlockPos hitPos, Direction hitSide, Vector3d hitLocation){
+        return InteractionFeedback.PASS;
+    }
+
+    /**
      * Called when a player right-clicks on an entity.
      * @return whether the player's interaction should be consumed or passed on
      */
@@ -77,6 +97,16 @@ public class BaseBlockItem extends BlockItem {
     @Override
     public ActionResultType interactLivingEntity(ItemStack stack, PlayerEntity player, LivingEntity target, Hand hand){
         return this.interactWithEntity(stack, target, player, hand).interactionResult;
+    }
+
+    @Override
+    public ActionResultType useOn(ItemUseContext context){
+        return this.interactWithBlock(context.getItemInHand(), context.getPlayer(), context.getHand(), context.getLevel(), context.getClickedPos(), context.getClickedFace(), context.getClickLocation()).interactionResult;
+    }
+
+    @Override
+    public ActionResultType onItemUseFirst(ItemStack stack, ItemUseContext context){
+        return this.interactWithBlockFirst(stack, context.getPlayer(), context.getHand(), context.getLevel(), context.getClickedPos(), context.getClickedFace(), context.getClickLocation()).interactionResult;
     }
 
     @Override
