@@ -31,124 +31,130 @@ public abstract class ModelGenerator extends ResourceGenerator {
     public void save(){
         // Loop over all models
         for(ModelBuilder modelBuilder : this.models.values()){
-            JsonObject json = new JsonObject();
-
-            // Parent model
-            ResourceLocation parentModel = modelBuilder.parent;
-            if(parentModel != null){
-                if(!this.models.containsKey(parentModel) && !this.cache.doesResourceExist(ResourceType.ASSET, parentModel.getResourceDomain(), "models", parentModel.getResourcePath(), ".json"))
-                    throw new RuntimeException("Could find parent model '" + parentModel + "' for model '" + modelBuilder.identifier + "'!");
-                json.addProperty("parent", parentModel.toString());
-            }
-            // Render type
-            if(modelBuilder.renderType != null)
-                json.addProperty("render_type", modelBuilder.renderType.toString());
-            // Ambient occlusion
-            if(!modelBuilder.ambientOcclusion)
-                json.addProperty("ambientocclusion", false);
-            // Transforms
-            if(!modelBuilder.transforms.isEmpty()){
-                JsonObject displayJson = new JsonObject();
-                // Add each transform
-                for(Map.Entry<ItemCameraTransforms.TransformType,TransformBuilder> transform : modelBuilder.transforms.entrySet()){
-                    JsonObject transformJson = new JsonObject();
-                    transformJson.add("rotation", createJsonArray(transform.getValue().rotation.x, transform.getValue().rotation.y, transform.getValue().rotation.z));
-                    transformJson.add("translation", createJsonArray(transform.getValue().translation.x, transform.getValue().translation.y, transform.getValue().translation.z));
-                    transformJson.add("scale", createJsonArray(transform.getValue().scale.x, transform.getValue().scale.y, transform.getValue().scale.z));
-                    String transformName = "unknown";
-                    if(transform.getKey() == ItemCameraTransforms.TransformType.NONE)
-                        transformName = "none";
-                    else if(transform.getKey() == ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND)
-                        transformName = "thirdperson_lefthand";
-                    else if(transform.getKey() == ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND)
-                        transformName = "thirdperson_righthand";
-                    else if(transform.getKey() == ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND)
-                        transformName = "firstperson_lefthand";
-                    else if(transform.getKey() == ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND)
-                        transformName = "firstperson_righthand";
-                    else if(transform.getKey() == ItemCameraTransforms.TransformType.HEAD)
-                        transformName = "head";
-                    else if(transform.getKey() == ItemCameraTransforms.TransformType.GUI)
-                        transformName = "gui";
-                    else if(transform.getKey() == ItemCameraTransforms.TransformType.GROUND)
-                        transformName = "ground";
-                    else if(transform.getKey() == ItemCameraTransforms.TransformType.FIXED)
-                        transformName = "fixed";
-                    displayJson.add(transformName, transformJson);
-                }
-                json.add("display", displayJson);
-            }
-            // Textures
-            if(!modelBuilder.textures.isEmpty()){
-                JsonObject texturesJson = new JsonObject();
-                for(Map.Entry<String,String> entry : modelBuilder.textures.entrySet()){
-                    // Validate the texture exists
-                    if(entry.getValue().charAt(0) != '#'){
-                        ResourceLocation texture = new ResourceLocation(entry.getValue());
-                        if(!this.cache.doesResourceExist(ResourceType.ASSET, texture.getResourceDomain(), "textures", texture.getResourcePath(), ".png"))
-                            throw new IllegalArgumentException("Could not find texture '" + texture + "' for model '" + modelBuilder.identifier + "'!");
-                    }
-
-                    texturesJson.addProperty(entry.getKey(), entry.getValue());
-                }
-                json.add("textures", texturesJson);
-            }
-            // Gui lighting
-            if(modelBuilder.lighting != null)
-                json.addProperty("gui_light", modelBuilder.lighting ? "side" : "front");
-            // Elements
-            if(!modelBuilder.elements.isEmpty()){
-                JsonArray elementsJson = new JsonArray();
-                // Loop over the individual elements
-                for(ElementBuilder element : modelBuilder.elements){
-                    JsonObject elementJson = new JsonObject();
-                    // From & to
-                    elementJson.add("from", createJsonArray(element.from.x, element.from.y, element.from.z));
-                    elementJson.add("to", createJsonArray(element.from.x, element.from.y, element.from.z));
-                    // Rotation
-                    if(element.rotation != null){
-                        JsonObject rotationJson = new JsonObject();
-                        rotationJson.add("origin", createJsonArray(element.rotation.origin.x, element.rotation.origin.y, element.rotation.origin.z));
-                        rotationJson.addProperty("axis", element.rotation.axis.getName2().toLowerCase(Locale.ROOT));
-                        rotationJson.addProperty("angle", element.rotation.angle);
-                        rotationJson.addProperty("rescale", element.rotation.rescale);
-                        elementJson.add("rotation", rotationJson);
-                    }
-                    // Shade
-                    if(!element.shading)
-                        elementJson.addProperty("shade", false);
-                    // Faces
-                    if(!element.faces.isEmpty()){
-                        JsonObject facesJson = new JsonObject();
-                        for(Map.Entry<EnumFacing,FaceBuilder> entry : element.faces.entrySet()){
-                            JsonObject faceJson = new JsonObject();
-                            if(entry.getValue().texture == null)
-                                throw new RuntimeException("Model '" + modelBuilder.identifier + "' has face without a texture!");
-                            faceJson.addProperty("texture", entry.getValue().texture);
-                            if(entry.getValue().uv != null)
-                                faceJson.add("uv", createJsonArray(entry.getValue().uv));
-                            if(entry.getValue().cullface != null)
-                                faceJson.addProperty("cullface", entry.getValue().cullface.getName2().toLowerCase(Locale.ROOT));
-                            if(entry.getValue().emissivity != 0)
-                                faceJson.addProperty("emissivity", entry.getValue().emissivity);
-                            if(entry.getValue().rotation != 0)
-                                faceJson.addProperty("rotation", entry.getValue().rotation);
-                            if(entry.getValue().tintIndex != -1)
-                                faceJson.addProperty("tintindex", entry.getValue().tintIndex);
-                            facesJson.add(entry.getKey().getName2().toLowerCase(Locale.ROOT), faceJson);
-                        }
-                        elementJson.add("faces", facesJson);
-                    }else
-                        throw new RuntimeException("Element in model '" + modelBuilder.identifier + "' has no faces!");
-                    elementsJson.add(elementJson);
-                }
-                json.add("elements", elementsJson);
-            }
+            JsonObject json = this.convertToJson(modelBuilder);
 
             // Save the object to the cache
             ResourceLocation identifier = modelBuilder.identifier;
             this.cache.saveJsonResource(ResourceType.ASSET, json, identifier.getResourceDomain(), "models", identifier.getResourcePath());
         }
+    }
+
+    protected JsonObject convertToJson(ModelBuilder modelBuilder){
+        JsonObject json = new JsonObject();
+
+        // Parent model
+        ResourceLocation parentModel = modelBuilder.parent;
+        if(parentModel != null){
+            if(!this.models.containsKey(parentModel) && !this.cache.doesResourceExist(ResourceType.ASSET, parentModel.getResourceDomain(), "models", parentModel.getResourcePath(), ".json"))
+                throw new RuntimeException("Could find parent model '" + parentModel + "' for model '" + modelBuilder.identifier + "'!");
+            json.addProperty("parent", parentModel.toString());
+        }
+        // Render type
+        if(modelBuilder.renderType != null)
+            json.addProperty("render_type", modelBuilder.renderType.toString());
+        // Ambient occlusion
+        if(!modelBuilder.ambientOcclusion)
+            json.addProperty("ambientocclusion", false);
+        // Transforms
+        if(!modelBuilder.transforms.isEmpty()){
+            JsonObject displayJson = new JsonObject();
+            // Add each transform
+            for(Map.Entry<ItemCameraTransforms.TransformType,TransformBuilder> transform : modelBuilder.transforms.entrySet()){
+                JsonObject transformJson = new JsonObject();
+                transformJson.add("rotation", createJsonArray(transform.getValue().rotation.x, transform.getValue().rotation.y, transform.getValue().rotation.z));
+                transformJson.add("translation", createJsonArray(transform.getValue().translation.x, transform.getValue().translation.y, transform.getValue().translation.z));
+                transformJson.add("scale", createJsonArray(transform.getValue().scale.x, transform.getValue().scale.y, transform.getValue().scale.z));
+                String transformName = "unknown";
+                if(transform.getKey() == ItemCameraTransforms.TransformType.NONE)
+                    transformName = "none";
+                else if(transform.getKey() == ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND)
+                    transformName = "thirdperson_lefthand";
+                else if(transform.getKey() == ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND)
+                    transformName = "thirdperson_righthand";
+                else if(transform.getKey() == ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND)
+                    transformName = "firstperson_lefthand";
+                else if(transform.getKey() == ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND)
+                    transformName = "firstperson_righthand";
+                else if(transform.getKey() == ItemCameraTransforms.TransformType.HEAD)
+                    transformName = "head";
+                else if(transform.getKey() == ItemCameraTransforms.TransformType.GUI)
+                    transformName = "gui";
+                else if(transform.getKey() == ItemCameraTransforms.TransformType.GROUND)
+                    transformName = "ground";
+                else if(transform.getKey() == ItemCameraTransforms.TransformType.FIXED)
+                    transformName = "fixed";
+                displayJson.add(transformName, transformJson);
+            }
+            json.add("display", displayJson);
+        }
+        // Textures
+        if(!modelBuilder.textures.isEmpty()){
+            JsonObject texturesJson = new JsonObject();
+            for(Map.Entry<String,String> entry : modelBuilder.textures.entrySet()){
+                // Validate the texture exists
+                if(entry.getValue().charAt(0) != '#'){
+                    ResourceLocation texture = new ResourceLocation(entry.getValue());
+                    if(!this.cache.doesResourceExist(ResourceType.ASSET, texture.getResourceDomain(), "textures", texture.getResourcePath(), ".png"))
+                        throw new IllegalArgumentException("Could not find texture '" + texture + "' for model '" + modelBuilder.identifier + "'!");
+                }
+
+                texturesJson.addProperty(entry.getKey(), entry.getValue());
+            }
+            json.add("textures", texturesJson);
+        }
+        // Gui lighting
+        if(modelBuilder.lighting != null)
+            json.addProperty("gui_light", modelBuilder.lighting ? "side" : "front");
+        // Elements
+        if(!modelBuilder.elements.isEmpty()){
+            JsonArray elementsJson = new JsonArray();
+            // Loop over the individual elements
+            for(ElementBuilder element : modelBuilder.elements){
+                JsonObject elementJson = new JsonObject();
+                // From & to
+                elementJson.add("from", createJsonArray(element.from.x, element.from.y, element.from.z));
+                elementJson.add("to", createJsonArray(element.from.x, element.from.y, element.from.z));
+                // Rotation
+                if(element.rotation != null){
+                    JsonObject rotationJson = new JsonObject();
+                    rotationJson.add("origin", createJsonArray(element.rotation.origin.x, element.rotation.origin.y, element.rotation.origin.z));
+                    rotationJson.addProperty("axis", element.rotation.axis.getName2().toLowerCase(Locale.ROOT));
+                    rotationJson.addProperty("angle", element.rotation.angle);
+                    rotationJson.addProperty("rescale", element.rotation.rescale);
+                    elementJson.add("rotation", rotationJson);
+                }
+                // Shade
+                if(!element.shading)
+                    elementJson.addProperty("shade", false);
+                // Faces
+                if(!element.faces.isEmpty()){
+                    JsonObject facesJson = new JsonObject();
+                    for(Map.Entry<EnumFacing,FaceBuilder> entry : element.faces.entrySet()){
+                        JsonObject faceJson = new JsonObject();
+                        if(entry.getValue().texture == null)
+                            throw new RuntimeException("Model '" + modelBuilder.identifier + "' has face without a texture!");
+                        faceJson.addProperty("texture", entry.getValue().texture);
+                        if(entry.getValue().uv != null)
+                            faceJson.add("uv", createJsonArray(entry.getValue().uv));
+                        if(entry.getValue().cullface != null)
+                            faceJson.addProperty("cullface", entry.getValue().cullface.getName2().toLowerCase(Locale.ROOT));
+                        if(entry.getValue().emissivity != 0)
+                            faceJson.addProperty("emissivity", entry.getValue().emissivity);
+                        if(entry.getValue().rotation != 0)
+                            faceJson.addProperty("rotation", entry.getValue().rotation);
+                        if(entry.getValue().tintIndex != -1)
+                            faceJson.addProperty("tintindex", entry.getValue().tintIndex);
+                        facesJson.add(entry.getKey().getName2().toLowerCase(Locale.ROOT), faceJson);
+                    }
+                    elementJson.add("faces", facesJson);
+                }else
+                    throw new RuntimeException("Element in model '" + modelBuilder.identifier + "' has no faces!");
+                elementsJson.add(elementJson);
+            }
+            json.add("elements", elementsJson);
+        }
+
+        return json;
     }
 
     private static JsonArray createJsonArray(float... elements){
