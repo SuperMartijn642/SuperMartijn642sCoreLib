@@ -13,6 +13,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockReader;
@@ -66,7 +67,7 @@ public class BaseBlockItem extends BlockItem {
      * @return whether the player's interaction should be consumed or passed on
      */
     public InteractionFeedback interactWithBlock(ItemStack stack, PlayerEntity player, Hand hand, World level, BlockPos hitPos, Direction hitSide, Vec3d hitLocation){
-        return InteractionFeedback.PASS;
+        return InteractionFeedback.fromUnderlying(super.useOn(new ItemUseContext(player, hand, new BlockRayTraceResult(hitLocation, hitSide, hitPos, false))));
     }
 
     /**
@@ -161,8 +162,17 @@ public class BaseBlockItem extends BlockItem {
         }
 
         @Deprecated
-        public ActionResultType getUnderlying(){
-            return this.interactionResult;
+        public static InteractionFeedback fromUnderlying(ActionResultType interactionResult){
+            switch(interactionResult){
+                case SUCCESS:
+                    return SUCCESS;
+                case CONSUME:
+                case FAIL:
+                    return CONSUME;
+                case PASS:
+                    return PASS;
+            }
+            return null;
         }
     }
 }
