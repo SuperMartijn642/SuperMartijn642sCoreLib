@@ -63,7 +63,7 @@ public class CommonUtils {
      * Opens the given container. This method will do nothing if called client-side.
      * @param container the container to be opened
      */
-    public static <T extends AbstractContainerMenu> void openContainer(BaseContainer container){
+    public static void openContainer(BaseContainer container){
         Player player = container.player;
         if(!(container.player instanceof ServerPlayer))
             return;
