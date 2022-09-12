@@ -1,5 +1,7 @@
 package com.supermartijn642.core.item;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -10,9 +12,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -50,6 +55,22 @@ public class BaseBlockItem extends BlockItem {
     }
 
     /**
+     * Called when a player right-clicks on a block with this item, before the block is interacted with.
+     * @return whether the player's interaction should be consumed or passed on
+     */
+    public InteractionFeedback interactWithBlockFirst(ItemStack stack, Player player, InteractionHand hand, Level level, BlockPos hitPos, Direction hitSide, Vec3 hitLocation){
+        return InteractionFeedback.PASS;
+    }
+
+    /**
+     * Called when a player right-clicks on a block with this item, after the block is interacted with.
+     * @return whether the player's interaction should be consumed or passed on
+     */
+    public InteractionFeedback interactWithBlock(ItemStack stack, Player player, InteractionHand hand, Level level, BlockPos hitPos, Direction hitSide, Vec3 hitLocation){
+        return InteractionFeedback.fromUnderlying(super.useOn(new UseOnContext(player, hand, new BlockHitResult(hitLocation, hitSide, hitPos, false))));
+    }
+
+    /**
      * Called when a player right-clicks on an entity.
      * @return whether the player's interaction should be consumed or passed on
      */
@@ -77,6 +98,11 @@ public class BaseBlockItem extends BlockItem {
     @Override
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target, InteractionHand hand){
         return this.interactWithEntity(stack, target, player, hand).interactionResult;
+    }
+
+    @Override
+    public InteractionResult useOn(UseOnContext context){
+        return this.interactWithBlock(context.getItemInHand(), context.getPlayer(), context.getHand(), context.getLevel(), context.getClickedPos(), context.getClickedFace(), context.getClickLocation()).interactionResult;
     }
 
     @Override
@@ -128,6 +154,26 @@ public class BaseBlockItem extends BlockItem {
 
         InteractionFeedback(InteractionResult interactionResult){
             this.interactionResult = interactionResult;
+        }
+
+        @Deprecated
+        public static InteractionFeedback fromUnderlying(InteractionResult interactionResult){
+            switch(interactionResult){
+                case SUCCESS:
+                    return SUCCESS;
+                case CONSUME:
+                case CONSUME_PARTIAL:
+                case FAIL:
+                    return CONSUME;
+                case PASS:
+                    return PASS;
+            }
+            return null;
+        }
+
+        @Deprecated
+        public InteractionResult getUnderlying(){
+            return this.interactionResult;
         }
     }
 }

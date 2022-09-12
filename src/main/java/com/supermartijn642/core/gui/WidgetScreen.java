@@ -134,6 +134,7 @@ public class WidgetScreen<T extends Widget> extends Screen {
 
     @Override
     public Component getNarrationMessage(){
-        return this.widget.getNarrationMessage();
+        Component message = this.widget.getNarrationMessage();
+        return message == null ? TextComponents.empty().get() : message;
     }
 }

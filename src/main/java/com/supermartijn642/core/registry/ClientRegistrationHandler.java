@@ -42,7 +42,9 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
@@ -93,7 +95,7 @@ public class ClientRegistrationHandler {
 
     private final Set<ResourceLocation> models = new HashSet<>();
     private final Map<ResourceLocation,Supplier<BakedModel>> specialModels = new HashMap<>();
-    private final Map<ResourceLocation,Function<BakedModel,BakedModel>> modelOverwrites = new HashMap<>();
+    private final List<Pair<Predicate<ResourceLocation>,Function<BakedModel,BakedModel>>> modelOverwrites = new ArrayList<>();
 
     private final List<Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?>>>> entityRenderers = new ArrayList<>();
     private final List<Pair<Supplier<BlockEntityType<?>>,Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?>>>> blockEntityRenderers = new ArrayList<>();
@@ -159,8 +161,6 @@ public class ClientRegistrationHandler {
         ResourceLocation fullIdentifier = new ResourceLocation(this.modid, identifier);
         if(this.specialModels.containsKey(fullIdentifier))
             throw new RuntimeException("Duplicate special model entry '" + fullIdentifier + "'!");
-        if(this.modelOverwrites.containsKey(fullIdentifier))
-            throw new RuntimeException("Overlapping special model and model overwrite '" + fullIdentifier + "'!");
 
         this.specialModels.put(fullIdentifier, model);
     }
@@ -178,12 +178,10 @@ public class ClientRegistrationHandler {
     public void registerModelOverwrite(ResourceLocation identifier, Function<BakedModel,BakedModel> modelOverwrite){
         if(haveModelsBeenRegistered)
             throw new IllegalStateException("Cannot register new model overwrites after model baking has completed!");
-        if(this.modelOverwrites.containsKey(identifier))
-            throw new RuntimeException("Duplicate model overwrite '" + identifier + "'!");
         if(this.specialModels.containsKey(identifier))
             throw new RuntimeException("Overlapping special model and model overwrite '" + identifier + "'!");
 
-        this.modelOverwrites.put(identifier, modelOverwrite);
+        this.modelOverwrites.add(Pair.of(identifier::equals, modelOverwrite));
     }
 
     /**
@@ -240,6 +238,65 @@ public class ClientRegistrationHandler {
      */
     public void registerModelOverwrite(String namespace, String identifier, BakedModel modelOverwrite){
         this.registerModelOverwrite(namespace, identifier, model -> modelOverwrite);
+    }
+
+    /**
+     * Registers an overwrite for all models for the given block, including the block's item model.
+     */
+    public void registerBlockModelOverwrite(Supplier<Block> block, Function<BakedModel,BakedModel> modelOverwrite){
+        if(haveModelsBeenRegistered)
+            throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
+
+        this.modelOverwrites.add(Pair.of(identifier -> {
+            ResourceLocation blockIdentifier = Registries.BLOCKS.getIdentifier(block.get());
+            return identifier instanceof ModelResourceLocation
+                && identifier.getNamespace().equals(blockIdentifier.getNamespace())
+                && identifier.getPath().equals(blockIdentifier.getPath());
+        }, modelOverwrite));
+    }
+
+    /**
+     * Registers an overwrite for all models for the given block, including the block's item model.
+     */
+    public void registerBlockModelOverwrite(Supplier<Block> block, Supplier<BakedModel> modelOverwrite){
+        this.registerBlockModelOverwrite(block, model -> modelOverwrite.get());
+    }
+
+    /**
+     * Registers an overwrite for all models for the given block, including the block's item model.
+     */
+    public void registerBlockModelOverwrite(Supplier<Block> block, BakedModel modelOverwrite){
+        this.registerBlockModelOverwrite(block, model -> modelOverwrite);
+    }
+
+    /**
+     * Registers an overwrite for the given item's model.
+     */
+    public void registerItemModelOverwrite(Supplier<Item> item, Function<BakedModel,BakedModel> modelOverwrite){
+        if(haveModelsBeenRegistered)
+            throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
+
+        this.modelOverwrites.add(Pair.of(identifier -> {
+            ResourceLocation itemIdentifier = Registries.ITEMS.getIdentifier(item.get());
+            return identifier.getNamespace().equals(itemIdentifier.getNamespace())
+                && (identifier instanceof ModelResourceLocation ?
+                identifier.getPath().equals(itemIdentifier.getPath()) && ((ModelResourceLocation)identifier).getVariant().equals("inventory")
+                : identifier.getPath().equals("item/" + itemIdentifier.getPath()));
+        }, modelOverwrite));
+    }
+
+    /**
+     * Registers an overwrite for the given item's model.
+     */
+    public void registerItemModelOverwrite(Supplier<Item> item, Supplier<BakedModel> modelOverwrite){
+        this.registerItemModelOverwrite(item, model -> modelOverwrite.get());
+    }
+
+    /**
+     * Registers an overwrite for the given item's model.
+     */
+    public void registerItemModelOverwrite(Supplier<Item> item, BakedModel modelOverwrite){
+        this.registerItemModelOverwrite(item, model -> modelOverwrite);
     }
 
     /**
@@ -596,17 +653,23 @@ public class ClientRegistrationHandler {
         }
 
         // Model overwrites
-        for(Map.Entry<ResourceLocation,Function<BakedModel,BakedModel>> entry : this.modelOverwrites.entrySet()){
-            ResourceLocation identifier = entry.getKey();
-            if(!modelRegistry.containsKey(identifier))
-                throw new RuntimeException("No model registered for model overwrite '" + identifier + "'!");
+        for(Pair<Predicate<ResourceLocation>,Function<BakedModel,BakedModel>> pair : this.modelOverwrites){
+            // Find all the identifiers which should be replaced
+            List<ResourceLocation> modelIdentifiers = modelRegistry.keySet().stream()
+                .filter(identifier -> pair.left().test(identifier))
+                .collect(Collectors.toList());
 
-            BakedModel model = modelRegistry.get(identifier);
-            model = entry.getValue().apply(model);
-            if(model == null)
-                throw new RuntimeException("Model overwrite '" + identifier + "' returned a null model!");
+            for(ResourceLocation identifier : modelIdentifiers){
+                if(!modelRegistry.containsKey(identifier))
+                    throw new RuntimeException("No model registered for model overwrite '" + identifier + "'!");
 
-            modelRegistry.put(identifier, model);
+                BakedModel model = modelRegistry.get(identifier);
+                model = pair.right().apply(model);
+                if(model == null)
+                    throw new RuntimeException("Model overwrite for '" + identifier + "' returned a null model!");
+
+                modelRegistry.put(identifier, model);
+            }
         }
     }
 
