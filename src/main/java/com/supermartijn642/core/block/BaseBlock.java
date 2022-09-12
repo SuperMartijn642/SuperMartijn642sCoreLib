@@ -11,6 +11,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.BlockGetter;
@@ -137,6 +138,14 @@ public class BaseBlock extends Block {
      * @param advanced whether advanced tooltips is enabled
      */
     protected void appendItemInformation(ItemStack stack, @Nullable BlockGetter level, Consumer<Component> info, boolean advanced){
+    }
+
+    /**
+     * Gets the item corresponding to this block.
+     */
+    @Override
+    public Item asItem(){
+        return super.asItem();
     }
 
     @Override
