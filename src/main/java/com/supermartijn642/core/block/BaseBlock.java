@@ -189,7 +189,7 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
 
     @Override
     public boolean onBlockActivated(World level, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing hitSide, float hitX, float hitY, float hitZ){
-        return this.interact(state, level, pos, player, hand, hitSide, new Vec3d(hitX, hitY, hitZ)).consumesAction();
+        return this.interact(state, level, pos, player, hand, hitSide, new Vec3d(hitX + pos.getX(), hitY + pos.getY(), hitZ + pos.getZ())).consumesAction();
     }
 
     /**
