@@ -696,9 +696,12 @@ public class ClientRegistrationHandler {
         this.passedTextureStitch = true;
 
         // Texture atlas sprites
-        Set<ResourceLocation> sprites = this.textureAtlasSprites.get(e.getMap().getBasePath()); // TODO
-        if(sprites == null)
-            return;
+        Set<ResourceLocation> sprites = this.textureAtlasSprites.entrySet()
+            .stream()
+            .filter(entry -> ClientUtils.getTextureManager().getTexture(entry.getKey()) == e.getMap())
+            .map(Map.Entry::getValue)
+            .flatMap(Set::stream)
+            .collect(Collectors.toSet());
 
         sprites.forEach(e::addSprite);
     }
