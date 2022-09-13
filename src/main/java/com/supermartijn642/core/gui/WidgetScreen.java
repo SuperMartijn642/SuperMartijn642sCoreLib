@@ -91,8 +91,6 @@ public class WidgetScreen<T extends Widget> extends GuiScreen {
     @Override
     public void mouseClicked(int mouseX, int mouseY, int button) throws IOException{
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
         if(!this.widget.mousePressed(mouseX - offsetX, mouseY - offsetY, button, false))
             super.mouseClicked(mouseX, mouseY, button);
     }
@@ -100,9 +98,7 @@ public class WidgetScreen<T extends Widget> extends GuiScreen {
     @Override
     public void mouseReleased(int mouseX, int mouseY, int button){
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
-        if(!this.widget.mouseReleased(mouseX, mouseY, button, false))
+        if(!this.widget.mouseReleased(mouseX - offsetX, mouseY - offsetY, button, false))
             super.mouseReleased(mouseX, mouseY, button);
     }
 
