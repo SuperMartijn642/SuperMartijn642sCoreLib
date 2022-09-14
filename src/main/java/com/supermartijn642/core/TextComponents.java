@@ -86,7 +86,7 @@ public class TextComponents {
      * Creates a new {@link TextComponentBuilder} around the given block's name.
      */
     public static TextComponentBuilder block(Block block){
-        return translation(block.getUnlocalizedName() + ".name");
+        return translation(block.getUnlocalizedName());
     }
 
     /**
@@ -101,7 +101,7 @@ public class TextComponents {
      * Creates a new {@link TextComponentBuilder} around the given item's name.
      */
     public static TextComponentBuilder item(Item item){
-        return translation(item.getUnlocalizedName() + ".name");
+        return translation(item.getUnlocalizedName());
     }
 
     /**
