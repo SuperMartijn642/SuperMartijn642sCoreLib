@@ -4,11 +4,16 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
+import net.minecraft.advancements.critereon.EnchantmentPredicate;
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.Deserializers;
@@ -18,6 +23,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.minecraft.world.level.storage.loot.providers.number.BinomialDistributionGenerator;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
@@ -135,7 +141,15 @@ public abstract class LootTableGenerator extends ResourceGenerator {
      * @param block block to create the loot table for
      */
     protected LootTableBuilder dropSelf(Block block){
-        return this.lootTable(block.getLootTable()).parameters(LootContextParamSets.BLOCK).pool(poolBuilder -> poolBuilder.survivesExplosionCondition().itemEntry(block));
+        return this.lootTable(block).blockParameters().pool(poolBuilder -> poolBuilder.survivesExplosionCondition().itemEntry(block));
+    }
+
+    /**
+     * Creates a basic loot table for the given to drop itself when broken with a silk touch tool.
+     * @param block block to create the loot table for
+     */
+    protected LootTableBuilder dropSelfWhenSilkTouch(Block block){
+        return this.lootTable(block).blockParameters().pool(poolBuilder -> poolBuilder.hasEnchantmentCondition(Enchantments.SILK_TOUCH).itemEntry(block));
     }
 
     @Override
@@ -314,6 +328,33 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          */
         public LootPoolBuilder survivesExplosionCondition(){
             return this.condition(ExplosionCondition.survivesExplosion().build());
+        }
+
+        /**
+         * Adds a condition for the used tool to have the given enchantment.
+         * @param enchantment enchantment required
+         * @param minLevel    minimum level of the enchantment (inclusive)
+         * @param maxLevel    maximum level of the enchantment (inclusive)
+         */
+        public LootPoolBuilder hasEnchantmentCondition(Enchantment enchantment, int minLevel, int maxLevel){
+            return this.condition(MatchTool.toolMatches(ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(enchantment, MinMaxBounds.Ints.between(minLevel, maxLevel)))).build());
+        }
+
+        /**
+         * Adds a condition for the used tool to have the given enchantment.
+         * @param enchantment enchantment required
+         * @param minLevel    minimum level of the enchantment
+         */
+        public LootPoolBuilder hasEnchantmentCondition(Enchantment enchantment, int minLevel){
+            return this.condition(MatchTool.toolMatches(ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(enchantment, MinMaxBounds.Ints.atLeast(minLevel)))).build());
+        }
+
+        /**
+         * Adds a condition for the used tool to have the given enchantment.
+         * @param enchantment enchantment required
+         */
+        public LootPoolBuilder hasEnchantmentCondition(Enchantment enchantment){
+            return this.hasEnchantmentCondition(enchantment, 1);
         }
 
         /**
