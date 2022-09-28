@@ -4,6 +4,7 @@ import com.supermartijn642.core.data.TagLoader;
 import com.supermartijn642.core.generator.GeneratorManager;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
 import com.supermartijn642.core.loot_table.SurvivesExplosionLootCondition;
+import com.supermartijn642.core.loot_table.ToolMatchLootCondition;
 import com.supermartijn642.core.network.OpenContainerPacket;
 import com.supermartijn642.core.network.PacketChannel;
 import com.supermartijn642.core.recipe.condition.ModLoadedRecipeCondition;
@@ -41,6 +42,7 @@ public class CoreLib {
 
         // Register loot condition
         LootConditionManager.registerCondition(SurvivesExplosionLootCondition.SERIALIZER);
+        LootConditionManager.registerCondition(ToolMatchLootCondition.SERIALIZER);
 
         // Register generator for default tags
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));

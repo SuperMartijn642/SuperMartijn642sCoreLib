@@ -5,8 +5,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.loot_table.BinomialNumberProvider;
 import com.supermartijn642.core.loot_table.SurvivesExplosionLootCondition;
+import com.supermartijn642.core.loot_table.ToolMatchLootCondition;
 import com.supermartijn642.core.registry.Registries;
+import net.minecraft.advancements.critereon.EnchantmentPredicate;
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.critereon.NBTPredicate;
 import net.minecraft.block.Block;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.init.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.*;
@@ -139,6 +146,14 @@ public abstract class LootTableGenerator extends ResourceGenerator {
      */
     protected LootTableBuilder dropSelf(Block block){
         return this.lootTable(block).pool(poolBuilder -> poolBuilder.survivesExplosionCondition().itemEntry(block));
+    }
+
+    /**
+     * Creates a basic loot table for the given to drop itself when broken with a silk touch tool.
+     * @param block block to create the loot table for
+     */
+    protected LootTableBuilder dropSelfWhenSilkTouch(Block block){
+        return this.lootTable(block).pool(poolBuilder -> poolBuilder.hasEnchantmentCondition(Enchantments.SILK_TOUCH).itemEntry(block));
     }
 
     @Override
@@ -285,6 +300,37 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          */
         public LootPoolBuilder survivesExplosionCondition(){
             return this.condition(new SurvivesExplosionLootCondition());
+        }
+
+        /**
+         * Adds a condition for the used tool to have the given enchantment.
+         * @param enchantment enchantment required
+         * @param minLevel    minimum level of the enchantment (inclusive)
+         * @param maxLevel    maximum level of the enchantment (inclusive)
+         */
+        public LootPoolBuilder hasEnchantmentCondition(Enchantment enchantment, int minLevel, int maxLevel){
+            EnchantmentPredicate enchantmentPredicate = new EnchantmentPredicate(enchantment, new MinMaxBounds((float)minLevel, (float)maxLevel));
+            ItemPredicate itemPredicate = new ItemPredicate(null, null, MinMaxBounds.UNBOUNDED, MinMaxBounds.UNBOUNDED, new EnchantmentPredicate[]{enchantmentPredicate}, null, NBTPredicate.ANY);
+            return this.condition(new ToolMatchLootCondition(itemPredicate));
+        }
+
+        /**
+         * Adds a condition for the used tool to have the given enchantment.
+         * @param enchantment enchantment required
+         * @param minLevel    minimum level of the enchantment
+         */
+        public LootPoolBuilder hasEnchantmentCondition(Enchantment enchantment, int minLevel){
+            EnchantmentPredicate enchantmentPredicate = new EnchantmentPredicate(enchantment, new MinMaxBounds((float)minLevel, null));
+            ItemPredicate itemPredicate = new ItemPredicate(null, null, MinMaxBounds.UNBOUNDED, MinMaxBounds.UNBOUNDED, new EnchantmentPredicate[]{enchantmentPredicate}, null, NBTPredicate.ANY);
+            return this.condition(new ToolMatchLootCondition(itemPredicate));
+        }
+
+        /**
+         * Adds a condition for the used tool to have the given enchantment.
+         * @param enchantment enchantment required
+         */
+        public LootPoolBuilder hasEnchantmentCondition(Enchantment enchantment){
+            return this.hasEnchantmentCondition(enchantment, 1);
         }
 
         /**
