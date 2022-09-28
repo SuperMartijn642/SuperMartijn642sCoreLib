@@ -929,7 +929,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private final int outputCount;
         private String group;
         private boolean hasAdvancement = true;
-        private CriterionInstance unlockedBy;
+        private final List<CriterionInstance> unlockedBy = new ArrayList<>();
 
         protected RecipeBuilder(ResourceLocation identifier, IItemProvider output, CompoundNBT outputTag, int outputCount){
             this.identifier = identifier;
@@ -990,7 +990,10 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * Sets which criterion should be met to unlock this recipe in its generated advancement.
          */
         public T unlockedBy(CriterionInstance criterion){
-            this.unlockedBy = criterion;
+            if(this.unlockedBy.contains(criterion))
+                throw new RuntimeException("Duplicate unlockedBy criterion '" + criterion + "'!");
+
+            this.unlockedBy.add(criterion);
             return this.self();
         }
 
@@ -1541,15 +1544,25 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         }
 
         private void createAdvancement(String namespace, String identifier, RecipeBuilder<?> recipe){
-            this.advancement(namespace, identifier)
+            AdvancementBuilder builder = this.advancement(namespace, identifier)
                 .parent(new ResourceLocation("minecraft", "recipes/root"))
                 .criterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(recipe.identifier))
-                .criterion("can_unlock_recipe", recipe.unlockedBy)
-                .requirementGroup("has_the_recipe", "can_unlock_recipe")
                 .icon(recipe.output, recipe.outputTag)
                 .dontShowToast()
                 .dontAnnounceToChat()
                 .rewardRecipe(recipe.identifier);
+            String[] conditions = new String[recipe.unlockedBy.size() + 1];
+            conditions[0] = "has_the_recipe";
+            if(recipe.unlockedBy.size() == 1){
+                builder.criterion("recipe_condition", recipe.unlockedBy.get(0));
+                conditions[1] = "recipe_condition";
+            }else{
+                for(int i = 0; i < recipe.unlockedBy.size(); i++){
+                    builder.criterion("recipe_condition" + (i + 1), recipe.unlockedBy.get(i));
+                    conditions[i + 1] = "recipe_condition" + (i + 1);
+                }
+            }
+            builder.requirementGroup(conditions);
         }
     }
 }
