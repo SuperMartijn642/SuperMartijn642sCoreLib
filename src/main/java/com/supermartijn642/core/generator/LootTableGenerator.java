@@ -4,7 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
+import net.minecraft.advancements.criterion.EnchantmentPredicate;
+import net.minecraft.advancements.criterion.ItemPredicate;
+import net.minecraft.advancements.criterion.MinMaxBounds;
 import net.minecraft.block.Block;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
@@ -13,6 +18,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.*;
 import net.minecraft.world.storage.loot.conditions.ILootCondition;
 import net.minecraft.world.storage.loot.conditions.LootConditionManager;
+import net.minecraft.world.storage.loot.conditions.MatchTool;
 import net.minecraft.world.storage.loot.conditions.SurvivesExplosion;
 import net.minecraft.world.storage.loot.functions.ILootFunction;
 import net.minecraft.world.storage.loot.functions.LootFunctionManager;
@@ -129,7 +135,15 @@ public abstract class LootTableGenerator extends ResourceGenerator {
      * @param block block to create the loot table for
      */
     protected LootTableBuilder dropSelf(Block block){
-        return this.lootTable(block.getLootTable()).parameters(LootParameterSets.BLOCK).pool(poolBuilder -> poolBuilder.survivesExplosionCondition().itemEntry(block));
+        return this.lootTable(block).blockParameters().pool(poolBuilder -> poolBuilder.survivesExplosionCondition().itemEntry(block));
+    }
+
+    /**
+     * Creates a basic loot table for the given to drop itself when broken with a silk touch tool.
+     * @param block block to create the loot table for
+     */
+    protected LootTableBuilder dropSelfWhenSilkTouch(Block block){
+        return this.lootTable(block).blockParameters().pool(poolBuilder -> poolBuilder.hasEnchantmentCondition(Enchantments.SILK_TOUCH).itemEntry(block));
     }
 
     @Override
@@ -302,6 +316,33 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          */
         public LootPoolBuilder survivesExplosionCondition(){
             return this.condition(SurvivesExplosion.survivesExplosion().build());
+        }
+
+        /**
+         * Adds a condition for the used tool to have the given enchantment.
+         * @param enchantment enchantment required
+         * @param minLevel    minimum level of the enchantment (inclusive)
+         * @param maxLevel    maximum level of the enchantment (inclusive)
+         */
+        public LootPoolBuilder hasEnchantmentCondition(Enchantment enchantment, int minLevel, int maxLevel){
+            return this.condition(MatchTool.toolMatches(ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(enchantment, new MinMaxBounds.IntBound(minLevel, maxLevel)))).build());
+        }
+
+        /**
+         * Adds a condition for the used tool to have the given enchantment.
+         * @param enchantment enchantment required
+         * @param minLevel    minimum level of the enchantment
+         */
+        public LootPoolBuilder hasEnchantmentCondition(Enchantment enchantment, int minLevel){
+            return this.condition(MatchTool.toolMatches(ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(enchantment, MinMaxBounds.IntBound.atLeast(minLevel)))).build());
+        }
+
+        /**
+         * Adds a condition for the used tool to have the given enchantment.
+         * @param enchantment enchantment required
+         */
+        public LootPoolBuilder hasEnchantmentCondition(Enchantment enchantment){
+            return this.hasEnchantmentCondition(enchantment, 1);
         }
 
         /**
