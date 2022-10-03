@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
+import com.supermartijn642.core.util.Pair;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.IProperty;
@@ -32,40 +33,82 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
         for(BlockStateBuilder blockStateBuilder : this.blockStates.values()){
             ResourceLocation block = Registries.BLOCKS.getIdentifier(blockStateBuilder.block);
             JsonObject json = new JsonObject();
-            // Loop over all variants
+
+            // Serialize all variants
             JsonObject variantsJson = new JsonObject();
             for(Map.Entry<PartialBlockState,VariantBuilder> variantEntry : blockStateBuilder.variants.entrySet()){
                 if(variantEntry.getValue().models.isEmpty())
                     continue;
                 String name = formatVariantName(variantEntry.getKey());
-                JsonObject[] models = new JsonObject[variantEntry.getValue().models.size()];
-                for(int i = 0; i < models.length; i++){
-                    VariantModel model = variantEntry.getValue().models.get(i);
-                    JsonObject modelJson = new JsonObject();
-                    // Model location
-                    if(!this.cache.doesResourceExist(ResourceType.ASSET, model.modelLocation.getNamespace(), "models", model.modelLocation.getPath(), ".json"))
-                        throw new RuntimeException("Could not find model '" + model.modelLocation + "' in block state for block '" + block + "'!");
-                    modelJson.addProperty("model", model.modelLocation.toString());
-                    // Rotation
-                    if(model.xRotation != 0)
-                        modelJson.addProperty("x", model.xRotation);
-                    if(model.yRotation != 0)
-                        modelJson.addProperty("y", model.yRotation);
-                    // UV lock
-                    if(model.uvLock)
-                        modelJson.addProperty("uvlock", true);
-                    // Weight
-                    if(model.weight != 1 && models.length > 1)
-                        modelJson.addProperty("weight", model.weight);
-                    models[i] = modelJson;
-                }
-                variantsJson.add(name, models.length > 1 ? createJsonArray(models) : models[0]);
+                variantsJson.add(name, this.serializeVariant(variantEntry.getValue(), block));
             }
-            json.add("variants", variantsJson);
+            if(variantsJson.size() > 0)
+                json.add("variants", variantsJson);
+
+            // Serialize all multiparts
+            JsonArray multipartsJson = new JsonArray();
+            for(Pair<MultipartConditionBuilder,VariantBuilder> multipartEntry : blockStateBuilder.multipartVariants){
+                if(multipartEntry.right().models.isEmpty())
+                    continue;
+                JsonObject multipartJson = new JsonObject();
+                multipartJson.add("apply", this.serializeVariant(multipartEntry.right(), block));
+                multipartEntry.left().flatten();
+                JsonArray whenJson = new JsonArray();
+                for(MultipartConditionBuilder condition : multipartEntry.left().or){
+                    if(condition.properties.isEmpty())
+                        continue;
+                    JsonObject conditionJson = new JsonObject();
+                    //noinspection rawtypes,unchecked
+                    condition.properties.forEach(
+                        (property, values) ->
+                            conditionJson.addProperty(property.getName(), Arrays.stream(values).map(((IProperty)property)::getName).collect(Collectors.joining("|")))
+                    );
+                    whenJson.add(conditionJson);
+                }
+                if(whenJson.size() == 1)
+                    multipartJson.add("when", whenJson.get(0));
+                else if(whenJson.size() != 0){
+                    JsonObject newWhenJson = new JsonObject();
+                    newWhenJson.add("OR", whenJson);
+                    multipartJson.add("when", newWhenJson);
+                }
+                multipartsJson.add(multipartJson);
+            }
+            if(multipartsJson.size() != 0)
+                json.add("multipart", multipartsJson);
+
+            // Check if there's at one entry in the block state
+            if(variantsJson.size() == 0 && multipartsJson.size() == 0)
+                throw new RuntimeException("Block state for block '" + block + "' is empty!");
 
             // Save the object to the cache
             this.cache.saveJsonResource(ResourceType.ASSET, json, this.modid, "blockstates", block.getPath());
         }
+    }
+
+    private JsonElement serializeVariant(VariantBuilder builder, ResourceLocation block){
+        JsonObject[] models = new JsonObject[builder.models.size()];
+        for(int i = 0; i < models.length; i++){
+            VariantModel model = builder.models.get(i);
+            JsonObject modelJson = new JsonObject();
+            // Model location
+            if(!this.cache.doesResourceExist(ResourceType.ASSET, model.modelLocation.getNamespace(), "models", model.modelLocation.getPath(), ".json"))
+                throw new RuntimeException("Could not find model '" + model.modelLocation + "' in block state for block '" + block + "'!");
+            modelJson.addProperty("model", model.modelLocation.toString());
+            // Rotation
+            if(model.xRotation != 0)
+                modelJson.addProperty("x", model.xRotation);
+            if(model.yRotation != 0)
+                modelJson.addProperty("y", model.yRotation);
+            // UV lock
+            if(model.uvLock)
+                modelJson.addProperty("uvlock", true);
+            // Weight
+            if(model.weight != 1 && models.length > 1)
+                modelJson.addProperty("weight", model.weight);
+            models[i] = modelJson;
+        }
+        return models.length > 1 ? createJsonArray(models) : models[0];
     }
 
     private static JsonArray createJsonArray(JsonElement... elements){
@@ -125,6 +168,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
         private final String modid;
         private final Block block;
         private final Map<PartialBlockState,VariantBuilder> variants = new HashMap<>();
+        private final List<Pair<MultipartConditionBuilder,VariantBuilder>> multipartVariants = new ArrayList<>();
 
         public BlockStateBuilder(String modid, Block block){
             this.modid = modid;
@@ -212,6 +256,50 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          */
         public BlockStateBuilder variantsForAll(BiConsumer<PartialBlockState,VariantBuilder> variantBuilderConsumer){
             return this.variantsForAllExcept(variantBuilderConsumer);
+        }
+
+        /**
+         * Constructs a condition and model options which will be added whenever a state matches all properties in constructed condition.
+         * @param conditionBuilderConsumer consumer to build the condition for the multipart
+         * @param variantBuilderConsumer   consumer to build the model options
+         */
+        public BlockStateBuilder multipart(Consumer<MultipartConditionBuilder> conditionBuilderConsumer, Consumer<VariantBuilder> variantBuilderConsumer){
+            MultipartConditionBuilder condition = new MultipartConditionBuilder(this.block);
+            conditionBuilderConsumer.accept(condition);
+            VariantBuilder variant = new VariantBuilder(this.modid);
+            variantBuilderConsumer.accept(variant);
+            this.multipartVariants.add(Pair.of(condition, variant));
+            return this;
+        }
+
+        /**
+         * Constructs model options which will be added whenever a state matches all properties in the given state.
+         * @param state                  the properties to match
+         * @param variantBuilderConsumer consumer to build the model options
+         */
+        public BlockStateBuilder multipart(PartialBlockState state, Consumer<VariantBuilder> variantBuilderConsumer){
+            if(state.block != this.block)
+                throw new IllegalArgumentException("Cannot use state from block '" + state.block + "' in block state builder for block '" + this.block + "'!");
+
+            //noinspection unchecked,rawtypes
+            return this.multipart(condition -> state.properties.forEach((property, value) -> condition.requireProperty((IProperty)property, (Comparable)value)), variantBuilderConsumer);
+        }
+
+        /**
+         * Constructs model options which will be added whenever a state matches all properties in the given state.
+         * @param state                  the properties to match
+         * @param variantBuilderConsumer consumer to build the model options
+         */
+        public BlockStateBuilder multipart(BlockState state, Consumer<VariantBuilder> variantBuilderConsumer){
+            return this.multipart(BlockStateGenerator.this.createPartialState(state), variantBuilderConsumer);
+        }
+
+        /**
+         * Constructs model options which will be added to the regular variants.
+         * @param variantBuilderConsumer consumer to build the model options
+         */
+        public BlockStateBuilder unconditionalMultipart(Consumer<VariantBuilder> variantBuilderConsumer){
+            return this.multipart(BlockStateGenerator.this.createEmptyPartialState(this.block), variantBuilderConsumer);
         }
     }
 
@@ -367,6 +455,67 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
             this.yRotation = yRotation;
             this.uvLock = uvLock;
             this.weight = weight;
+        }
+    }
+
+    protected static class MultipartConditionBuilder {
+
+        private final Block block;
+        private final Map<IProperty<?>,Comparable<?>[]> properties = new HashMap<>();
+        private final List<MultipartConditionBuilder> or = new ArrayList<>();
+
+        private MultipartConditionBuilder(Block block){
+            this.block = block;
+        }
+
+        /**
+         * Adds required values for a property for this condition to be met.
+         * @param property       property which should have any of the given values
+         * @param acceptedValues values which the property may have for the condition to be met
+         */
+        public <T extends Comparable<T>> MultipartConditionBuilder requireProperty(IProperty<T> property, T... acceptedValues){
+            if(acceptedValues.length == 0)
+                throw new RuntimeException("Accepted values cannot be empty for multipart condition property!");
+            if(this.properties.containsKey(property))
+                throw new RuntimeException("Duplicate requirements for property '" + property + "' for multipart condition for block '" + Registries.BLOCKS.getIdentifier(this.block) + "'!");
+            if(!this.block.getStateDefinition().getProperties().contains(property))
+                throw new IllegalArgumentException("Property '" + property + "' is not a property of block '" + Registries.BLOCKS.getIdentifier(this.block) + "'!");
+            for(T value : acceptedValues){
+                if(!property.getPossibleValues().contains(value))
+                    throw new IllegalArgumentException("Value '" + value + "' does not belong to property '" + property + "'!");
+            }
+
+            this.properties.put(property, acceptedValues);
+            return this;
+        }
+
+        /**
+         * Adds an alternative condition to this one.
+         * @param alternativeBuilderConsumer consumer to construct the alternative condition
+         */
+        public MultipartConditionBuilder or(Consumer<MultipartConditionBuilder> alternativeBuilderConsumer){
+            MultipartConditionBuilder builder = new MultipartConditionBuilder(this.block);
+            alternativeBuilderConsumer.accept(builder);
+            if(builder.properties.isEmpty())
+                throw new IllegalArgumentException("Alternative condition cannot be empty!");
+            this.or.add(builder);
+            return this;
+        }
+
+        /**
+         * Constructs an alternative condition to this one.
+         * @return builder for the alternative condition
+         */
+        public MultipartConditionBuilder or(){
+            MultipartConditionBuilder builder = new MultipartConditionBuilder(this.block);
+            this.or.add(builder);
+            return builder;
+        }
+
+        private void flatten(){
+            this.or.add(0, this);
+            for(int i = 1; i < this.or.size(); i++)
+                this.or.addAll(this.or.get(i).or);
         }
     }
 
