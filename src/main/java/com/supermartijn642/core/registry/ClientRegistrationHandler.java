@@ -260,7 +260,9 @@ public class ClientRegistrationHandler {
 
         this.modelOverwrites.add(Pair.of(identifier -> {
             ResourceLocation blockIdentifier = Registries.BLOCKS.getIdentifier(block.get());
-            return identifier.getResourceDomain().equals(blockIdentifier.getResourceDomain());
+            return identifier instanceof ModelResourceLocation
+                && identifier.getResourceDomain().equals(blockIdentifier.getResourceDomain())
+                && identifier.getResourcePath().equals(blockIdentifier.getResourcePath());
         }, modelOverwrite));
     }
 
