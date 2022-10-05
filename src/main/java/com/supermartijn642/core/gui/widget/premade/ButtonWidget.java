@@ -30,8 +30,16 @@ public class ButtonWidget extends AbstractButtonWidget {
         this.text = text;
     }
 
+    public ITextComponent getText(){
+        return this.text;
+    }
+
     public void setActive(boolean active){
         this.active = active;
+    }
+
+    public boolean isActive(){
+        return this.active;
     }
 
     @Override
