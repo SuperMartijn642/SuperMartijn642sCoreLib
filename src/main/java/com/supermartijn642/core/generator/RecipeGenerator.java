@@ -13,6 +13,7 @@ import net.minecraft.advancements.criterion.RecipeUnlockedTrigger;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.Tag;
@@ -45,10 +46,11 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         for(RecipeBuilder<?> recipeBuilder : this.recipes.values()){
             JsonObject json = new JsonObject();
 
+            // Set the recipe serializer
+            json.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(recipeBuilder.serializer).toString());
+
             // Filter by recipe builder
             if(recipeBuilder instanceof ShapedRecipeBuilder){
-                json.addProperty("type", "minecraft:crafting_shaped");
-
                 // Verify all keys are defined
                 Set<Character> characters = new HashSet<>();
                 for(String row : ((ShapedRecipeBuilder)recipeBuilder).pattern){
@@ -81,8 +83,6 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 json.add("result", resultJson);
 
             }else if(recipeBuilder instanceof ShapelessRecipeBuilder){
-                json.addProperty("type", "minecraft:crafting_shapeless");
-
                 // Group
                 json.addProperty("group", recipeBuilder.group);
                 // Ingredients
@@ -116,27 +116,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                     json.addProperty("type", "minecraft:campfire_cooking");
                     serializeCookingRecipe(json, (SmeltingRecipeBuilder)recipeBuilder, 2, 100);
                 }
-            }else if(recipeBuilder instanceof SmithingRecipeBuilder){
-                json.addProperty("type", "minecraft:smithing");
-
-                // Group
-                json.addProperty("group", recipeBuilder.group);
-                // Base
-                json.add("base", ((SmithingRecipeBuilder)recipeBuilder).base.toJson());
-                // Addition
-                json.add("addition", ((SmithingRecipeBuilder)recipeBuilder).addition.toJson());
-                // Result
-                JsonObject resultJson = new JsonObject();
-                resultJson.addProperty("item", Registries.ITEMS.getIdentifier(recipeBuilder.output.asItem()).toString());
-                if(recipeBuilder.outputCount != 1)
-                    resultJson.addProperty("count", recipeBuilder.outputCount);
-                if(recipeBuilder.outputTag != null)
-                    resultJson.addProperty("nbt", recipeBuilder.outputTag.toString());
-                json.add("result", resultJson);
-
             }else if(recipeBuilder instanceof StoneCuttingRecipeBuilder){
-                json.addProperty("type", "minecraft:stonecutting");
-
                 // Group
                 json.addProperty("group", recipeBuilder.group);
                 // Ingredient
@@ -682,163 +662,6 @@ public abstract class RecipeGenerator extends ResourceGenerator {
     }
 
     /**
-     * Creates a new smithing recipe builder for the given location.
-     * @param recipeLocation location of the recipe
-     * @param output         recipe result
-     * @param nbt            nbt tag of the recipe result
-     * @param amount         count of the recipe result
-     */
-    protected SmithingRecipeBuilder smithing(ResourceLocation recipeLocation, IItemProvider output, CompoundNBT nbt, int amount){
-        return this.recipe(recipeLocation, new SmithingRecipeBuilder(recipeLocation, output, nbt, amount));
-    }
-
-    /**
-     * Creates a new smithing recipe builder for the given location.
-     * @param namespace  namespace of the recipe
-     * @param identifier path of the recipe
-     * @param output     recipe result
-     * @param nbt        nbt tag of the recipe result
-     * @param amount     count of the recipe result
-     */
-    protected SmithingRecipeBuilder smithing(String namespace, String identifier, IItemProvider output, CompoundNBT nbt, int amount){
-        return this.smithing(new ResourceLocation(namespace, identifier), output, nbt, amount);
-    }
-
-    /**
-     * Creates a new smithing recipe builder for the given location.
-     * @param identifier path of the recipe
-     * @param output     recipe result
-     * @param nbt        nbt tag of the recipe result
-     * @param amount     count of the recipe result
-     */
-    protected SmithingRecipeBuilder smithing(String identifier, IItemProvider output, CompoundNBT nbt, int amount){
-        return this.smithing(this.modid, identifier, output, nbt, amount);
-    }
-
-    /**
-     * Creates a new smithing recipe builder with the output's identifier as location.
-     * @param output recipe result
-     * @param nbt    nbt tag of the recipe result
-     * @param amount count of the recipe result
-     */
-    protected SmithingRecipeBuilder smithing(IItemProvider output, CompoundNBT nbt, int amount){
-        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output.asItem());
-        return this.smithing(identifier, output, nbt, amount);
-    }
-
-    /**
-     * Creates a new smithing recipe builder for the given location.
-     * @param recipeLocation location of the recipe
-     * @param output         recipe result
-     * @param amount         count of the recipe result
-     */
-    protected SmithingRecipeBuilder smithing(ResourceLocation recipeLocation, IItemProvider output, int amount){
-        return this.smithing(recipeLocation, output, null, amount);
-    }
-
-    /**
-     * Creates a new smithing recipe builder for the given location.
-     * @param namespace  namespace of the recipe
-     * @param identifier path of the recipe
-     * @param output     recipe result
-     * @param amount     count of the recipe result
-     */
-    protected SmithingRecipeBuilder smithing(String namespace, String identifier, IItemProvider output, int amount){
-        return this.smithing(new ResourceLocation(namespace, identifier), output, null, amount);
-    }
-
-    /**
-     * Creates a new smithing recipe builder for the given location.
-     * @param identifier path of the recipe
-     * @param output     recipe result
-     * @param amount     count of the recipe result
-     */
-    protected SmithingRecipeBuilder smithing(String identifier, IItemProvider output, int amount){
-        return this.smithing(this.modid, identifier, output, null, amount);
-    }
-
-    /**
-     * Creates a new smithing recipe builder with the output's identifier as location.
-     * @param output recipe result
-     * @param amount count of the recipe result
-     */
-    protected SmithingRecipeBuilder smithing(IItemProvider output, int amount){
-        return this.smithing(output, null, amount);
-    }
-
-    /**
-     * Creates a new smithing recipe builder for the given location.
-     * @param recipeLocation location of the recipe
-     * @param output         recipe result
-     */
-    protected SmithingRecipeBuilder smithing(ResourceLocation recipeLocation, IItemProvider output){
-        return this.smithing(recipeLocation, output, null, 1);
-    }
-
-    /**
-     * Creates a new smithing recipe builder for the given location.
-     * @param namespace  namespace of the recipe
-     * @param identifier path of the recipe
-     * @param output     recipe result
-     */
-    protected SmithingRecipeBuilder smithing(String namespace, String identifier, IItemProvider output){
-        return this.smithing(new ResourceLocation(namespace, identifier), output, null, 1);
-    }
-
-    /**
-     * Creates a new smithing recipe builder for the given location.
-     * @param identifier path of the recipe
-     * @param output     recipe result
-     */
-    protected SmithingRecipeBuilder smithing(String identifier, IItemProvider output){
-        return this.smithing(this.modid, identifier, output, null, 1);
-    }
-
-    /**
-     * Creates a new smithing recipe builder with the output's identifier as location.
-     * @param output recipe result
-     */
-    protected SmithingRecipeBuilder smithing(IItemProvider output){
-        return this.smithing(output, null, 1);
-    }
-
-    /**
-     * Creates a new smithing recipe builder for the given location.
-     * @param recipeLocation location of the recipe
-     * @param output         recipe result
-     */
-    protected SmithingRecipeBuilder smithing(ResourceLocation recipeLocation, ItemStack output){
-        return this.smithing(recipeLocation, output.getItem(), output.hasTag() && !output.getTag().isEmpty() ? output.getTag() : null, output.getCount());
-    }
-
-    /**
-     * Creates a new smithing recipe builder for the given location.
-     * @param namespace  namespace of the recipe
-     * @param identifier path of the recipe
-     * @param output     recipe result
-     */
-    protected SmithingRecipeBuilder smithing(String namespace, String identifier, ItemStack output){
-        return this.smithing(new ResourceLocation(namespace, identifier), output.getItem(), output.hasTag() && !output.getTag().isEmpty() ? output.getTag() : null, output.getCount());
-    }
-
-    /**
-     * Creates a new smithing recipe builder for the given location.
-     * @param identifier path of the recipe
-     * @param output     recipe result
-     */
-    protected SmithingRecipeBuilder smithing(String identifier, ItemStack output){
-        return this.smithing(this.modid, identifier, output.getItem(), output.hasTag() && !output.getTag().isEmpty() ? output.getTag() : null, output.getCount());
-    }
-
-    /**
-     * Creates a new smithing recipe builder with the output's identifier as location.
-     * @param output recipe result
-     */
-    protected SmithingRecipeBuilder smithing(ItemStack output){
-        return this.smithing(output.getItem(), output.hasTag() && !output.getTag().isEmpty() ? output.getTag() : null, output.getCount());
-    }
-
-    /**
      * Creates a new stonecutting recipe builder for the given location.
      * @param recipeLocation location of the recipe
      * @param output         recipe result
@@ -927,15 +750,17 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private final IItemProvider output;
         private final CompoundNBT outputTag;
         private final int outputCount;
+        private IRecipeSerializer<?> serializer;
         private String group;
         private boolean hasAdvancement = true;
         private final List<CriterionInstance> unlockedBy = new ArrayList<>();
 
-        protected RecipeBuilder(ResourceLocation identifier, IItemProvider output, CompoundNBT outputTag, int outputCount){
+        protected RecipeBuilder(ResourceLocation identifier, IRecipeSerializer serializer, IItemProvider output, CompoundNBT outputTag, int outputCount){
             this.identifier = identifier;
             this.output = output;
             this.outputTag = outputTag;
             this.outputCount = outputCount;
+            this.serializer = serializer;
         }
 
         /**
@@ -1011,6 +836,14 @@ public abstract class RecipeGenerator extends ResourceGenerator {
             return this.unlockedBy(InventoryChangeTrigger.Instance.hasItem(ItemPredicate.Builder.item().of(tag).build()));
         }
 
+        /**
+         * Sets a different recipe serializer. This may not have an effect for all recipe types, most notably the smelting recipes.
+         */
+        public T customSerializer(IRecipeSerializer<?> serializer){
+            this.serializer = serializer;
+            return this.self();
+        }
+
         private T self(){
             //noinspection unchecked
             return (T)this;
@@ -1023,7 +856,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private final Map<Character,Ingredient> inputs = new HashMap<>();
 
         private ShapedRecipeBuilder(ResourceLocation identifier, IItemProvider output, CompoundNBT outputTag, int outputCount){
-            super(identifier, output, outputTag, outputCount);
+            super(identifier, IRecipeSerializer.SHAPED_RECIPE, output, outputTag, outputCount);
         }
 
         /**
@@ -1113,7 +946,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private final List<Ingredient> inputs = new ArrayList<>();
 
         private ShapelessRecipeBuilder(ResourceLocation identifier, IItemProvider output, CompoundNBT outputTag, int outputCount){
-            super(identifier, output, outputTag, outputCount);
+            super(identifier, IRecipeSerializer.SHAPELESS_RECIPE, output, outputTag, outputCount);
         }
 
         /**
@@ -1233,7 +1066,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private int duration = 200;
 
         private SmeltingRecipeBuilder(ResourceLocation identifier, IItemProvider output, CompoundNBT outputTag, int count){
-            super(identifier, output, outputTag, count);
+            super(identifier, IRecipeSerializer.SMELTING_RECIPE, output, outputTag, count);
         }
 
         /**
@@ -1372,103 +1205,12 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         }
     }
 
-    protected static class SmithingRecipeBuilder extends RecipeBuilder<SmithingRecipeBuilder> {
-
-        private Ingredient base, addition;
-
-        private SmithingRecipeBuilder(ResourceLocation identifier, IItemProvider output, CompoundNBT outputTag, int outputCount){
-            super(identifier, output, outputTag, outputCount);
-        }
-
-        /**
-         * Sets the base ingredient for this recipe.
-         * @param ingredient ingredient to be used as base
-         */
-        public SmithingRecipeBuilder base(Ingredient ingredient){
-            this.base = ingredient;
-            return this;
-        }
-
-        /**
-         * Sets the base ingredient for this recipe.
-         * @param ingredients ingredients to be accepted as base
-         */
-        public SmithingRecipeBuilder base(Ingredient... ingredients){
-            return this.base(Ingredient.merge(Arrays.asList(ingredients)));
-        }
-
-        /**
-         * Sets the base ingredient for this recipe.
-         * @param items items to be accepted as base
-         */
-        public SmithingRecipeBuilder base(IItemProvider... items){
-            return this.base(Ingredient.of(items));
-        }
-
-        /**
-         * Sets the base ingredient for this recipe.
-         * @param itemStacks items to be accepted as base
-         */
-        public SmithingRecipeBuilder base(ItemStack... itemStacks){
-            return this.base(Ingredient.of(itemStacks));
-        }
-
-        /**
-         * Sets the base ingredient for this recipe.
-         * @param tag item tag to be accepted as base
-         */
-        public SmithingRecipeBuilder base(Tag<Item> tag){
-            return this.base(Ingredient.of(tag));
-        }
-
-        /**
-         * Sets the addition ingredient for this recipe.
-         * @param ingredient ingredient to be used as addition
-         */
-        public SmithingRecipeBuilder addition(Ingredient ingredient){
-            this.addition = ingredient;
-            return this;
-        }
-
-        /**
-         * Sets the addition ingredient for this recipe.
-         * @param ingredients ingredients to be accepted as addition
-         */
-        public SmithingRecipeBuilder addition(Ingredient... ingredients){
-            return this.addition(Ingredient.merge(Arrays.asList(ingredients)));
-        }
-
-        /**
-         * Sets the addition ingredient for this recipe.
-         * @param items items to be accepted as addition
-         */
-        public SmithingRecipeBuilder addition(IItemProvider... items){
-            return this.addition(Ingredient.of(items));
-        }
-
-        /**
-         * Sets the addition ingredient for this recipe.
-         * @param itemStacks items to be accepted as addition
-         */
-        public SmithingRecipeBuilder addition(ItemStack... itemStacks){
-            return this.addition(Ingredient.of(itemStacks));
-        }
-
-        /**
-         * Sets the addition ingredient for this recipe.
-         * @param tag item tag to be accepted as addition
-         */
-        public SmithingRecipeBuilder addition(Tag<Item> tag){
-            return this.addition(Ingredient.of(tag));
-        }
-    }
-
     protected static class StoneCuttingRecipeBuilder extends RecipeBuilder<StoneCuttingRecipeBuilder> {
 
         private Ingredient input;
 
         private StoneCuttingRecipeBuilder(ResourceLocation identifier, IItemProvider output, int outputCount){
-            super(identifier, output, null, outputCount);
+            super(identifier, IRecipeSerializer.STONECUTTER, output, null, outputCount);
         }
 
         /**
