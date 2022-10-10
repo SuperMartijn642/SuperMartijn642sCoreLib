@@ -13,6 +13,7 @@ import net.minecraft.advancements.criterion.RecipeUnlockedTrigger;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.ITag;
@@ -45,10 +46,11 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         for(RecipeBuilder<?> recipeBuilder : this.recipes.values()){
             JsonObject json = new JsonObject();
 
+            // Set the recipe serializer
+            json.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(recipeBuilder.serializer).toString());
+
             // Filter by recipe builder
             if(recipeBuilder instanceof ShapedRecipeBuilder){
-                json.addProperty("type", "minecraft:crafting_shaped");
-
                 // Verify all keys are defined
                 Set<Character> characters = new HashSet<>();
                 for(String row : ((ShapedRecipeBuilder)recipeBuilder).pattern){
@@ -81,8 +83,6 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 json.add("result", resultJson);
 
             }else if(recipeBuilder instanceof ShapelessRecipeBuilder){
-                json.addProperty("type", "minecraft:crafting_shapeless");
-
                 // Group
                 json.addProperty("group", recipeBuilder.group);
                 // Ingredients
@@ -117,8 +117,6 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                     serializeCookingRecipe(json, (SmeltingRecipeBuilder)recipeBuilder, 2, 100);
                 }
             }else if(recipeBuilder instanceof SmithingRecipeBuilder){
-                json.addProperty("type", "minecraft:smithing");
-
                 // Group
                 json.addProperty("group", recipeBuilder.group);
                 // Base
@@ -135,8 +133,6 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 json.add("result", resultJson);
 
             }else if(recipeBuilder instanceof StoneCuttingRecipeBuilder){
-                json.addProperty("type", "minecraft:stonecutting");
-
                 // Group
                 json.addProperty("group", recipeBuilder.group);
                 // Ingredient
@@ -927,15 +923,17 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private final IItemProvider output;
         private final CompoundNBT outputTag;
         private final int outputCount;
+        private IRecipeSerializer<?> serializer;
         private String group;
         private boolean hasAdvancement = true;
         private final List<CriterionInstance> unlockedBy = new ArrayList<>();
 
-        protected RecipeBuilder(ResourceLocation identifier, IItemProvider output, CompoundNBT outputTag, int outputCount){
+        protected RecipeBuilder(ResourceLocation identifier, IRecipeSerializer serializer, IItemProvider output, CompoundNBT outputTag, int outputCount){
             this.identifier = identifier;
             this.output = output;
             this.outputTag = outputTag;
             this.outputCount = outputCount;
+            this.serializer = serializer;
         }
 
         /**
@@ -1011,6 +1009,14 @@ public abstract class RecipeGenerator extends ResourceGenerator {
             return this.unlockedBy(InventoryChangeTrigger.Instance.hasItems(ItemPredicate.Builder.item().of(tagKey).build()));
         }
 
+        /**
+         * Sets a different recipe serializer. This may not have an effect for all recipe types, most notably the smelting recipes.
+         */
+        public T customSerializer(IRecipeSerializer<?> serializer){
+            this.serializer = serializer;
+            return this.self();
+        }
+
         private T self(){
             //noinspection unchecked
             return (T)this;
@@ -1023,7 +1029,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private final Map<Character,Ingredient> inputs = new HashMap<>();
 
         private ShapedRecipeBuilder(ResourceLocation identifier, IItemProvider output, CompoundNBT outputTag, int outputCount){
-            super(identifier, output, outputTag, outputCount);
+            super(identifier, IRecipeSerializer.SHAPED_RECIPE, output, outputTag, outputCount);
         }
 
         /**
@@ -1113,7 +1119,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private final List<Ingredient> inputs = new ArrayList<>();
 
         private ShapelessRecipeBuilder(ResourceLocation identifier, IItemProvider output, CompoundNBT outputTag, int outputCount){
-            super(identifier, output, outputTag, outputCount);
+            super(identifier, IRecipeSerializer.SHAPELESS_RECIPE, output, outputTag, outputCount);
         }
 
         /**
@@ -1233,7 +1239,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private int duration = 200;
 
         private SmeltingRecipeBuilder(ResourceLocation identifier, IItemProvider output, CompoundNBT outputTag, int count){
-            super(identifier, output, outputTag, count);
+            super(identifier, IRecipeSerializer.SMELTING_RECIPE, output, outputTag, count);
         }
 
         /**
@@ -1377,7 +1383,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private Ingredient base, addition;
 
         private SmithingRecipeBuilder(ResourceLocation identifier, IItemProvider output, CompoundNBT outputTag, int outputCount){
-            super(identifier, output, outputTag, outputCount);
+            super(identifier, IRecipeSerializer.SMITHING, output, outputTag, outputCount);
         }
 
         /**
@@ -1468,7 +1474,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private Ingredient input;
 
         private StoneCuttingRecipeBuilder(ResourceLocation identifier, IItemProvider output, int outputCount){
-            super(identifier, output, null, outputCount);
+            super(identifier, IRecipeSerializer.STONECUTTER, output, null, outputCount);
         }
 
         /**
