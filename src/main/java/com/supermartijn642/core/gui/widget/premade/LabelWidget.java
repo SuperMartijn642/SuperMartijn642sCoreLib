@@ -41,10 +41,10 @@ public class LabelWidget extends BaseWidget {
     @Override
     public void render(int mouseX, int mouseY){
         if(this.active){
-            ScreenUtils.fillRect(this.x - 1, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, -6250336);
-            ScreenUtils.fillRect(this.x, this.y, this.x + this.width, this.y + this.height, 0xff404040);
+            ScreenUtils.fillRect(this.x, this.y, this.width, this.height, -6250336);
+            ScreenUtils.fillRect(this.x + 1, this.y + 1, this.width - 2, this.height - 2, 0xff404040);
 
-            ScreenUtils.drawCenteredStringWithShadow(this.text.get(), this.x, this.y + 2, this.active ? ScreenUtils.ACTIVE_TEXT_COLOR : ScreenUtils.INACTIVE_TEXT_COLOR);
+            ScreenUtils.drawCenteredStringWithShadow(this.text.get(), this.x + this.width / 2f, this.y + 2, this.active ? ScreenUtils.ACTIVE_TEXT_COLOR : ScreenUtils.INACTIVE_TEXT_COLOR);
         }
     }
 }

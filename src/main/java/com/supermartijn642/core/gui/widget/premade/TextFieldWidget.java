@@ -316,7 +316,7 @@ public class TextFieldWidget extends BaseWidget {
                 case 201: // page up
                 case 209: // page down
                 default:
-                    break;
+                    return true;
                 case 211: // delete
                     this.removeAtCursor(false);
                     break;
