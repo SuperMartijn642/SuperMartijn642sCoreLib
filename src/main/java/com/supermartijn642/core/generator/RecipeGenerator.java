@@ -22,12 +22,37 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IRecipeFactory;
 import net.minecraftforge.oredict.OreIngredient;
 
+import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * Created 23/08/2022 by SuperMartijn642
  */
 public abstract class RecipeGenerator extends ResourceGenerator {
+
+    /**
+     * {@link CraftingHelper.recipes}
+     */
+    @SuppressWarnings("JavadocReference")
+    private static final Supplier<Map<ResourceLocation,IRecipeFactory>> CRAFTING_HELPER_RECIPES;
+
+    static{
+        try{
+            Field field = CraftingHelper.class.getDeclaredField("recipes");
+            field.setAccessible(true);
+            CRAFTING_HELPER_RECIPES = () -> {
+                try{
+                    //noinspection unchecked
+                    return (Map<ResourceLocation,IRecipeFactory>)field.get(null);
+                }catch(IllegalAccessException e){
+                    throw new RuntimeException(e);
+                }
+            };
+        }catch(NoSuchFieldException e){
+            throw new RuntimeException(e);
+        }
+    }
 
     private final Map<ResourceLocation,RecipeBuilder<?>> recipes = new HashMap<>();
     private final Advancements advancements;
@@ -195,7 +220,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
     }
 
     private static ResourceLocation getRecipeSerializerRegistration(IRecipeFactory serializer){
-        for(Map.Entry<ResourceLocation,IRecipeFactory> entry : CraftingHelper.recipes.entrySet()){
+        for(Map.Entry<ResourceLocation,IRecipeFactory> entry : CRAFTING_HELPER_RECIPES.get().entrySet()){
             if(entry.getValue() == serializer)
                 return entry.getKey();
         }
@@ -1174,7 +1199,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * Sets a different recipe serializer. This may not have an effect for all recipe types, most notably the smelting recipes.
          */
         public T customSerializer(ResourceLocation serializer){
-            if(!CraftingHelper.recipes.containsKey(serializer))
+            if(!CRAFTING_HELPER_RECIPES.get().containsKey(serializer))
                 throw new IllegalArgumentException("Cannot use unknown recipe factory '" + serializer + "' for recipe '" + this.identifier + "'!");
             this.serializer = serializer.toString();
             return this.self();
