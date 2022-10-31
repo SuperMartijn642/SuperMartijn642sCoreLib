@@ -126,7 +126,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
 
     private static String formatVariantName(PartialBlockState state){
         //noinspection unchecked,rawtypes
-        String name = state.properties.entrySet().stream().map(entry -> entry.getKey().getName() + "=" + ((IProperty)entry.getKey()).getName(entry.getValue())).collect(Collectors.joining(","));
+        String name = state.properties.entrySet().stream().sorted(Comparator.comparing(entry -> entry.getKey().getName())).map(entry -> entry.getKey().getName() + "=" + ((IProperty)entry.getKey()).getName(entry.getValue())).collect(Collectors.joining(","));
         return name.isEmpty() ? "normal" : name;
     }
 
