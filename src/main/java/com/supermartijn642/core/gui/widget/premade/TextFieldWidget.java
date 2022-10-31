@@ -292,7 +292,7 @@ public class TextFieldWidget extends BaseWidget {
             return false;
 
         boolean shift = GuiScreen.isShiftKeyDown();
-        if(keyCode == 1){
+        if(keyCode == 256){
             this.setSelected(false);
         }else if(GuiScreen.isKeyComboCtrlA(keyCode)){
             this.lineScrollOffset = 0;
@@ -307,20 +307,20 @@ public class TextFieldWidget extends BaseWidget {
             this.addTextAtCursor("");
         }else{
             switch(keyCode){
-                case 14: // backspace
+                case 259: // backspace
                     this.removeAtCursor(true);
                     break;
-                case 210: // insert
+                case 260: // insert
                 case 264: // ?
                 case 265: // ?
-                case 201: // page up
-                case 209: // page down
+                case 266: // page up
+                case 267: // page down
                 default:
                     return true;
-                case 211: // delete
+                case 261: // delete
                     this.removeAtCursor(false);
                     break;
-                case 205: // right
+                case 262: // right
                     if(!shift && this.cursorPosition != this.selectionPos)
                         this.cursorPosition = this.selectionPos = Math.max(this.cursorPosition, this.selectionPos);
                     else if(this.cursorPosition < this.text.length()){
@@ -330,7 +330,7 @@ public class TextFieldWidget extends BaseWidget {
                     }
                     this.moveLineOffsetToCursor();
                     break;
-                case 203: // left
+                case 263: // left
                     if(!shift && this.cursorPosition != this.selectionPos)
                         this.cursorPosition = this.selectionPos = Math.min(this.cursorPosition, this.selectionPos);
                     else if(this.cursorPosition > 0){
@@ -340,11 +340,11 @@ public class TextFieldWidget extends BaseWidget {
                     }
                     this.moveLineOffsetToCursor();
                     break;
-                case 199: // home
+                case 268: // home
                     this.cursorPosition = this.selectionPos = 0;
                     this.moveLineOffsetToCursor();
                     break;
-                case 207: // end
+                case 269: // end
                     this.cursorPosition = this.selectionPos = this.text.length();
                     this.moveLineOffsetToCursor();
                     break;
