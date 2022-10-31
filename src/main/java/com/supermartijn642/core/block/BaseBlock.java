@@ -17,6 +17,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -285,9 +286,10 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
         return this.properties == null || (state.isFullCube() && this.properties.canOcclude);
     }
 
+    @Nullable
     @Override
-    public boolean isCollidable(){
-        return this.properties.hasCollision;
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos){
+        return this.properties.hasCollision ? super.getCollisionBoundingBox(blockState, worldIn, pos) : NULL_AABB;
     }
 
     @Override
