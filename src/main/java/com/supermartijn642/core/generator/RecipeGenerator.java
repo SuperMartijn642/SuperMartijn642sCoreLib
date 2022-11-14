@@ -2,9 +2,10 @@ package com.supermartijn642.core.generator;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.supermartijn642.core.recipe.ConditionalRecipeSerializer;
-import com.supermartijn642.core.recipe.condition.ModLoadedRecipeCondition;
-import com.supermartijn642.core.recipe.condition.RecipeCondition;
+import com.supermartijn642.core.data.condition.ModLoadedResourceCondition;
+import com.supermartijn642.core.data.condition.NotResourceCondition;
+import com.supermartijn642.core.data.condition.ResourceCondition;
+import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
@@ -956,16 +957,29 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         /**
          * Adds a condition for this recipe to be loaded.
          */
-        public T condition(RecipeCondition condition){
-            this.conditions.add(RecipeCondition.createForgeCondition(condition));
-            return this.self();
+        public T condition(ResourceCondition condition){
+            return this.condition(ResourceCondition.createForgeCondition(condition));
+        }
+
+        /**
+         * Adds a condition to only load this recipe when the given condition is <b>not</b> satisfied.
+         */
+        public T notCondition(ICondition condition){
+            return this.condition(new NotResourceCondition(condition));
+        }
+
+        /**
+         * Adds a condition to only load this recipe when the given condition is <b>not</b> satisfied.
+         */
+        public T notCondition(ResourceCondition condition){
+            return this.condition(new NotResourceCondition(condition));
         }
 
         /**
          * Adds a condition to only load this recipe when a mod with the given modid is present.
          */
         public T modLoadedCondition(String modid){
-            return this.condition(new ModLoadedRecipeCondition(modid));
+            return this.condition(new ModLoadedResourceCondition(modid));
         }
 
         /**
