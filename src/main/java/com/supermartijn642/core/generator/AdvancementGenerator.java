@@ -219,7 +219,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
         }
 
         /**
-         * Adds a condition for this recipe to be loaded.
+         * Adds a condition for this advancement to be loaded.
          */
         public AdvancementBuilder condition(ICondition condition){
             this.conditions.add(condition);
@@ -227,28 +227,28 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
         }
 
         /**
-         * Adds a condition for this recipe to be loaded.
+         * Adds a condition for this advancement to be loaded.
          */
         public AdvancementBuilder condition(ResourceCondition condition){
             return this.condition(ResourceCondition.createForgeCondition(condition));
         }
 
         /**
-         * Adds a condition to only load this recipe when the given condition is <b>not</b> satisfied.
+         * Adds a condition to only load this advancement when the given condition is <b>not</b> satisfied.
          */
         public AdvancementBuilder notCondition(ICondition condition){
             return this.condition(new NotResourceCondition(condition));
         }
 
         /**
-         * Adds a condition to only load this recipe when the given condition is <b>not</b> satisfied.
+         * Adds a condition to only load this advancement when the given condition is <b>not</b> satisfied.
          */
         public AdvancementBuilder notCondition(ResourceCondition condition){
             return this.condition(new NotResourceCondition(condition));
         }
 
         /**
-         * Adds a condition to only load this recipe when a mod with the given modid is present.
+         * Adds a condition to only load this advancement when a mod with the given modid is present.
          */
         public AdvancementBuilder modLoadedCondition(String modid){
             return this.condition(new ModLoadedResourceCondition(modid));

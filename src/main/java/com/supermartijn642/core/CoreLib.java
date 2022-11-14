@@ -1,6 +1,7 @@
 package com.supermartijn642.core;
 
 import com.supermartijn642.core.data.condition.ModLoadedResourceCondition;
+import com.supermartijn642.core.data.condition.NotResourceCondition;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
@@ -27,6 +28,7 @@ public class CoreLib {
         RegistrationHandler handler = RegistrationHandler.get("supermartijn642corelib");
         handler.registerRecipeSerializer("conditional", ConditionalRecipeSerializer.INSTANCE);
         handler.registerResourceConditionSerializer("mod_loaded", ModLoadedResourceCondition.SERIALIZER);
+        handler.registerResourceConditionSerializer("not", NotResourceCondition.SERIALIZER);
 
         // Register generator for default tags
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));
