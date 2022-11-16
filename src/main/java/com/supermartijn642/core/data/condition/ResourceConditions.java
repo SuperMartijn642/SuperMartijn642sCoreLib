@@ -1,4 +1,4 @@
-package com.supermartijn642.core.recipe.condition;
+package com.supermartijn642.core.data.condition;
 
 import com.google.gson.JsonObject;
 import net.minecraft.util.ResourceLocation;
@@ -11,15 +11,15 @@ import java.util.Map;
 /**
  * Created 27/08/2022 by SuperMartijn642
  */
-class RecipeConditions {
+class ResourceConditions {
 
-    private static final Map<RecipeConditionSerializer<?>,IConditionSerializer<?>> TO_UNDERLYING_MAP = new HashMap<>();
+    private static final Map<ResourceConditionSerializer<?>,IConditionSerializer<?>> TO_UNDERLYING_MAP = new HashMap<>();
 
-    static ICondition wrap(RecipeCondition condition){
+    static ICondition wrap(ResourceCondition condition){
         return new ConditionWrapper(condition);
     }
 
-    static IConditionSerializer<?> wrap(ResourceLocation identifier, RecipeConditionSerializer<?> serializer){
+    static IConditionSerializer<?> wrap(ResourceLocation identifier, ResourceConditionSerializer<?> serializer){
         IConditionSerializer<?> forgeSerializer = new ConditionSerializerWrapper(identifier, serializer);
         TO_UNDERLYING_MAP.put(serializer, forgeSerializer);
         return forgeSerializer;
@@ -27,9 +27,9 @@ class RecipeConditions {
 
     private static class ConditionWrapper implements ICondition {
 
-        private final RecipeCondition condition;
+        private final ResourceCondition condition;
 
-        ConditionWrapper(RecipeCondition condition){
+        ConditionWrapper(ResourceCondition condition){
             this.condition = condition;
         }
 
@@ -40,24 +40,24 @@ class RecipeConditions {
 
         @Override
         public boolean test(){
-            return this.condition.test();
+            return this.condition.test(new ResourceConditionContext());
         }
     }
 
     private static class ConditionSerializerWrapper implements IConditionSerializer<ICondition> {
 
         private final ResourceLocation identifier;
-        private final RecipeConditionSerializer<RecipeCondition> serializer;
+        private final ResourceConditionSerializer<ResourceCondition> serializer;
 
-        private ConditionSerializerWrapper(ResourceLocation identifier, RecipeConditionSerializer<?> serializer){
+        private ConditionSerializerWrapper(ResourceLocation identifier, ResourceConditionSerializer<?> serializer){
             this.identifier = identifier;
             //noinspection unchecked
-            this.serializer = (RecipeConditionSerializer<RecipeCondition>)serializer;
+            this.serializer = (ResourceConditionSerializer<ResourceCondition>)serializer;
         }
 
         @Override
         public void write(JsonObject json, ICondition value){
-            this.serializer.serialize(json, (RecipeCondition)value);
+            this.serializer.serialize(json, (ResourceCondition)value);
         }
 
         @Override
