@@ -2,8 +2,8 @@ package com.supermartijn642.core.registry;
 
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.block.BaseBlockEntityType;
+import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import com.supermartijn642.core.gui.BaseContainerType;
-import com.supermartijn642.core.recipe.condition.RecipeConditionSerializer;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.Item;
@@ -350,33 +350,33 @@ public class RegistrationHandler {
         this.addCallback(Registries.RECIPE_CONDITION_SERIALIZERS, callback);
     }
 
-    public void registerRecipeConditionSerializer(String identifier, Supplier<RecipeConditionSerializer<?>> recipeSerializer){
-        this.registerConditionSerializer(identifier, () -> RecipeConditionSerializer.createForgeConditionSerializer(new ResourceLocation(this.modid, identifier), recipeSerializer.get()));
+    public void registerResourceConditionSerializer(String identifier, Supplier<ResourceConditionSerializer<?>> conditionSerializer){
+        this.registerConditionSerializer(identifier, () -> ResourceConditionSerializer.createForgeConditionSerializer(new ResourceLocation(this.modid, identifier), conditionSerializer.get()));
     }
 
-    public void registerRecipeConditionSerializer(String identifier, RecipeConditionSerializer<?> recipeSerializer){
-        this.registerConditionSerializer(identifier, () -> RecipeConditionSerializer.createForgeConditionSerializer(new ResourceLocation(this.modid, identifier), recipeSerializer));
+    public void registerResourceConditionSerializer(String identifier, ResourceConditionSerializer<?> conditionSerializer){
+        this.registerConditionSerializer(identifier, () -> ResourceConditionSerializer.createForgeConditionSerializer(new ResourceLocation(this.modid, identifier), conditionSerializer));
     }
 
-    public void registerRecipeConditionSerializerOverride(String namespace, String identifier, Supplier<RecipeConditionSerializer<?>> recipeSerializer){
-        this.registerConditionSerializerOverride(namespace, identifier, () -> RecipeConditionSerializer.createForgeConditionSerializer(new ResourceLocation(namespace, identifier), recipeSerializer.get()));
+    public void registerResourceConditionSerializerOverride(String namespace, String identifier, Supplier<ResourceConditionSerializer<?>> conditionSerializer){
+        this.registerConditionSerializerOverride(namespace, identifier, () -> ResourceConditionSerializer.createForgeConditionSerializer(new ResourceLocation(namespace, identifier), conditionSerializer.get()));
     }
 
-    public void registerRecipeConditionSerializerOverride(String namespace, String identifier, RecipeConditionSerializer<?> recipeSerializer){
-        this.registerConditionSerializerOverride(namespace, identifier, () -> RecipeConditionSerializer.createForgeConditionSerializer(new ResourceLocation(namespace, identifier), recipeSerializer));
+    public void registerResourceConditionSerializerOverride(String namespace, String identifier, ResourceConditionSerializer<?> conditionSerializer){
+        this.registerConditionSerializerOverride(namespace, identifier, () -> ResourceConditionSerializer.createForgeConditionSerializer(new ResourceLocation(namespace, identifier), conditionSerializer));
     }
 
-    public void registerRecipeConditionSerializerCallback(Consumer<Helper<RecipeConditionSerializer<?>>> callback){
-        this.registerConditionSerializerCallback(helper -> callback.accept(new Helper<RecipeConditionSerializer<?>>(null) {
+    public void registerResourceConditionSerializerCallback(Consumer<Helper<ResourceConditionSerializer<?>>> callback){
+        this.registerConditionSerializerCallback(helper -> callback.accept(new Helper<ResourceConditionSerializer<?>>(null) {
             @Override
-            public <X extends RecipeConditionSerializer<?>> X register(String identifier, X object){
-                helper.register(identifier, RecipeConditionSerializer.createForgeConditionSerializer(new ResourceLocation(RegistrationHandler.this.modid, identifier), object));
+            public <X extends ResourceConditionSerializer<?>> X register(String identifier, X object){
+                helper.register(identifier, ResourceConditionSerializer.createForgeConditionSerializer(new ResourceLocation(RegistrationHandler.this.modid, identifier), object));
                 return object;
             }
 
             @Override
-            public <X extends RecipeConditionSerializer<?>> X registerOverride(String namespace, String identifier, X object){
-                helper.register(namespace, identifier, RecipeConditionSerializer.createForgeConditionSerializer(new ResourceLocation(namespace, identifier), object));
+            public <X extends ResourceConditionSerializer<?>> X registerOverride(String namespace, String identifier, X object){
+                helper.register(namespace, identifier, ResourceConditionSerializer.createForgeConditionSerializer(new ResourceLocation(namespace, identifier), object));
                 return object;
             }
         }));

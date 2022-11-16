@@ -1,13 +1,14 @@
 package com.supermartijn642.core;
 
 import com.supermartijn642.core.data.TagLoader;
+import com.supermartijn642.core.data.condition.ModLoadedResourceCondition;
+import com.supermartijn642.core.data.condition.NotResourceCondition;
 import com.supermartijn642.core.generator.GeneratorManager;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
 import com.supermartijn642.core.loot_table.SurvivesExplosionLootCondition;
 import com.supermartijn642.core.loot_table.ToolMatchLootCondition;
 import com.supermartijn642.core.network.OpenContainerPacket;
 import com.supermartijn642.core.network.PacketChannel;
-import com.supermartijn642.core.recipe.condition.ModLoadedRecipeCondition;
 import com.supermartijn642.core.registry.ClientRegistrationHandler;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import com.supermartijn642.core.registry.RegistrationHandler;
@@ -38,7 +39,8 @@ public class CoreLib {
 
         // Register conditional recipe type
         RegistrationHandler handler = RegistrationHandler.get("supermartijn642corelib");
-        handler.registerRecipeConditionSerializer("mod_loaded", ModLoadedRecipeCondition.SERIALIZER);
+        handler.registerResourceConditionSerializer("mod_loaded", ModLoadedResourceCondition.SERIALIZER);
+        handler.registerResourceConditionSerializer("not", NotResourceCondition.SERIALIZER);
 
         // Register loot condition
         LootConditionManager.registerCondition(SurvivesExplosionLootCondition.SERIALIZER);
