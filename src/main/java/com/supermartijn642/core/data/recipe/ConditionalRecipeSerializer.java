@@ -1,10 +1,11 @@
-package com.supermartijn642.core.recipe;
+package com.supermartijn642.core.data.recipe;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.supermartijn642.core.recipe.condition.RecipeCondition;
-import com.supermartijn642.core.recipe.condition.RecipeConditionSerializer;
+import com.supermartijn642.core.data.condition.ResourceCondition;
+import com.supermartijn642.core.data.condition.ResourceConditionContext;
+import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.network.FriendlyByteBuf;
@@ -42,18 +43,18 @@ public class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> 
             if(!RegistryUtil.isValidIdentifier(type))
                 throw new RuntimeException("Condition for recipe '" + location + "' has invalid type '" + type + "'!");
 
-            RecipeConditionSerializer<?> serializer = Registries.RECIPE_CONDITION_SERIALIZERS.getValue(new ResourceLocation(type));
+            ResourceConditionSerializer<?> serializer = Registries.RESOURCE_CONDITION_SERIALIZERS.getValue(new ResourceLocation(type));
             if(serializer == null)
                 throw new RuntimeException("Condition for recipe '" + location + "' has unknown type '" + new ResourceLocation(type) + "'!");
 
-            RecipeCondition condition;
+            ResourceCondition condition;
             try{
                 condition = serializer.deserialize(conditionJson);
             }catch(Exception e){
                 throw new RuntimeException("Encountered exception whilst testing condition '" + new ResourceLocation(type) + "' for recipe '" + location + "'!");
             }
 
-            if(!condition.test())
+            if(!condition.test(new ResourceConditionContext()))
                 return null;
         }
 

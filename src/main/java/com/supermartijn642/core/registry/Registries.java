@@ -1,9 +1,10 @@
 package com.supermartijn642.core.registry;
 
 import com.google.common.collect.Lists;
-import com.supermartijn642.core.recipe.condition.RecipeConditionSerializer;
+import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -65,7 +66,7 @@ public final class Registries {
     public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZERS = vanilla(RECIPE_SERIALIZER, RecipeSerializer.class);
     public static final Registry<Attribute> ATTRIBUTES = vanilla(ATTRIBUTE, Attribute.class);
     public static final Registry<StatType<?>> STAT_TYPES = vanilla(STAT_TYPE, StatType.class);
-    public static final Registry<RecipeConditionSerializer<?>> RECIPE_CONDITION_SERIALIZERS = new MapBackedRegistry<>(RecipeConditionSerializer.class);
+    public static final Registry<ResourceConditionSerializer<?>> RESOURCE_CONDITION_SERIALIZERS = new MapBackedRegistry<>(ResourceConditionSerializer.class);
 
     static{
         REGISTRATION_ORDER = Lists.newArrayList(
@@ -84,7 +85,7 @@ public final class Registries {
             Registries.RECIPE_SERIALIZERS,
             Registries.ATTRIBUTES,
             Registries.STAT_TYPES,
-            Registries.RECIPE_CONDITION_SERIALIZERS
+            Registries.RESOURCE_CONDITION_SERIALIZERS
         );
     }
 
@@ -209,6 +210,8 @@ public final class Registries {
                 throw new RuntimeException("Duplicate registry for identifier '" + identifier + "'!");
             if(this.objectToIdentifier.containsKey(object))
                 throw new RuntimeException("Duplicate registry for object under '" + this.objectToIdentifier.get(object) + "' and '" + identifier + "'!");
+            if(ResourceConditions.get(identifier) != null)
+                throw new RuntimeException("A resource condition with identifier '" + identifier + "' has already been registered to Fabric's registry!");
 
             this.identifierToObject.put(identifier, object);
             this.objectToIdentifier.put(object, identifier);

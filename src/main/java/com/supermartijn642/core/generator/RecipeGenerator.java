@@ -2,10 +2,11 @@ package com.supermartijn642.core.generator;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.supermartijn642.core.recipe.ConditionalRecipeSerializer;
-import com.supermartijn642.core.recipe.condition.ModLoadedRecipeCondition;
-import com.supermartijn642.core.recipe.condition.RecipeCondition;
-import com.supermartijn642.core.recipe.condition.RecipeConditionSerializer;
+import com.supermartijn642.core.data.condition.ModLoadedResourceCondition;
+import com.supermartijn642.core.data.condition.NotResourceCondition;
+import com.supermartijn642.core.data.condition.ResourceCondition;
+import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
+import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
@@ -153,11 +154,11 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 JsonObject newJson = new JsonObject();
                 newJson.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE).toString());
                 JsonArray conditionsJson = new JsonArray();
-                for(RecipeCondition condition : recipeBuilder.conditions){
+                for(ResourceCondition condition : recipeBuilder.conditions){
                     JsonObject conditionJson = new JsonObject();
-                    conditionJson.addProperty("type", Registries.RECIPE_CONDITION_SERIALIZERS.getIdentifier(condition.getSerializer()).toString());
+                    conditionJson.addProperty("type", Registries.RESOURCE_CONDITION_SERIALIZERS.getIdentifier(condition.getSerializer()).toString());
                     //noinspection unchecked,rawtypes
-                    ((RecipeConditionSerializer)condition.getSerializer()).serialize(conditionJson, condition);
+                    ((ResourceConditionSerializer)condition.getSerializer()).serialize(conditionJson, condition);
                     conditionsJson.add(conditionJson);
                 }
                 newJson.add("conditions", conditionsJson);
@@ -929,7 +930,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
     public static abstract class RecipeBuilder<T extends RecipeBuilder<T>> {
 
         protected final ResourceLocation identifier;
-        private final List<RecipeCondition> conditions = new ArrayList<>();
+        private final List<ResourceCondition> conditions = new ArrayList<>();
         private final ItemLike output;
         private final CompoundTag outputTag;
         private final int outputCount;
@@ -958,16 +959,23 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         /**
          * Adds a condition for this recipe to be loaded.
          */
-        public T condition(RecipeCondition condition){
+        public T condition(ResourceCondition condition){
             this.conditions.add(condition);
             return this.self();
+        }
+
+        /**
+         * Adds a condition to only load this recipe when the given condition is <b>not</b> satisfied.
+         */
+        public T notCondition(ResourceCondition condition){
+            return this.condition(new NotResourceCondition(condition));
         }
 
         /**
          * Adds a condition to only load this recipe when a mod with the given modid is present.
          */
         public T modLoadedCondition(String modid){
-            return this.condition(new ModLoadedRecipeCondition(modid));
+            return this.condition(new ModLoadedResourceCondition(modid));
         }
 
         /**

@@ -2,6 +2,10 @@ package com.supermartijn642.core.generator;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.supermartijn642.core.data.condition.ModLoadedResourceCondition;
+import com.supermartijn642.core.data.condition.NotResourceCondition;
+import com.supermartijn642.core.data.condition.ResourceCondition;
+import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.FrameType;
@@ -45,6 +49,18 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             }
 
             JsonObject json = new JsonObject();
+            // Conditions
+            if(!advancementBuilder.conditions.isEmpty()){
+                JsonArray conditionsJson = new JsonArray();
+                for(ResourceCondition condition : advancementBuilder.conditions){
+                    JsonObject conditionJson = new JsonObject();
+                    conditionJson.addProperty("condition", Registries.RESOURCE_CONDITION_SERIALIZERS.getIdentifier(condition.getSerializer()).toString());
+                    //noinspection unchecked,rawtypes
+                    ((ResourceConditionSerializer)condition.getSerializer()).serialize(conditionJson, condition);
+                    conditionsJson.add(conditionJson);
+                }
+                json.add("fabric:load_conditions", conditionsJson);
+            }
             // Parent
             if(advancementBuilder.parent != null){
                 ResourceLocation parent = advancementBuilder.parent;
@@ -181,6 +197,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
 
         protected final String modid;
         protected final ResourceLocation identifier;
+        private final List<ResourceCondition> conditions = new ArrayList<>();
         private final Map<String,CriterionTriggerInstance> criteria = new HashMap<>();
         private final List<String[]> requirements = new ArrayList<>();
         private final List<ResourceLocation> rewardLootTables = new ArrayList<>();
@@ -202,6 +219,28 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             this.identifier = identifier;
             this.titleKey = identifier.getNamespace() + ".advancement." + identifier.getPath() + ".title";
             this.descriptionKey = identifier.getNamespace() + ".advancement." + identifier.getPath() + ".description";
+        }
+
+        /**
+         * Adds a condition for this advancement to be loaded.
+         */
+        public AdvancementBuilder condition(ResourceCondition condition){
+            this.conditions.add(condition);
+            return this;
+        }
+
+        /**
+         * Adds a condition to only load this advancement when the given condition is <b>not</b> satisfied.
+         */
+        public AdvancementBuilder notCondition(ResourceCondition condition){
+            return this.condition(new NotResourceCondition(condition));
+        }
+
+        /**
+         * Adds a condition to only load this advancement when a mod with the given modid is present.
+         */
+        public AdvancementBuilder modLoadedCondition(String modid){
+            return this.condition(new ModLoadedResourceCondition(modid));
         }
 
         /**

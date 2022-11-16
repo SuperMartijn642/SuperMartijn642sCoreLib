@@ -50,7 +50,7 @@ public @interface RegistryEntryAcceptor {
         RECIPE_SERIALIZERS(Registries.RECIPE_SERIALIZERS),
         ATTRIBUTES(Registries.ATTRIBUTES),
         STAT_TYPES(Registries.STAT_TYPES),
-        RECIPE_CONDITION_SERIALIZERS(Registries.RECIPE_CONDITION_SERIALIZERS);
+        RESOURCE_CONDITION_SERIALIZERS(Registries.RESOURCE_CONDITION_SERIALIZERS);
 
         public final Registries.Registry<?> registry;
 

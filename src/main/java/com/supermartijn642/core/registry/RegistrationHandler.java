@@ -1,7 +1,7 @@
 package com.supermartijn642.core.registry;
 
 import com.supermartijn642.core.CoreLib;
-import com.supermartijn642.core.recipe.condition.RecipeConditionSerializer;
+import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.core.particles.ParticleType;
@@ -374,24 +374,24 @@ public class RegistrationHandler {
         this.addCallback(Registries.STAT_TYPES, callback);
     }
 
-    public void registerRecipeConditionSerializer(String identifier, Supplier<RecipeConditionSerializer<?>> recipeSerializer){
-        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, identifier, recipeSerializer);
+    public void registerResourceConditionSerializer(String identifier, Supplier<ResourceConditionSerializer<?>> conditionSerializer){
+        this.addEntry(Registries.RESOURCE_CONDITION_SERIALIZERS, identifier, conditionSerializer);
     }
 
-    public void registerRecipeConditionSerializer(String identifier, RecipeConditionSerializer<?> recipeSerializer){
-        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, identifier, () -> recipeSerializer);
+    public void registerResourceConditionSerializer(String identifier, ResourceConditionSerializer<?> conditionSerializer){
+        this.addEntry(Registries.RESOURCE_CONDITION_SERIALIZERS, identifier, () -> conditionSerializer);
     }
 
-    public void registerRecipeConditionSerializerOverride(String namespace, String identifier, Supplier<RecipeConditionSerializer<?>> recipeSerializer){
-        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, namespace, identifier, recipeSerializer);
+    public void registerResourceConditionSerializerOverride(String namespace, String identifier, Supplier<ResourceConditionSerializer<?>> conditionSerializer){
+        this.addEntry(Registries.RESOURCE_CONDITION_SERIALIZERS, namespace, identifier, conditionSerializer);
     }
 
-    public void registerRecipeConditionSerializerOverride(String namespace, String identifier, RecipeConditionSerializer<?> recipeSerializer){
-        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, namespace, identifier, () -> recipeSerializer);
+    public void registerResourceConditionSerializerOverride(String namespace, String identifier, ResourceConditionSerializer<?> conditionSerializer){
+        this.addEntry(Registries.RESOURCE_CONDITION_SERIALIZERS, namespace, identifier, () -> conditionSerializer);
     }
 
-    public void registerRecipeConditionSerializerCallback(Consumer<Helper<RecipeConditionSerializer<?>>> callback){
-        this.addCallback(Registries.RECIPE_CONDITION_SERIALIZERS, callback);
+    public void registerResourceConditionSerializerCallback(Consumer<Helper<ResourceConditionSerializer<?>>> callback){
+        this.addCallback(Registries.RESOURCE_CONDITION_SERIALIZERS, callback);
     }
 
     private <T> void addEntry(Registries.Registry<T> registry, String identifier, Supplier<T> entry){
