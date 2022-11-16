@@ -1,4 +1,4 @@
-package com.supermartijn642.core.recipe;
+package com.supermartijn642.core.data.recipe;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
