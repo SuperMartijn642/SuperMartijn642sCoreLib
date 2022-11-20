@@ -1668,18 +1668,20 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 .dontShowToast()
                 .dontAnnounceToChat()
                 .rewardRecipe(recipe.identifier);
-            String[] conditions = new String[recipe.unlockedBy.size() + 1];
-            conditions[0] = "has_the_recipe";
+            String[] triggers = new String[recipe.unlockedBy.size() + 1];
+            triggers[0] = "has_the_recipe";
             if(recipe.unlockedBy.size() == 1){
                 builder.criterion("recipe_condition", recipe.unlockedBy.get(0));
-                conditions[1] = "recipe_condition";
+                triggers[1] = "recipe_condition";
             }else{
                 for(int i = 0; i < recipe.unlockedBy.size(); i++){
                     builder.criterion("recipe_condition" + (i + 1), recipe.unlockedBy.get(i));
-                    conditions[i + 1] = "recipe_condition" + (i + 1);
+                    triggers[i + 1] = "recipe_condition" + (i + 1);
                 }
             }
-            builder.requirementGroup(conditions);
+            builder.requirementGroup(triggers);
+            // Add the same conditions the recipe has to its advancement
+            recipe.conditions.forEach(builder::condition);
         }
 
         private class FakeRecipeUnlockedTrigger implements ICriterionInstance, ICriterionInstanceExtension {
