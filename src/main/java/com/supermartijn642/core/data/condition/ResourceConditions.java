@@ -15,7 +15,7 @@ class ResourceConditions {
 
     private static final Map<ResourceConditionSerializer<?>,IConditionSerializer<?>> TO_UNDERLYING_MAP = new HashMap<>();
 
-    static ICondition wrap(ResourceCondition condition){
+    static ConditionWrapper wrap(ResourceCondition condition){
         return new ConditionWrapper(condition);
     }
 
@@ -44,7 +44,7 @@ class ResourceConditions {
         }
     }
 
-    private static class ConditionSerializerWrapper implements IConditionSerializer<ICondition> {
+    private static class ConditionSerializerWrapper implements IConditionSerializer<ConditionWrapper> {
 
         private final ResourceLocation identifier;
         private final ResourceConditionSerializer<ResourceCondition> serializer;
@@ -56,12 +56,12 @@ class ResourceConditions {
         }
 
         @Override
-        public void write(JsonObject json, ICondition value){
-            this.serializer.serialize(json, (ResourceCondition)value);
+        public void write(JsonObject json, ConditionWrapper value){
+            this.serializer.serialize(json, value.condition);
         }
 
         @Override
-        public ICondition read(JsonObject json){
+        public ConditionWrapper read(JsonObject json){
             return wrap(this.serializer.deserialize(json));
         }
 
