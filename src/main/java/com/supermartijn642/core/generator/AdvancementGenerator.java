@@ -92,7 +92,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
                 if(!this.cache.doesResourceExist(ResourceType.ASSET, advancementBuilder.background.getNamespace(), "textures", advancementBuilder.background.getPath(), ".png"))
                     throw new RuntimeException("Could not find background texture '" + advancementBuilder.background + "' for advancement '" + advancementBuilder.identifier + "'!");
 
-                displayJson.addProperty("background", advancementBuilder.background.toString());
+                displayJson.addProperty("background", advancementBuilder.background.getNamespace() + ":textures/" + advancementBuilder.background.getPath() + ".png");
             }
             // Show toast
             displayJson.addProperty("show_toast", advancementBuilder.showToast);
