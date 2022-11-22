@@ -218,7 +218,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     private static ResourceLocation getRecipeSerializerRegistration(IRecipeFactory serializer){
         for(Map.Entry<ResourceLocation,IRecipeFactory> entry : CRAFTING_HELPER_RECIPES.get().entrySet()){
-            if(entry.getValue() == serializer)
+            if(entry.getValue().getClass() == serializer.getClass())
                 return entry.getKey();
         }
         return null;
