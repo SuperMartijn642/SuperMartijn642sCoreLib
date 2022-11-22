@@ -26,7 +26,9 @@ public class ResourceConditions {
     }
 
     static IConditionFactory wrap(ResourceLocation identifier, ResourceConditionSerializer<?> serializer){
-        return new ConditionSerializerWrapper(identifier, serializer);
+        IConditionFactory factory = new ConditionSerializerWrapper(identifier, serializer);
+        TO_UNDERLYING_MAP.put(serializer, factory);
+        return factory;
     }
 
     public static ResourceLocation getIdentifierForSerializer(ResourceConditionSerializer<?> serializer){
