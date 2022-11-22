@@ -1,6 +1,8 @@
 package com.supermartijn642.core.mixin;
 
+import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.Registries;
+import com.supermartijn642.core.registry.RegistryEntryAcceptor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IConditionFactory;
@@ -22,5 +24,20 @@ public class CraftingHelperMixin {
     )
     private static void registerConditionSerializer(ResourceLocation identifier, IConditionFactory conditionSerializer, CallbackInfo ci){
         Registries.onRecipeConditionSerializerAdded(identifier, conditionSerializer);
+    }
+
+    @Inject(
+        method = "loadRecipes",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraftforge/fml/common/Loader;setActiveModContainer(Lnet/minecraftforge/fml/common/ModContainer;)V",
+            shift = At.Shift.AFTER,
+            ordinal = 0
+        ),
+        remap = false
+    )
+    private static void loadRecipes(CallbackInfo ci){
+        RegistrationHandler.handleResourceConditionSerializerRegistryEvent();
+        RegistryEntryAcceptor.Handler.onRegisterEvent(Registries.RECIPE_CONDITION_SERIALIZERS);
     }
 }

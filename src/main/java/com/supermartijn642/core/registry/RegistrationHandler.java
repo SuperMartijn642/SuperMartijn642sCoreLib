@@ -84,6 +84,14 @@ public class RegistrationHandler {
     }
 
     /**
+     * @deprecated for internal use only!
+     */
+    @Deprecated
+    public static void handleResourceConditionSerializerRegistryEvent(){
+        Events.handleRegistry(Registries.RECIPE_CONDITION_SERIALIZERS, null);
+    }
+
+    /**
      * Contains one registration helper per modid
      */
     private static final Map<String,RegistrationHandler> REGISTRATION_HELPER_MAP = new HashMap<>();

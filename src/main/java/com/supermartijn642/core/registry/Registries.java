@@ -100,7 +100,7 @@ public final class Registries {
 
         // Add all registries which don't have a forge registry
         REGISTRATION_ORDER_MAP.put(ITEMS, Lists.newArrayList(BLOCK_ENTITY_TYPES, BLOCK_ENTITY_CLASSES, FLUIDS));
-        REGISTRATION_ORDER_MAP.put(ENTITY_TYPES, Lists.newArrayList(MENU_TYPES, RECIPE_CONDITION_SERIALIZERS));
+        REGISTRATION_ORDER_MAP.put(ENTITY_TYPES, Lists.newArrayList(MENU_TYPES));
     }
 
     private static <T> Registry<T> vanilla(IRegistry<ResourceLocation,T> registry, Class<? super T> valueClass){

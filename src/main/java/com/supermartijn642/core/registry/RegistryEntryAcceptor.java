@@ -131,9 +131,11 @@ public @interface RegistryEntryAcceptor {
 
         public static void onRegisterEvent(RegistryEvent.Register<?> e){
             Registries.Registry<?> registry = Registries.fromUnderlying(e.getRegistry());
-            if(registry == null)
-                return;
+            if(registry != null)
+                onRegisterEvent(registry);
+        }
 
+        public static void onRegisterEvent(Registries.Registry<?> registry){
             applyToFields(registry);
             applyToMethods(registry);
 

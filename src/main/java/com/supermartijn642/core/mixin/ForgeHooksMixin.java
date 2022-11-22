@@ -1,11 +1,16 @@
 package com.supermartijn642.core.mixin;
 
 import com.supermartijn642.core.block.BaseBlock;
+import com.supermartijn642.core.registry.RegistrationHandler;
+import com.supermartijn642.core.registry.Registries;
+import com.supermartijn642.core.registry.RegistryEntryAcceptor;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.ForgeHooks;
@@ -15,6 +20,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Map;
 
 /**
  * Created 29/07/2022 by SuperMartijn642
@@ -78,5 +85,19 @@ public class ForgeHooksMixin {
             }
             ci.setReturnValue(false);
         }
+    }
+
+    @Inject(
+        method = "loadAdvancements",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraftforge/common/crafting/CraftingHelper;init()V",
+            shift = At.Shift.AFTER
+        ),
+        remap = false
+    )
+    private static void loadAdvancements(Map<ResourceLocation, Advancement.Builder> map, CallbackInfoReturnable<Boolean> ci){
+        RegistrationHandler.handleResourceConditionSerializerRegistryEvent();
+        RegistryEntryAcceptor.Handler.onRegisterEvent(Registries.RECIPE_CONDITION_SERIALIZERS);
     }
 }
