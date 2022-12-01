@@ -33,13 +33,17 @@ import static net.minecraft.core.Registry.*;
  */
 public final class Registries {
 
+    static final Map<ResourceLocation,Registry<?>> IDENTIFIER_TO_REGISTRY = new HashMap<>();
     static final Map<net.minecraft.core.Registry<?>,Registry<?>> VANILLA_REGISTRY_MAP = new HashMap<>();
     static final List<Registry<?>> REGISTRATION_ORDER;
 
     private static void addRegistry(Registry<?> registry){
+        if(IDENTIFIER_TO_REGISTRY.containsKey(registry.getRegistryIdentifier()))
+            throw new RuntimeException("Duplicate registry registration for identifier '" + registry.getRegistryIdentifier() + "'!");
         if(registry.hasVanillaRegistry() && VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
             throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
 
+        IDENTIFIER_TO_REGISTRY.put(registry.getRegistryIdentifier(), registry);
         if(registry.hasVanillaRegistry())
             VANILLA_REGISTRY_MAP.put(registry.getVanillaRegistry(), registry);
     }
@@ -48,6 +52,15 @@ public final class Registries {
     @Deprecated
     public static <T> Registry<T> fromUnderlying(net.minecraft.core.Registry<T> registry){
         return (Registry<T>)VANILLA_REGISTRY_MAP.get(registry);
+    }
+
+    /**
+     * Gets the registry registered under the given identifier.
+     * @param identifier identifier of the registry
+     * @return the registry registered under the given identifier or {@code null} if no registry is registered
+     */
+    public static Registry<?> getRegistry(ResourceLocation identifier){
+        return IDENTIFIER_TO_REGISTRY.get(identifier);
     }
 
     public static final Registry<Block> BLOCKS = vanilla(BLOCK, Block.class);
@@ -66,7 +79,7 @@ public final class Registries {
     public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZERS = vanilla(RECIPE_SERIALIZER, RecipeSerializer.class);
     public static final Registry<Attribute> ATTRIBUTES = vanilla(ATTRIBUTE, Attribute.class);
     public static final Registry<StatType<?>> STAT_TYPES = vanilla(STAT_TYPE, StatType.class);
-    public static final Registry<ResourceConditionSerializer<?>> RESOURCE_CONDITION_SERIALIZERS = new MapBackedRegistry<>(ResourceConditionSerializer.class);
+    public static final Registry<ResourceConditionSerializer<?>> RESOURCE_CONDITION_SERIALIZERS = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "resource_conditions"), ResourceConditionSerializer.class);
 
     static{
         REGISTRATION_ORDER = Lists.newArrayList(
@@ -95,6 +108,8 @@ public final class Registries {
 
     public interface Registry<T> {
 
+        ResourceLocation getRegistryIdentifier();
+
         @Nullable net.minecraft.core.Registry<T> getVanillaRegistry();
 
         boolean hasVanillaRegistry();
@@ -119,14 +134,21 @@ public final class Registries {
     private static class VanillaRegistryWrapper<T> implements Registry<T> {
 
         private final net.minecraft.core.Registry<T> registry;
+        private final ResourceLocation identifier;
         private final Class<T> valueClass;
 
         private VanillaRegistryWrapper(net.minecraft.core.Registry<T> registry, Class<? super T> valueClass){
             this.registry = registry;
+            this.identifier = registry.key().location();
             //noinspection unchecked
             this.valueClass = (Class<T>)valueClass;
 
             addRegistry(this);
+        }
+
+        @Override
+        public ResourceLocation getRegistryIdentifier(){
+            return this.identifier;
         }
 
         @Nullable
@@ -183,14 +205,23 @@ public final class Registries {
 
     private static class MapBackedRegistry<T> implements Registry<T> {
 
+        private final ResourceLocation identifier;
         private final Map<ResourceLocation,T> identifierToObject = new HashMap<>();
         private final Map<T,ResourceLocation> objectToIdentifier = new HashMap<>();
         private final Set<Pair<ResourceLocation,T>> entries = new HashSet<>();
         private final Class<T> valueClass;
 
-        private MapBackedRegistry(Class<? super T> valueClass){
+        private MapBackedRegistry(ResourceLocation identifier, Class<? super T> valueClass){
+            this.identifier = identifier;
             //noinspection unchecked
             this.valueClass = (Class<T>)valueClass;
+
+            addRegistry(this);
+        }
+
+        @Override
+        public ResourceLocation getRegistryIdentifier(){
+            return this.identifier;
         }
 
         @Nullable

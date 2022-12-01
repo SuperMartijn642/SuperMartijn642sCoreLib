@@ -217,14 +217,14 @@ public @interface RegistryEntryAcceptor {
             if(FIELDS.containsKey(registry)){
                 for(Map.Entry<ResourceLocation,Set<Field>> entry : FIELDS.get(registry).entrySet()){
                     if(!registry.hasIdentifier(entry.getKey()))
-                        CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getVanillaRegistry().key().location() + "' for @RegistryEntryAcceptor!");
+                        CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getRegistryIdentifier() + "' for @RegistryEntryAcceptor!");
                 }
             }
             // Methods
             if(METHODS.containsKey(registry)){
                 for(Map.Entry<ResourceLocation,Set<Method>> entry : METHODS.get(registry).entrySet()){
                     if(!registry.hasIdentifier(entry.getKey()))
-                        CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getVanillaRegistry().key().location() + "' for @RegistryEntryAcceptor!");
+                        CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getRegistryIdentifier() + "' for @RegistryEntryAcceptor!");
                 }
             }
         }
