@@ -30,7 +30,7 @@ public class CoreLib {
         handler.registerResourceConditionSerializer("not", NotResourceCondition.SERIALIZER);
         handler.registerResourceConditionSerializer("or", OrResourceCondition.SERIALIZER);
         handler.registerResourceConditionSerializer("and", AndResourceCondition.SERIALIZER);
-        handler.registerResourceConditionSerializer("empty_tag", EmptyTagResourceCondition.SERIALIZER);
+        handler.registerResourceConditionSerializer("tag_populated", TagPopulatedResourceCondition.SERIALIZER);
 
         // Register generator for default tags
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));
