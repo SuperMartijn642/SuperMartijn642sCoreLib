@@ -23,7 +23,7 @@ public class NotResourceCondition implements ResourceCondition {
 
     @Override
     public boolean test(ResourceConditionContext context){
-        return !this.condition.test(ICondition.IContext.EMPTY);
+        return !this.condition.test(context.getUnderlying());
     }
 
     @Override
