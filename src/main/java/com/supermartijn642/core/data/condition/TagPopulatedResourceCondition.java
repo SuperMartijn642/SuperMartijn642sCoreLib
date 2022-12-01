@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  * TODO properly do tags
  * Created 30/11/2022 by SuperMartijn642
  */
-public class EmptyTagResourceCondition implements ResourceCondition {
+public class TagPopulatedResourceCondition implements ResourceCondition {
 
     /**
      * TODO this is stupid
@@ -33,7 +33,7 @@ public class EmptyTagResourceCondition implements ResourceCondition {
     private final Registries.Registry<?> registry;
     private final ResourceLocation tag;
 
-    public EmptyTagResourceCondition(Registries.Registry<?> registry, ResourceLocation tag){
+    public TagPopulatedResourceCondition(Registries.Registry<?> registry, ResourceLocation tag){
         if(!TAGS.containsKey(registry))
             throw new IllegalArgumentException("Registry '" + registry.getRegistryIdentifier() + "' is not supported!");
 
@@ -43,7 +43,7 @@ public class EmptyTagResourceCondition implements ResourceCondition {
 
     @Override
     public boolean test(ResourceConditionContext context){
-        return TAGS.get(this.registry).get().getTagOrEmpty(this.tag).getValues().isEmpty();
+        return !TAGS.get(this.registry).get().getTagOrEmpty(this.tag).getValues().isEmpty();
     }
 
     @Override
@@ -51,16 +51,16 @@ public class EmptyTagResourceCondition implements ResourceCondition {
         return SERIALIZER;
     }
 
-    private static class Serializer implements ResourceConditionSerializer<EmptyTagResourceCondition> {
+    private static class Serializer implements ResourceConditionSerializer<TagPopulatedResourceCondition> {
 
         @Override
-        public void serialize(JsonObject json, EmptyTagResourceCondition condition){
+        public void serialize(JsonObject json, TagPopulatedResourceCondition condition){
             json.addProperty("registry", condition.registry.getRegistryIdentifier().toString());
             json.addProperty("tag", condition.tag.toString());
         }
 
         @Override
-        public EmptyTagResourceCondition deserialize(JsonObject json){
+        public TagPopulatedResourceCondition deserialize(JsonObject json){
             if(!json.has("registry") || !json.get("registry").isJsonPrimitive() || !json.getAsJsonPrimitive("registry").isString())
                 throw new RuntimeException("Condition must have key 'registry' of type string!");
             if(!json.has("tag") || !json.get("tag").isJsonPrimitive() || !json.getAsJsonPrimitive("tag").isString())
@@ -75,7 +75,7 @@ public class EmptyTagResourceCondition implements ResourceCondition {
                 throw new RuntimeException("Could not find a registry with identifier '" + json.get("registry").getAsString() + "'!");
 
             ResourceLocation tag = new ResourceLocation(json.get("tag").getAsString());
-            return new EmptyTagResourceCondition(registry, tag);
+            return new TagPopulatedResourceCondition(registry, tag);
         }
     }
 }
