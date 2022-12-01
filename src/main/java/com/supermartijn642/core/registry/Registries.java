@@ -38,6 +38,7 @@ import static net.minecraft.core.Registry.*;
  */
 public final class Registries {
 
+    static final Map<ResourceLocation,Registry<?>> IDENTIFIER_TO_REGISTRY = new HashMap<>();
     static final Map<net.minecraft.core.Registry<?>,Registry<?>> VANILLA_REGISTRY_MAP = new HashMap<>();
     static final Map<IForgeRegistry<?>,Registry<?>> FORGE_REGISTRY_MAP = new HashMap<>();
     /**
@@ -46,11 +47,14 @@ public final class Registries {
     static final Map<Registry<?>,List<Registry<?>>> REGISTRATION_ORDER_MAP = new HashMap<>();
 
     private static void addRegistry(Registry<?> registry){
+        if(IDENTIFIER_TO_REGISTRY.containsKey(registry.getRegistryIdentifier()))
+            throw new RuntimeException("Duplicate registry registration for identifier '" + registry.getRegistryIdentifier() + "'!");
         if(registry.hasVanillaRegistry() && VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
             throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
         if(registry.hasForgeRegistry() && FORGE_REGISTRY_MAP.containsKey(registry.getForgeRegistry()))
             throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
 
+        IDENTIFIER_TO_REGISTRY.put(registry.getRegistryIdentifier(), registry);
         if(registry.hasVanillaRegistry())
             VANILLA_REGISTRY_MAP.put(registry.getVanillaRegistry(), registry);
         if(registry.hasForgeRegistry())
@@ -73,6 +77,15 @@ public final class Registries {
     @Deprecated
     public static <T> Registry<T> fromUnderlying(IForgeRegistry<T> registry){
         return (Registry<T>)FORGE_REGISTRY_MAP.get(registry);
+    }
+
+    /**
+     * Gets the registry registered under the given identifier.
+     * @param identifier identifier of the registry
+     * @return the registry registered under the given identifier or {@code null} if no registry is registered
+     */
+    public static Registry<?> getRegistry(ResourceLocation identifier){
+        return IDENTIFIER_TO_REGISTRY.get(identifier);
     }
 
     public static final Registry<Block> BLOCKS = forge(BLOCK, ForgeRegistries.BLOCKS, Block.class);
@@ -108,6 +121,8 @@ public final class Registries {
 
     public interface Registry<T> {
 
+        ResourceLocation getRegistryIdentifier();
+
         @Nullable net.minecraft.core.Registry<T> getVanillaRegistry();
 
         boolean hasVanillaRegistry();
@@ -136,14 +151,21 @@ public final class Registries {
     private static class VanillaRegistryWrapper<T> implements Registry<T> {
 
         private final net.minecraft.core.Registry<T> registry;
+        private final ResourceLocation identifier;
         private final Class<T> valueClass;
 
         private VanillaRegistryWrapper(net.minecraft.core.Registry<T> registry, Class<? super T> valueClass){
             this.registry = registry;
+            this.identifier = registry.key().location();
             //noinspection unchecked
             this.valueClass = (Class<T>)valueClass;
 
             addRegistry(this);
+        }
+
+        @Override
+        public ResourceLocation getRegistryIdentifier(){
+            return this.identifier;
         }
 
         @Nullable
@@ -213,15 +235,22 @@ public final class Registries {
 
         private final net.minecraft.core.Registry<T> registry;
         private final IForgeRegistry<T> forgeRegistry;
+        private final ResourceLocation identifier;
         private final Class<T> valueClass;
 
         private ForgeRegistryWrapper(net.minecraft.core.Registry<T> registry, IForgeRegistry<T> forgeRegistry, Class<? super T> valueClass){
             this.registry = registry;
             this.forgeRegistry = forgeRegistry;
+            this.identifier = forgeRegistry.getRegistryName();
             //noinspection unchecked
             this.valueClass = (Class<T>)valueClass;
 
             addRegistry(this);
+        }
+
+        @Override
+        public ResourceLocation getRegistryIdentifier(){
+            return this.identifier;
         }
 
         @Nullable
@@ -309,6 +338,8 @@ public final class Registries {
             }
         }
 
+        private static final ResourceLocation IDENTIFIER = new ResourceLocation("supermartijn642corelib", "resource_conditions");
+
         private final Map<ResourceLocation,IConditionSerializer<?>> identifierToObject;
         private final Map<IConditionSerializer<?>,ResourceLocation> objectToIdentifier = new HashMap<>();
         private final Set<Pair<ResourceLocation,IConditionSerializer<?>>> entries = new HashSet<>();
@@ -320,6 +351,11 @@ public final class Registries {
             this.identifierToObject.forEach((id, o) -> this.entries.add(Pair.of(id, o)));
             //noinspection unchecked
             this.valueClass = (Class<IConditionSerializer<?>>)(Object)IConditionSerializer.class;
+        }
+
+        @Override
+        public ResourceLocation getRegistryIdentifier(){
+            return IDENTIFIER;
         }
 
         @Nullable
