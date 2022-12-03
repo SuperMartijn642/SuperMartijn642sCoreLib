@@ -157,7 +157,7 @@ public @interface RegistryEntryAcceptor {
             for(Map.Entry<ResourceLocation,Set<Field>> entry : FIELDS.get(registry).entrySet()){
                 // Skip if no value is registered with the identifier
                 if(!registry.hasIdentifier(entry.getKey())){
-                    CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry for type '" + registry.getValueClass().getName() + "' for @RegistryEntryAcceptor!");
+                    CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getRegistryIdentifier() + "' for @RegistryEntryAcceptor!");
                     continue;
                 }
 
@@ -187,7 +187,7 @@ public @interface RegistryEntryAcceptor {
             for(Map.Entry<ResourceLocation,Set<Method>> entry : METHODS.get(registry).entrySet()){
                 // Skip if no value is registered with the identifier
                 if(!registry.hasIdentifier(entry.getKey())){
-                    CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry for type '" + registry.getValueClass().getName() + "' for @RegistryEntryAcceptor!");
+                    CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getRegistryIdentifier() + "' for @RegistryEntryAcceptor!");
                     continue;
                 }
 

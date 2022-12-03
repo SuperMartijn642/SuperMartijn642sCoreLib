@@ -26,6 +26,7 @@ import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.RegistryManager;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
@@ -37,6 +38,7 @@ import java.util.function.Supplier;
  */
 public final class Registries {
 
+    static final Map<ResourceLocation,Registry<?>> IDENTIFIER_TO_REGISTRY = new HashMap<>();
     static final Map<IRegistry<ResourceLocation,?>,Registry<?>> VANILLA_REGISTRY_MAP = new HashMap<>();
     static final Map<IForgeRegistry<?>,Registry<?>> FORGE_REGISTRY_MAP = new HashMap<>();
     /**
@@ -45,11 +47,14 @@ public final class Registries {
     static final Map<Registry<?>,List<Registry<?>>> REGISTRATION_ORDER_MAP = new HashMap<>();
 
     private static void addRegistry(Registry<?> registry){
+        if(IDENTIFIER_TO_REGISTRY.containsKey(registry.getRegistryIdentifier()))
+            throw new RuntimeException("Duplicate registry registration for identifier '" + registry.getRegistryIdentifier() + "'!");
         if(registry.hasVanillaRegistry() && VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
             throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
         if(registry.hasForgeRegistry() && FORGE_REGISTRY_MAP.containsKey(registry.getForgeRegistry()))
             throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
 
+        IDENTIFIER_TO_REGISTRY.put(registry.getRegistryIdentifier(), registry);
         if(registry.hasVanillaRegistry())
             VANILLA_REGISTRY_MAP.put(registry.getVanillaRegistry(), registry);
         if(registry.hasForgeRegistry())
@@ -73,6 +78,15 @@ public final class Registries {
         return (Registry<T>)FORGE_REGISTRY_MAP.get(registry);
     }
 
+    /**
+     * Gets the registry registered under the given identifier.
+     * @param identifier identifier of the registry
+     * @return the registry registered under the given identifier or {@code null} if no registry is registered
+     */
+    public static Registry<?> getRegistry(ResourceLocation identifier){
+        return IDENTIFIER_TO_REGISTRY.get(identifier);
+    }
+
     public static final Registry<Block> BLOCKS = forge(Block.REGISTRY, ForgeRegistries.BLOCKS, Block.class);
     public static final Registry<Fluid> FLUIDS = new FluidRegistryWrapper();
     public static final Registry<Item> ITEMS = new ForgeRegistryWrapper<Item>(Item.REGISTRY, ForgeRegistries.ITEMS, Item.class) {
@@ -90,9 +104,9 @@ public final class Registries {
     public static final Registry<PotionType> POTIONS = forge(PotionType.REGISTRY, ForgeRegistries.POTION_TYPES, PotionType.class);
     public static final Registry<Enchantment> ENCHANTMENTS = forge(Enchantment.REGISTRY, ForgeRegistries.ENCHANTMENTS, Enchantment.class);
     public static final Registry<EntityEntry> ENTITY_TYPES = forge(null, ForgeRegistries.ENTITIES, EntityEntry.class);
-    public static final Registry<BaseBlockEntityType<?>> BLOCK_ENTITY_TYPES = new MapBackedRegistry<>(BaseBlockEntityType.class);
-    public static final Registry<Class<? extends TileEntity>> BLOCK_ENTITY_CLASSES = vanilla(TileEntity.REGISTRY, Class.class);
-    public static final Registry<BaseContainerType<?>> MENU_TYPES = new MapBackedRegistry<>(BaseContainerType.class);
+    public static final Registry<BaseBlockEntityType<?>> BLOCK_ENTITY_TYPES = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "block_entity_types"), BaseBlockEntityType.class);
+    public static final Registry<Class<? extends TileEntity>> BLOCK_ENTITY_CLASSES = vanilla(new ResourceLocation("block_entities"), TileEntity.REGISTRY, Class.class);
+    public static final Registry<BaseContainerType<?>> MENU_TYPES = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "container_types"), BaseContainerType.class);
     public static final Registry<IConditionFactory> RECIPE_CONDITION_SERIALIZERS = new RecipeConditionSerializerRegistry();
 
     static{
@@ -103,8 +117,8 @@ public final class Registries {
         REGISTRATION_ORDER_MAP.put(ENTITY_TYPES, Lists.newArrayList(MENU_TYPES));
     }
 
-    private static <T> Registry<T> vanilla(IRegistry<ResourceLocation,T> registry, Class<? super T> valueClass){
-        return new VanillaRegistryWrapper<>(registry, valueClass);
+    private static <T> Registry<T> vanilla(ResourceLocation identifier, IRegistry<ResourceLocation,T> registry, Class<? super T> valueClass){
+        return new VanillaRegistryWrapper<>(identifier, registry, valueClass);
     }
 
     @SuppressWarnings("unchecked")
@@ -113,6 +127,8 @@ public final class Registries {
     }
 
     public interface Registry<T> {
+
+        ResourceLocation getRegistryIdentifier();
 
         @Nullable
         IRegistry<ResourceLocation,T> getVanillaRegistry();
@@ -144,9 +160,11 @@ public final class Registries {
     private static class VanillaRegistryWrapper<T> implements Registry<T> {
 
         private final IRegistry<ResourceLocation,T> registry;
+        private final ResourceLocation identifier;
         private final Class<T> valueClass;
 
-        private VanillaRegistryWrapper(IRegistry<ResourceLocation,T> registry, Class<? super T> valueClass){
+        private VanillaRegistryWrapper(ResourceLocation identifier, IRegistry<ResourceLocation,T> registry, Class<? super T> valueClass){
+            this.identifier = identifier;
             this.registry = registry;
             //noinspection unchecked
             this.valueClass = (Class<T>)valueClass;
@@ -155,6 +173,11 @@ public final class Registries {
                 throw new RuntimeException("Registry for type '" + valueClass.getName() + "' is not an instance of RegistrySimple!");
 
             addRegistry(this);
+        }
+
+        @Override
+        public ResourceLocation getRegistryIdentifier(){
+            return this.identifier;
         }
 
         @Nullable
@@ -224,15 +247,22 @@ public final class Registries {
 
         private final IRegistry<ResourceLocation,T> registry;
         private final IForgeRegistry<T> forgeRegistry;
+        private final ResourceLocation identifier;
         private final Class<T> valueClass;
 
         private ForgeRegistryWrapper(IRegistry<ResourceLocation,T> registry, IForgeRegistry<T> forgeRegistry, Class<? super T> valueClass){
             this.registry = registry;
             this.forgeRegistry = forgeRegistry;
+            this.identifier = RegistryManager.ACTIVE.getName(forgeRegistry);
             //noinspection unchecked
             this.valueClass = (Class<T>)valueClass;
 
             addRegistry(this);
+        }
+
+        @Override
+        public ResourceLocation getRegistryIdentifier(){
+            return this.identifier;
         }
 
         @Nullable
@@ -299,6 +329,13 @@ public final class Registries {
     }
 
     private static class FluidRegistryWrapper implements Registry<Fluid> {
+
+        private static final ResourceLocation IDENTIFIER = new ResourceLocation("fluids");
+
+        @Override
+        public ResourceLocation getRegistryIdentifier(){
+            return IDENTIFIER;
+        }
 
         @Nullable
         @Override
@@ -367,14 +404,21 @@ public final class Registries {
 
     private static class MapBackedRegistry<T> implements Registry<T> {
 
+        private final ResourceLocation identifier;
         private final Map<ResourceLocation,T> identifierToObject = new HashMap<>();
         private final Map<T,ResourceLocation> objectToIdentifier = new HashMap<>();
         private final Set<Pair<ResourceLocation,T>> entries = new HashSet<>();
         private final Class<T> valueClass;
 
-        private MapBackedRegistry(Class<? super T> valueClass){
+        private MapBackedRegistry(ResourceLocation identifier, Class<? super T> valueClass){
+            this.identifier = identifier;
             //noinspection unchecked
             this.valueClass = (Class<T>)valueClass;
+        }
+
+        @Override
+        public ResourceLocation getRegistryIdentifier(){
+            return this.identifier;
         }
 
         @Nullable
@@ -471,6 +515,8 @@ public final class Registries {
             }
         }
 
+        private static final ResourceLocation IDENTIFIER = new ResourceLocation("supermartijn642corelib", "resource_conditions");
+
         private Map<ResourceLocation,IConditionFactory> identifierToObject;
         private final Map<IConditionFactory,ResourceLocation> objectToIdentifier = new HashMap<>();
         private final Set<Pair<ResourceLocation,IConditionFactory>> entries = new HashSet<>();
@@ -483,6 +529,11 @@ public final class Registries {
             this.identifierToObject = craftingHelperConditions.get();
             this.identifierToObject.forEach((id, o) -> this.objectToIdentifier.put(o, id));
             this.identifierToObject.forEach((id, o) -> this.entries.add(Pair.of(id, o)));
+        }
+
+        @Override
+        public ResourceLocation getRegistryIdentifier(){
+            return IDENTIFIER;
         }
 
         @Nullable

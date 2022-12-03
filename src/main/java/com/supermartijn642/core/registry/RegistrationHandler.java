@@ -407,7 +407,7 @@ public class RegistrationHandler {
         ResourceLocation fullIdentifier = new ResourceLocation(namespace, identifier);
         Map<ResourceLocation,Supplier<?>> entries = this.entryMap.computeIfAbsent(registry, o -> new HashMap<>());
         if(entries.containsKey(fullIdentifier))
-            throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry of type '" + registry.getValueClass().getName() + "'!");
+            throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + registry.getRegistryIdentifier() + "'!");
 
         entries.put(fullIdentifier, entry);
     }
@@ -483,7 +483,7 @@ public class RegistrationHandler {
             ResourceLocation fullIdentifier = new ResourceLocation(namespace, identifier);
             Map<ResourceLocation,Supplier<?>> entries = RegistrationHandler.this.entryMap.computeIfAbsent(this.registry, o -> new HashMap<>());
             if(entries.containsKey(fullIdentifier))
-                throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry of type '" + this.registry.getValueClass().getName() + "'!");
+                throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + this.registry.getRegistryIdentifier() + "'!");
 
             this.registry.register(fullIdentifier, object);
         }
