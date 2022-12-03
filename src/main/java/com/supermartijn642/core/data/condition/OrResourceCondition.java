@@ -50,7 +50,7 @@ public class OrResourceCondition implements ResourceCondition {
             for(ResourceCondition alternative : condition.conditions){
                 JsonObject conditionJson = new JsonObject();
                 //noinspection unchecked,rawtypes
-                ((ResourceConditionSerializer)alternative.getSerializer()).serialize(conditionJson, condition);
+                ((ResourceConditionSerializer)alternative.getSerializer()).serialize(conditionJson, alternative);
                 conditionJson.addProperty("condition", ResourceConditions.getIdentifierForSerializer(alternative.getSerializer()).toString());
                 conditions.add(conditionJson);
             }
