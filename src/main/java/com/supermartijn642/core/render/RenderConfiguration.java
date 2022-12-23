@@ -12,11 +12,17 @@ import org.lwjgl.opengl.GL11;
 public class RenderConfiguration extends RenderType {
 
     public static RenderConfiguration create(String modid, String name, VertexFormat format, PrimitiveType primitive, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, RenderStateConfiguration renderStateConfiguration){
-        return new RenderConfiguration(modid + ":" + name, format, primitive, bufferSize, affectsCrumbling, sortOnUpload, renderStateConfiguration);
+        return new RenderConfiguration(modid + ":" + name, format, primitive.getGlMode(), bufferSize, affectsCrumbling, sortOnUpload, renderStateConfiguration::setup, renderStateConfiguration::clear);
     }
 
-    private RenderConfiguration(String name, VertexFormat format, PrimitiveType primitive, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, RenderStateConfiguration renderStateConfiguration){
-        super(name, format, primitive.getGlMode(), bufferSize, affectsCrumbling, sortOnUpload, renderStateConfiguration::setup, renderStateConfiguration::clear);
+    public static RenderConfiguration wrap(RenderType renderType){
+        if(renderType instanceof RenderConfiguration)
+            return (RenderConfiguration)renderType;
+        return new RenderConfiguration(renderType.toString(), renderType.format(), renderType.mode(), renderType.bufferSize(), renderType.affectsCrumbling(), renderType.sortOnUpload, renderType::setupRenderState, renderType::clearRenderState);
+    }
+
+    private RenderConfiguration(String name, VertexFormat format, int glMode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, Runnable setup, Runnable clear){
+        super(name, format, glMode, bufferSize, affectsCrumbling, sortOnUpload, setup, clear);
     }
 
     public void setupState(){
