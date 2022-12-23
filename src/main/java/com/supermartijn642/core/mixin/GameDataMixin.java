@@ -1,5 +1,6 @@
 package com.supermartijn642.core.mixin;
 
+import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -42,6 +43,7 @@ public class GameDataMixin {
         remap = false
     )
     private static void fireRegistryEvents(CallbackInfo ci){
+        RegistrationHandler.handleRegistryEvent(registerEvent);
         RegistryEntryAcceptor.Handler.onRegisterEvent(registerEvent);
     }
 }

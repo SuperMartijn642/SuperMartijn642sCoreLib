@@ -15,12 +15,9 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.common.crafting.IConditionFactory;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.eventhandler.IContextSetter;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 
 import java.util.*;
@@ -32,55 +29,14 @@ import java.util.function.Supplier;
  */
 public class RegistrationHandler {
 
-    @Mod.EventBusSubscriber(modid = "supermartijn642corelib")
-    private static final class Events {
-
-        private static void handleRegistry(Registries.Registry<?> registry, Object event){
-            REGISTRATION_HELPER_MAP.values().forEach(handler -> {
-                ModContainer modContainer = Loader.instance().getActiveModList().stream().filter(container -> handler.owningMod.equals(container.getModId())).findAny().orElse(null);
-                if(modContainer != null && event instanceof IContextSetter){
-                    ModContainer old = Loader.instance().activeModContainer();
-                    Loader.instance().setActiveModContainer(modContainer);
-                    ((IContextSetter)event).setModContainer(modContainer);
-
-                    handler.handleRegisterEvent(registry);
-
-                    ((IContextSetter)event).setModContainer(old);
-                    Loader.instance().setActiveModContainer(old);
-                }else
-                    handler.handleRegisterEvent(registry);
-            });
-        }
-
-        @SubscribeEvent
-        public static void handleBlockRegistryEvent(RegistryEvent.Register<Block> event){
-            handleRegistry(Registries.BLOCKS, event);
-        }
-
-        @SubscribeEvent
-        public static void handleItemRegistryEvent(RegistryEvent.Register<Item> event){
-            handleRegistry(Registries.ITEMS, event);
-        }
-
-        @SubscribeEvent
-        public static void handleMobEffectRegistryEvent(RegistryEvent.Register<Potion> event){
-            handleRegistry(Registries.MOB_EFFECTS, event);
-        }
-
-        @SubscribeEvent
-        public static void handleEnchantmentRegistryEvent(RegistryEvent.Register<Enchantment> event){
-            handleRegistry(Registries.ENCHANTMENTS, event);
-        }
-
-        @SubscribeEvent
-        public static void handleEntityRegistryEvent(RegistryEvent.Register<EntityEntry> event){
-            handleRegistry(Registries.ENTITY_TYPES, event);
-        }
-
-        @SubscribeEvent
-        public static void handleFluidRegistryEvent(FluidRegistry.FluidRegisterEvent event){
-            handleRegistry(Registries.FLUIDS, event);
-        }
+    /**
+     * @deprecated for internal use only!
+     */
+    @Deprecated
+    public static void handleRegistryEvent(RegistryEvent.Register<?> event){
+        Registries.Registry<?> registry = Registries.fromUnderlying(event.getRegistry());
+        if(registry != null)
+            handleRegistryEvent(registry, null);
     }
 
     /**
@@ -88,7 +44,24 @@ public class RegistrationHandler {
      */
     @Deprecated
     public static void handleResourceConditionSerializerRegistryEvent(){
-        Events.handleRegistry(Registries.RECIPE_CONDITION_SERIALIZERS, null);
+        handleRegistryEvent(Registries.RECIPE_CONDITION_SERIALIZERS, null);
+    }
+
+    private static void handleRegistryEvent(Registries.Registry<?> registry, Object event){
+        REGISTRATION_HELPER_MAP.values().forEach(handler -> {
+            ModContainer modContainer = Loader.instance().getActiveModList().stream().filter(container -> handler.owningMod.equals(container.getModId())).findAny().orElse(null);
+            if(modContainer != null && event instanceof IContextSetter){
+                ModContainer old = Loader.instance().activeModContainer();
+                Loader.instance().setActiveModContainer(modContainer);
+                ((IContextSetter)event).setModContainer(modContainer);
+
+                handler.handleRegisterEvent(registry);
+
+                ((IContextSetter)event).setModContainer(old);
+                Loader.instance().setActiveModContainer(old);
+            }else
+                handler.handleRegisterEvent(registry);
+        });
     }
 
     /**
