@@ -36,7 +36,7 @@ public class RegistrationHandler {
     public static void handleRegistryEvent(RegistryEvent.Register<?> event){
         Registries.Registry<?> registry = Registries.fromUnderlying(event.getRegistry());
         if(registry != null)
-            handleRegistryEvent(registry, null);
+            handleRegistryEvent(registry, event);
     }
 
     /**
