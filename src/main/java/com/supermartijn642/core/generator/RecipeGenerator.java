@@ -1179,6 +1179,20 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         /**
          * Sets which items the player should have to unlock this recipe in its generated advancement.
          */
+        public T unlockedBy(ItemStack... items){
+            return this.unlockedBy(
+                new InventoryChangeTrigger.Instance(
+                    MinMaxBounds.UNBOUNDED,
+                    MinMaxBounds.UNBOUNDED,
+                    MinMaxBounds.UNBOUNDED,
+                    Arrays.stream(items).map(item -> new ItemPredicate(item.getItem(), item.getMetadata(), MinMaxBounds.UNBOUNDED, MinMaxBounds.UNBOUNDED, new EnchantmentPredicate[0], null, NBTPredicate.ANY)).toArray(ItemPredicate[]::new)
+                )
+            );
+        }
+
+        /**
+         * Sets which items the player should have to unlock this recipe in its generated advancement.
+         */
         public T unlockedByOreDict(String ore){
             return this.unlockedBy(new InventoryChangeTrigger.Instance(
                 MinMaxBounds.UNBOUNDED,
