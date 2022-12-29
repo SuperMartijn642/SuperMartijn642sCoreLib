@@ -289,7 +289,8 @@ public final class Registries {
         }
 
         public void register(ResourceLocation identifier, T object){
-            object.setRegistryName(identifier);
+            if(!identifier.equals(object.getRegistryName()))
+                object.setRegistryName(identifier);
             this.forgeRegistry.register(object);
         }
 

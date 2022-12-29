@@ -239,23 +239,23 @@ public class RegistrationHandler {
         this.addCallback(Registries.ENCHANTMENTS, callback);
     }
 
-    public void registerEntityType(String identifier, Supplier<EntityEntry> entityType){
+    public void registerEntityEntry(String identifier, Supplier<EntityEntry> entityType){ // TODO add proper entity registration
         this.addEntry(Registries.ENTITY_TYPES, identifier, entityType);
     }
 
-    public void registerEntityType(String identifier, EntityEntry entityType){
+    public void registerEntityEntry(String identifier, EntityEntry entityType){
         this.addEntry(Registries.ENTITY_TYPES, identifier, () -> entityType);
     }
 
-    public void registerEntityTypeOverride(String namespace, String identifier, Supplier<EntityEntry> entityType){
+    public void registerEntityEntryOverride(String namespace, String identifier, Supplier<EntityEntry> entityType){
         this.addEntry(Registries.ENTITY_TYPES, namespace, identifier, entityType);
     }
 
-    public void registerEntityTypeOverride(String namespace, String identifier, EntityEntry entityType){
+    public void registerEntityEntryOverride(String namespace, String identifier, EntityEntry entityType){
         this.addEntry(Registries.ENTITY_TYPES, namespace, identifier, () -> entityType);
     }
 
-    public void registerEntityTypeCallback(Consumer<Helper<EntityEntry>> callback){
+    public void registerEntityEntryCallback(Consumer<Helper<EntityEntry>> callback){
         this.addCallback(Registries.ENTITY_TYPES, callback);
     }
 
