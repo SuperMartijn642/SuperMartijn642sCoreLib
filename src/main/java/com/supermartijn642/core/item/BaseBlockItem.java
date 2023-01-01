@@ -29,13 +29,16 @@ import java.util.function.Consumer;
 public class BaseBlockItem extends ItemBlock {
 
     private final ItemProperties properties;
+    private final CreativeTabs[] groups;
 
     public BaseBlockItem(Block block, ItemProperties properties){
         super(block);
         this.properties = properties;
+        this.groups = properties.groups.toArray(new CreativeTabs[0]);
         this.setMaxStackSize(properties.maxStackSize);
         this.setMaxDamage(properties.durability);
-        this.setCreativeTab(properties.group);
+        if(!properties.groups.isEmpty())
+            this.setCreativeTab(properties.groups.iterator().next());
         this.setContainerItem(properties.craftingRemainingItem);
     }
 
@@ -118,9 +121,13 @@ public class BaseBlockItem extends ItemBlock {
         this.inventoryUpdate(stack, level, entity, slot, isSelected);
     }
 
+    public boolean isInCreativeGroup(CreativeTabs tab){
+        return this.properties.groups.contains(tab);
+    }
+
     @Override
-    public CreativeTabs getCreativeTab(){
-        return this.properties.group != null ? this.properties.group : super.getCreativeTab();
+    public CreativeTabs[] getCreativeTabs(){
+        return this.groups;
     }
 
     @Override

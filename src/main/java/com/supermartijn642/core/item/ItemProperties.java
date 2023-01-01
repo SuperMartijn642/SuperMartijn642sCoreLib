@@ -4,6 +4,9 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraftforge.common.IRarity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created 24/07/2022 by SuperMartijn642
  */
@@ -16,9 +19,9 @@ public class ItemProperties {
     int maxStackSize = 64;
     int durability;
     Item craftingRemainingItem;
-    CreativeTabs group;
     IRarity rarity = ItemRarity.COMMON.getUnderlying();
     boolean isFireResistant;
+    final Set<CreativeTabs> groups = new HashSet<>();
 
     private ItemProperties(){
     }
@@ -48,7 +51,7 @@ public class ItemProperties {
     }
 
     public ItemProperties group(CreativeTabs group){
-        this.group = group;
+        this.groups.add(group);
         return this;
     }
 

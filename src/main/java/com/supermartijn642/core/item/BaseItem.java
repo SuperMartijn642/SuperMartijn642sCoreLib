@@ -2,6 +2,7 @@ package com.supermartijn642.core.item;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,13 +26,16 @@ import java.util.function.Consumer;
 public class BaseItem extends Item {
 
     private final ItemProperties properties;
+    private final CreativeTabs[] groups;
 
     public BaseItem(ItemProperties properties){
         super();
         this.properties = properties;
+        this.groups = properties.groups.toArray(new CreativeTabs[0]);
         this.setMaxStackSize(properties.maxStackSize);
         this.setMaxDamage(properties.durability);
-        this.setCreativeTab(properties.group);
+        if(!properties.groups.isEmpty())
+            this.setCreativeTab(properties.groups.iterator().next());
         this.setContainerItem(properties.craftingRemainingItem);
     }
 
@@ -112,6 +116,15 @@ public class BaseItem extends Item {
     @Override
     public void onUpdate(ItemStack stack, World level, Entity entity, int slot, boolean isSelected){
         this.inventoryUpdate(stack, level, entity, slot, isSelected);
+    }
+
+    public boolean isInCreativeGroup(CreativeTabs tab){
+        return this.properties.groups.contains(tab);
+    }
+
+    @Override
+    public CreativeTabs[] getCreativeTabs(){
+        return this.groups;
     }
 
     public boolean isFireResistant(){

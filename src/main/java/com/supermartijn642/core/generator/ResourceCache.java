@@ -19,10 +19,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -77,6 +74,17 @@ public abstract class ResourceCache {
         byte[] bytes = GSON.toJson(json).getBytes(StandardCharsets.UTF_8);
         this.saveResource(resourceType, bytes, namespace, directory, fileName, fileName.endsWith(".json") ? "" : ".json");
     }
+
+    /**
+     * Opens an input stream for the requested resource.
+     * @param resourceType whether the resource is part of the server data or the client assets
+     * @param namespace    the namespace of the resource
+     * @param directory    name of the directory within the namespace
+     * @param fileName     name of the file
+     * @param extension    the file's extension
+     * @return an input stream for the requested resource, or an empty optional if the resource does not exist
+     */
+    public abstract Optional<InputStream> getManualResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension);
 
     static ResourceCache create(Path outputDirectory, Path manualDirectory){
         return new Impl(outputDirectory, manualDirectory);
@@ -232,6 +240,19 @@ public abstract class ResourceCache {
         @Override
         public void trackToBeGeneratedResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             this.toBeGenerated.add(this.constructPath(resourceType, namespace, directory, fileName, extension));
+        }
+
+        @Override
+        public Optional<InputStream> getManualResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
+            Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
+            Path fullPath = this.outputDirectory.resolve(path);
+            if(!Files.exists(fullPath))
+                return Optional.empty();
+            try{
+                return Optional.of(Files.newInputStream(fullPath));
+            }catch(IOException e){
+                throw new RuntimeException(e);
+            }
         }
 
         @Override
