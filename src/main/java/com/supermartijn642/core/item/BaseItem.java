@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.util.*;
@@ -16,6 +17,7 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -119,6 +121,15 @@ public class BaseItem extends Item {
     protected String getOrCreateDescriptionId(){
         ResourceLocation identifier = Registries.ITEMS.getIdentifier(this);
         return identifier.getNamespace() + ".item." + identifier.getPath();
+    }
+
+    public boolean isInCreativeGroup(ItemGroup tab){
+        return this.properties != null && this.properties.groups.contains(tab);
+    }
+
+    @Override
+    public Collection<ItemGroup> getCreativeTabs(){
+        return this.properties != null ? this.properties.groups : super.getCreativeTabs();
     }
 
     public boolean isFireResistant(){
