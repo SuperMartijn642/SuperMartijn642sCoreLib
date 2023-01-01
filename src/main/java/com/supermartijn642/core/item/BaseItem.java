@@ -11,6 +11,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -118,6 +119,16 @@ public class BaseItem extends Item {
     protected String getOrCreateDescriptionId(){
         ResourceLocation identifier = Registries.ITEMS.getIdentifier(this);
         return identifier.getNamespace() + ".item." + identifier.getPath();
+    }
+
+    public boolean isInCreativeGroup(CreativeModeTab tab){
+        return this.properties == null ? tab == this.getItemCategory() : this.properties.groups.contains(tab);
+    }
+
+    @Override
+    protected boolean allowdedIn(CreativeModeTab creativeModeTab){
+        CreativeModeTab tab = this.getItemCategory();
+        return tab != null && (creativeModeTab == CreativeModeTab.TAB_SEARCH || this.isInCreativeGroup(tab));
     }
 
     protected static class ItemUseResult {

@@ -10,6 +10,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
@@ -28,12 +29,16 @@ import java.util.function.Consumer;
  */
 public class BaseBlockItem extends BlockItem {
 
+    private final ItemProperties properties;
+
     public BaseBlockItem(Block block, Properties properties){
         super(block, properties);
+        this.properties = null;
     }
 
     public BaseBlockItem(Block block, ItemProperties properties){
-        this(block, properties.toUnderlying());
+        super(block, properties.toUnderlying());
+        this.properties = properties;
     }
 
     /**
@@ -108,6 +113,16 @@ public class BaseBlockItem extends BlockItem {
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean isSelected){
         this.inventoryUpdate(stack, level, entity, slot, isSelected);
+    }
+
+    public boolean isInCreativeGroup(CreativeModeTab tab){
+        return this.properties == null ? tab == this.getItemCategory() : this.properties.groups.contains(tab);
+    }
+
+    @Override
+    protected boolean allowdedIn(CreativeModeTab creativeModeTab){
+        CreativeModeTab tab = this.getItemCategory();
+        return tab != null && (creativeModeTab == CreativeModeTab.TAB_SEARCH || this.isInCreativeGroup(tab));
     }
 
     public static class ItemUseResult {

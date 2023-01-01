@@ -42,5 +42,4 @@ public class LevelRendererMixin {
     public void renderLevel(CallbackInfo ci){
         RenderWorldEvent.EVENT.invoker().accept(new RenderWorldEvent(this.poseStack, this.partialTicks));
     }
-
 }
