@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.util.ActionResult;
@@ -20,6 +21,7 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -28,12 +30,16 @@ import java.util.function.Consumer;
  */
 public class BaseBlockItem extends BlockItem {
 
+    private final ItemProperties properties;
+
     public BaseBlockItem(Block block, Properties properties){
         super(block, properties);
+        this.properties = null;
     }
 
     public BaseBlockItem(Block block, ItemProperties properties){
-        this(block, properties.toUnderlying());
+        super(block, properties.toUnderlying());
+        this.properties = properties;
     }
 
     /**
@@ -113,6 +119,15 @@ public class BaseBlockItem extends BlockItem {
     @Override
     public void inventoryTick(ItemStack stack, World level, Entity entity, int slot, boolean isSelected){
         this.inventoryUpdate(stack, level, entity, slot, isSelected);
+    }
+
+    public boolean isInCreativeGroup(ItemGroup tab){
+        return this.properties != null && this.properties.groups.contains(tab);
+    }
+
+    @Override
+    public Collection<ItemGroup> getCreativeTabs(){
+        return this.properties != null ? this.properties.groups : super.getCreativeTabs();
     }
 
     protected static class ItemUseResult {

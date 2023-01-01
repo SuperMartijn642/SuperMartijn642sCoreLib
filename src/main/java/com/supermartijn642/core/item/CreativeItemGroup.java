@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 /**
  * Created 24/07/2022 by SuperMartijn642
  */
-public class CreativeItemGroup extends ItemGroup {
+public final class CreativeItemGroup extends ItemGroup {
 
     public static CreativeItemGroup create(String modid, String name, Supplier<ItemStack> icon){
         if(!RegistryUtil.isValidNamespace(modid))

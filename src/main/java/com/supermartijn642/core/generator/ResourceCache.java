@@ -11,6 +11,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -18,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created 16/08/2022 by SuperMartijn642
@@ -71,6 +73,17 @@ public abstract class ResourceCache {
         this.saveResource(resourceType, bytes, namespace, directory, fileName, fileName.endsWith(".json") ? "" : ".json");
     }
 
+    /**
+     * Opens an input stream for the requested resource.
+     * @param resourceType whether the resource is part of the server data or the client assets
+     * @param namespace    the namespace of the resource
+     * @param directory    name of the directory within the namespace
+     * @param fileName     name of the file
+     * @param extension    the file's extension
+     * @return an input stream for the requested resource, or an empty optional if the resource does not exist
+     */
+    public abstract Optional<InputStream> getManualResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension);
+
     static ResourceCache wrap(ExistingFileHelper existingFileHelper, DirectoryCache cachedOutput, Path outputDirectory){
         return new ExistingFileHelperWrapper(existingFileHelper, cachedOutput, outputDirectory);
     }
@@ -101,6 +114,19 @@ public abstract class ResourceCache {
         public void trackToBeGeneratedResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             ResourceLocation location = new ResourceLocation(namespace, fileName);
             this.existingFileHelper.trackGenerated(location, resourceType == ResourceType.DATA ? ResourcePackType.SERVER_DATA : ResourcePackType.CLIENT_RESOURCES, extension, directory);
+        }
+
+        @Override
+        public Optional<InputStream> getManualResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
+            Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
+            Path fullPath = this.outputDirectory.resolve(path);
+            if(!Files.exists(fullPath))
+                return Optional.empty();
+            try{
+                return Optional.of(Files.newInputStream(fullPath));
+            }catch(IOException e){
+                throw new RuntimeException(e);
+            }
         }
 
         private Path constructPath(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
