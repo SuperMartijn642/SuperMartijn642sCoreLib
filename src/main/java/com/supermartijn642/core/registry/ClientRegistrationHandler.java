@@ -34,10 +34,10 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ModelEvent;
-import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -74,6 +74,12 @@ public class ClientRegistrationHandler {
         return REGISTRATION_HELPER_MAP.computeIfAbsent(modid, ClientRegistrationHandler::new);
     }
 
+    @ApiStatus.Internal
+    public static void collectSprites(ResourceLocation atlas, Consumer<ResourceLocation> spriteConsumer){
+        for(ClientRegistrationHandler value : REGISTRATION_HELPER_MAP.values())
+            value.addSprites(atlas, spriteConsumer);
+    }
+
     private final String modid;
 
     private final Set<ResourceLocation> models = new HashSet<>();
@@ -100,7 +106,6 @@ public class ClientRegistrationHandler {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleModelRegistryEvent);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleModelBakeEvent);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleRegisterRenderersEvent);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleTextureStitchEvent);
     }
 
     /**
@@ -466,6 +471,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelRenderType(Supplier<Block> block, Supplier<RenderType> renderTypeSupplier){
         if(this.passedRegisterRenderers)
             throw new IllegalStateException("Cannot register new menu screens after the ClientInitialization event has been fired!");
@@ -479,6 +485,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelRenderType(Supplier<Block> block, RenderType renderType){
         this.registerBlockModelRenderType(block, renderType);
     }
@@ -489,6 +496,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelRenderType(Block block, Supplier<RenderType> renderTypeSupplier){
         this.registerBlockModelRenderType(() -> block, renderTypeSupplier);
     }
@@ -499,6 +507,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelSolidRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::solid);
     }
@@ -509,6 +518,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelSolidRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::solid);
     }
@@ -519,6 +529,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelCutoutMippedRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::cutoutMipped);
     }
@@ -529,6 +540,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelCutoutMippedRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::cutoutMipped);
     }
@@ -539,6 +551,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelCutoutRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::cutout);
     }
@@ -549,6 +562,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelCutoutRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::cutout);
     }
@@ -559,6 +573,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelTranslucentRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::translucent);
     }
@@ -569,6 +584,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelTranslucentRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::translucent);
     }
@@ -702,14 +718,14 @@ public class ClientRegistrationHandler {
         }
     }
 
-    private void handleTextureStitchEvent(TextureStitchEvent.Pre e){
+    private void addSprites(ResourceLocation atlas, Consumer<ResourceLocation> spriteConsumer){
         this.passedTextureStitch = true;
 
         // Texture atlas sprites
-        Set<ResourceLocation> sprites = this.textureAtlasSprites.get(e.getAtlas().location());
+        Set<ResourceLocation> sprites = this.textureAtlasSprites.get(atlas);
         if(sprites == null)
             return;
 
-        sprites.forEach(e::addSprite);
+        sprites.forEach(spriteConsumer);
     }
 }

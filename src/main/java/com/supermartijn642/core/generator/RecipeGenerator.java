@@ -11,15 +11,18 @@ import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
+import net.minecraftforge.common.CreativeModeTabRegistry;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 
@@ -29,6 +32,23 @@ import java.util.*;
  * Created 23/08/2022 by SuperMartijn642
  */
 public abstract class RecipeGenerator extends ResourceGenerator {
+
+    private static final Map<CreativeModeTab,RecipeCategory> TAB_TO_CATEGORY = new HashMap<>();
+
+    static{
+        TAB_TO_CATEGORY.put(CreativeModeTabs.BUILDING_BLOCKS, RecipeCategory.BUILDING_BLOCKS);
+        TAB_TO_CATEGORY.put(CreativeModeTabs.COMBAT, RecipeCategory.COMBAT);
+        TAB_TO_CATEGORY.put(CreativeModeTabs.COLORED_BLOCKS, RecipeCategory.BUILDING_BLOCKS);
+        TAB_TO_CATEGORY.put(CreativeModeTabs.FOOD_AND_DRINKS, RecipeCategory.FOOD);
+        TAB_TO_CATEGORY.put(CreativeModeTabs.FUNCTIONAL_BLOCKS, RecipeCategory.BUILDING_BLOCKS);
+        TAB_TO_CATEGORY.put(CreativeModeTabs.INGREDIENTS, RecipeCategory.MISC);
+        TAB_TO_CATEGORY.put(CreativeModeTabs.NATURAL_BLOCKS, RecipeCategory.DECORATIONS);
+        TAB_TO_CATEGORY.put(CreativeModeTabs.REDSTONE_BLOCKS, RecipeCategory.REDSTONE);
+        TAB_TO_CATEGORY.put(CreativeModeTabs.OP_BLOCKS, RecipeCategory.MISC);
+        TAB_TO_CATEGORY.put(CreativeModeTabs.SPAWN_EGGS, RecipeCategory.MISC);
+        TAB_TO_CATEGORY.put(CreativeModeTabs.TOOLS_AND_UTILITIES, RecipeCategory.TOOLS);
+        TAB_TO_CATEGORY.put(CreativeModeTabs.SEARCH, RecipeCategory.MISC);
+    }
 
     private final Map<ResourceLocation,RecipeBuilder<?>> recipes = new HashMap<>();
     private final Advancements advancements;
@@ -1545,9 +1565,17 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 if(!recipe.hasAdvancement)
                     continue;
 
-                CreativeModeTab tab = recipe.output.asItem().getItemCategory();
+                Item outputItem = recipe.output.asItem();
+                String category = RecipeCategory.MISC.getFolderName();
+                for(CreativeModeTab tab : CreativeModeTabRegistry.getSortedCreativeModeTabs()){
+                    if(tab.contains(outputItem.getDefaultInstance())){
+                        category = TAB_TO_CATEGORY.containsKey(tab) ?
+                            TAB_TO_CATEGORY.get(tab).getFolderName() :
+                            CreativeModeTabRegistry.getName(tab).getPath();
+                    }
+                }
                 String namespace = recipe.identifier.getNamespace();
-                String identifier = "recipes/" + (tab == null ? "" : tab.getRecipeFolderName() + "/") + recipe.identifier.getPath();
+                String identifier = "recipes/" + category + "/" + recipe.identifier.getPath();
 
                 if(recipe instanceof SmeltingRecipeBuilder){
                     if(((SmeltingRecipeBuilder)recipe).includeSmelting)

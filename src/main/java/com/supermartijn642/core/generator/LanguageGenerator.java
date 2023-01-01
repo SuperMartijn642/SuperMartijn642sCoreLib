@@ -53,9 +53,9 @@ public abstract class LanguageGenerator extends ResourceGenerator {
      */
     protected void itemGroup(CreativeModeTab group, String translation){
         Component component = group.getDisplayName();
-        if(component.getContents() instanceof TranslatableContents)
-            this.translation(((TranslatableContents)component.getContents()).getKey(), translation);
-        this.translation(group.langId, translation);
+        if(!(component.getContents() instanceof TranslatableContents))
+            throw new RuntimeException("Creative mode tab's title must be an instance of TranslatableContents!");
+        this.translation(((TranslatableContents)component.getContents()).getKey(), translation);
     }
 
     /**

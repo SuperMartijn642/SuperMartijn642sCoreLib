@@ -12,6 +12,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.forgespi.language.IModInfo;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 /**
@@ -28,13 +29,14 @@ public abstract class ResourceGenerator {
             private String name = "Resource Generator";
 
             @Override
-            public void run(CachedOutput cachedOutput){
-                ResourceCache resourceCache = ResourceCache.wrap(existingFileHelper, cachedOutput, dataGenerator.getOutputFolder());
+            public CompletableFuture<?> run(CachedOutput cachedOutput){
+                ResourceCache resourceCache = ResourceCache.wrap(existingFileHelper, cachedOutput, dataGenerator.rootOutputFolder);
                 ResourceGenerator resourceGenerator = generator.apply(resourceCache);
                 this.name = resourceGenerator.getName();
                 // Run the resource generator
                 resourceGenerator.generate();
                 resourceGenerator.save();
+                return CompletableFuture.completedFuture(null);
             }
 
             @Override

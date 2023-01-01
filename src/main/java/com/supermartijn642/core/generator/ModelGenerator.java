@@ -1,9 +1,7 @@
 package com.supermartijn642.core.generator;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.mojang.math.Vector3f;
+import com.google.gson.*;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.client.color.block.BlockColor;
@@ -15,12 +13,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.client.NamedRenderTypeManager;
 import net.minecraftforge.client.RenderTypeGroup;
+import org.joml.Vector3f;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -29,6 +27,8 @@ import java.util.function.Consumer;
  * Created 18/08/2022 by SuperMartijn642
  */
 public abstract class ModelGenerator extends ResourceGenerator {
+
+    private static final Gson GSON = new GsonBuilder().setLenient().create();
 
     /**
      * {@link NamedRenderTypeManager#RENDER_TYPES}
@@ -65,6 +65,11 @@ public abstract class ModelGenerator extends ResourceGenerator {
 
     @Override
     public void save(){
+        // Gather all the textures
+        Set<ResourceLocation> textures = new HashSet<>();
+        // Gather all parent models
+        Set<ResourceLocation> parents = new HashSet<>();
+
         // Loop over all models
         for(ModelBuilder modelBuilder : this.models.values()){
             JsonObject json = this.convertToJson(modelBuilder);
@@ -72,6 +77,59 @@ public abstract class ModelGenerator extends ResourceGenerator {
             // Save the object to the cache
             ResourceLocation identifier = modelBuilder.identifier;
             this.cache.saveJsonResource(ResourceType.ASSET, json, identifier.getNamespace(), "models", identifier.getPath());
+
+            // Add the textures used by the model
+            modelBuilder.textures.values().stream().filter(i -> i.charAt(0) != '#').map(ResourceLocation::new).forEach(textures::add);
+            // Add the parent model
+            if(modelBuilder.parent != null)
+                parents.add(modelBuilder.parent);
+        }
+
+        // Remove all present models from the parents
+        parents.removeAll(this.models.keySet());
+        Set<ResourceLocation> done = new HashSet<>(this.models.keySet());
+        // Add the textures from the parent models
+        while(!parents.isEmpty()){
+            ResourceLocation model = parents.iterator().next();
+            done.add(model);
+            // Try to read the file
+            Optional<InputStream> optional = this.cache.getManualResource(ResourceType.ASSET, model.getNamespace(), "models", model.getPath(), ".json");
+            if(optional.isEmpty())
+                continue;
+            // Try reading the model
+            try{
+                JsonObject json = GSON.fromJson(new InputStreamReader(optional.get()), JsonObject.class);
+                // Assume the model uses the default model format
+                if(json.has("parent") && json.get("parent").isJsonPrimitive() && json.getAsJsonPrimitive("parent").isString()){
+                    String identifier = json.get("parent").getAsString();
+                    if(RegistryUtil.isValidIdentifier(identifier) && !done.contains(new ResourceLocation(identifier)))
+                        parents.add(new ResourceLocation(identifier));
+                }
+                if(json.has("textures") && json.get("textures").isJsonObject()){
+                    for(Map.Entry<String,JsonElement> texture : json.getAsJsonObject("textures").entrySet()){
+                        if(texture.getValue().isJsonPrimitive() && texture.getValue().getAsJsonPrimitive().isString()){
+                            String identifier = texture.getValue().getAsString();
+                            if(RegistryUtil.isValidIdentifier(identifier))
+                                textures.add(new ResourceLocation(identifier));
+                        }
+                    }
+                }
+            }catch(Exception ignore){}
+        }
+
+        // Generate a file for the block atlas
+        if(!textures.isEmpty()){
+            JsonArray sources = new JsonArray();
+            for(ResourceLocation texture : textures){
+                JsonObject textureEntry = new JsonObject();
+                textureEntry.addProperty("type", "minecraft:single");
+                textureEntry.addProperty("resource", texture.toString());
+                sources.add(textureEntry);
+            }
+            JsonObject atlasJson = new JsonObject();
+            atlasJson.add("sources", sources);
+            // Save the file to the block atlas location
+            this.cache.saveJsonResource(ResourceType.ASSET, atlasJson, "minecraft", "atlases", "blocks");
         }
     }
 
@@ -685,9 +743,9 @@ public abstract class ModelGenerator extends ResourceGenerator {
 
     protected static class TransformBuilder {
 
-        private Vector3f rotation = ItemTransform.Deserializer.DEFAULT_ROTATION.copy();
-        private Vector3f translation = ItemTransform.Deserializer.DEFAULT_TRANSLATION.copy();
-        private Vector3f scale = ItemTransform.Deserializer.DEFAULT_SCALE.copy();
+        private Vector3f rotation = new Vector3f(ItemTransform.Deserializer.DEFAULT_ROTATION);
+        private Vector3f translation = new Vector3f(ItemTransform.Deserializer.DEFAULT_TRANSLATION);
+        private Vector3f scale = new Vector3f(ItemTransform.Deserializer.DEFAULT_SCALE);
 
         protected TransformBuilder(){
         }

@@ -31,7 +31,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static net.minecraft.core.Registry.*;
+import static net.minecraft.core.registries.BuiltInRegistries.*;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
