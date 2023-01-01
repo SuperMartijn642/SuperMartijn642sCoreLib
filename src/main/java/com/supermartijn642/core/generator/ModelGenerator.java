@@ -45,8 +45,15 @@ public abstract class ModelGenerator extends ResourceGenerator {
         // Parent model
         ResourceLocation parentModel = modelBuilder.parent;
         if(parentModel != null){
-            if(!this.models.containsKey(parentModel) && !this.cache.doesResourceExist(ResourceType.ASSET, parentModel.getResourceDomain(), "models", parentModel.getResourcePath(), ".json"))
-                throw new RuntimeException("Could find parent model '" + parentModel + "' for model '" + modelBuilder.identifier + "'!");
+            String name = parentModel.getResourcePath();
+            String extension = ".json";
+            if(name.lastIndexOf('.') > name.lastIndexOf('/') && name.lastIndexOf('.') + 1 < name.length()){
+                int index = name.lastIndexOf('.');
+                extension = name.substring(index + 1);
+                name = name.substring(0, index);
+            }
+            if(!this.models.containsKey(parentModel) && !this.cache.doesResourceExist(ResourceType.ASSET, parentModel.getResourceDomain(), "models", name, extension))
+                throw new RuntimeException("Could not find parent model '" + parentModel + "' for model '" + modelBuilder.identifier + "'!");
             json.addProperty("parent", parentModel.toString());
         }
         // Render type

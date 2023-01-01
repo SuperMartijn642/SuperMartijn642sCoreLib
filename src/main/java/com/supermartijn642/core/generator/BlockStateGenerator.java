@@ -92,7 +92,14 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
             VariantModel model = builder.models.get(i);
             JsonObject modelJson = new JsonObject();
             // Model location
-            if(!this.cache.doesResourceExist(ResourceType.ASSET, model.modelLocation.getResourceDomain(), "models", model.modelLocation.getResourcePath(), ".json"))
+            String name = model.modelLocation.getResourcePath();
+            String extension = ".json";
+            if(name.lastIndexOf('.') > name.lastIndexOf('/') && name.lastIndexOf('.') + 1 < name.length()){
+                int index = name.lastIndexOf('.');
+                extension = name.substring(index + 1);
+                name = name.substring(0, index);
+            }
+            if(!this.cache.doesResourceExist(ResourceType.ASSET, model.modelLocation.getResourceDomain(), "models", name, extension))
                 throw new RuntimeException("Could not find model '" + model.modelLocation + "' in block state for block '" + block + "'!");
             if(model.modelLocation.getResourcePath().startsWith("block/"))
                 modelJson.addProperty("model", model.modelLocation.getResourceDomain() + ":" + model.modelLocation.getResourcePath().substring("block/".length()));

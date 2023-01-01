@@ -196,6 +196,8 @@ public abstract class ResourceCache {
         }
 
         private Path constructPath(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
+            if(!extension.isEmpty() && extension.charAt(0) != '.')
+                extension = '.' + extension;
             return Paths.get(resourceType.getDirectoryName(), namespace, directory, fileName + extension);
         }
 
