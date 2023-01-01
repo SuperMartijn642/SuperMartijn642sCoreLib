@@ -10,6 +10,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
@@ -21,6 +22,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -29,12 +31,16 @@ import java.util.function.Consumer;
  */
 public class BaseBlockItem extends BlockItem {
 
+    private final ItemProperties properties;
+
     public BaseBlockItem(Block block, Properties properties){
         super(block, properties);
+        this.properties = null;
     }
 
     public BaseBlockItem(Block block, ItemProperties properties){
-        this(block, properties.toUnderlying());
+        super(block, properties.toUnderlying());
+        this.properties = properties;
     }
 
     /**
@@ -119,6 +125,15 @@ public class BaseBlockItem extends BlockItem {
     @Override
     public void initializeClient(Consumer<IClientItemExtensions> consumer){
         consumer.accept(new EditableClientItemExtensions());
+    }
+
+    public boolean isInCreativeGroup(CreativeModeTab tab){
+        return this.properties != null && this.properties.groups.contains(tab);
+    }
+
+    @Override
+    public Collection<CreativeModeTab> getCreativeTabs(){
+        return this.properties != null ? this.properties.groups : super.getCreativeTabs();
     }
 
     public static class ItemUseResult {

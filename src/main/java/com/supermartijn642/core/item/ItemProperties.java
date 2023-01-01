@@ -5,6 +5,9 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created 24/07/2022 by SuperMartijn642
  */
@@ -17,10 +20,10 @@ public class ItemProperties {
     private int maxStackSize = 64;
     private int durability;
     private Item craftingRemainingItem;
-    private CreativeModeTab group;
     private Rarity rarity = Rarity.COMMON;
     private FoodProperties foodProperties;
     private boolean isFireResistant;
+    final Set<CreativeModeTab> groups = new HashSet<>();
 
     private ItemProperties(){
     }
@@ -50,7 +53,7 @@ public class ItemProperties {
     }
 
     public ItemProperties group(CreativeModeTab group){
-        this.group = group;
+        this.groups.add(group);
         return this;
     }
 
@@ -83,11 +86,12 @@ public class ItemProperties {
         properties.durability(this.durability);
         properties.stacksTo(this.maxStackSize);
         properties.craftRemainder(this.craftingRemainingItem);
-        properties.tab(this.group);
         properties.rarity(this.rarity);
         properties.food(this.foodProperties);
         if(this.isFireResistant)
             properties.fireResistant();
+        if(!this.groups.isEmpty())
+            properties.tab(this.groups.iterator().next());
         return properties;
     }
 }

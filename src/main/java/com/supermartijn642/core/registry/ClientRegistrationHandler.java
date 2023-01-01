@@ -466,6 +466,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelRenderType(Supplier<Block> block, Supplier<RenderType> renderTypeSupplier){
         if(this.passedRegisterRenderers)
             throw new IllegalStateException("Cannot register new menu screens after the ClientInitialization event has been fired!");
@@ -479,8 +480,9 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelRenderType(Supplier<Block> block, RenderType renderType){
-        this.registerBlockModelRenderType(block, renderType);
+        this.registerBlockModelRenderType(block, () -> renderType);
     }
 
     /**
@@ -489,6 +491,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelRenderType(Block block, Supplier<RenderType> renderTypeSupplier){
         this.registerBlockModelRenderType(() -> block, renderTypeSupplier);
     }
@@ -499,6 +502,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelSolidRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::solid);
     }
@@ -509,6 +513,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelSolidRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::solid);
     }
@@ -519,6 +524,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelCutoutMippedRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::cutoutMipped);
     }
@@ -529,6 +535,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelCutoutMippedRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::cutoutMipped);
     }
@@ -539,6 +546,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelCutoutRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::cutout);
     }
@@ -549,6 +557,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelCutoutRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::cutout);
     }
@@ -559,6 +568,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelTranslucentRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::translucent);
     }
@@ -569,6 +579,7 @@ public class ClientRegistrationHandler {
      * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
     @SuppressWarnings("JavadocReference")
+    @Deprecated
     public void registerBlockModelTranslucentRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::translucent);
     }

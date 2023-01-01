@@ -43,5 +43,4 @@ public class LevelRendererMixin {
     public void renderLevel(CallbackInfo ci){
         MinecraftForge.EVENT_BUS.post(new RenderWorldEvent(this.poseStack, this.partialTicks));
     }
-
 }
