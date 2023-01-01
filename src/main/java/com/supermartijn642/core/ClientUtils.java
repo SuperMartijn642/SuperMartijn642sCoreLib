@@ -69,5 +69,4 @@ public class ClientUtils {
     public static void displayScreen(GuiScreen screen){
         getMinecraft().displayGuiScreen(screen);
     }
-
 }

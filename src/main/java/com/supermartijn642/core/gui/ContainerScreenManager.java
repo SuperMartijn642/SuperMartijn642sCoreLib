@@ -1,5 +1,6 @@
 package com.supermartijn642.core.gui;
 
+import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -31,5 +32,14 @@ public class ContainerScreenManager {
         }
 
         return CONTAINER_SCREEN_MAP.get(handler).apply(container);
+    }
+
+    public static <T extends Container> GuiContainer displayContainer(BaseContainerType<T> handler, T container, int windowId){
+        container.windowId = windowId;
+        ClientUtils.getPlayer().openContainer = container;
+        GuiContainer screen = createScreen(handler, container);
+        if(screen != null)
+            ClientUtils.displayScreen(screen);
+        return screen;
     }
 }

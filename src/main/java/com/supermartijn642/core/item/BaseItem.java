@@ -1,6 +1,5 @@
 package com.supermartijn642.core.item;
 
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -12,6 +11,7 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IRarity;
@@ -142,7 +142,8 @@ public class BaseItem extends Item {
 
     @Override
     public String getItemStackDisplayName(ItemStack stack){
-        return I18n.format(this.getUnlocalizedName(stack)).trim();
+        //noinspection deprecation
+        return I18n.translateToLocalFormatted(this.getUnlocalizedName(stack)).trim();
     }
 
     @Override

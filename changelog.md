@@ -18,3 +18,4 @@
 - Backported mining tags for use with `BaseBlock`
 - Added `ResourceGenerator`s to generate all assets
 - Added `BaseBlockEntityType`s to allow for multiple block entities from a single class
+- Added json language files

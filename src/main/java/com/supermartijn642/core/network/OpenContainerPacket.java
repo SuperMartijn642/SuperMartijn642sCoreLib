@@ -6,7 +6,6 @@ import com.supermartijn642.core.gui.BaseContainerType;
 import com.supermartijn642.core.gui.ContainerScreenManager;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 
@@ -56,10 +55,6 @@ public final class OpenContainerPacket<T extends BaseContainer> implements BaseP
 
     @Override
     public void handle(PacketContext context){
-        this.container.windowId = this.windowId;
-        ClientUtils.getPlayer().openContainer = this.container;
-        GuiScreen screen = ContainerScreenManager.createScreen(this.handler, this.container);
-        if(screen != null)
-            ClientUtils.displayScreen(screen);
+        ContainerScreenManager.displayContainer(this.handler, this.container, this.windowId);
     }
 }
