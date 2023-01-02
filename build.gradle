@@ -130,13 +130,13 @@ task processSources(type: Sync) {
     inputs.property 'version', version
 
     // Replace mod properties in main mod class
-    Hashtable<String,String> properties = new Hashtable<>()
+    Hashtable<String, String> properties = new Hashtable<>()
     project.properties.entrySet().stream()
             .filter(entry -> entry.key instanceof String && entry.value instanceof String)
             .forEach(entry -> properties.put(entry.key, entry.value))
-    filesMatching(project.mod_package.replace('.','/') + "/" + project.mod_main_class + ".java") {
+    filesMatching(project.mod_package.replace('.', '/') + "/" + project.mod_main_class + ".java") {
         //noinspection UnnecessaryQualifiedReference
-        filter(org.apache.tools.ant.filters.ReplaceTokens, tokens : properties)
+        filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: properties)
     }
 }
 
@@ -200,7 +200,7 @@ task prepareDataResources(type: Sync) {
 
 // Run prepareDataResources before prepareRunData
 tasks.whenTaskAdded {
-    if(it.name == "prepareRunData")
+    if (it.name == "prepareRunData")
         it.dependsOn "prepareDataResources"
 }
 
@@ -216,13 +216,15 @@ curseforge {
         // Point to 'changelog' setting to a the changelog file
         changelog = file("changelog.md")
         changelogType = "markdown"
-        relations {
-            // Required dependencies
-            if (!project.curseforge_required_dependency_ids.isEmpty())
-                project.curseforge_required_dependency_ids.split(" ").each it::requiredDependency
-            // Optional dependencies
-            if (!project.curseforge_optional_dependency_ids.isEmpty())
-                project.curseforge_optional_dependency_ids.split(" ").each it::optionalDependency
+        if (!project.curseforge_required_dependency_ids.isEmpty() || !project.curseforge_optional_dependency_ids.isEmpty()) {
+            relations {
+                // Required dependencies
+                if (!project.curseforge_required_dependency_ids.isEmpty())
+                    project.curseforge_required_dependency_ids.split(" ").each it::requiredDependency
+                // Optional dependencies
+                if (!project.curseforge_optional_dependency_ids.isEmpty())
+                    project.curseforge_optional_dependency_ids.split(" ").each it::optionalDependency
+            }
         }
 
         mainArtifact(jar) {
