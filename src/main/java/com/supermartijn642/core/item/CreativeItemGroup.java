@@ -92,6 +92,10 @@ public final class CreativeItemGroup extends CreativeModeTab {
         return CreativeModeTabs.OP_BLOCKS;
     }
 
+    public static CreativeModeTab getSearch(){
+        return CreativeModeTabs.SEARCH;
+    }
+
     private final String modid, identifier;
     private Consumer<Consumer<ItemStack>> filler;
     private Comparator<ItemStack> sorter;

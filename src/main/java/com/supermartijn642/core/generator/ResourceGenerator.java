@@ -26,7 +26,8 @@ public abstract class ResourceGenerator {
      */
     public static DataProvider createDataProvider(Function<ResourceCache,ResourceGenerator> generator, ExistingFileHelper existingFileHelper, DataGenerator dataGenerator){
         return new DataProvider() {
-            private String name = "Resource Generator";
+            private static int iterator = 1;
+            private String name = "Resource Generator " + iterator++;
 
             @Override
             public CompletableFuture<?> run(CachedOutput cachedOutput){

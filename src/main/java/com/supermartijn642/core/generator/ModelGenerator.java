@@ -91,6 +91,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
         // Add the textures from the parent models
         while(!parents.isEmpty()){
             ResourceLocation model = parents.iterator().next();
+            parents.remove(model);
             done.add(model);
             // Try to read the file
             Optional<InputStream> optional = this.cache.getManualResource(ResourceType.ASSET, model.getNamespace(), "models", model.getPath(), ".json");
