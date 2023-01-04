@@ -17,14 +17,14 @@ public class GameDataMixin {
 
     private static RegistryEvent.Register<?> registerEvent;
 
-    @ModifyVariable(method = "lambda$postRegistryEventDispatch$15(Lnet/minecraftforge/fml/IModStateTransition$EventGenerator;)V", at = @At("STORE"), ordinal = 0, remap = false)
+    @ModifyVariable(method = "lambda$postRegistryEventDispatch$15(Lnet/minecraftforge/fml/ModLoadingStage$EventGenerator;)V", at = @At("STORE"), ordinal = 0, remap = false)
     private static RegistryEvent.Register<?> modifyRegisterEvent(RegistryEvent.Register<?> registerEvent){
         GameDataMixin.registerEvent = registerEvent;
         return registerEvent;
     }
 
     @Inject(
-        method = "lambda$postRegistryEventDispatch$15(Lnet/minecraftforge/fml/IModStateTransition$EventGenerator;)V",
+        method = "lambda$postRegistryEventDispatch$15(Lnet/minecraftforge/fml/ModLoadingStage$EventGenerator;)V",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraftforge/registries/ObjectHolderRegistry;applyObjectHolders(Ljava/util/function/Predicate;)V"
