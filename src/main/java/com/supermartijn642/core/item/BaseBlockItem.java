@@ -18,6 +18,8 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -90,6 +92,7 @@ public class BaseBlockItem extends ItemBlock {
     public void inventoryUpdate(ItemStack stack, World level, Entity entity, int itemSlot, boolean isSelected){
     }
 
+    @SideOnly(Side.CLIENT) // Needed in 1.16 because ITooltipFlag is client-side only
     @Override
     public void addInformation(ItemStack stack, @Nullable World level, List<String> information, ITooltipFlag flag){
         this.appendItemInformation(stack, level, component -> information.add(component.getFormattedText()), flag.isAdvanced());
