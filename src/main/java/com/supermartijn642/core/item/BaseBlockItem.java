@@ -19,6 +19,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -90,6 +92,7 @@ public class BaseBlockItem extends BlockItem {
     public void inventoryUpdate(ItemStack stack, World level, Entity entity, int itemSlot, boolean isSelected){
     }
 
+    @OnlyIn(Dist.CLIENT) // Needed in 1.16 because ITooltipFlag is client-side only
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World level, List<ITextComponent> information, ITooltipFlag flag){
         this.appendItemInformation(stack, level, information::add, flag.isAdvanced());
