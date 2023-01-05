@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.0a
+- Fix crash on dedicated servers in certain scenarios
+
 ### SuperMartijn642's Core Library 1.1.0
 - All gui functionality has been extracted into `Widget`s
 - Added `RegistrationHandler`, `ClientRegistrationHandler`, and `GeneratorRegistrationHandler` for registering everything
