@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.0b
+- Fix crash on dedicated servers in certain scenarios
+
 ### SuperMartijn642's Core Library 1.1.0a
 - Fix mixin conflict with certain mods
 
