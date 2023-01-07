@@ -528,8 +528,6 @@ public final class Registries {
 
         private void initializeMap(){
             this.identifierToObject = craftingHelperConditions.get();
-            this.identifierToObject.forEach((id, o) -> this.objectToIdentifier.put(o, id));
-            this.identifierToObject.forEach((id, o) -> this.entries.add(Pair.of(id, o)));
         }
 
         @Override
