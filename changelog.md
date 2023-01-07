@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.1
+- Fix crash when a recipe condition is registered as `RecipeConditionSerializerRegistry` gets initialized
+
 ### SuperMartijn642's Core Library 1.1.0b
 - Fix crash on dedicated servers in certain scenarios
 
