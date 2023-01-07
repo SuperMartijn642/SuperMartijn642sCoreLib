@@ -347,8 +347,6 @@ public final class Registries {
 
         private RecipeConditionSerializerRegistry(){
             this.identifierToObject = craftingHelperConditions.get();
-            this.identifierToObject.forEach((id, o) -> this.objectToIdentifier.put(o, id));
-            this.identifierToObject.forEach((id, o) -> this.entries.add(Pair.of(id, o)));
             //noinspection unchecked
             this.valueClass = (Class<IConditionSerializer<?>>)(Object)IConditionSerializer.class;
         }
