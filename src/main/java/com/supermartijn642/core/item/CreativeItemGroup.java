@@ -97,6 +97,7 @@ public final class CreativeItemGroup extends CreativeModeTab {
     }
 
     private final String modid, identifier;
+    private final ResourceLocation background;
     private Consumer<Consumer<ItemStack>> filler;
     private Comparator<ItemStack> sorter;
     private List<ItemStack> sortedDisplayItems;
@@ -105,6 +106,7 @@ public final class CreativeItemGroup extends CreativeModeTab {
         super(CreativeModeTab.builder(Row.TOP, 0).icon(icon).title(TextComponents.translation(translationKey).get()));
         this.modid = modid;
         this.identifier = identifier;
+        this.background = new ResourceLocation("textures/gui/container/creative_inventory/tab_items.png");
         this.displayItemsGenerator = (flags, output, hasPermissions) -> this.applyFiller(output::accept);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<CreativeModeTabEvent.Register>)event -> registerTab(this));
@@ -152,6 +154,11 @@ public final class CreativeItemGroup extends CreativeModeTab {
     @Override
     public Collection<ItemStack> getDisplayItems(){
         return this.sortedDisplayItems == null ? super.getDisplayItems() : this.sortedDisplayItems;
+    }
+
+    @Override
+    public ResourceLocation getBackgroundLocation(){
+        return this.background;
     }
 
     /**
