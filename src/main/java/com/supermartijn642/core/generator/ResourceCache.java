@@ -8,17 +8,19 @@ import com.google.gson.JsonObject;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
@@ -82,7 +84,7 @@ public abstract class ResourceCache {
      * @param extension    the file's extension
      * @return an input stream for the requested resource, or an empty optional if the resource does not exist
      */
-    public abstract Optional<InputStream> getManualResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension);
+    public abstract Optional<InputStream> getExistingResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension);
 
     @ApiStatus.Internal
     static ResourceCache wrap(ExistingFileHelper existingFileHelper, CachedOutput cachedOutput, Path outputDirectory){
@@ -118,13 +120,12 @@ public abstract class ResourceCache {
         }
 
         @Override
-        public Optional<InputStream> getManualResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
-            Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
-            Path fullPath = this.outputDirectory.resolve(path);
-            if(!Files.exists(fullPath))
-                return Optional.empty();
+        public Optional<InputStream> getExistingResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             try{
-                return Optional.of(Files.newInputStream(fullPath));
+                Resource resource = this.existingFileHelper.getResource(new ResourceLocation(namespace, directory + "/" + fileName + extension), PackType.CLIENT_RESOURCES);
+                return Optional.of(resource.open());
+            }catch(FileNotFoundException | NoSuchElementException e){
+                return Optional.empty();
             }catch(IOException e){
                 throw new RuntimeException(e);
             }

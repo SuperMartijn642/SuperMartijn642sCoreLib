@@ -94,7 +94,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
             parents.remove(model);
             done.add(model);
             // Try to read the file
-            Optional<InputStream> optional = this.cache.getManualResource(ResourceType.ASSET, model.getNamespace(), "models", model.getPath(), ".json");
+            Optional<InputStream> optional = this.cache.getExistingResource(ResourceType.ASSET, model.getNamespace(), "models", model.getPath(), ".json");
             if(optional.isEmpty())
                 continue;
             // Try reading the model
