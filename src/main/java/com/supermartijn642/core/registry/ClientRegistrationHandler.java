@@ -597,7 +597,7 @@ public class ClientRegistrationHandler {
             e.register(model);
     }
 
-    private void handleModelBakeEvent(ModelEvent.BakingCompleted e){
+    private void handleModelBakeEvent(ModelEvent.ModifyBakingResult e){
         this.passedModelBake = true;
 
         // Special models
