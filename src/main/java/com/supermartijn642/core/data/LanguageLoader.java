@@ -50,7 +50,7 @@ public class LanguageLoader {
         IResourceManager domainManager = findFallbackResourceManager(resourceManager, langLocation.getResourceDomain());
         // If it's not a FallbackResourceManager or SimpleReloadableResourceManager, just return the original values
         if(!(domainManager instanceof FallbackResourceManager))
-            return domainManager.getAllResources(langLocation);
+            return resourceManager.getAllResources(langLocation);
 
         FallbackResourceManager fallbackResourceManager = (FallbackResourceManager)domainManager;
         fallbackResourceManager.checkResourcePath(langLocation);
