@@ -1,3 +1,7 @@
+### SuperMartijn642's Core Library 1.1.1a
+- Fix rare crash well loading recipe ingredients
+- Fix crash when both Hammer Lib and ColorUtility are installed
+
 ### SuperMartijn642's Core Library 1.1.1
 - Fix crash when a recipe condition is registered as `RecipeConditionSerializerRegistry` gets initialized
 
