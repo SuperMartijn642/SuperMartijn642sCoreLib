@@ -9,7 +9,8 @@
     "GameDataMixin"
   ],
   "client": [
-    "LevelRendererMixin"
+    "LevelRendererMixin",
+    "SpriteResourceLoaderMixin"
   ],
   "server": [],
   "injectors": {
