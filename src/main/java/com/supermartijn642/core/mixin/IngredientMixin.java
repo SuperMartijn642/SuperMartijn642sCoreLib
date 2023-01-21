@@ -22,7 +22,7 @@ public class IngredientMixin implements IngredientExtension {
 
     @Inject(
         method = "<init>([Lnet/minecraft/item/ItemStack;)V",
-        at = @At("TAIL")
+        at = @At("RETURN")
     )
     private void constructor(ItemStack[] input, CallbackInfo ci){
         this.coreLibOriginalInput = input;
