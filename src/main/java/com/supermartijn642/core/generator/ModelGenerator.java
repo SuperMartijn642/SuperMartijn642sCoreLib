@@ -1,7 +1,10 @@
 package com.supermartijn642.core.generator;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.client.color.block.BlockColor;
@@ -15,10 +18,11 @@ import net.minecraftforge.client.NamedRenderTypeManager;
 import net.minecraftforge.client.RenderTypeGroup;
 import org.joml.Vector3f;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -58,17 +62,18 @@ public abstract class ModelGenerator extends ResourceGenerator {
     }
 
     private final Map<ResourceLocation,ModelBuilder> models = new HashMap<>();
+    private final ModelAtlasSourceGenerator atlasSourceGenerator;
 
     public ModelGenerator(String modid, ResourceCache cache){
         super(modid, cache);
+        this.atlasSourceGenerator = new ModelAtlasSourceGenerator(modid, cache);
     }
 
     @Override
     public void save(){
-        // Gather all the textures
-        Set<ResourceLocation> textures = new HashSet<>();
-        // Gather all parent models
-        Set<ResourceLocation> parents = new HashSet<>();
+        // Save all the texture atlas entries
+        this.atlasSourceGenerator.generate();
+        this.atlasSourceGenerator.save();
 
         // Loop over all models
         for(ModelBuilder modelBuilder : this.models.values()){
@@ -77,60 +82,6 @@ public abstract class ModelGenerator extends ResourceGenerator {
             // Save the object to the cache
             ResourceLocation identifier = modelBuilder.identifier;
             this.cache.saveJsonResource(ResourceType.ASSET, json, identifier.getNamespace(), "models", identifier.getPath());
-
-            // Add the textures used by the model
-            modelBuilder.textures.values().stream().filter(i -> i.charAt(0) != '#').map(ResourceLocation::new).forEach(textures::add);
-            // Add the parent model
-            if(modelBuilder.parent != null)
-                parents.add(modelBuilder.parent);
-        }
-
-        // Remove all present models from the parents
-        parents.removeAll(this.models.keySet());
-        Set<ResourceLocation> done = new HashSet<>(this.models.keySet());
-        // Add the textures from the parent models
-        while(!parents.isEmpty()){
-            ResourceLocation model = parents.iterator().next();
-            parents.remove(model);
-            done.add(model);
-            // Try to read the file
-            Optional<InputStream> optional = this.cache.getExistingResource(ResourceType.ASSET, model.getNamespace(), "models", model.getPath(), ".json");
-            if(optional.isEmpty())
-                continue;
-            // Try reading the model
-            try{
-                JsonObject json = GSON.fromJson(new InputStreamReader(optional.get()), JsonObject.class);
-                // Assume the model uses the default model format
-                if(json.has("parent") && json.get("parent").isJsonPrimitive() && json.getAsJsonPrimitive("parent").isString()){
-                    String identifier = json.get("parent").getAsString();
-                    if(RegistryUtil.isValidIdentifier(identifier) && !done.contains(new ResourceLocation(identifier)))
-                        parents.add(new ResourceLocation(identifier));
-                }
-                if(json.has("textures") && json.get("textures").isJsonObject()){
-                    for(Map.Entry<String,JsonElement> texture : json.getAsJsonObject("textures").entrySet()){
-                        if(texture.getValue().isJsonPrimitive() && texture.getValue().getAsJsonPrimitive().isString()){
-                            String identifier = texture.getValue().getAsString();
-                            if(RegistryUtil.isValidIdentifier(identifier))
-                                textures.add(new ResourceLocation(identifier));
-                        }
-                    }
-                }
-            }catch(Exception ignore){}
-        }
-
-        // Generate a file for the block atlas
-        if(!textures.isEmpty()){
-            JsonArray sources = new JsonArray();
-            for(ResourceLocation texture : textures){
-                JsonObject textureEntry = new JsonObject();
-                textureEntry.addProperty("type", "minecraft:single");
-                textureEntry.addProperty("resource", texture.toString());
-                sources.add(textureEntry);
-            }
-            JsonObject atlasJson = new JsonObject();
-            atlasJson.add("sources", sources);
-            // Save the file to the block atlas location
-            this.cache.saveJsonResource(ResourceType.ASSET, atlasJson, "minecraft", "atlases", "blocks");
         }
     }
 
@@ -1079,6 +1030,25 @@ public abstract class ModelGenerator extends ResourceGenerator {
 
             this.emissivity = emissivity;
             return this;
+        }
+    }
+
+    private class ModelAtlasSourceGenerator extends AtlasSourceGenerator {
+
+        public ModelAtlasSourceGenerator(String modid, ResourceCache cache){
+            super(modid, cache);
+        }
+
+        @Override
+        public void generate(){
+            for(ModelBuilder modelBuilder : ModelGenerator.this.models.values()){
+                // Add the textures used by the model
+                modelBuilder.textures.values().stream().filter(i -> i.charAt(0) != '#').map(ResourceLocation::new).forEach(this.blockAtlas()::texture);
+                // Add the parent model
+                ResourceLocation parent = modelBuilder.parent;
+                if(parent != null && !ModelGenerator.this.models.containsKey(parent) && this.cache.getExistingResource(ResourceType.ASSET, parent.getNamespace(), "models", parent.getPath(), ".json").isPresent())
+                    this.blockAtlas().texturesFromModel(modelBuilder.parent);
+            }
         }
     }
 }
