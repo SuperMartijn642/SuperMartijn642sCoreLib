@@ -11,7 +11,7 @@ import net.minecraft.stats.StatType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.decoration.Motive;
+import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.alchemy.Potion;
@@ -294,23 +294,23 @@ public class RegistrationHandler {
         this.addCallback(Registries.MENU_TYPES, callback);
     }
 
-    public void registerPaintingVariant(String identifier, Supplier<Motive> paintingVariant){
+    public void registerPaintingVariant(String identifier, Supplier<PaintingVariant> paintingVariant){
         this.addEntry(Registries.PAINTING_VARIANTS, identifier, paintingVariant);
     }
 
-    public void registerPaintingVariant(String identifier, Motive paintingVariant){
+    public void registerPaintingVariant(String identifier, PaintingVariant paintingVariant){
         this.addEntry(Registries.PAINTING_VARIANTS, identifier, () -> paintingVariant);
     }
 
-    public void registerPaintingVariantOverride(String namespace, String identifier, Supplier<Motive> paintingVariant){
+    public void registerPaintingVariantOverride(String namespace, String identifier, Supplier<PaintingVariant> paintingVariant){
         this.addEntry(Registries.PAINTING_VARIANTS, namespace, identifier, paintingVariant);
     }
 
-    public void registerPaintingVariantOverride(String namespace, String identifier, Motive paintingVariant){
+    public void registerPaintingVariantOverride(String namespace, String identifier, PaintingVariant paintingVariant){
         this.addEntry(Registries.PAINTING_VARIANTS, namespace, identifier, () -> paintingVariant);
     }
 
-    public void registerPaintingVariantCallback(Consumer<Helper<Motive>> callback){
+    public void registerPaintingVariantCallback(Consumer<Helper<PaintingVariant>> callback){
         this.addCallback(Registries.PAINTING_VARIANTS, callback);
     }
 

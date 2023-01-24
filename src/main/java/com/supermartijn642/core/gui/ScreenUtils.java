@@ -2,18 +2,18 @@ package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
 
 import java.util.Collections;
 import java.util.List;
@@ -251,7 +251,7 @@ public class ScreenUtils {
     }
 
     public static void drawTooltip(PoseStack poseStack, Font fontRenderer, String text, int x, int y){
-        drawTooltip(poseStack, fontRenderer, new TextComponent(text), x, y);
+        drawTooltip(poseStack, fontRenderer, Component.literal(text), x, y);
     }
 
     public static void drawTooltip(PoseStack poseStack, List<Component> text, int x, int y){
@@ -267,8 +267,9 @@ public class ScreenUtils {
     }
 
     /**
-     * Copied from {@link Screen#renderTooltipInternal(PoseStack, List, int, int)}.
+     * Copied from {@link Screen#renderTooltipInternal(PoseStack, List, int, int, ClientTooltipPositioner)}.
      */
+    @SuppressWarnings("JavadocReference")
     private static void drawTooltipInternal(PoseStack poseStack, Font fontRenderer, List<ClientTooltipComponent> components, int x, int y){
         if(components.isEmpty())
             return;
@@ -324,8 +325,7 @@ public class ScreenUtils {
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        bufferbuilder.end();
-        BufferUploader.end(bufferbuilder);
+        BufferUploader.drawWithShader(bufferbuilder.end());
         RenderSystem.disableBlend();
         RenderSystem.enableTexture();
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());

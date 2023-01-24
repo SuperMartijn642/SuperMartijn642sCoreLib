@@ -2,7 +2,7 @@ package com.supermartijn642.core.network;
 
 import com.supermartijn642.core.CoreSide;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
@@ -57,7 +57,7 @@ public abstract class BlockEntityBasePacket<T extends BlockEntity> extends Block
     public void read(FriendlyByteBuf buffer){
         super.read(buffer);
         if(buffer.readBoolean())
-            this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, buffer.readResourceLocation());
+            this.dimension = ResourceKey.create(Registries.DIMENSION, buffer.readResourceLocation());
     }
 
     @Override

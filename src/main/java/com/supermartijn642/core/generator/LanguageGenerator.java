@@ -2,7 +2,7 @@ package com.supermartijn642.core.generator;
 
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -53,9 +53,9 @@ public abstract class LanguageGenerator extends ResourceGenerator {
      */
     protected void itemGroup(CreativeModeTab group, String translation){
         Component component = group.getDisplayName();
-        if(component instanceof TranslatableComponent)
-            this.translation(((TranslatableComponent)component).getKey(), translation);
-        this.translation(group.langId, translation);
+        if(!(component.getContents() instanceof TranslatableContents))
+            throw new RuntimeException("Creative mode tab's title must be an instance of TranslatableContents!");
+        this.translation(((TranslatableContents)component.getContents()).getKey(), translation);
     }
 
     /**

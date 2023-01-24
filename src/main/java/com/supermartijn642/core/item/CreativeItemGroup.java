@@ -2,14 +2,18 @@ package com.supermartijn642.core.item;
 
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.registry.RegistryUtil;
-import net.fabricmc.fabric.impl.item.group.ItemGroupExtensions;
-import net.minecraft.core.NonNullList;
-import net.minecraft.network.chat.Component;
+import net.fabricmc.fabric.impl.itemgroup.ItemGroupHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -24,11 +28,8 @@ public final class CreativeItemGroup extends CreativeModeTab {
         if(!RegistryUtil.isValidNamespace(modid))
             throw new IllegalArgumentException("Item group name '" + name + "' must only contain characters [a-z0-9_.-]!");
 
-        ((ItemGroupExtensions)CreativeModeTab.TAB_BUILDING_BLOCKS).fabric_expandArray();
-
-        String identifier = modid + "." + name;
         String translationKey = modid + ".item_group." + name;
-        return new CreativeItemGroup(identifier, translationKey, icon);
+        return new CreativeItemGroup(modid, name, translationKey, icon);
     }
 
     public static CreativeItemGroup create(String modid, String name, ItemLike icon){
@@ -39,10 +40,8 @@ public final class CreativeItemGroup extends CreativeModeTab {
         if(!RegistryUtil.isValidNamespace(modid))
             throw new IllegalArgumentException("Modid '" + modid + "' must only contain characters [a-z0-9_.-]!");
 
-        ((ItemGroupExtensions)CreativeModeTab.TAB_BUILDING_BLOCKS).fabric_expandArray();
-
         String translationKey = modid + ".item_group";
-        return new CreativeItemGroup(modid, translationKey, icon);
+        return new CreativeItemGroup(modid, modid, translationKey, icon);
     }
 
     public static CreativeItemGroup create(String modid, ItemLike icon){
@@ -50,56 +49,72 @@ public final class CreativeItemGroup extends CreativeModeTab {
     }
 
     public static CreativeModeTab getBuildingBlocks(){
-        return CreativeModeTab.TAB_DECORATIONS;
+        return CreativeModeTabs.BUILDING_BLOCKS;
     }
 
-    public static CreativeModeTab getDecoration(){
-        return CreativeModeTab.TAB_DECORATIONS;
+    public static CreativeModeTab getColoredBlocks(){
+        return CreativeModeTabs.COLORED_BLOCKS;
     }
 
-    public static CreativeModeTab getRedstone(){
-        return CreativeModeTab.TAB_DECORATIONS;
+    public static CreativeModeTab getNaturalBlocks(){
+        return CreativeModeTabs.NATURAL_BLOCKS;
     }
 
-    public static CreativeModeTab getTransportation(){
-        return CreativeModeTab.TAB_DECORATIONS;
+    public static CreativeModeTab getFunctionalBlocks(){
+        return CreativeModeTabs.FUNCTIONAL_BLOCKS;
     }
 
-    public static CreativeModeTab getMisc(){
-        return CreativeModeTab.TAB_DECORATIONS;
+    public static CreativeModeTab getRedstoneBlocks(){
+        return CreativeModeTabs.REDSTONE_BLOCKS;
     }
 
-    public static CreativeModeTab getSearch(){
-        return CreativeModeTab.TAB_DECORATIONS;
-    }
-
-    public static CreativeModeTab getFood(){
-        return CreativeModeTab.TAB_DECORATIONS;
-    }
-
-    public static CreativeModeTab getTools(){
-        return CreativeModeTab.TAB_DECORATIONS;
+    public static CreativeModeTab getToolsAndUtilities(){
+        return CreativeModeTabs.TOOLS_AND_UTILITIES;
     }
 
     public static CreativeModeTab getCombat(){
-        return CreativeModeTab.TAB_DECORATIONS;
+        return CreativeModeTabs.COMBAT;
     }
 
-    public static CreativeModeTab getBrewing(){
-        return CreativeModeTab.TAB_DECORATIONS;
+    public static CreativeModeTab getFoodAndDrinks(){
+        return CreativeModeTabs.FOOD_AND_DRINKS;
     }
 
-    private final String identifier;
-    private final Component displayName;
-    private final Supplier<ItemStack> icon;
+    public static CreativeModeTab getIngredients(){
+        return CreativeModeTabs.INGREDIENTS;
+    }
+
+    public static CreativeModeTab getSpawnEggs(){
+        return CreativeModeTabs.SPAWN_EGGS;
+    }
+
+    public static CreativeModeTab getOperatorUtilities(){
+        return CreativeModeTabs.OP_BLOCKS;
+    }
+
+    public static CreativeModeTab getSearch(){
+        return CreativeModeTabs.SEARCH;
+    }
+
+    private final String modid, identifier;
     private Consumer<Consumer<ItemStack>> filler;
     private Comparator<ItemStack> sorter;
+    private List<ItemStack> sortedDisplayItems;
 
-    private CreativeItemGroup(String identifier, String translationKey, Supplier<ItemStack> icon){
-        super(CreativeModeTab.TABS.length - 1, identifier);
+    private CreativeItemGroup(String modid, String identifier, String translationKey, Supplier<ItemStack> icon){
+        super(Row.TOP, 0, Type.CATEGORY, TextComponents.translation(translationKey).get(), icon, (a, b, c) -> {
+        });
+        this.modid = modid;
         this.identifier = identifier;
-        this.displayName = TextComponents.translation(translationKey).get();
-        this.icon = icon;
+        this.displayItemsGenerator = (flags, output, hasPermissions) -> this.applyFiller(output::accept);
+
+        //noinspection UnstableApiUsage
+        ItemGroupHelper.appendItemGroup(this);
+    }
+
+    private void applyFiller(Consumer<ItemStack> output){
+        if(this.filler != null)
+            this.filler.accept(output);
     }
 
     /**
@@ -128,32 +143,21 @@ public final class CreativeItemGroup extends CreativeModeTab {
     }
 
     @Override
-    public ItemStack makeIcon(){
-        ItemStack stack = this.icon.get();
-        if(stack == null || stack.isEmpty())
-            throw new RuntimeException("Item group '" + this.identifier + "'s icon stack must not be empty!");
-        return stack;
+    public void buildContents(FeatureFlagSet flags, boolean hasPermissions){
+        super.buildContents(flags, hasPermissions);
+        if(this.sorter != null){
+            this.sortedDisplayItems = new ArrayList<>(this.displayItems);
+            this.sortedDisplayItems.sort(this.sorter);
+        }
     }
 
     @Override
-    public Component getDisplayName(){
-        return this.displayName;
+    public Collection<ItemStack> getDisplayItems(){
+        return this.sortedDisplayItems == null ? super.getDisplayItems() : this.sortedDisplayItems;
     }
 
     @Override
-    public String getRecipeFolderName(){
-        return this.identifier;
-    }
-
-    @Override
-    public void fillItemList(NonNullList<ItemStack> items){
-        // Fill the list with items
-        if(this.filler == null)
-            super.fillItemList(items);
-        else
-            this.filler.accept(items::add);
-        // Sort the items
-        if(this.sorter != null)
-            items.sort(this.sorter);
+    public ResourceLocation getId(){
+        return new ResourceLocation(this.modid, this.identifier);
     }
 }

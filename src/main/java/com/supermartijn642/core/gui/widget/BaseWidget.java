@@ -1,9 +1,9 @@
 package com.supermartijn642.core.gui.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.gui.ScreenUtils;
 import net.minecraft.Util;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -124,7 +124,7 @@ public abstract class BaseWidget implements Widget {
             Component message = this.getNarrationMessage();
             String s = message == null ? "" : message.getString();
             if(!s.isEmpty()){
-                NarratorChatListener.INSTANCE.sayNow(s);
+                ClientUtils.getMinecraft().getNarrator().sayNow(s);
                 this.nextNarration = Long.MAX_VALUE;
             }
         }

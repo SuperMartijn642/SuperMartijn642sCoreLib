@@ -3,13 +3,13 @@ package com.supermartijn642.core;
 import com.supermartijn642.core.data.condition.*;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
-import com.supermartijn642.core.registry.ClientRegistrationHandler;
-import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
-import com.supermartijn642.core.registry.RegistrationHandler;
-import com.supermartijn642.core.registry.RegistryEntryAcceptor;
+import com.supermartijn642.core.item.BaseBlockItem;
+import com.supermartijn642.core.item.BaseItem;
+import com.supermartijn642.core.registry.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +36,14 @@ public class CoreLib implements ModInitializer {
 
         // Register generator for default tags
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));
+
+        // Add all BaseItem instances to their respective creative tabs
+        ItemGroupEvents.MODIFY_ENTRIES_ALL.register(((group, entries) -> {
+            Registries.ITEMS.getValues().stream()
+                .filter(item -> item instanceof BaseItem || item instanceof BaseBlockItem)
+                .filter(item -> item instanceof BaseItem ? ((BaseItem)item).isInCreativeGroup(group) : ((BaseBlockItem)item).isInCreativeGroup(group))
+                .forEach(entries::accept);
+        }));
 
         // Load test mod stuff
         if(FabricLoader.getInstance().isDevelopmentEnvironment()){

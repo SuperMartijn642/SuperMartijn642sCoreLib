@@ -8,8 +8,8 @@ import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.Tag;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -35,15 +35,15 @@ public class TagPopulatedResourceCondition implements ResourceCondition {
     public boolean test(ResourceConditionContext context){
         // Copy implementation from fabric-api until I do tags properly TODO replace
         //noinspection UnstableApiUsage
-        Map<ResourceKey<?>,Map<ResourceLocation,Tag<Holder<?>>>> allTags = ResourceConditionsImpl.LOADED_TAGS.get();
+        Map<ResourceKey<?>,Map<ResourceLocation,Collection<Holder<?>>>> allTags = ResourceConditionsImpl.LOADED_TAGS.get();
 
         if(allTags == null){
             CoreLib.LOGGER.warn("Can't retrieve deserialized tags. Failing tags_populated resource condition check.");
             return false;
         }
 
-        Tag<Holder<?>> tag = allTags.get(this.registry.getVanillaRegistry().key()).get(this.tag);
-        return tag != null && !tag.getValues().isEmpty();
+        Collection<Holder<?>> tag = allTags.get(this.registry.getVanillaRegistry().key()).get(this.tag);
+        return tag != null && !tag.isEmpty();
     }
 
     @Override

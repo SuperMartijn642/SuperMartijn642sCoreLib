@@ -10,8 +10,6 @@ import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
-import net.fabricmc.fabric.impl.client.texture.SpriteRegistryCallbackHolder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -22,7 +20,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.network.chat.Component;
@@ -91,6 +88,12 @@ public class ClientRegistrationHandler {
         return REGISTRATION_HELPER_MAP.computeIfAbsent(modid, ClientRegistrationHandler::new);
     }
 
+    @ApiStatus.Internal
+    public static void collectSprites(ResourceLocation atlas, Consumer<ResourceLocation> spriteConsumer){
+        for(ClientRegistrationHandler value : REGISTRATION_HELPER_MAP.values())
+            value.addSprites(atlas, spriteConsumer);
+    }
+
     private final String modid;
 
     private final Set<ResourceLocation> models = new HashSet<>();
@@ -113,7 +116,6 @@ public class ClientRegistrationHandler {
     private ClientRegistrationHandler(String modid){
         this.modid = modid;
         ModelLoadingRegistry.INSTANCE.registerModelProvider(this::handleModelRegistryEvent);
-        SpriteRegistryCallbackHolder.EVENT_GLOBAL.register(this::handleTextureStitchEvent);
     }
 
     /**
@@ -373,6 +375,9 @@ public class ClientRegistrationHandler {
             throw new IllegalArgumentException("Texture atlas must not be null!");
         if(!RegistryUtil.isValidPath(spriteLocation))
             throw new IllegalArgumentException("Sprite location '" + spriteLocation + "' must only contain characters [a-z0-9_./-]!");
+
+        if(textureAtlas.getPath().startsWith("textures/atlas/") && textureAtlas.getPath().endsWith(".png"))
+            textureAtlas = new ResourceLocation(textureAtlas.getNamespace(), textureAtlas.getPath().substring("textures/atlas/".length(), textureAtlas.getPath().length() - ".png".length()));
 
         ResourceLocation fullSpriteLocation = new ResourceLocation(this.modid, spriteLocation);
         this.textureAtlasSprites.putIfAbsent(textureAtlas, new HashSet<>());
@@ -673,14 +678,14 @@ public class ClientRegistrationHandler {
         }
     }
 
-    private void handleTextureStitchEvent(TextureAtlas atlasTexture, ClientSpriteRegistryCallback.Registry registry){
+    private void addSprites(ResourceLocation atlas, Consumer<ResourceLocation> spriteConsumer){
         this.passedTextureStitch = true;
 
         // Texture atlas sprites
-        Set<ResourceLocation> sprites = this.textureAtlasSprites.get(atlasTexture.location());
+        Set<ResourceLocation> sprites = this.textureAtlasSprites.get(atlas);
         if(sprites == null)
             return;
 
-        sprites.forEach(registry::register);
+        sprites.forEach(spriteConsumer);
     }
 }

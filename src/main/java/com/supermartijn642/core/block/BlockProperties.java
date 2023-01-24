@@ -201,7 +201,7 @@ public class BlockProperties {
         properties.speedFactor(this.speedFactor);
         properties.jumpFactor(this.jumpFactor);
         if(this.noLootTable)
-            properties.noDrops();
+            properties.noLootTable();
         if(!this.canOcclude)
             properties.noOcclusion();
         if(this.isAir)

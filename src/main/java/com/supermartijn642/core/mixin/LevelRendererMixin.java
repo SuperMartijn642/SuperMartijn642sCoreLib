@@ -37,7 +37,7 @@ public class LevelRendererMixin {
             target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V"),
         slice = @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/BlockHitResult;getBlockPos()Lnet/minecraft/core/BlockPos;"),
-            to = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPoseMatrix(Lcom/mojang/math/Matrix4f;)V")
+            to = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPoseMatrix(Lorg/joml/Matrix4f;)V")
         ))
     public void renderLevel(CallbackInfo ci){
         RenderWorldEvent.EVENT.invoker().accept(new RenderWorldEvent(this.poseStack, this.partialTicks));

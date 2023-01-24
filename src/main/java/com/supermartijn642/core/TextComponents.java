@@ -3,7 +3,9 @@ package com.supermartijn642.core;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
@@ -31,42 +33,42 @@ public class TextComponents {
      * Creates a new {@link TextComponentBuilder} around the given {@code text}.
      */
     public static TextComponentBuilder string(String text){
-        return new TextComponentBuilder(new TextComponent(text));
+        return new TextComponentBuilder(Component.literal(text));
     }
 
     /**
      * Creates a new {@link TextComponentBuilder} for the given {@code number}.
      */
     public static TextComponentBuilder number(int number){
-        return new TextComponentBuilder(new TextComponent(Integer.toString(number)));
+        return new TextComponentBuilder(Component.literal(Integer.toString(number)));
     }
 
     /**
      * Creates a new {@link TextComponentBuilder} for the given {@code number}.
      */
     public static TextComponentBuilder number(double number, int decimals){
-        return new TextComponentBuilder(new TextComponent(String.format("%." + decimals + "f", number)));
+        return new TextComponentBuilder(Component.literal(String.format("%." + decimals + "f", number)));
     }
 
     /**
      * Creates a new {@link TextComponentBuilder} for the given {@code number}.
      */
     public static TextComponentBuilder number(double number){
-        return new TextComponentBuilder(new TextComponent(Double.toString(number)));
+        return new TextComponentBuilder(Component.literal(Double.toString(number)));
     }
 
     /**
      * Creates a new {@link TextComponentBuilder} around the given translation.
      */
     public static TextComponentBuilder translation(String translationKey, Object... arguments){
-        return new TextComponentBuilder(new TranslatableComponent(translationKey, arguments));
+        return new TextComponentBuilder(Component.translatable(translationKey, arguments));
     }
 
     /**
      * Creates a new {@link TextComponentBuilder} around the given translation.
      */
     public static TextComponentBuilder translation(String translationKey){
-        return new TextComponentBuilder(new TranslatableComponent(translationKey));
+        return new TextComponentBuilder(Component.translatable(translationKey));
     }
 
     /**
@@ -261,7 +263,7 @@ public class TextComponents {
          * @return a new {@link TextComponentBuilder} for the given string
          */
         public TextComponentBuilder string(String text){
-            return this.append(new TextComponent(text));
+            return this.append(Component.literal(text));
         }
 
         /**
@@ -270,7 +272,7 @@ public class TextComponents {
          * @return a new {@link TextComponentBuilder} for the given translation
          */
         public TextComponentBuilder translation(String translationKey, Object... arguments){
-            return this.append(new TranslatableComponent(translationKey, arguments));
+            return this.append(Component.translatable(translationKey, arguments));
         }
 
         /**
@@ -279,7 +281,7 @@ public class TextComponents {
          * @return a new {@link TextComponentBuilder} for the given translation
          */
         public TextComponentBuilder translation(String translationKey){
-            return this.append(new TranslatableComponent(translationKey));
+            return this.append(Component.translatable(translationKey));
         }
 
         /**

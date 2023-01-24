@@ -2,9 +2,7 @@ package com.supermartijn642.core.mixin;
 
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.ClientRegistrationHandler;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,10 +24,10 @@ public class ModelManagerMixin {
         ),
         method = "apply"
     )
-    private void apply(ModelBakery modelBakery, ResourceManager resourceManager, ProfilerFiller profilerFiller, CallbackInfo ci){
+    private void apply(ModelManager.ReloadState reloadState, ProfilerFiller profilerFiller, CallbackInfo ci){
         // Catch errors here to prevent the model manager from continuously retrying to load models
         try{
-            ClientRegistrationHandler.registerModelOverwritesInternal(modelBakery.getBakedTopLevelModels());
+            ClientRegistrationHandler.registerModelOverwritesInternal(reloadState.modelBakery().getBakedTopLevelModels());
         }catch(Exception e){
             CoreLib.LOGGER.error("Encountered an error while applying model overwrites!", e);
         }

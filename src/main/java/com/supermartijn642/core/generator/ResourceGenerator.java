@@ -5,12 +5,12 @@ import com.supermartijn642.core.registry.RegistryUtil;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 /**
  * Created 04/08/2022 by SuperMartijn642
@@ -21,26 +21,20 @@ public abstract class ResourceGenerator {
      * Wraps the given resource generator in a data provider using the given file helper and data generator.
      * @return a data provider wrapping the resource generator
      */
-    public static DataProvider createDataProvider(Function<ResourceCache,ResourceGenerator> generatorProvider, Supplier<ResourceCache> cacheSupplier){
+    public static DataProvider createDataProvider(ResourceGenerator generator, Consumer<CachedOutput> cacheUpdater){
         return new DataProvider() {
-            private ResourceGenerator generator;
-
-            private ResourceGenerator getGenerator(){
-                if(this.generator == null)
-                    this.generator = generatorProvider.apply(cacheSupplier.get());
-                return this.generator;
-            }
-
             @Override
-            public void run(HashCache cachedOutput){
+            public CompletableFuture<?> run(CachedOutput cachedOutput){
+                cacheUpdater.accept(cachedOutput);
                 // Run the resource generator
-                this.getGenerator().generate();
-                this.getGenerator().save();
+                generator.generate();
+                generator.save();
+                return CompletableFuture.completedFuture(null);
             }
 
             @Override
             public String getName(){
-                return this.getGenerator().getName();
+                return generator.getName();
             }
         };
     }
