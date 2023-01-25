@@ -85,8 +85,11 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
         int offsetMouseX = mouseX - offsetX;
         int offsetMouseY = mouseY - offsetY;
-        poseStack.pushPose();
-        poseStack.translate(offsetX, offsetY, 0);
+
+        RenderSystem.getModelViewStack().pushPose();
+        RenderSystem.getModelViewStack().translate(offsetX, offsetY, 0);
+        RenderSystem.applyModelViewMatrix();
+        RenderSystem.disableDepthTest();
 
         // Update whether the widget is focused
         this.widget.setFocused(offsetMouseX >= 0 && offsetMouseX < this.widget.width() && offsetMouseY >= 0 && offsetMouseY < this.widget.height());
@@ -101,7 +104,14 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             }
         }
 
+        RenderSystem.getModelViewStack().popPose();
+        RenderSystem.applyModelViewMatrix();
+
         MinecraftForge.EVENT_BUS.post(new ContainerScreenEvent.DrawBackground(this, poseStack, mouseX, mouseY));
+
+        RenderSystem.getModelViewStack().pushPose();
+        RenderSystem.getModelViewStack().translate(offsetX, offsetY, 0);
+        RenderSystem.applyModelViewMatrix();
 
         // Render the widget
         this.widget.render(poseStack, offsetMouseX, offsetMouseY);
@@ -111,11 +121,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             if(!slot.isActive())
                 continue;
 
-            RenderSystem.getModelViewStack().pushPose();
-            RenderSystem.getModelViewStack().translate(offsetX, offsetY, 0);
             this.renderSlot(poseStack, slot);
-            RenderSystem.getModelViewStack().popPose();
-            RenderSystem.applyModelViewMatrix();
             if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
                 this.hoveredSlot = slot;
                 renderSlotHighlight(poseStack, slot.x, slot.y, this.getBlitOffset(), this.getSlotColor(0));
@@ -143,7 +149,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
                     s = ChatFormatting.YELLOW + "0";
             }
 
-            this.renderFloatingItem(cursorStack, mouseX - 8, mouseY - offset, s);
+            this.renderFloatingItem(cursorStack, offsetMouseX - 8, offsetMouseY - offset, s);
         }
 
         if(!this.snapbackItem.isEmpty()){
@@ -165,7 +171,9 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         // Render the widget's tooltips
         this.widget.renderTooltips(poseStack, offsetMouseX, offsetMouseY);
 
-        poseStack.popPose();
+        RenderSystem.getModelViewStack().popPose();
+        RenderSystem.applyModelViewMatrix();
+        RenderSystem.enableDepthTest();
     }
 
     @Override
