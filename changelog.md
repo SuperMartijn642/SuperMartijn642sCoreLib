@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.1a
+- Fix translations inside of `WidgetScreen` and `WidgetContainerScreen`
+
 ### SuperMartijn642's Core Library 1.1.1
 - Fix crash when a recipe condition is registered as `RecipeConditionSerializerRegistry` gets initialized
 
