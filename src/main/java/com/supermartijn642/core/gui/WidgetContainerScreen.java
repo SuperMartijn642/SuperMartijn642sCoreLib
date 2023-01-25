@@ -2,15 +2,12 @@ package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.datafixers.util.Pair;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.ContainerWidget;
 import com.supermartijn642.core.gui.widget.Widget;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.util.InputMappings;
-import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -88,8 +85,10 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
         int offsetMouseX = mouseX - offsetX;
         int offsetMouseY = mouseY - offsetY;
-        poseStack.pushPose();
-        poseStack.translate(offsetX, offsetY, 0);
+
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(offsetX, offsetY, 0);
+        RenderSystem.disableDepthTest();
 
         // Update whether the widget is focused
         this.widget.setFocused(offsetMouseX >= 0 && offsetMouseX < this.widget.width() && offsetMouseY >= 0 && offsetMouseY < this.widget.height());
@@ -104,7 +103,12 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             }
         }
 
+        RenderSystem.popMatrix();
+
         MinecraftForge.EVENT_BUS.post(new GuiContainerEvent.DrawBackground(this, poseStack, mouseX, mouseY));
+
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(offsetX, offsetY, 0);
 
         // Render the widget
         this.widget.render(poseStack, offsetMouseX, offsetMouseY);
@@ -114,7 +118,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             if(!slot.isActive())
                 continue;
 
-            this.renderSlotOffset(poseStack, slot, offsetX, offsetY);
+            this.renderSlot(poseStack, slot);
             if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
                 this.hoveredSlot = slot;
                 RenderSystem.disableDepthTest();
@@ -147,7 +151,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
                     s = TextFormatting.YELLOW + "0";
             }
 
-            this.renderFloatingItem(cursorStack, mouseX - 8, mouseY - offset, s);
+            this.renderFloatingItem(cursorStack, offsetMouseX - 8, offsetMouseY - offset, s);
         }
 
         if(!this.snapbackItem.isEmpty()){
@@ -169,70 +173,8 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         // Render the widget's tooltips
         this.widget.renderTooltips(poseStack, offsetMouseX, offsetMouseY);
 
-        poseStack.popPose();
-    }
-
-    /**
-     * Just a copy of {@link ContainerScreen#renderSlot(MatrixStack, Slot)} since the item rendering doesn't use the provided matrix stack 😑
-     */
-    private void renderSlotOffset(MatrixStack poseStack, Slot slot, int offsetX, int offsetY){
-        int slotX = slot.x;
-        int slotY = slot.y;
-
-        ItemStack slotItem = slot.getItem();
-        boolean drawHighlight = false;
-        boolean drawItem = slot == this.clickedSlot && !this.draggingItem.isEmpty() && !this.isSplittingStack;
-        ItemStack carried = this.inventory.getCarried();
-        String countText = null;
-        if(slot == this.clickedSlot && !this.draggingItem.isEmpty() && this.isSplittingStack && !slotItem.isEmpty()){
-            slotItem = slotItem.copy();
-            slotItem.setCount(slotItem.getCount() / 2);
-        }else if(this.isQuickCrafting && this.quickCraftSlots.contains(slot) && !carried.isEmpty()){
-            if(this.quickCraftSlots.size() == 1)
-                return;
-
-            if(Container.canItemQuickReplace(slot, carried, true) && this.menu.canDragTo(slot)){
-                slotItem = carried.copy();
-                drawHighlight = true;
-                Container.getQuickCraftSlotCount(this.quickCraftSlots, this.quickCraftingType, slotItem, slot.getItem().isEmpty() ? 0 : slot.getItem().getCount());
-                int k = Math.min(slotItem.getMaxStackSize(), slot.getMaxStackSize(slotItem));
-                if(slotItem.getCount() > k){
-                    countText = TextFormatting.YELLOW.toString() + k;
-                    slotItem.setCount(k);
-                }
-            }else{
-                this.quickCraftSlots.remove(slot);
-                this.recalculateQuickCraftRemaining();
-            }
-        }
-
-        this.setBlitOffset(100);
-        this.itemRenderer.blitOffset = 100;
-        if(slotItem.isEmpty() && slot.isActive()){
-            Pair<ResourceLocation,ResourceLocation> pair = slot.getNoItemIcon();
-            if(pair != null){
-                TextureAtlasSprite sprite = this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
-                this.minecraft.getTextureManager().bind(sprite.atlas().location());
-                blit(poseStack, slotX, slotY, this.getBlitOffset(), 16, 16, sprite);
-                drawItem = true;
-            }
-        }
-
-        if(!drawItem){
-            if(drawHighlight)
-                fill(poseStack, slotX, slotY, slotX + 16, slotY + 16, -2130706433);
-
-            // For some reason this part just ignores the given matrix stack, so we have to translate the position manually
-            slotX += offsetX;
-            slotY += offsetY;
-
-            RenderSystem.enableDepthTest();
-            this.itemRenderer.renderAndDecorateItem(this.minecraft.player, slotItem, slotX, slotY);
-            this.itemRenderer.renderGuiItemDecorations(this.font, slotItem, slotX, slotY, countText);
-        }
-
-        this.itemRenderer.blitOffset = 0;
-        this.setBlitOffset(0);
+        RenderSystem.popMatrix();
+        RenderSystem.enableDepthTest();
     }
 
     @Override
