@@ -82,7 +82,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
                 throw new RuntimeException("Block state for block '" + block + "' is empty!");
 
             // Save the object to the cache
-            this.cache.saveJsonResource(ResourceType.ASSET, json, this.modid, "blockstates", block.getPath());
+            this.cache.saveJsonResource(ResourceType.ASSET, json, block.getNamespace(), "blockstates", block.getPath());
         }
     }
 
