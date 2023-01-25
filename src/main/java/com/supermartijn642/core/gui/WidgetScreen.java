@@ -1,6 +1,7 @@
 package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.Widget;
@@ -62,8 +63,9 @@ public class WidgetScreen<T extends Widget> extends Screen {
         mouseX -= offsetX;
         mouseY -= offsetY;
         MatrixStack poseStack = new MatrixStack();
-        poseStack.pushPose();
-        poseStack.translate(offsetX, offsetY, 0);
+
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(offsetX, offsetY, 0);
 
         // Update whether the widget is focused
         this.widget.setFocused(mouseX >= 0 && mouseX < this.widget.width() && mouseY >= 0 && mouseY < this.widget.height());
@@ -79,7 +81,7 @@ public class WidgetScreen<T extends Widget> extends Screen {
         // Render the widget's tooltips
         this.widget.renderTooltips(poseStack, mouseX, mouseY);
 
-        poseStack.popPose();
+        RenderSystem.popMatrix();
     }
 
     @Override

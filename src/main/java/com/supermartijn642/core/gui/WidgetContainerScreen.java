@@ -86,8 +86,10 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         int offsetMouseX = mouseX - offsetX;
         int offsetMouseY = mouseY - offsetY;
         MatrixStack poseStack = new MatrixStack();
-        poseStack.pushPose();
-        poseStack.translate(offsetX, offsetY, 0);
+
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(offsetX, offsetY, 0);
+        RenderSystem.disableDepthTest();
 
         // Update whether the widget is focused
         this.widget.setFocused(offsetMouseX >= 0 && offsetMouseX < this.widget.width() && offsetMouseY >= 0 && offsetMouseY < this.widget.height());
@@ -102,7 +104,12 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             }
         }
 
+        RenderSystem.popMatrix();
+
         MinecraftForge.EVENT_BUS.post(new GuiContainerEvent.DrawBackground(this, mouseX, mouseY));
+
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(offsetX, offsetY, 0);
 
         // Render the widget
         this.widget.render(poseStack, offsetMouseX, offsetMouseY);
@@ -112,17 +119,13 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             if(!slot.isActive())
                 continue;
 
-            slot.x += offsetX;
-            slot.y += offsetY;
             this.renderSlot(slot);
-            slot.x -= offsetX;
-            slot.y -= offsetY;
             if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
                 this.hoveredSlot = slot;
                 RenderSystem.disableDepthTest();
                 RenderSystem.colorMask(true, true, true, false);
                 int slotColor = this.getSlotColor(0);
-                ScreenUtils.fillRect(poseStack, slot.x, slot.y, 16, 16, slotColor);
+                this.fillGradient(slot.x, slot.y, slot.x + 16, slot.y + 16, slotColor, slotColor);
                 RenderSystem.colorMask(true, true, true, true);
                 RenderSystem.enableDepthTest();
             }
@@ -133,10 +136,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
         this.renderTooltip(mouseX, mouseY);
 
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(offsetX, offsetY, 0);
         MinecraftForge.EVENT_BUS.post(new GuiContainerEvent.DrawForeground(this, mouseX, mouseY));
-        RenderSystem.popMatrix();
 
         ItemStack cursorStack = this.draggingItem.isEmpty() ? this.inventory.getCarried() : this.draggingItem;
         if(!cursorStack.isEmpty()){
@@ -152,7 +152,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
                     s = TextFormatting.YELLOW + "0";
             }
 
-            this.renderFloatingItem(cursorStack, mouseX - 8, mouseY - offset, s);
+            this.renderFloatingItem(cursorStack, offsetMouseX - 8, offsetMouseY - offset, s);
         }
 
         if(!this.snapbackItem.isEmpty()){
@@ -174,7 +174,8 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         // Render the widget's tooltips
         this.widget.renderTooltips(poseStack, offsetMouseX, offsetMouseY);
 
-        poseStack.popPose();
+        RenderSystem.popMatrix();
+        RenderSystem.enableDepthTest();
     }
 
     @Override
