@@ -2,15 +2,19 @@ package com.supermartijn642.core;
 
 import com.supermartijn642.core.gui.BaseContainer;
 import com.supermartijn642.core.gui.BaseContainerType;
-import com.supermartijn642.core.registry.Registries;
-import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created 20/03/2022 by SuperMartijn642
@@ -61,7 +65,24 @@ public class CommonUtils {
 
         // Open the container
         BaseContainerType<?> containerType = container.getContainerType();
-        //noinspection unchecked,rawtypes
-        ContainerProviderRegistry.INSTANCE.openContainer(Registries.MENU_TYPES.getIdentifier(containerType), (ServerPlayer)player, data -> ((BaseContainerType)containerType).writeContainer(container, data));
+        player.openMenu(new ExtendedScreenHandlerFactory() {
+            @Override
+            public void writeScreenOpeningData(ServerPlayer player, FriendlyByteBuf data){
+                //noinspection unchecked,rawtypes
+                ((BaseContainerType)containerType).writeContainer(container, data);
+            }
+
+            @Override
+            public Component getDisplayName(){
+                return TextComponents.empty().get();
+            }
+
+            @Nullable
+            @Override
+            public AbstractContainerMenu createMenu(int windowId, Inventory inventory, Player player){
+                container.setContainerId(windowId);
+                return container;
+            }
+        });
     }
 }
