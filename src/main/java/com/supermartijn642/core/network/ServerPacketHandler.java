@@ -2,7 +2,6 @@ package com.supermartijn642.core.network;
 
 import com.supermartijn642.core.CoreSide;
 import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
@@ -17,7 +16,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 class ServerPacketHandler implements ServerPlayNetworking.PlayChannelHandler {
 
     public static void registerReceiver(ResourceLocation channelName, PacketChannel channel){
-        ClientPlayNetworking.registerGlobalReceiver(channelName, new ClientPacketHandler(channel));
+        ServerPlayNetworking.registerGlobalReceiver(channelName, new ServerPacketHandler(channel));
     }
 
     public static void sendPacket(ResourceLocation channelName, PacketChannel channel, BasePacket packet, ServerPlayer target){
