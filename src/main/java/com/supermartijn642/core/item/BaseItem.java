@@ -128,7 +128,7 @@ public class BaseItem extends Item {
     @Override
     protected boolean allowdedIn(CreativeModeTab creativeModeTab){
         CreativeModeTab tab = this.getItemCategory();
-        return tab != null && (creativeModeTab == CreativeModeTab.TAB_SEARCH || this.isInCreativeGroup(tab));
+        return tab != null && (creativeModeTab == CreativeModeTab.TAB_SEARCH || this.isInCreativeGroup(creativeModeTab));
     }
 
     protected static class ItemUseResult {
