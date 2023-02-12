@@ -1,3 +1,7 @@
+### SuperMartijn642's Core Library 1.1.2
+- Use the given block's namespace for blockstate files in `BlockStateGenerator`
+- Fix crash when loading ore dictionary recipe ingredients
+
 ### SuperMartijn642's Core Library 1.1.1a
 - Fix rare crash well loading recipe ingredients
 - Fix crash when both Hammer Lib and ColorUtility are installed
