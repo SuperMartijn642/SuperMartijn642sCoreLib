@@ -19,7 +19,7 @@ public class OreIngredientMixin implements IngredientExtension {
 
     @Inject(
         method = "<init>(Ljava/lang/String;)V",
-        at = @At("TAIL"),
+        at = @At("RETURN"),
         remap = false
     )
     private void constructor(String ore, CallbackInfo ci){
