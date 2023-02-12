@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.2
+- Use the given block's namespace for blockstate files in `BlockStateGenerator`
+
 ### SuperMartijn642's Core Library 1.1.1
 - Fix crash when a recipe condition is registered as `RecipeConditionSerializerRegistry` gets initialized
 
