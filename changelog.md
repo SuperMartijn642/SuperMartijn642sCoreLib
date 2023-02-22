@@ -1,4 +1,8 @@
 ### SuperMartijn642's Core Library 1.1.2
+- Fix crash on dedicated servers when certain containers get forcibly closed
+- Fix `CommonUtils#getServer` always returning `null`
+
+### SuperMartijn642's Core Library 1.1.2
 - Use the given block's namespace for blockstate files in `BlockStateGenerator`
 
 ### SuperMartijn642's Core Library 1.1.1
