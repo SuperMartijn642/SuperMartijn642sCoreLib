@@ -11,10 +11,11 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
@@ -24,13 +25,14 @@ import java.util.function.Consumer;
 /**
  * Created 20/03/2022 by SuperMartijn642
  */
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class CommonUtils {
 
     private static MinecraftServer server;
 
     static void initialize(){
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<ServerAboutToStartEvent>)(e -> server = e.getServer()));
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<ServerStoppedEvent>)(e -> server = null));
+        MinecraftForge.EVENT_BUS.addListener((Consumer<ServerAboutToStartEvent>)(e -> server = e.getServer()));
+        MinecraftForge.EVENT_BUS.addListener((Consumer<ServerStoppedEvent>)(e -> server = null));
     }
 
     /**
