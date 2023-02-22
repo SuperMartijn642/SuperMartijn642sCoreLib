@@ -114,4 +114,11 @@ public class CommonUtils {
         container.addListener((EntityPlayerMP)player);
         MinecraftForge.EVENT_BUS.post(new PlayerContainerEvent.Open(player, container));
     }
+
+    /**
+     * Closes the currently open container for the given player. If the player is not in a container, this method won't do anything.
+     */
+    public static void closeContainer(EntityPlayer player){
+        player.closeScreen();
+    }
 }
