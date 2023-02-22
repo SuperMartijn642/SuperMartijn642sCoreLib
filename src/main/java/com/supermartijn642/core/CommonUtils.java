@@ -11,8 +11,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fmllegacy.network.NetworkHooks;
 import net.minecraftforge.fmlserverevents.FMLServerAboutToStartEvent;
@@ -29,8 +29,8 @@ public class CommonUtils {
     private static MinecraftServer server;
 
     static void initialize(){
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<FMLServerAboutToStartEvent>)(e -> server = e.getServer()));
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<FMLServerStoppedEvent>)(e -> server = null));
+        MinecraftForge.EVENT_BUS.addListener((Consumer<FMLServerAboutToStartEvent>)(e -> server = e.getServer()));
+        MinecraftForge.EVENT_BUS.addListener((Consumer<FMLServerStoppedEvent>)(e -> server = null));
     }
 
     /**
