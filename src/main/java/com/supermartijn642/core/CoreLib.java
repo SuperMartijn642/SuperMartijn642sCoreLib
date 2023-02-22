@@ -28,6 +28,7 @@ public class CoreLib {
 
     public CoreLib(){
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onConstructMod);
+        CommonUtils.initialize();
 
         // Register conditional recipe type
         RegistrationHandler handler = RegistrationHandler.get("supermartijn642corelib");
