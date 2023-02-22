@@ -11,10 +11,10 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.network.NetworkHooks;
 
@@ -29,8 +29,8 @@ public class CommonUtils {
     private static MinecraftServer server;
 
     static void initialize(){
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<FMLServerAboutToStartEvent>)(e -> server = e.getServer()));
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<FMLServerStoppedEvent>)(e -> server = null));
+        MinecraftForge.EVENT_BUS.addListener((Consumer<FMLServerAboutToStartEvent>)(e -> server = e.getServer()));
+        MinecraftForge.EVENT_BUS.addListener((Consumer<FMLServerStoppedEvent>)(e -> server = null));
     }
 
     /**
