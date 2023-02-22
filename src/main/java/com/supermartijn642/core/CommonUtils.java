@@ -84,4 +84,11 @@ public class CommonUtils {
             }
         }, data -> ((BaseContainerType)container.getContainerType()).writeContainer(container, data));
     }
+
+    /**
+     * Closes the currently open container for the given player. If the player is not in a container, this method won't do anything.
+     */
+    public static void closeContainer(PlayerEntity player){
+        player.closeContainer();
+    }
 }
