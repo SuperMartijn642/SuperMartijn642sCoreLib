@@ -227,7 +227,7 @@ public abstract class ResourceCache {
         @Override
         public Optional<InputStream> getExistingResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
-            Path fullPath = this.outputDirectory.resolve(path);
+            Path fullPath = this.manualDirectory.resolve(path);
             if(!Files.exists(fullPath))
                 return Optional.empty();
             try{
