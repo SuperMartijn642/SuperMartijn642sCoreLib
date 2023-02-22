@@ -3,8 +3,6 @@ package com.supermartijn642.core.gui;
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.world.entity.player.Player;
 
-import javax.annotation.Nonnull;
-
 /**
  * Created 1/26/2021 by SuperMartijn642
  */
@@ -31,7 +29,7 @@ public abstract class ObjectBaseContainer<T> extends BaseContainer {
     /**
      * Adds slots to the container
      */
-    protected abstract void addSlots(Player player, @Nonnull T object);
+    protected abstract void addSlots(Player player, T object);
 
     /**
      * Called to obtain object needed for this widget to remain active. May be called at any time.
