@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.4a
+- Fix `ConditionalRecipeSerializer` ignoring recipe conditions
+
 ### SuperMartijn642's Core Library 1.1.4
 - Fix crash on startup
 
