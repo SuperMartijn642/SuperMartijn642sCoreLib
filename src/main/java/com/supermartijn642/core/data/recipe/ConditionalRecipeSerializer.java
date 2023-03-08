@@ -36,7 +36,7 @@ public class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> 
             throw new RuntimeException("Conditional recipe '" + location + "' must have 'recipe' object!");
 
         // Test all conditions
-        JsonArray conditions = new JsonArray();
+        JsonArray conditions = json.getAsJsonArray("conditions");
         for(JsonElement conditionElement : conditions){
             if(!conditionElement.isJsonObject())
                 throw new RuntimeException("Conditions array for recipe '" + location + "' must only contain objects!");
