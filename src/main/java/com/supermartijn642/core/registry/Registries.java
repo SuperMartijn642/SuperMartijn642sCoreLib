@@ -1,6 +1,8 @@
 package com.supermartijn642.core.registry;
 
 import com.google.common.collect.Lists;
+import com.supermartijn642.core.data.condition.ResourceCondition;
+import com.supermartijn642.core.data.condition.ResourceConditionContext;
 import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
@@ -79,7 +81,21 @@ public final class Registries {
     public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZERS = vanilla(RECIPE_SERIALIZER, RecipeSerializer.class);
     public static final Registry<Attribute> ATTRIBUTES = vanilla(ATTRIBUTE, Attribute.class);
     public static final Registry<StatType<?>> STAT_TYPES = vanilla(STAT_TYPE, StatType.class);
-    public static final Registry<ResourceConditionSerializer<?>> RESOURCE_CONDITION_SERIALIZERS = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "resource_conditions"), ResourceConditionSerializer.class);
+    public static final Registry<ResourceConditionSerializer<?>> RESOURCE_CONDITION_SERIALIZERS = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "resource_conditions"), ResourceConditionSerializer.class) {
+        @Override
+        public void register(ResourceLocation identifier, ResourceConditionSerializer<?> object){
+            super.register(identifier, object);
+            ResourceConditions.register(identifier, json -> {
+                ResourceCondition condition;
+                try{
+                    condition = object.deserialize(json);
+                }catch(Exception e){
+                    throw new RuntimeException("Encountered exception whilst testing condition '" + identifier + "'!", e);
+                }
+                return condition.test(new ResourceConditionContext());
+            });
+        }
+    };
 
     static{
         REGISTRATION_ORDER = Lists.newArrayList(
