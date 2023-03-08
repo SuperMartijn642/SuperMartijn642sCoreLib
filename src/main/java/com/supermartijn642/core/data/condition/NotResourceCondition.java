@@ -33,7 +33,7 @@ public class NotResourceCondition implements ResourceCondition {
         public void serialize(JsonObject json, NotResourceCondition condition){
             JsonObject conditionJson = new JsonObject();
             //noinspection unchecked,rawtypes
-            ((ResourceConditionSerializer)condition.condition.getSerializer()).serialize(conditionJson, condition);
+            ((ResourceConditionSerializer)condition.condition.getSerializer()).serialize(conditionJson, condition.condition);
             conditionJson.addProperty("condition", Registries.RESOURCE_CONDITION_SERIALIZERS.getIdentifier(condition.condition.getSerializer()).toString());
             json.add("value", conditionJson);
         }
