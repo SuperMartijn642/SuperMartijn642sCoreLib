@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.5
+- Fix performance issues with model overwrites in ClientRegistrationHandler
+
 ### SuperMartijn642's Core Library 1.1.4a
 - Fix `ConditionalRecipeSerializer` ignoring recipe conditions
 
