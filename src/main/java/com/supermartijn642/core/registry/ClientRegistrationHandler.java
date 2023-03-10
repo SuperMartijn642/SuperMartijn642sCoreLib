@@ -36,9 +36,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
@@ -92,7 +92,7 @@ public class ClientRegistrationHandler {
 
     private final Set<ResourceLocation> models = new HashSet<>();
     private final Map<ResourceLocation,Supplier<IBakedModel>> specialModels = new HashMap<>();
-    private final List<Pair<Predicate<ResourceLocation>,Function<IBakedModel,IBakedModel>>> modelOverwrites = new ArrayList<>();
+    private final List<Pair<Supplier<Stream<ModelResourceLocation>>,Function<IBakedModel,IBakedModel>>> modelOverwrites = new ArrayList<>();
 
     private final Map<Class<?>,Supplier<Render<?>>> entityRenderers = new HashMap<>();
     private final List<Pair<Supplier<BaseBlockEntityType<?>>,Function<TileEntityRendererDispatcher,TileEntitySpecialRenderer<?>>>> blockEntityRenderers = new ArrayList<>();
@@ -190,9 +190,10 @@ public class ClientRegistrationHandler {
         if(this.specialModels.containsKey(identifier))
             throw new RuntimeException("Overlapping special model and model overwrite '" + identifier + "'!");
 
-        if(!(identifier instanceof ModelResourceLocation))
-            identifier = new ResourceLocation(identifier.toString());
-        this.modelOverwrites.add(Pair.of(identifier::equals, modelOverwrite));
+        ModelResourceLocation modelIdentifier = identifier instanceof ModelResourceLocation ?
+            ((ModelResourceLocation)identifier) :
+            new ModelResourceLocation(identifier, "normal");
+        this.modelOverwrites.add(Pair.of(() -> Stream.of(modelIdentifier), modelOverwrite));
     }
 
     /**
@@ -258,12 +259,11 @@ public class ClientRegistrationHandler {
         if(this.passedModelBake)
             throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
 
-        this.modelOverwrites.add(Pair.of(identifier -> {
-            ResourceLocation blockIdentifier = Registries.BLOCKS.getIdentifier(block.get());
-            return identifier instanceof ModelResourceLocation
-                && identifier.getResourceDomain().equals(blockIdentifier.getResourceDomain())
-                && identifier.getResourcePath().equals(blockIdentifier.getResourcePath());
-        }, modelOverwrite));
+        this.modelOverwrites.add(Pair.of(
+            () -> ClientUtils.getMinecraft().modelManager.getBlockModelShapes().getBlockStateMapper().getVariants(block.get()).values().stream(),
+            modelOverwrite)
+        );
+        this.registerItemModelOverwrite(() -> Item.getItemFromBlock(block.get()), modelOverwrite);
     }
 
     /**
@@ -287,12 +287,10 @@ public class ClientRegistrationHandler {
         if(this.passedModelBake)
             throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
 
-        this.modelOverwrites.add(Pair.of(identifier -> {
-            ResourceLocation itemIdentifier = Registries.ITEMS.getIdentifier(item.get());
-            return identifier.getResourceDomain().equals(itemIdentifier.getResourceDomain())
-                && identifier.getResourcePath().equals(itemIdentifier.getResourcePath())
-                && ((ModelResourceLocation)identifier).getVariant().equals("inventory");
-        }, modelOverwrite));
+        this.modelOverwrites.add(Pair.of(
+            () -> Stream.of(new ModelResourceLocation(Registries.ITEMS.getIdentifier(item.get()), "inventory")),
+            modelOverwrite
+        ));
     }
 
     /**
@@ -604,11 +602,12 @@ public class ClientRegistrationHandler {
         }
 
         // Model overwrites
-        for(Pair<Predicate<ResourceLocation>,Function<IBakedModel,IBakedModel>> pair : this.modelOverwrites){
-            // Find all the identifiers which should be replaced
-            List<ModelResourceLocation> modelIdentifiers = e.getModelRegistry().getKeys().stream()
-                .filter(identifier -> pair.left().test(identifier))
-                .collect(Collectors.toList());
+        for(Pair<Supplier<Stream<ModelResourceLocation>>,Function<IBakedModel,IBakedModel>> pair : this.modelOverwrites){
+            // Get all the identifiers which should be replaced
+            List<ModelResourceLocation> modelIdentifiers;
+            try(Stream<ModelResourceLocation> stream = pair.left().get()){
+                modelIdentifiers = stream.collect(Collectors.toList());
+            }
 
             for(ModelResourceLocation identifier : modelIdentifiers){
                 if(e.getModelRegistry().getObject(identifier) == null)
