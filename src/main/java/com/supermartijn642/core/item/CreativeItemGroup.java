@@ -3,7 +3,6 @@ package com.supermartijn642.core.item;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
@@ -107,7 +106,7 @@ public final class CreativeItemGroup extends CreativeModeTab {
         this.modid = modid;
         this.identifier = identifier;
         this.background = new ResourceLocation("textures/gui/container/creative_inventory/tab_items.png");
-        this.displayItemsGenerator = (flags, output, hasPermissions) -> this.applyFiller(output::accept);
+        this.displayItemsGenerator = (flags, output) -> this.applyFiller(output::accept);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<CreativeModeTabEvent.Register>)event -> registerTab(this));
     }
@@ -143,8 +142,8 @@ public final class CreativeItemGroup extends CreativeModeTab {
     }
 
     @Override
-    public void buildContents(FeatureFlagSet flags, boolean hasPermissions){
-        super.buildContents(flags, hasPermissions);
+    public void buildContents(ItemDisplayParameters parameters){
+        super.buildContents(parameters);
         if(this.sorter != null){
             this.sortedDisplayItems = new ArrayList<>(this.displayItems);
             this.sortedDisplayItems.sort(this.sorter);

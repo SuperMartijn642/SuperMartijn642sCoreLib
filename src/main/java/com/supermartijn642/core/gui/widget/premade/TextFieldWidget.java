@@ -148,7 +148,6 @@ public class TextFieldWidget extends BaseWidget {
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuilder();
         RenderSystem.setShaderColor(0.0F, 0.0F, 255.0F, 255.0F); // TODO check if this works
-        RenderSystem.disableTexture();
         RenderSystem.enableColorLogicOp();
         RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
@@ -158,7 +157,6 @@ public class TextFieldWidget extends BaseWidget {
         bufferbuilder.vertex(matrix, startX, startY, 0).endVertex();
         tessellator.end();
         RenderSystem.disableColorLogicOp();
-        RenderSystem.enableTexture();
     }
 
     public void clear(){

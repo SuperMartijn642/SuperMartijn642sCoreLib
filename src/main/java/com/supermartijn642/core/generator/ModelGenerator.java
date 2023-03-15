@@ -10,9 +10,9 @@ import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemTransform;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.client.NamedRenderTypeManager;
 import net.minecraftforge.client.RenderTypeGroup;
@@ -105,12 +105,12 @@ public abstract class ModelGenerator extends ResourceGenerator {
         if(!modelBuilder.transforms.isEmpty()){
             JsonObject displayJson = new JsonObject();
             // Add each transform
-            for(Map.Entry<ItemTransforms.TransformType,TransformBuilder> transform : modelBuilder.transforms.entrySet()){
+            for(Map.Entry<ItemDisplayContext,TransformBuilder> transform : modelBuilder.transforms.entrySet()){
                 JsonObject transformJson = new JsonObject();
                 transformJson.add("rotation", createJsonArray(transform.getValue().rotation.x(), transform.getValue().rotation.y(), transform.getValue().rotation.z()));
                 transformJson.add("translation", createJsonArray(transform.getValue().translation.x(), transform.getValue().translation.y(), transform.getValue().translation.z()));
                 transformJson.add("scale", createJsonArray(transform.getValue().scale.x(), transform.getValue().scale.y(), transform.getValue().scale.z()));
-                displayJson.add(transform.getKey().getSerializeName(), transformJson);
+                displayJson.add(transform.getKey().getSerializedName(), transformJson);
             }
             json.add("display", displayJson);
         }
@@ -477,7 +477,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
         protected final String modid;
         protected final ResourceLocation identifier;
         private final Map<String,String> textures = new HashMap<>();
-        private final Map<ItemTransforms.TransformType,TransformBuilder> transforms = new HashMap<>();
+        private final Map<ItemDisplayContext,TransformBuilder> transforms = new HashMap<>();
         private final List<ElementBuilder> elements = new ArrayList<>();
         private ResourceLocation parent;
         private ResourceLocation renderType;
@@ -676,7 +676,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
          * @param transformType            transform type to be build
          * @param transformBuilderConsumer consumer to build the transformation
          */
-        public ModelBuilder transform(ItemTransforms.TransformType transformType, Consumer<TransformBuilder> transformBuilderConsumer){
+        public ModelBuilder transform(ItemDisplayContext transformType, Consumer<TransformBuilder> transformBuilderConsumer){
             transformBuilderConsumer.accept(this.transforms.computeIfAbsent(transformType, o -> new TransformBuilder()));
             return this;
         }

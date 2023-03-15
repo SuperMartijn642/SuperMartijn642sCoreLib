@@ -2,6 +2,7 @@ package com.supermartijn642.core.gui;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.network.IContainerFactory;
 
@@ -30,7 +31,7 @@ public final class BaseContainerType<T extends BaseContainer> extends MenuType<T
             T container = containerDeserializer.apply(inventory.player, data);
             container.setContainerId(id);
             return container;
-        });
+        }, FeatureFlagSet.of());
         this.containerSerializer = containerSerializer;
         this.containerDeserializer = containerDeserializer;
     }

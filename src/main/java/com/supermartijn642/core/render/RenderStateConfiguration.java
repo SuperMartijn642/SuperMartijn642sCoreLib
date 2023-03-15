@@ -57,13 +57,12 @@ public class RenderStateConfiguration {
         }
 
         public Builder disableTexture(){
-            this.textureState = new RenderStateEntry(RenderSystem::disableTexture, RenderSystem::enableTexture);
+            this.textureState = new RenderStateEntry(null, null);
             return this;
         }
 
         public Builder useTexture(ResourceLocation texture, boolean useBlur, boolean useMipmap){
             this.textureState = new RenderStateEntry(() -> {
-                RenderSystem.enableTexture();
                 ClientUtils.getTextureManager().getTexture(texture).setFilter(useBlur, useMipmap);
                 RenderSystem.setShaderTexture(0, texture);
             }, null);

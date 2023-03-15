@@ -1,8 +1,8 @@
 package com.supermartijn642.core.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraftforge.client.model.BakedModelWrapper;
 
 /**
@@ -24,7 +24,7 @@ public final class CustomRendererBakedModelWrapper extends BakedModelWrapper<Bak
     }
 
     @Override
-    public BakedModel applyTransform(ItemTransforms.TransformType cameraTransformType, PoseStack poseStack, boolean applyLeftHandTransform){
+    public BakedModel applyTransform(ItemDisplayContext cameraTransformType, PoseStack poseStack, boolean applyLeftHandTransform){
         super.applyTransform(cameraTransformType, poseStack, applyLeftHandTransform);
         return this;
     }

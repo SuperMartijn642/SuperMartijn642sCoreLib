@@ -4,10 +4,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HalfTransparentBlock;
@@ -34,7 +34,7 @@ public class BlockEntityCustomItemRenderer<T extends BlockEntity> implements Cus
     }
 
     @Override
-    public void render(ItemStack itemStack, ItemTransforms.TransformType transformType, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay){
+    public void render(ItemStack itemStack, ItemDisplayContext transformType, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay){
         if(this.blockEntity == null){
             this.blockEntity = this.initEntity.get();
             if(this.blockEntity == null)
@@ -50,7 +50,7 @@ public class BlockEntityCustomItemRenderer<T extends BlockEntity> implements Cus
     /**
      * Renders the baked model corresponding to the given item stack. Ignores any custom renderers associated with the item.
      */
-    protected void renderDefaultModel(ItemStack itemStack, ItemTransforms.TransformType transformType, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay){
+    protected void renderDefaultModel(ItemStack itemStack, ItemDisplayContext transformType, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay){
         if(itemStack.isEmpty())
             return;
 
@@ -58,7 +58,7 @@ public class BlockEntityCustomItemRenderer<T extends BlockEntity> implements Cus
         BakedModel model = itemRenderer.getModel(itemStack, null, null, 0);
 
         boolean fabulous;
-        if(transformType != ItemTransforms.TransformType.GUI && !transformType.firstPerson() && itemStack.getItem() instanceof BlockItem){
+        if(transformType != ItemDisplayContext.GUI && !transformType.firstPerson() && itemStack.getItem() instanceof BlockItem){
             Block block = ((BlockItem)itemStack.getItem()).getBlock();
             fabulous = !(block instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock);
         }else
