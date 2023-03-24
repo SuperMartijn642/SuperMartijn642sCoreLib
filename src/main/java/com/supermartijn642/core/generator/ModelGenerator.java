@@ -205,7 +205,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
      * @param west     resource location of the texture for the west face
      */
     protected ModelBuilder cube(ResourceLocation location, ResourceLocation up, ResourceLocation down, ResourceLocation north, ResourceLocation east, ResourceLocation south, ResourceLocation west){
-        return this.model(location).parent("minecraft", "block/cube").texture("up", "#up").texture("down", "#down").texture("north", "#north").texture("east", "#east").texture("south", "#south").texture("west", "#west");
+        return this.model(location).parent("minecraft", "block/cube").texture("up", up).texture("down", down).texture("north", north).texture("east", east).texture("south", south).texture("west", west);
     }
 
     /**
@@ -220,7 +220,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
      * @param west      resource location of the texture for the west face
      */
     protected ModelBuilder cube(String namespace, String path, ResourceLocation up, ResourceLocation down, ResourceLocation north, ResourceLocation east, ResourceLocation south, ResourceLocation west){
-        return this.model(namespace, path).parent("minecraft", "block/cube").texture("up", "#up").texture("down", "#down").texture("north", "#north").texture("east", "#east").texture("south", "#south").texture("west", "#west");
+        return this.model(namespace, path).parent("minecraft", "block/cube").texture("up", up).texture("down", down).texture("north", north).texture("east", east).texture("south", south).texture("west", west);
     }
 
     /**
@@ -234,7 +234,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
      * @param west     resource location of the texture for the west face
      */
     protected ModelBuilder cube(String location, ResourceLocation up, ResourceLocation down, ResourceLocation north, ResourceLocation east, ResourceLocation south, ResourceLocation west){
-        return this.model(location).parent("minecraft", "block/cube").texture("up", "#up").texture("down", "#down").texture("north", "#north").texture("east", "#east").texture("south", "#south").texture("west", "#west");
+        return this.model(location).parent("minecraft", "block/cube").texture("up", up).texture("down", down).texture("north", north).texture("east", east).texture("south", south).texture("west", west);
     }
 
     /**
