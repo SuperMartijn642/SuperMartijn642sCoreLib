@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.6
+- Fix `ModelGenerator#cube` methods ignoring parameters
+
 ### SuperMartijn642's Core Library 1.1.5
 - Fix performance issues with model overwrites in ClientRegistrationHandler
 
