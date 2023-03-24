@@ -6,6 +6,8 @@
   "refmap": "${mod_id}.mixins.refmap.json",
   "mixins": [
     "FabricDataGenHelperMixin",
+    "HolderReferenceMixin",
+    "MappedRegistryMixin",
     "ServerPlayerGameModeMixin",
     "DataGeneratorMixin"
   ],

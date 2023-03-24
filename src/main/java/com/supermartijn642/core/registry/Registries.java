@@ -1,13 +1,17 @@
 package com.supermartijn642.core.registry;
 
 import com.google.common.collect.Lists;
+import com.mojang.serialization.Lifecycle;
 import com.supermartijn642.core.data.condition.ResourceCondition;
 import com.supermartijn642.core.data.condition.ResourceConditionContext;
 import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
+import com.supermartijn642.core.extensions.CoreLibMappedRegistry;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.StatType;
@@ -179,6 +183,15 @@ public final class Registries {
         }
 
         public void register(ResourceLocation identifier, T object){
+            if(this.registry instanceof MappedRegistry<T> && this.registry.containsKey(identifier)){
+                ResourceKey<T> key = ResourceKey.create(this.registry.key(), identifier);
+                T oldObject = this.registry.get(key);
+                int id = this.registry.getId(oldObject);
+                ((CoreLibMappedRegistry)this.registry).supermartijn642corelibSetRegisterOverrides(true);
+                ((MappedRegistry<T>)this.registry).registerMapping(id, key, object, Lifecycle.stable());
+                ((CoreLibMappedRegistry)this.registry).supermartijn642corelibSetRegisterOverrides(false);
+                return;
+            }
             net.minecraft.core.Registry.register(this.registry, identifier, object);
         }
 
