@@ -8,7 +8,9 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -23,6 +25,10 @@ public abstract class ResourceGenerator {
      */
     public static DataProvider createDataProvider(ResourceGenerator generator, Consumer<CachedOutput> cacheUpdater){
         return new DataProvider() {
+            private static final Set<String> NAMES = new HashSet<>();
+
+            private String name;
+
             @Override
             public CompletableFuture<?> run(CachedOutput cachedOutput){
                 cacheUpdater.accept(cachedOutput);
@@ -34,7 +40,14 @@ public abstract class ResourceGenerator {
 
             @Override
             public String getName(){
-                return generator.getName();
+                if(this.name == null){
+                    String generatorName = generator.getName();
+                    int counter = 1;
+                    this.name = generatorName;
+                    while(!NAMES.add(this.name))
+                        this.name = generatorName + " " + ++counter;
+                }
+                return this.name;
             }
         };
     }
