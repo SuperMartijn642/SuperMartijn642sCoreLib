@@ -1,6 +1,8 @@
 package com.supermartijn642.core.util;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Created 17/07/2022 by SuperMartijn642
@@ -47,6 +49,21 @@ public abstract class Maybe<T> {
      */
     public abstract T get() throws IllegalStateException;
 
+    /**
+     * Returns the object held by this maybe. If this maybe is empty, the given alternative will be returned.
+     */
+    public abstract T orElse(T other);
+
+    /**
+     * Returns the object held by this maybe. If this maybe is empty, the given alternative will be resolved and returned.
+     */
+    public abstract T orElseGet(Supplier<T> other);
+
+    /**
+     * Applies the given consumer if this maybe is present.
+     */
+    public abstract void ifPresent(Consumer<T> consumer);
+
     private static class Present<T> extends Maybe<T> {
 
         private final T object;
@@ -69,6 +86,21 @@ public abstract class Maybe<T> {
         public T get(){
             return this.object;
         }
+
+        @Override
+        public T orElse(T other){
+            return this.object;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other){
+            return this.object;
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer){
+            consumer.accept(this.object);
+        }
     }
 
     private static class Empty extends Maybe<Object> {
@@ -79,14 +111,28 @@ public abstract class Maybe<T> {
         }
 
         @Override
+        public <S> Maybe<S> map(Function<Object,S> mapper){
+            //noinspection unchecked
+            return (Maybe<S>)this;
+        }
+
+        @Override
         public Object get(){
             throw new IllegalStateException("Cannot call get on an empty maybe!");
         }
 
         @Override
-        public <S> Maybe<S> map(Function<Object,S> mapper){
-            //noinspection unchecked
-            return (Maybe<S>)this;
+        public Object orElse(Object other){
+            return other;
+        }
+
+        @Override
+        public Object orElseGet(Supplier<Object> other){
+            return other.get();
+        }
+
+        @Override
+        public void ifPresent(Consumer<Object> consumer){
         }
     }
 }
