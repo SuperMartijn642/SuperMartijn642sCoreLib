@@ -1,6 +1,7 @@
 package com.supermartijn642.core.util;
 
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -99,6 +100,21 @@ public abstract class Either<X, Y> {
         return this.mapLeft(mapLeft).mapRight(mapRight);
     }
 
+    /**
+     * Applies the respective mapper to obtain an object of type {@link S}.
+     */
+    public abstract <S> S flatMap(Function<X,S> mapLeft, Function<Y,S> mapRight);
+
+    /**
+     * Applies the given consumer if this either is a left value.
+     */
+    public abstract void ifLeft(Consumer<X> consumer);
+
+    /**
+     * Applies the given consumer if this either is a right value.
+     */
+    public abstract void ifRight(Consumer<Y> consumer);
+
     private static class Left<X, Y> extends Either<X,Y> {
 
         private final X value;
@@ -156,6 +172,20 @@ public abstract class Either<X, Y> {
         public <S> Either<X,S> mapRight(Function<Y,S> mapper){
             //noinspection unchecked
             return (Either<X,S>)this;
+        }
+
+        @Override
+        public <S> S flatMap(Function<X,S> mapLeft, Function<Y,S> mapRight){
+            return mapLeft.apply(this.value);
+        }
+
+        @Override
+        public void ifLeft(Consumer<X> consumer){
+            consumer.accept(this.value);
+        }
+
+        @Override
+        public void ifRight(Consumer<Y> consumer){
         }
     }
 
@@ -216,6 +246,20 @@ public abstract class Either<X, Y> {
         @Override
         public <S> Either<X,S> mapRight(Function<Y,S> mapper){
             return new Right<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public <S> S flatMap(Function<X,S> mapLeft, Function<Y,S> mapRight){
+            return mapRight.apply(this.value);
+        }
+
+        @Override
+        public void ifLeft(Consumer<X> consumer){
+        }
+
+        @Override
+        public void ifRight(Consumer<Y> consumer){
+            consumer.accept(this.value);
         }
     }
 }
