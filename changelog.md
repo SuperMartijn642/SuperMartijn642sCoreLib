@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.6a
+- Fix `PacketChannel#sendToDimension` using incorrect dimension id
+
 ### SuperMartijn642's Core Library 1.1.6
 - Fix `ModelGenerator#cube` methods ignoring parameters
 
