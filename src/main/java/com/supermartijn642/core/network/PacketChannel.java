@@ -135,12 +135,23 @@ public class PacketChannel {
 
     /**
      * Sends the given {@code packet} to all players in the given {@code dimension}. Must only be used server-side.
-     * @param dimension dimension to send the packet to
+     * @param dimension dimension id to send the packet to
      * @param packet    packet to be send
      */
-    public void sendToDimension(DimensionType dimension, BasePacket packet){
+    public void sendToDimension(int dimension, BasePacket packet){
         this.checkRegistration(packet);
-        this.channel.sendToDimension(new InternalPacket(this).setPacket(packet), dimension.getId());
+        this.channel.sendToDimension(new InternalPacket(this).setPacket(packet), dimension);
+    }
+
+    /**
+     * Sends the given {@code packet} to all players in the given {@code dimension}. Must only be used server-side.
+     * @param dimension dimension to send the packet to
+     * @param packet    packet to be send
+     * @deprecated Use {@link #sendToDimension(World, BasePacket)} or {@link #sendToDimension(int, BasePacket)} instead
+     */
+    @Deprecated
+    public void sendToDimension(DimensionType dimension, BasePacket packet){
+        this.sendToDimension(dimension.getId(), packet);
     }
 
     /**
@@ -151,7 +162,7 @@ public class PacketChannel {
     public void sendToDimension(World world, BasePacket packet){
         if(world.isRemote)
             throw new IllegalStateException("This must only be called server-side!");
-        this.sendToDimension(world.provider.getDimensionType(), packet);
+        this.sendToDimension(world.provider.getDimension(), packet);
     }
 
     /**
