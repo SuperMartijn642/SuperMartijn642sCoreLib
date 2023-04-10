@@ -51,6 +51,8 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         // Loop over all recipes
         for(RecipeBuilder<?> recipeBuilder : this.recipes.values()){
             JsonObject json = new JsonObject();
+            Map<String,JsonObject> subRecipes = new HashMap<>();
+            subRecipes.put("", json);
 
             // Set the recipe serializer
             json.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(recipeBuilder.serializer).toString());
@@ -106,22 +108,28 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 json.add("result", resultJson);
 
             }else if(recipeBuilder instanceof SmeltingRecipeBuilder){
-                if(((SmeltingRecipeBuilder)recipeBuilder).includeSmelting){
-                    json.addProperty("type", "minecraft:smelting");
-                    serializeCookingRecipe(json, (SmeltingRecipeBuilder)recipeBuilder, 1, 200);
-                }
                 if(((SmeltingRecipeBuilder)recipeBuilder).includeBlasting){
-                    json.addProperty("type", "minecraft:blasting");
-                    serializeCookingRecipe(json, (SmeltingRecipeBuilder)recipeBuilder, 2, 100);
+                    JsonObject recipeJson = new JsonObject();
+                    recipeJson.addProperty("type", "minecraft:blasting");
+                    serializeCookingRecipe(recipeJson, (SmeltingRecipeBuilder)recipeBuilder, 2, 100);
+                    subRecipes.put("_blasting", recipeJson);
                 }
                 if(((SmeltingRecipeBuilder)recipeBuilder).includeSmoking){
-                    json.addProperty("type", "minecraft:smoking");
+                    JsonObject recipeJson = new JsonObject();
+                    recipeJson.addProperty("type", "minecraft:smoking");
                     serializeCookingRecipe(json, (SmeltingRecipeBuilder)recipeBuilder, 2, 100);
+                    subRecipes.put("_smoking", recipeJson);
                 }
                 if(((SmeltingRecipeBuilder)recipeBuilder).includeCampfire){
-                    json.addProperty("type", "minecraft:campfire_cooking");
+                    JsonObject recipeJson = new JsonObject();
+                    recipeJson.addProperty("type", "minecraft:campfire_cooking");
                     serializeCookingRecipe(json, (SmeltingRecipeBuilder)recipeBuilder, 2, 100);
+                    subRecipes.put("_campfire", recipeJson);
                 }
+                if(((SmeltingRecipeBuilder)recipeBuilder).includeSmelting)
+                    serializeCookingRecipe(json, (SmeltingRecipeBuilder)recipeBuilder, 1, 200);
+                else
+                    subRecipes.remove("");
             }else if(recipeBuilder instanceof SmithingRecipeBuilder){
                 // Group
                 json.addProperty("group", recipeBuilder.group);
@@ -149,26 +157,30 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 json.addProperty("count", recipeBuilder.outputCount);
             }
 
-            // Conditions
-            if(!recipeBuilder.conditions.isEmpty()){
-                JsonObject newJson = new JsonObject();
-                newJson.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE).toString());
-                JsonArray conditionsJson = new JsonArray();
-                for(ResourceCondition condition : recipeBuilder.conditions){
-                    JsonObject conditionJson = new JsonObject();
-                    conditionJson.addProperty("type", Registries.RESOURCE_CONDITION_SERIALIZERS.getIdentifier(condition.getSerializer()).toString());
-                    //noinspection unchecked,rawtypes
-                    ((ResourceConditionSerializer)condition.getSerializer()).serialize(conditionJson, condition);
-                    conditionsJson.add(conditionJson);
-                }
-                newJson.add("conditions", conditionsJson);
-                newJson.add("recipe", json);
-                json = newJson;
-            }
+            for(Map.Entry<String,JsonObject> subRecipe : subRecipes.entrySet()){
+                json = subRecipe.getValue();
 
-            // Save the object to the cache
-            ResourceLocation identifier = recipeBuilder.identifier;
-            this.cache.saveJsonResource(ResourceType.DATA, json, identifier.getNamespace(), "recipes", identifier.getPath());
+                // Conditions
+                if(!recipeBuilder.conditions.isEmpty()){
+                    JsonObject newJson = new JsonObject();
+                    newJson.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE).toString());
+                    JsonArray conditionsJson = new JsonArray();
+                    for(ResourceCondition condition : recipeBuilder.conditions){
+                        JsonObject conditionJson = new JsonObject();
+                        conditionJson.addProperty("type", Registries.RESOURCE_CONDITION_SERIALIZERS.getIdentifier(condition.getSerializer()).toString());
+                        //noinspection unchecked,rawtypes
+                        ((ResourceConditionSerializer)condition.getSerializer()).serialize(conditionJson, condition);
+                        conditionsJson.add(conditionJson);
+                    }
+                    newJson.add("conditions", conditionsJson);
+                    newJson.add("recipe", json);
+                    json = newJson;
+                }
+
+                // Save the object to the cache
+                ResourceLocation identifier = recipeBuilder.identifier;
+                this.cache.saveJsonResource(ResourceType.DATA, json, identifier.getNamespace(), "recipes", identifier.getPath() + subRecipe.getKey());
+            }
         }
 
         // Save the advancements
