@@ -412,7 +412,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
      * @param texture  resource location of the texture for the item
      */
     protected ModelBuilder itemHandheld(ResourceLocation location, ResourceLocation texture){
-        return this.model(location).parent("minecraft", "item/generated").texture("layer0", texture);
+        return this.model(location).parent("minecraft", "item/handheld").texture("layer0", texture);
     }
 
     /**
@@ -422,7 +422,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
      * @param texture   resource location of the texture for the item
      */
     protected ModelBuilder itemHandheld(String namespace, String path, ResourceLocation texture){
-        return this.model(namespace, path).parent("minecraft", "item/generated").texture("layer0", texture);
+        return this.model(namespace, path).parent("minecraft", "item/handheld").texture("layer0", texture);
     }
 
     /**
@@ -431,7 +431,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
      * @param texture  resource location of the texture for the item
      */
     protected ModelBuilder itemHandheld(String location, ResourceLocation texture){
-        return this.model(location).parent("minecraft", "item/generated").texture("layer0", texture);
+        return this.model(location).parent("minecraft", "item/handheld").texture("layer0", texture);
     }
 
     /**
@@ -441,7 +441,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
      */
     protected ModelBuilder itemHandheld(IItemProvider item, ResourceLocation texture){
         ResourceLocation identifier = Registries.ITEMS.getIdentifier(item.asItem());
-        return this.model(identifier.getNamespace(), "item/" + identifier.getPath()).parent("minecraft", "item/generated").texture("layer0", texture);
+        return this.model(identifier.getNamespace(), "item/" + identifier.getPath()).parent("minecraft", "item/handheld").texture("layer0", texture);
     }
 
     @Override
