@@ -415,7 +415,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
      * @param texture  resource location of the texture for the item
      */
     protected ModelBuilder itemHandheld(ResourceLocation location, ResourceLocation texture){
-        return this.model(location).parent("minecraft", "item/generated").texture("layer0", texture);
+        return this.model(location).parent("minecraft", "item/handheld").texture("layer0", texture);
     }
 
     /**
@@ -425,7 +425,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
      * @param texture   resource location of the texture for the item
      */
     protected ModelBuilder itemHandheld(String namespace, String path, ResourceLocation texture){
-        return this.model(namespace, path).parent("minecraft", "item/generated").texture("layer0", texture);
+        return this.model(namespace, path).parent("minecraft", "item/handheld").texture("layer0", texture);
     }
 
     /**
@@ -434,7 +434,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
      * @param texture  resource location of the texture for the item
      */
     protected ModelBuilder itemHandheld(String location, ResourceLocation texture){
-        return this.model(location).parent("minecraft", "item/generated").texture("layer0", texture);
+        return this.model(location).parent("minecraft", "item/handheld").texture("layer0", texture);
     }
 
     /**
@@ -444,7 +444,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
      */
     protected ModelBuilder itemHandheld(Item item, ResourceLocation texture){
         ResourceLocation identifier = Registries.ITEMS.getIdentifier(item);
-        return this.model(identifier.getResourceDomain(), "item/" + identifier.getResourcePath()).parent("minecraft", "item/generated").texture("layer0", texture);
+        return this.model(identifier.getResourceDomain(), "item/" + identifier.getResourcePath()).parent("minecraft", "item/handheld").texture("layer0", texture);
     }
 
     @Override
