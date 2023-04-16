@@ -5,13 +5,13 @@
   "compatibilityLevel": "${mixin_compatibility_level}",
   "refmap": "${mod_id}.mixins.refmap.json",
   "mixins": [
-    "FabricDataGenHelperMixin",
     "HolderReferenceMixin",
     "MappedRegistryMixin",
-    "ServerPlayerGameModeMixin",
-    "DataGeneratorMixin"
+    "ServerPlayerGameModeMixin"
   ],
   "client": [
+    "FabricDataGenHelperMixin",
+    "DataGeneratorMixin",
     "LevelRendererMixin",
     "MinecraftMixin",
     "ModelManagerMixin",
