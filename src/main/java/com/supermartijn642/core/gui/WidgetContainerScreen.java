@@ -112,7 +112,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             this.renderSlot(poseStack, slot);
             if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
                 this.hoveredSlot = slot;
-                renderSlotHighlight(poseStack, slot.x, slot.y, this.getBlitOffset());
+                renderSlotHighlight(poseStack, slot.x, slot.y, 0);
             }
         }
 
@@ -135,7 +135,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
                     s = ChatFormatting.YELLOW + "0";
             }
 
-            this.renderFloatingItem(cursorStack, offsetMouseX - 8, offsetMouseY - offset, s);
+            this.renderFloatingItem(poseStack, cursorStack, offsetMouseX - 8, offsetMouseY - offset, s);
         }
 
         if(!this.snapbackItem.isEmpty()){
@@ -149,7 +149,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             int k2 = this.snapbackEnd.y - this.snapbackStartY;
             int j1 = this.snapbackStartX + (int)(j2 * f);
             int k1 = this.snapbackStartY + (int)(k2 * f);
-            this.renderFloatingItem(this.snapbackItem, j1, k1, null);
+            this.renderFloatingItem(poseStack, this.snapbackItem, j1, k1, null);
         }
 
         // Render the widget's overlay

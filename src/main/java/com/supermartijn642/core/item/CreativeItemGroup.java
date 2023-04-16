@@ -4,7 +4,6 @@ import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.fabricmc.fabric.impl.itemgroup.ItemGroupHelper;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
@@ -102,11 +101,11 @@ public final class CreativeItemGroup extends CreativeModeTab {
     private List<ItemStack> sortedDisplayItems;
 
     private CreativeItemGroup(String modid, String identifier, String translationKey, Supplier<ItemStack> icon){
-        super(Row.TOP, 0, Type.CATEGORY, TextComponents.translation(translationKey).get(), icon, (a, b, c) -> {
+        super(Row.TOP, 0, Type.CATEGORY, TextComponents.translation(translationKey).get(), icon, (a, b) -> {
         });
         this.modid = modid;
         this.identifier = identifier;
-        this.displayItemsGenerator = (flags, output, hasPermissions) -> this.applyFiller(output::accept);
+        this.displayItemsGenerator = (flags, output) -> this.applyFiller(output::accept);
 
         //noinspection UnstableApiUsage
         ItemGroupHelper.appendItemGroup(this);
@@ -143,8 +142,8 @@ public final class CreativeItemGroup extends CreativeModeTab {
     }
 
     @Override
-    public void buildContents(FeatureFlagSet flags, boolean hasPermissions){
-        super.buildContents(flags, hasPermissions);
+    public void buildContents(ItemDisplayParameters parameters){
+        super.buildContents(parameters);
         if(this.sorter != null){
             this.sortedDisplayItems = new ArrayList<>(this.displayItems);
             this.sortedDisplayItems.sort(this.sorter);

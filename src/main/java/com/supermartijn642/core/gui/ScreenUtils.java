@@ -10,7 +10,6 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
@@ -221,7 +220,6 @@ public class ScreenUtils {
     public static void fillRect(PoseStack poseStack, float x, float y, float width, float height, float red, float green, float blue, float alpha){
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.enableBlend();
-        RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
 
         Matrix4f matrix = poseStack.last().pose();
@@ -234,7 +232,6 @@ public class ScreenUtils {
         buffer.vertex(matrix, x, y, 0).color(red, green, blue, alpha).endVertex();
         tesselator.end();
 
-        RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
 
@@ -303,9 +300,6 @@ public class ScreenUtils {
         }
 
         poseStack.pushPose();
-        ItemRenderer itemRenderer = ClientUtils.getItemRenderer();
-        float oldBlitOffset = itemRenderer.blitOffset;
-        itemRenderer.blitOffset = 400.0F;
 
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
@@ -322,12 +316,10 @@ public class ScreenUtils {
         GuiComponent.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY - 3, tooltipX + tooltipWidth + 3, tooltipY - 3 + 1, 400, 1347420415, 1347420415);
         GuiComponent.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipWidth + 3, tooltipY + tooltipHeight + 3, 400, 1344798847, 1344798847);
         RenderSystem.enableDepthTest();
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         BufferUploader.drawWithShader(bufferbuilder.end());
         RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         poseStack.translate(0.0D, 0.0D, 400.0D);
 
@@ -345,10 +337,8 @@ public class ScreenUtils {
 
         for(int index = 0; index < components.size(); ++index){
             ClientTooltipComponent component = components.get(index);
-            component.renderImage(ClientUtils.getFontRenderer(), tooltipX, offsetY, poseStack, itemRenderer, 400);
+            component.renderImage(ClientUtils.getFontRenderer(), tooltipX, offsetY, poseStack, ClientUtils.getItemRenderer());
             offsetY += component.getHeight() + (index == 0 ? 2 : 0);
         }
-
-        itemRenderer.blitOffset = oldBlitOffset;
     }
 }
