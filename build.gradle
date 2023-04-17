@@ -131,7 +131,7 @@ curseforge {
             }
         }
 
-        mainArtifact(jar) {
+        mainArtifact(remapJar) {
             displayName = "${project.mod_name} ${project.mod_version} for Fabric ${project.minecraft_suffix.substring(2)}"
         }
     }
@@ -158,7 +158,7 @@ modrinth {
     gameVersions = project.modrinth_game_versions.split(" ") as List
     // Convert the changelog file to text
     changelog = file("changelog.md").text
-    uploadFile = jar // With Loom, this MUST be set to `remapJar` instead of `jar`!
+    uploadFile = remapJar // With Loom, this MUST be set to `remapJar` instead of `jar`!
     loaders = ["fabric"]
     dependencies {
         // Required dependencies
