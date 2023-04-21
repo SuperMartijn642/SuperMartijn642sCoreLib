@@ -11,7 +11,6 @@ import net.minecraft.data.DataProvider;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
@@ -30,12 +29,11 @@ public abstract class ResourceGenerator {
             private String name;
 
             @Override
-            public CompletableFuture<?> run(CachedOutput cachedOutput){
+            public void run(CachedOutput cachedOutput){
                 cacheUpdater.accept(cachedOutput);
                 // Run the resource generator
                 generator.generate();
                 generator.save();
-                return CompletableFuture.completedFuture(null);
             }
 
             @Override

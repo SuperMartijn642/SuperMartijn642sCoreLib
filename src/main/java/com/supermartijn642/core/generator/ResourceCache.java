@@ -8,13 +8,11 @@ import com.google.gson.JsonObject;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.RegistryUtil;
-import com.supermartijn642.core.util.Pair;
 import net.fabricmc.fabric.impl.resource.loader.FabricModResourcePack;
 import net.fabricmc.fabric.impl.resource.loader.GroupResourcePack;
 import net.fabricmc.fabric.impl.resource.loader.ModNioResourcePack;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.data.CachedOutput;
 import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
@@ -30,9 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -99,9 +95,8 @@ public abstract class ResourceCache {
     public abstract Optional<InputStream> getExistingResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension);
 
     @ApiStatus.Internal
-    public static Pair<ResourceCache,Consumer<CachedOutput>> wrap(Supplier<HashCache> hashCache, Path outputDirectory, Path manualDirectory){
-        HashCacheWrapper cacheWrapper = new HashCacheWrapper(outputDirectory, manualDirectory, hashCache);
-        return Pair.of(cacheWrapper, cacheWrapper::setActiveCacheUpdater);
+    public static ResourceCache wrap(HashCache cachedOutput, Path outputDirectory, Path manualDirectory){
+        return new HashCacheWrapper(outputDirectory, manualDirectory, cachedOutput);
     }
 
     private static class HashCacheWrapper extends ResourceCache {
@@ -125,22 +120,25 @@ public abstract class ResourceCache {
             }
         }
 
+        private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
         private final Map<Path,HashCode> presentFiles = new HashMap<>();
         private final Map<Path,HashCode> writtenFiles = new HashMap<>();
         private final List<Path> toBeGenerated = new ArrayList<>(); // TODO validate this is empty after datagen
 
         private final Path outputDirectory;
         private final Path manualDirectory;
-        private final Supplier<HashCache> cache;
+        private final HashCache cache;
         private final List<PackResources> otherResourcePacks;
-        private HashCache.CacheUpdater activeCacheUpdater;
 
-        HashCacheWrapper(Path outputFolder, Path manualFolder, Supplier<HashCache> hashCache){
+        HashCacheWrapper(Path outputFolder, Path manualFolder, HashCache hashCache){
             if(outputFolder == null)
                 throw new IllegalArgumentException("Output directory must not be null!");
             this.outputDirectory = outputFolder;
             this.manualDirectory = manualFolder;
             this.cache = hashCache;
+            // Copy all the paths from the hash cache
+//            for(Map.Entry<Path,String> entry : this.cache.oldCache.entrySet())
+//                this.presentFiles.put(this.outputDirectory.relativize(entry.getKey()), entry.getValue().isEmpty() ? HashCode.fromInt(0) : HashCode.fromString(entry.getValue()));
 
             // Take all loaded resource packs and remove the one for the datagen modid
             this.otherResourcePacks = new ArrayList<>(ClientUtils.getMinecraft().resourcePackRepository.openAllSelected());
@@ -171,31 +169,8 @@ public abstract class ResourceCache {
                 CoreLib.LOGGER.warn("The 'fabric-api.datagen.modid' property has not been set! The resource cache may wrongly identify previously generated files as existing files!");
         }
 
-        private void setActiveCacheUpdater(CachedOutput cachedOutput){
-            if(!(cachedOutput instanceof HashCache.CacheUpdater))
-                throw new RuntimeException("Data provider output must be an instanceof HashCache.CacheUpdater!");
-            this.activeCacheUpdater = (HashCache.CacheUpdater)cachedOutput;
-
-            // Copy all the paths from the hash cache
-            this.cache.get().caches.entrySet().stream()
-                .filter(entry -> !this.cache.get().cachesToWrite.contains(entry.getKey()))
-                .map(Map.Entry::getValue)
-                .flatMap(cache -> cache.data().entrySet().stream())
-                .forEach(entry -> this.presentFiles.put(this.outputDirectory.relativize(entry.getKey()), entry.getValue()));
-
-            // Copy all the paths from the cache updater
-            for(Map.Entry<Path,HashCode> entry : this.activeCacheUpdater.oldCache.data().entrySet())
-                this.presentFiles.put(this.outputDirectory.relativize(entry.getKey()), entry.getValue());
-        }
-
         private boolean existsInGeneratedFiles(Path path){
-            return this.toBeGenerated.contains(path) || this.writtenFiles.containsKey(path)
-                || this.cache.get().caches.entrySet().stream()
-                .filter(entry -> this.cache.get().cachesToWrite.contains(entry.getKey()))
-                .map(Map.Entry::getValue)
-                .flatMap(cache -> cache.data().entrySet().stream())
-                .map(Map.Entry::getKey)
-                .anyMatch(this.outputDirectory.resolve(path)::equals);
+            return this.toBeGenerated.contains(path);// || this.cache.newCache.containsKey(this.outputDirectory.resolve(path));
         }
 
         private boolean existsInManualFiles(Path path){
@@ -204,14 +179,13 @@ public abstract class ResourceCache {
 
         private boolean existsInLoadedResources(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             ResourceLocation location = new ResourceLocation(namespace, directory + "/" + fileName + extension);
-            return this.otherResourcePacks.stream().anyMatch(pack -> pack.getResource(resourceType == ResourceType.ASSET ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA, location) != null);
+            return this.otherResourcePacks.stream().anyMatch(pack -> pack.hasResource(resourceType == ResourceType.ASSET ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA, location));
         }
 
         private Path constructPath(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             return Paths.get(resourceType.getDirectoryName(), namespace, directory, fileName + extension);
         }
 
-        @Override
         public boolean doesResourceExist(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
             return this.existsInGeneratedFiles(path)
@@ -240,14 +214,8 @@ public abstract class ResourceCache {
         public void saveResource(ResourceType resourceType, byte[] data, String namespace, String directory, String fileName, String extension){
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
             Path fullPath = this.outputDirectory.resolve(path);
-            if(this.writtenFiles.containsKey(path)
-                || this.cache.get().caches.entrySet().stream()
-                .filter(entry -> this.cache.get().cachesToWrite.contains(entry.getKey()))
-                .map(Map.Entry::getValue)
-                .flatMap(cache -> cache.data().entrySet().stream())
-                .map(Map.Entry::getKey)
-                .anyMatch(fullPath::equals))
-                throw new RuntimeException("Duplicate file '" + path + "'!");
+//            if(this.writtenFiles.containsKey(path) || this.cache.newCache.containsKey(fullPath))
+//                throw new RuntimeException("Duplicate file '" + path + "'!");
             if(this.existsInManualFiles(path))
                 throw new RuntimeException("File '" + path + "' clashes with a manually created file!");
 
@@ -256,7 +224,7 @@ public abstract class ResourceCache {
             if(this.presentFiles.containsKey(path) && this.presentFiles.get(path).equals(hashCode) && fullPath.toFile().exists()){
                 this.writtenFiles.put(path, hashCode);
                 this.toBeGenerated.remove(path);
-                this.activeCacheUpdater.newCache.put(fullPath, hashCode);
+//                this.cache.putNew(fullPath, hashCode.toString());
                 return;
             }
 
@@ -269,8 +237,7 @@ public abstract class ResourceCache {
             }
             this.writtenFiles.put(path, hashCode);
             this.toBeGenerated.remove(path);
-            this.activeCacheUpdater.newCache.put(fullPath, hashCode);
-            this.activeCacheUpdater.writes.incrementAndGet();
+//            this.cache.putNew(fullPath, hashCode.toString());
         }
     }
 }

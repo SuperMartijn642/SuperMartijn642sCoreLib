@@ -122,7 +122,13 @@ public class BaseItem extends Item {
     }
 
     public boolean isInCreativeGroup(CreativeModeTab tab){
-        return this.properties != null && this.properties.groups.contains(tab);
+        return this.properties == null ? tab == this.getItemCategory() : this.properties.groups.contains(tab);
+    }
+
+    @Override
+    protected boolean allowedIn(CreativeModeTab creativeModeTab){
+        CreativeModeTab tab = this.getItemCategory();
+        return tab != null && (creativeModeTab == CreativeModeTab.TAB_SEARCH || this.isInCreativeGroup(tab));
     }
 
     protected static class ItemUseResult {

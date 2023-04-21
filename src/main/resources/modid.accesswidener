@@ -9,7 +9,7 @@ accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScr
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackStartX I # snapbackStartX
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackStartY I # snapbackStartY
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackTime J # snapbackTime
-accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderFloatingItem (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V # renderFloatingItem
+accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderFloatingItem (Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V # renderFloatingItem
 accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderSlot (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/inventory/Slot;)V # renderSlot
 # AbstractContainerMenu
 mutable field net/minecraft/world/inventory/AbstractContainerMenu containerId I # containerId
@@ -24,27 +24,8 @@ accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties isSuffocating Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate; # isSuffocating
 # BlockEntityType$BlockEntitySupplier
 extendable class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
-# CreativeModeTab
-accessible field net/minecraft/world/item/CreativeModeTab displayItems Ljava/util/Collection; # displayItems
-accessible field net/minecraft/world/item/CreativeModeTab displayItemsGenerator Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator; # displayItemsGenerator
-accessible method net/minecraft/world/item/CreativeModeTab <init> (Lnet/minecraft/world/item/CreativeModeTab$Row;ILnet/minecraft/world/item/CreativeModeTab$Type;Lnet/minecraft/network/chat/Component;Ljava/util/function/Supplier;Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator;)V # constructor
-mutable field net/minecraft/world/item/CreativeModeTab displayItemsGenerator Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator; # displayItemsGenerator
-# DataGenerator$PackGenerator
-accessible field net/minecraft/data/DataGenerator$PackGenerator output Lnet/minecraft/data/PackOutput; # output
 # GuiComponent
-accessible method net/minecraft/client/gui/GuiComponent fillGradient (Lorg/joml/Matrix4f;Lcom/mojang/blaze3d/vertex/BufferBuilder;IIIIIII)V # fillGradient
-# HashCache
-accessible field net/minecraft/data/HashCache caches Ljava/util/Map; # caches
-accessible field net/minecraft/data/HashCache cachesToWrite Ljava/util/Set; # cachesToWrite
-# HashCache$CacheUpdater
-accessible field net/minecraft/data/HashCache$CacheUpdater newCache Lnet/minecraft/data/HashCache$ProviderCacheBuilder; # newCache
-accessible field net/minecraft/data/HashCache$CacheUpdater oldCache Lnet/minecraft/data/HashCache$ProviderCache; # oldCache
-accessible field net/minecraft/data/HashCache$CacheUpdater writes Ljava/util/concurrent/atomic/AtomicInteger; # writes
-accessible class net/minecraft/data/HashCache$CacheUpdater
-# HashCache$ProviderCache
-accessible class net/minecraft/data/HashCache$ProviderCache
-# HashCache$ProviderCacheBuilder
-accessible class net/minecraft/data/HashCache$ProviderCacheBuilder
+accessible method net/minecraft/client/gui/GuiComponent fillGradient (Lcom/mojang/math/Matrix4f;Lcom/mojang/blaze3d/vertex/BufferBuilder;IIIIIII)V # fillGradient
 # Ingredient
 accessible field net/minecraft/world/item/crafting/Ingredient values [Lnet/minecraft/world/item/crafting/Ingredient$Value; # values
 accessible method net/minecraft/world/item/crafting/Ingredient fromValues (Ljava/util/stream/Stream;)Lnet/minecraft/world/item/crafting/Ingredient; # fromValues
@@ -53,14 +34,12 @@ accessible class net/minecraft/world/item/crafting/Ingredient$Value
 # ItemRenderer
 accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V # renderModelLists
 # ItemTransform$Deserializer
-accessible field net/minecraft/client/renderer/block/model/ItemTransform$Deserializer DEFAULT_ROTATION Lorg/joml/Vector3f; # DEFAULT_ROTATION
-accessible field net/minecraft/client/renderer/block/model/ItemTransform$Deserializer DEFAULT_TRANSLATION Lorg/joml/Vector3f; # DEFAULT_TRANSLATION
-accessible field net/minecraft/client/renderer/block/model/ItemTransform$Deserializer DEFAULT_SCALE Lorg/joml/Vector3f; # DEFAULT_SCALE
+accessible field net/minecraft/client/renderer/block/model/ItemTransform$Deserializer DEFAULT_ROTATION Lcom/mojang/math/Vector3f; # DEFAULT_ROTATION
+accessible field net/minecraft/client/renderer/block/model/ItemTransform$Deserializer DEFAULT_TRANSLATION Lcom/mojang/math/Vector3f; # DEFAULT_TRANSLATION
+accessible field net/minecraft/client/renderer/block/model/ItemTransform$Deserializer DEFAULT_SCALE Lcom/mojang/math/Vector3f; # DEFAULT_SCALE
 accessible class net/minecraft/client/renderer/block/model/ItemTransform$Deserializer
 # Minecraft
 accessible field net/minecraft/client/Minecraft options Lnet/minecraft/client/Options; # options
 accessible field net/minecraft/client/Minecraft resourcePackRepository Lnet/minecraft/server/packs/repository/PackRepository; # resourcePackRepository
-# ModelManager$ReloadState
-accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
 # Player
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer

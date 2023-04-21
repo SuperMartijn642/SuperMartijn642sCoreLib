@@ -90,6 +90,8 @@ public class ItemProperties {
         properties.food(this.foodProperties);
         if(this.isFireResistant)
             properties.fireResistant();
+        if(!this.groups.isEmpty())
+            properties.tab(this.groups.iterator().next());
         return properties;
     }
 }

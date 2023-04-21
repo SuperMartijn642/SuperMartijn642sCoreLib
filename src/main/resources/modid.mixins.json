@@ -6,7 +6,6 @@
   "refmap": "${mod_id}.mixins.refmap.json",
   "mixins": [
     "HolderReferenceMixin",
-    "MappedRegistryMixin",
     "ServerPlayerGameModeMixin"
   ],
   "client": [
@@ -15,8 +14,7 @@
     "LevelRendererMixin",
     "MinecraftMixin",
     "ModelManagerMixin",
-    "MultiPlayerGameModeMixin",
-    "SpriteResourceLoaderMixin"
+    "MultiPlayerGameModeMixin"
   ],
   "server": [
     "ServerMainMixin"

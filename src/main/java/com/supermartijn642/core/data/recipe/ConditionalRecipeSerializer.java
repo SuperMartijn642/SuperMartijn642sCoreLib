@@ -8,7 +8,6 @@ import com.supermartijn642.core.data.condition.ResourceConditionContext;
 import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
@@ -85,7 +84,7 @@ public class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> 
         }
 
         @Override
-        public ItemStack assemble(Container container, RegistryAccess registryAccess){
+        public ItemStack assemble(Container container){
             return ItemStack.EMPTY;
         }
 
@@ -95,7 +94,7 @@ public class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> 
         }
 
         @Override
-        public ItemStack getResultItem(RegistryAccess registryAccess){
+        public ItemStack getResultItem(){
             return ItemStack.EMPTY;
         }
 

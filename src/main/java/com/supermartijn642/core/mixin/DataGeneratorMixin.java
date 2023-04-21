@@ -19,7 +19,7 @@ public class DataGeneratorMixin {
         ordinal = 0
     )
     private HashCache run(HashCache hashCache){
-        GeneratorRegistrationHandler.setCache(hashCache);
+//        GeneratorRegistrationHandler.setCache(hashCache);
         return hashCache;
     }
 }

@@ -83,7 +83,7 @@ public class EnergyFormat {
 
         public String convertEnergy(int energy){
             LanguageManager manager = ClientUtils.getMinecraft().getLanguageManager();
-            String[] languageCode = manager == null || manager.getSelected() == null ? null : manager.getSelected().split("_", 2);
+            String[] languageCode = manager == null || manager.getSelected() == null ? null : manager.getSelected().getCode().split("_", 2);
             Locale locale = languageCode == null ? Locale.getDefault() : languageCode.length == 1 ? new Locale(languageCode[0]) : new Locale(languageCode[0], languageCode[1]);
             return NumberFormat.getNumberInstance(locale).format(energy);
         }

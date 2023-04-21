@@ -2,17 +2,17 @@ package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.joml.Matrix4f;
 
 import java.util.Collections;
 import java.util.List;
@@ -300,6 +300,9 @@ public class ScreenUtils {
         }
 
         poseStack.pushPose();
+        ItemRenderer itemRenderer = ClientUtils.getItemRenderer();
+        float oldBlitOffset = itemRenderer.blitOffset;
+        itemRenderer.blitOffset = 400.0F;
 
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
@@ -316,10 +319,12 @@ public class ScreenUtils {
         GuiComponent.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY - 3, tooltipX + tooltipWidth + 3, tooltipY - 3 + 1, 400, 1347420415, 1347420415);
         GuiComponent.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipWidth + 3, tooltipY + tooltipHeight + 3, 400, 1344798847, 1344798847);
         RenderSystem.enableDepthTest();
+        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        bufferbuilder.end();
         RenderSystem.disableBlend();
+        RenderSystem.enableTexture();
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         poseStack.translate(0.0D, 0.0D, 400.0D);
 
@@ -337,8 +342,10 @@ public class ScreenUtils {
 
         for(int index = 0; index < components.size(); ++index){
             ClientTooltipComponent component = components.get(index);
-            component.renderImage(ClientUtils.getFontRenderer(), tooltipX, offsetY, poseStack, ClientUtils.getItemRenderer());
+            component.renderImage(ClientUtils.getFontRenderer(), tooltipX, offsetY, poseStack, itemRenderer, 400);
             offsetY += component.getHeight() + (index == 0 ? 2 : 0);
         }
+
+        itemRenderer.blitOffset = oldBlitOffset;
     }
 }

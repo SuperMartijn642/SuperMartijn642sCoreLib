@@ -2,16 +2,16 @@ package com.supermartijn642.core.generator;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.math.Vector3f;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemTransform;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.ItemLike;
-import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,29 +70,29 @@ public abstract class ModelGenerator extends ResourceGenerator {
         if(!modelBuilder.transforms.isEmpty()){
             JsonObject displayJson = new JsonObject();
             // Add each transform
-            for(Map.Entry<ItemDisplayContext,TransformBuilder> transform : modelBuilder.transforms.entrySet()){
+            for(Map.Entry<ItemTransforms.TransformType,TransformBuilder> transform : modelBuilder.transforms.entrySet()){
                 JsonObject transformJson = new JsonObject();
                 transformJson.add("rotation", createJsonArray(transform.getValue().rotation.x(), transform.getValue().rotation.y(), transform.getValue().rotation.z()));
                 transformJson.add("translation", createJsonArray(transform.getValue().translation.x(), transform.getValue().translation.y(), transform.getValue().translation.z()));
                 transformJson.add("scale", createJsonArray(transform.getValue().scale.x(), transform.getValue().scale.y(), transform.getValue().scale.z()));
                 String transformName = "unknown";
-                if(transform.getKey() == ItemDisplayContext.NONE)
+                if(transform.getKey() == ItemTransforms.TransformType.NONE)
                     transformName = "none";
-                else if(transform.getKey() == ItemDisplayContext.THIRD_PERSON_LEFT_HAND)
+                else if(transform.getKey() == ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND)
                     transformName = "thirdperson_lefthand";
-                else if(transform.getKey() == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)
+                else if(transform.getKey() == ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND)
                     transformName = "thirdperson_righthand";
-                else if(transform.getKey() == ItemDisplayContext.FIRST_PERSON_LEFT_HAND)
+                else if(transform.getKey() == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND)
                     transformName = "firstperson_lefthand";
-                else if(transform.getKey() == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND)
+                else if(transform.getKey() == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND)
                     transformName = "firstperson_righthand";
-                else if(transform.getKey() == ItemDisplayContext.HEAD)
+                else if(transform.getKey() == ItemTransforms.TransformType.HEAD)
                     transformName = "head";
-                else if(transform.getKey() == ItemDisplayContext.GUI)
+                else if(transform.getKey() == ItemTransforms.TransformType.GUI)
                     transformName = "gui";
-                else if(transform.getKey() == ItemDisplayContext.GROUND)
+                else if(transform.getKey() == ItemTransforms.TransformType.GROUND)
                     transformName = "ground";
-                else if(transform.getKey() == ItemDisplayContext.FIXED)
+                else if(transform.getKey() == ItemTransforms.TransformType.FIXED)
                     transformName = "fixed";
                 displayJson.add(transformName, transformJson);
             }
@@ -461,7 +461,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
         protected final String modid;
         protected final ResourceLocation identifier;
         private final Map<String,String> textures = new HashMap<>();
-        private final Map<ItemDisplayContext,TransformBuilder> transforms = new HashMap<>();
+        private final Map<ItemTransforms.TransformType,TransformBuilder> transforms = new HashMap<>();
         private final List<ElementBuilder> elements = new ArrayList<>();
         private ResourceLocation parent;
         private ResourceLocation renderType;
@@ -604,7 +604,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
          * @param transformType            transform type to be build
          * @param transformBuilderConsumer consumer to build the transformation
          */
-        public ModelBuilder transform(ItemDisplayContext transformType, Consumer<TransformBuilder> transformBuilderConsumer){
+        public ModelBuilder transform(ItemTransforms.TransformType transformType, Consumer<TransformBuilder> transformBuilderConsumer){
             transformBuilderConsumer.accept(this.transforms.computeIfAbsent(transformType, o -> new TransformBuilder()));
             return this;
         }
@@ -623,9 +623,9 @@ public abstract class ModelGenerator extends ResourceGenerator {
 
     protected static class TransformBuilder {
 
-        private Vector3f rotation = new Vector3f(ItemTransform.Deserializer.DEFAULT_ROTATION);
-        private Vector3f translation = new Vector3f(ItemTransform.Deserializer.DEFAULT_TRANSLATION);
-        private Vector3f scale = new Vector3f(ItemTransform.Deserializer.DEFAULT_SCALE);
+        private Vector3f rotation = ItemTransform.Deserializer.DEFAULT_ROTATION;
+        private Vector3f translation = ItemTransform.Deserializer.DEFAULT_TRANSLATION;
+        private Vector3f scale = ItemTransform.Deserializer.DEFAULT_SCALE;
 
         protected TransformBuilder(){
         }

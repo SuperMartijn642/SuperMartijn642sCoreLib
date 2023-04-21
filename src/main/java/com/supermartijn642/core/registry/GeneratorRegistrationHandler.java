@@ -4,20 +4,18 @@ import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.generator.ResourceCache;
 import com.supermartijn642.core.generator.ResourceGenerator;
 import com.supermartijn642.core.util.Either;
-import com.supermartijn642.core.util.Pair;
+import com.supermartijn642.core.util.Holder;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -31,18 +29,12 @@ public class GeneratorRegistrationHandler {
      */
     private static final Map<String,GeneratorRegistrationHandler> REGISTRATION_HELPER_MAP = new HashMap<>();
     private static boolean haveProvidersBeenRegistered = false;
-    private static HashCache hashCache;
 
     @ApiStatus.Internal
     @Deprecated
     public static Map<String,GeneratorRegistrationHandler> getAllHandlers(){
         haveProvidersBeenRegistered = true;
         return Collections.unmodifiableMap(REGISTRATION_HELPER_MAP);
-    }
-
-    @ApiStatus.Internal
-    public static void setCache(HashCache cache){
-        hashCache = cache;
     }
 
     /**
@@ -65,7 +57,7 @@ public class GeneratorRegistrationHandler {
     }
 
     private final String modid;
-    private final List<Either<Function<ResourceCache,ResourceGenerator>,Function<FabricDataOutput,DataProvider>>> generatorsAndProviders = new ArrayList<>();
+    private final List<Either<Function<ResourceCache,ResourceGenerator>,Function<FabricDataGenerator,DataProvider>>> generatorsAndProviders = new ArrayList<>();
 
     private GeneratorRegistrationHandler(String modid){
         this.modid = modid;
@@ -106,7 +98,7 @@ public class GeneratorRegistrationHandler {
     /**
      * Adds the given data provider to the list of providers to be run.
      */
-    public void addProvider(Function<FabricDataOutput,DataProvider> provider){
+    public void addProvider(Function<FabricDataGenerator,DataProvider> provider){
         if(provider == null)
             throw new IllegalArgumentException("Provider must not be null!");
         if(haveProvidersBeenRegistered)
@@ -138,26 +130,33 @@ public class GeneratorRegistrationHandler {
     @ApiStatus.Internal
     @Deprecated
     public void registerProviders(FabricDataGenerator dataGenerator){
-        // Get the manual files folder
+        // Get the output folder and manual files folder
         String manualFolderProperty = System.getProperty("fabric-api.datagen.manual-dir");
-        Path manualFolder = manualFolderProperty == null || manualFolderProperty.isBlank() ? null : Paths.get(manualFolderProperty);
+        Path outputFolder = dataGenerator.getOutputFolder(), manualFolder = manualFolderProperty == null || manualFolderProperty.isBlank() ? null : Paths.get(manualFolderProperty);
         if(manualFolder == null)
             CoreLib.LOGGER.warn("Property 'fabric-api.datagen.manual-dir' has not been set! Manually created files may not be recognised!");
 
-        // Create a new pack
-        FabricDataGenerator.Pack pack = dataGenerator.createPack();
-        Path outputFolder = pack.output.getOutputFolder();
+        // Create a resource cache from the hash cache supplied when providers run
+        Holder<ResourceCache> cacheHolder = new Holder<>();
+        dataGenerator.addProvider(new DataProvider() {
 
-        // Create a resource cache and consumer to update the active CachedOutput instance
-        Pair<ResourceCache,Consumer<CachedOutput>> resourceCachePair = ResourceCache.wrap(() -> hashCache, outputFolder, manualFolder);
+            @Override
+            public void run(CachedOutput cachedOutput) throws IOException{
+//                cacheHolder.set(ResourceCache.wrap(() -> cachedOutput, outputFolder, manualFolder));
+            }
+
+            @Override
+            public String getName(){
+                return "Dummy Data Provider";
+            }
+        });
 
         // Resolve and add all the generators and providers
-        this.generatorsAndProviders
-            .stream()
-            .map(either -> either.mapLeft(generatorSupplier -> generatorSupplier.apply(resourceCachePair.left())))
-            .map(either -> either.mapLeft(generator -> (FabricDataGenerator.Pack.Factory<DataProvider>)output -> ResourceGenerator.createDataProvider(generator, resourceCachePair.right())))
-            .map(either -> either.mapRight(provider -> (FabricDataGenerator.Pack.Factory<DataProvider>)provider::apply))
-            .map(either -> either.leftOrElseGet(either::right))
-            .forEach(pack::addProvider);
+//        this.generatorsAndProviders
+//            .stream()
+//            .map(either -> either.mapLeft(generator -> ResourceGenerator.createDataProvider(generator, cacheHolder::get)))
+//            .map(either -> either.mapRight(provider -> provider.apply(dataGenerator)))
+//            .map(either -> either.leftOrElseGet(either::right))
+//            .forEach(dataGenerator::addProvider);
     }
 }

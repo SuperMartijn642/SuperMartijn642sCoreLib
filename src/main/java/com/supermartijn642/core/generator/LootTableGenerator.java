@@ -7,7 +7,7 @@ import com.supermartijn642.core.registry.Registries;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -208,7 +208,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param function item function to be added
          */
         public LootTableBuilder function(LootItemFunction function){
-            if(BuiltInRegistries.LOOT_FUNCTION_TYPE.getKey(function.getType()) == null)
+            if(Registry.LOOT_FUNCTION_TYPE.getKey(function.getType()) == null)
                 throw new IllegalArgumentException("Cannot use unregistered item function '" + function + "'!");
 
             this.functions.add(function);
@@ -230,7 +230,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param provider number provider for number of rolls
          */
         public LootPoolBuilder rolls(NumberProvider provider){
-            if(BuiltInRegistries.LOOT_NUMBER_PROVIDER_TYPE.getKey(provider.getType()) == null)
+            if(Registry.LOOT_NUMBER_PROVIDER_TYPE.getKey(provider.getType()) == null)
                 throw new IllegalArgumentException("Cannot use unregistered number provider '" + provider + "'!");
 
             this.rolls = provider;
@@ -268,7 +268,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param provider number provider for number of bonus rolls
          */
         public LootPoolBuilder bonusRolls(NumberProvider provider){
-            if(BuiltInRegistries.LOOT_NUMBER_PROVIDER_TYPE.getKey(provider.getType()) == null)
+            if(Registry.LOOT_NUMBER_PROVIDER_TYPE.getKey(provider.getType()) == null)
                 throw new IllegalArgumentException("Cannot use unregistered number provider '" + provider + "'!");
 
             this.bonusRolls = provider;
@@ -315,7 +315,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param condition condition to be added
          */
         public LootPoolBuilder condition(LootItemCondition condition){
-            if(BuiltInRegistries.LOOT_CONDITION_TYPE.getKey(condition.getType()) == null)
+            if(Registry.LOOT_CONDITION_TYPE.getKey(condition.getType()) == null)
                 throw new IllegalArgumentException("Cannot use unregistered loot pool condition '" + condition + "'!");
 
             this.conditions.add(condition);
@@ -361,7 +361,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param entry entry to be added
          */
         public LootPoolBuilder entry(LootPoolEntryContainer entry){
-            if(BuiltInRegistries.LOOT_POOL_ENTRY_TYPE.getKey(entry.getType()) == null)
+            if(Registry.LOOT_POOL_ENTRY_TYPE.getKey(entry.getType()) == null)
                 throw new IllegalArgumentException("Cannot use unregistered loot pool entry '" + entry + "'!");
 
             this.entries.add(entry);
@@ -450,7 +450,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param function item function to be added
          */
         public LootPoolBuilder function(LootItemFunction function){
-            if(BuiltInRegistries.LOOT_FUNCTION_TYPE.getKey(function.getType()) == null)
+            if(Registry.LOOT_FUNCTION_TYPE.getKey(function.getType()) == null)
                 throw new IllegalArgumentException("Cannot use unregistered item function '" + function + "'!");
 
             this.functions.add(function);

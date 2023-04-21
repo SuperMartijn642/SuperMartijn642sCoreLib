@@ -32,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static net.minecraft.core.registries.BuiltInRegistries.*;
+import static net.minecraft.core.Registry.*;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
