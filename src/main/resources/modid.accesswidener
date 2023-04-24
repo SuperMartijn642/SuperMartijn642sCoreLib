@@ -44,6 +44,7 @@ accessible field net/minecraft/client/renderer/block/model/ItemTransform$Deseria
 accessible class net/minecraft/client/renderer/block/model/ItemTransform$Deserializer
 # Minecraft
 accessible field net/minecraft/client/Minecraft options Lnet/minecraft/client/Options; # options
+accessible field net/minecraft/client/Minecraft pausePartialTick F # pausePartialTick
 accessible field net/minecraft/client/Minecraft resourcePackRepository Lnet/minecraft/server/packs/repository/PackRepository; # resourcePackRepository
 # Player
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
