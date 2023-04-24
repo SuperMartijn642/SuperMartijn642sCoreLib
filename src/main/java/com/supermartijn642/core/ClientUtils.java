@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.animation.Animation;
 
 /**
  * Created 1/26/2021 by SuperMartijn642
@@ -44,7 +45,7 @@ public class ClientUtils {
     }
 
     public static float getPartialTicks(){
-        return getMinecraft().getFrameTime();
+        return Animation.getPartialTickTime();
     }
 
     /**
