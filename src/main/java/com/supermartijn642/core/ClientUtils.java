@@ -44,7 +44,7 @@ public class ClientUtils {
     }
 
     public static float getPartialTicks(){
-        return getMinecraft().getFrameTime();
+        return getMinecraft().getPartialTick();
     }
 
     /**
