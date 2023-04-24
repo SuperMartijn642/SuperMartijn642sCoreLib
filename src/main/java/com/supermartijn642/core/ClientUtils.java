@@ -44,7 +44,8 @@ public class ClientUtils {
     }
 
     public static float getPartialTicks(){
-        return getMinecraft().getFrameTime();
+        Minecraft minecraft = getMinecraft();
+        return minecraft.isPaused() ? minecraft.pausePartialTick : minecraft.getFrameTime();
     }
 
     /**
