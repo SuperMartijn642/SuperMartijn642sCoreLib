@@ -13,10 +13,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.ItemLike;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -460,8 +457,8 @@ public abstract class ModelGenerator extends ResourceGenerator {
 
         protected final String modid;
         protected final ResourceLocation identifier;
-        private final Map<String,String> textures = new HashMap<>();
-        private final Map<ItemDisplayContext,TransformBuilder> transforms = new HashMap<>();
+        private final Map<String,String> textures = new LinkedHashMap<>();
+        private final Map<ItemDisplayContext,TransformBuilder> transforms = new LinkedHashMap<>();
         private final List<ElementBuilder> elements = new ArrayList<>();
         private ResourceLocation parent;
         private ResourceLocation renderType;

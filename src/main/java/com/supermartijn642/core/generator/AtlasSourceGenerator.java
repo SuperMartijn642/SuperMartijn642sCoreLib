@@ -120,7 +120,7 @@ public abstract class AtlasSourceGenerator extends ResourceGenerator {
     protected AtlasBuilder atlas(ResourceLocation identifier){
         if(identifier.getPath().startsWith("textures/atlas/") && identifier.getPath().endsWith(".png"))
             identifier = new ResourceLocation(identifier.getNamespace(), identifier.getPath().substring("textures/atlas/".length(), identifier.getPath().length() - ".png".length()));
-        return BUILDERS.computeIfAbsent(this.modid, i -> new HashMap<>()).computeIfAbsent(identifier, i -> new AtlasBuilder(this.modid, i));
+        return BUILDERS.computeIfAbsent(this.modid, i -> new LinkedHashMap<>()).computeIfAbsent(identifier, i -> new AtlasBuilder(this.modid, i));
     }
 
     /**
