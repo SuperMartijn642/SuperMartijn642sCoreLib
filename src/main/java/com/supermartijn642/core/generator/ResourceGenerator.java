@@ -7,10 +7,9 @@ import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Created 04/08/2022 by SuperMartijn642
@@ -21,28 +20,8 @@ public abstract class ResourceGenerator {
      * Wraps the given resource generator in a data provider using the given file helper and data generator.
      * @return a data provider wrapping the resource generator
      */
-    public static DataProvider createDataProvider(Function<ResourceCache,ResourceGenerator> generatorProvider, Supplier<ResourceCache> cacheSupplier){
-        return new DataProvider() {
-            private ResourceGenerator generator;
-
-            private ResourceGenerator getGenerator(){
-                if(this.generator == null)
-                    this.generator = generatorProvider.apply(cacheSupplier.get());
-                return this.generator;
-            }
-
-            @Override
-            public void run(HashCache cachedOutput){
-                // Run the resource generator
-                this.getGenerator().generate();
-                this.getGenerator().save();
-            }
-
-            @Override
-            public String getName(){
-                return this.getGenerator().getName();
-            }
-        };
+    public static DataProvider createDataProvider(ResourceGenerator generator){
+        return new DataProviderInstance(generator);
     }
 
     protected final String modid;
@@ -72,8 +51,7 @@ public abstract class ResourceGenerator {
     /**
      * Saves any generated resources. {@link #cache} may be used to check for existing files and to save the generated files.
      */
-    public void save(){
-    }
+    public abstract void save();
 
     /**
      * Gives the name of this data generator. A good name should include the name of the owning mod and the type of data the generator generates, e.g. Your Mod's model generator.
@@ -87,5 +65,34 @@ public abstract class ResourceGenerator {
      */
     public final String getOwnerModid(){
         return this.modid;
+    }
+
+    @ApiStatus.Internal
+    public static class DataProviderInstance implements DataProvider {
+
+        private final ResourceGenerator generator;
+        private boolean generated = false;
+
+        public DataProviderInstance(ResourceGenerator generator){
+            this.generator = generator;
+        }
+
+        public void generate(){
+            this.generated = true;
+            this.generator.generate();
+        }
+
+        @Override
+        public void run(HashCache output){
+            // Run the resource generator
+            if(!this.generated)
+                this.generator.generate();
+            this.generator.save();
+        }
+
+        @Override
+        public String getName(){
+            return this.generator.getName();
+        }
     }
 }
