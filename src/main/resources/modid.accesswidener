@@ -17,6 +17,7 @@ mutable field net/minecraft/world/inventory/AbstractContainerMenu containerId I 
 accessible field net/minecraft/world/level/block/state/BlockBehaviour properties Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties; # properties
 extendable method net/minecraft/world/level/block/state/BlockBehaviour getLootTable ()Lnet/minecraft/resources/ResourceLocation; # getLootTable
 # BlockBehaviour$Properties
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties drops Lnet/minecraft/resources/ResourceLocation; # drops
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties material Lnet/minecraft/world/level/material/Material; # material
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties hasCollision Z # hasCollision
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties lightEmission Ljava/util/function/ToIntFunction; # lightEmission
