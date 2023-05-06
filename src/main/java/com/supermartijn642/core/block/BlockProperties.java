@@ -2,6 +2,7 @@ package com.supermartijn642.core.block;
 
 import com.supermartijn642.core.util.TriPredicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -49,7 +50,7 @@ public class BlockProperties {
         properties.isRedstoneConductor = sourceProperties.isRedstoneConductor::test;
         properties.isSuffocating = sourceProperties.isSuffocating::test;
         properties.hasDynamicShape = block.hasDynamicShape();
-        properties.lootTableBlock = () -> block;
+        properties.lootTable = sourceProperties.drops;
         return properties;
     }
 
@@ -70,8 +71,9 @@ public class BlockProperties {
     private TriPredicate<BlockState,BlockGetter,BlockPos> isRedstoneConductor = (state, level, pos) -> state.getMaterial().isSolidBlocking() && state.isCollisionShapeFullBlock(level, pos);
     private TriPredicate<BlockState,BlockGetter,BlockPos> isSuffocating = (state, level, pos) -> state.getMaterial().blocksMotion() && state.isCollisionShapeFullBlock(level, pos);
     private boolean hasDynamicShape = false;
-    private boolean noLootTable = false;
+    boolean noLootTable = false;
     Supplier<Block> lootTableBlock;
+    ResourceLocation lootTable;
 
     private BlockProperties(Material material, MaterialColor color){
         this.material = material;
@@ -172,12 +174,21 @@ public class BlockProperties {
     public BlockProperties noLootTable(){
         this.noLootTable = true;
         this.lootTableBlock = null;
+        this.lootTable = null;
+        return this;
+    }
+
+    public BlockProperties lootTable(ResourceLocation lootTable){
+        this.noLootTable = false;
+        this.lootTableBlock = null;
+        this.lootTable = lootTable;
         return this;
     }
 
     public BlockProperties lootTableFrom(Supplier<Block> block){
         this.noLootTable = false;
         this.lootTableBlock = block;
+        this.lootTable = null;
         return this;
     }
 
