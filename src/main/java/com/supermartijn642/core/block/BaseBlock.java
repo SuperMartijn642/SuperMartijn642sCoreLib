@@ -20,6 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -41,6 +42,8 @@ public class BaseBlock extends Block {
         super(properties);
         this.saveTileData = saveTileData;
         this.properties = blockProperties;
+        if(blockProperties != null)
+            this.drops = blockProperties.lootTable;
     }
 
     public BaseBlock(boolean saveTileData, Properties properties){
@@ -69,17 +72,22 @@ public class BaseBlock extends Block {
     @Override
     public ResourceLocation getLootTable(){
         if(this.drops == null){
-            if(this.properties == null || this.properties.lootTableBlock == null)
+            if(this.properties != null && this.properties.noLootTable)
+                this.drops = BuiltInLootTables.EMPTY;
+            else if(this.properties != null && this.properties.lootTable != null)
+                this.drops = this.properties.lootTable;
+            else if(this.properties != null && this.properties.lootTableBlock != null){
+                Block block = this.properties.lootTableBlock.get();
+                if(block == null){
+                    CoreLib.LOGGER.warn("Received null block from BlockProperties#lootTableFrom's supplier for block '" + Registries.BLOCKS.getIdentifier(this) + "'!");
+                    return super.getLootTable();
+                }
+                if(block.properties.drops == null)
+                    return super.getLootTable();
+                this.drops = block.properties.drops;
+            }else
                 return super.getLootTable();
-
-            Block block = this.properties.lootTableBlock.get();
-            if(block == null){
-                CoreLib.LOGGER.warn("Received null block from BlockProperties#lootTableFrom's supplier for block '" + Registries.BLOCKS.getIdentifier(this) + "'!");
-                return super.getLootTable();
-            }
-            this.drops = block.getLootTable();
         }
-
         return this.drops;
     }
 
