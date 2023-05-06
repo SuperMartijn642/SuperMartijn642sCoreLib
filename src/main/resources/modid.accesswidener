@@ -29,19 +29,26 @@ accessible field net/minecraft/world/item/CreativeModeTab displayItems Ljava/uti
 accessible field net/minecraft/world/item/CreativeModeTab displayItemsGenerator Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator; # displayItemsGenerator
 accessible method net/minecraft/world/item/CreativeModeTab <init> (Lnet/minecraft/world/item/CreativeModeTab$Row;ILnet/minecraft/world/item/CreativeModeTab$Type;Lnet/minecraft/network/chat/Component;Ljava/util/function/Supplier;Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator;)V # constructor
 mutable field net/minecraft/world/item/CreativeModeTab displayItemsGenerator Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator; # displayItemsGenerator
-# DataGenerator$PackGenerator
-accessible field net/minecraft/data/DataGenerator$PackGenerator output Lnet/minecraft/data/PackOutput; # output
+# DataGenerator
+accessible field net/minecraft/data/DataGenerator rootOutputFolder Ljava/nio/file/Path; # rootOutputFolder
 # GuiComponent
 accessible method net/minecraft/client/gui/GuiComponent fillGradient (Lorg/joml/Matrix4f;Lcom/mojang/blaze3d/vertex/BufferBuilder;IIIIIII)V # fillGradient
 # HashCache
+accessible field net/minecraft/data/HashCache cachePaths Ljava/util/Set; # cachePaths
 accessible field net/minecraft/data/HashCache caches Ljava/util/Map; # caches
 accessible field net/minecraft/data/HashCache cachesToWrite Ljava/util/Set; # cachesToWrite
+accessible field net/minecraft/data/HashCache initialCount I # initialCount
+accessible field net/minecraft/data/HashCache versionId Ljava/lang/String; # versionId
+accessible method net/minecraft/data/HashCache getProviderCachePath (Ljava/lang/String;)Ljava/nio/file/Path; # getProviderCachePath
+accessible method net/minecraft/data/HashCache readCache (Ljava/nio/file/Path;Ljava/nio/file/Path;)Lnet/minecraft/data/HashCache$ProviderCache; # readCache
+mutable field net/minecraft/data/HashCache initialCount I # initialCount
 # HashCache$CacheUpdater
 accessible field net/minecraft/data/HashCache$CacheUpdater newCache Lnet/minecraft/data/HashCache$ProviderCacheBuilder; # newCache
 accessible field net/minecraft/data/HashCache$CacheUpdater oldCache Lnet/minecraft/data/HashCache$ProviderCache; # oldCache
 accessible field net/minecraft/data/HashCache$CacheUpdater writes Ljava/util/concurrent/atomic/AtomicInteger; # writes
 accessible class net/minecraft/data/HashCache$CacheUpdater
 # HashCache$ProviderCache
+accessible method net/minecraft/data/HashCache$ProviderCache <init> (Ljava/lang/String;Lcom/google/common/collect/ImmutableMap;)V # <init>
 accessible class net/minecraft/data/HashCache$ProviderCache
 # HashCache$ProviderCacheBuilder
 accessible class net/minecraft/data/HashCache$ProviderCacheBuilder

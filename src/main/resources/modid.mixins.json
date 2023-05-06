@@ -10,8 +10,8 @@
     "ServerPlayerGameModeMixin"
   ],
   "client": [
-    "FabricDataGenHelperMixin",
     "DataGeneratorMixin",
+    "FabricDataGenHelperMixin",
     "LevelRendererMixin",
     "MinecraftMixin",
     "ModelManagerMixin",
