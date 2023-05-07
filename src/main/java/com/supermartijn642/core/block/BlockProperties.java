@@ -1,6 +1,8 @@
 package com.supermartijn642.core.block;
 
+import com.supermartijn642.core.mixin.BlockPropertiesAccessor;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -49,7 +51,7 @@ public class BlockProperties {
         properties.isRedstoneConductor = sourceProperties.isRedstoneConductor::test;
         properties.isSuffocating = sourceProperties.isSuffocating::test;
         properties.hasDynamicShape = block.hasDynamicShape();
-        properties.lootTableBlock = () -> block;
+        properties.lootTableSupplier = sourceProperties.drops != null ? () -> sourceProperties.drops : ((BlockPropertiesAccessor)sourceProperties).getLootTableSupplier();
         return properties;
     }
 
@@ -71,7 +73,7 @@ public class BlockProperties {
     private TriPredicate<BlockState,BlockGetter,BlockPos> isSuffocating = (state, level, pos) -> state.getMaterial().blocksMotion() && state.isCollisionShapeFullBlock(level, pos);
     private boolean hasDynamicShape = false;
     private boolean noLootTable = false;
-    private Supplier<Block> lootTableBlock;
+    private Supplier<ResourceLocation> lootTableSupplier;
 
     private BlockProperties(Material material, MaterialColor color){
         this.material = material;
@@ -171,13 +173,19 @@ public class BlockProperties {
 
     public BlockProperties noLootTable(){
         this.noLootTable = true;
-        this.lootTableBlock = null;
+        this.lootTableSupplier = null;
+        return this;
+    }
+
+    public BlockProperties lootTable(ResourceLocation lootTable){
+        this.noLootTable = false;
+        this.lootTableSupplier = () -> lootTable;
         return this;
     }
 
     public BlockProperties lootTableFrom(Supplier<Block> block){
         this.noLootTable = false;
-        this.lootTableBlock = block;
+        this.lootTableSupplier = () -> block.get().getLootTable();
         return this;
     }
 
@@ -202,8 +210,7 @@ public class BlockProperties {
         properties.jumpFactor(this.jumpFactor);
         if(this.noLootTable)
             properties.noDrops();
-        if(this.lootTableBlock != null)
-            properties.lootFrom(this.lootTableBlock);
+        ((BlockPropertiesAccessor)properties).setLootTableSupplier(this.lootTableSupplier);
         if(!this.canOcclude)
             properties.noOcclusion();
         if(this.isAir)
