@@ -7,6 +7,8 @@
   "mixins": [
     "AbstractHorseEntityMixin",
     "CraftingHelperMixin",
+    "DataGeneratorMixin",
+    "DatagenModLoaderAccessor",
     "EntityMixin",
     "ForgeHooksMixin",
     "GameDataMixin",
