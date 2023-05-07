@@ -1,5 +1,6 @@
 package com.supermartijn642.core.test;
 
+import com.supermartijn642.core.CommonUtils;
 import com.supermartijn642.core.item.BaseItem;
 import com.supermartijn642.core.item.ItemProperties;
 import com.supermartijn642.core.registry.ClientRegistrationHandler;
@@ -20,8 +21,9 @@ public class TestMod {
     public TestMod(){
         RegistrationHandler handler = RegistrationHandler.get("corelibtestmod");
         handler.registerItem("test_item", () -> new BaseItem(ItemProperties.create()));
-        ClientRegistrationHandler.get("corelibtestmod").registerCustomItemRenderer(() -> test_item, () -> (itemStack, transformType, poseStack, bufferSource, combinedLight, combinedOverlay) -> {
+        if(CommonUtils.getEnvironmentSide().isClient())
+            ClientRegistrationHandler.get("corelibtestmod").registerCustomItemRenderer(() -> test_item, () -> (itemStack, transformType, poseStack, bufferSource, combinedLight, combinedOverlay) -> {
 
-        });
+            });
     }
 }
