@@ -9,6 +9,8 @@
     "GameDataMixin"
   ],
   "client": [
+    "DataGeneratorMixin",
+    "DatagenModLoaderAccessor",
     "LevelRendererMixin",
     "SpriteResourceLoaderMixin"
   ],
