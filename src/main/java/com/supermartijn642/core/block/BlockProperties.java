@@ -1,5 +1,6 @@
 package com.supermartijn642.core.block;
 
+import com.supermartijn642.core.mixin.BlockPropertiesAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -7,8 +8,10 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.item.DyeColor;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.storage.loot.LootTables;
 import net.minecraftforge.common.util.TriPredicate;
 
 import java.util.function.Supplier;
@@ -48,7 +51,15 @@ public class BlockProperties {
         properties.isRedstoneConductor = block::isRedstoneConductor;
         properties.isSuffocating = block::isViewBlocking;
         properties.hasDynamicShape = block.hasDynamicShape();
-        properties.lootTableBlock = () -> block;
+        ResourceLocation lootTable = block.getLootTable();
+        if(LootTables.EMPTY.equals(lootTable))
+            properties.noLootTable = true;
+        else if(lootTable != null){
+            ResourceLocation registryName = block.getRegistryName();
+            if(registryName != null && !lootTable.getNamespace().equals(block.getRegistryName().getNamespace()) && !lootTable.getPath().equals("block/" + block.getRegistryName().getPath())){
+                properties.lootTableSupplier = () -> lootTable;
+            }
+        }
         return properties;
     }
 
@@ -70,7 +81,7 @@ public class BlockProperties {
     TriPredicate<BlockState,IBlockReader,BlockPos> isSuffocating = (state, level, pos) -> state.getMaterial().blocksMotion() && state.isCollisionShapeFullBlock(level, pos);
     private boolean hasDynamicShape = false;
     private boolean noLootTable = false;
-    Supplier<Block> lootTableBlock;
+    Supplier<ResourceLocation> lootTableSupplier;
 
     private BlockProperties(Material material, MaterialColor color){
         this.material = material;
@@ -170,13 +181,19 @@ public class BlockProperties {
 
     public BlockProperties noLootTable(){
         this.noLootTable = true;
-        this.lootTableBlock = null;
+        this.lootTableSupplier = null;
+        return this;
+    }
+
+    public BlockProperties lootTable(ResourceLocation lootTable){
+        this.noLootTable = false;
+        this.lootTableSupplier = () -> lootTable;
         return this;
     }
 
     public BlockProperties lootTableFrom(Supplier<Block> block){
         this.noLootTable = false;
-        this.lootTableBlock = block;
+        this.lootTableSupplier = () -> block.get().getLootTable();
         return this;
     }
 
@@ -196,11 +213,7 @@ public class BlockProperties {
         properties.friction(this.friction);
         if(this.noLootTable)
             properties.noDrops();
-        if(this.lootTableBlock != null){
-            Block block = this.lootTableBlock.get();
-            if(block != null)
-                properties.dropsLike(block);
-        }
+        ((BlockPropertiesAccessor)properties).setLootTableSupplier(this.lootTableSupplier);
         if(this.hasDynamicShape)
             properties.dynamicShape();
         return properties;

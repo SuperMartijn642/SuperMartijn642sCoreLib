@@ -6,6 +6,7 @@
   "refmap": "${mod_id}.mixins.refmap.json",
   "mixins": [
     "AbstractHorseEntityMixin",
+    "BlockPropertiesAccessor",
     "CraftingHelperMixin",
     "DataGeneratorMixin",
     "DatagenModLoaderAccessor",
