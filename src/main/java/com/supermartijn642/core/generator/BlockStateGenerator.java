@@ -167,7 +167,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
 
         private final String modid;
         private final Block block;
-        private final Map<PartialBlockState,VariantBuilder> variants = new HashMap<>();
+        private final Map<PartialBlockState,VariantBuilder> variants = new LinkedHashMap<>();
         private final List<Pair<MultipartConditionBuilder,VariantBuilder>> multipartVariants = new ArrayList<>();
 
         public BlockStateBuilder(String modid, Block block){
