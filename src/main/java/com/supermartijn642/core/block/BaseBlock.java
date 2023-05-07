@@ -1,6 +1,5 @@
 package com.supermartijn642.core.block;
 
-import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -76,23 +75,6 @@ public class BaseBlock extends Block {
         TileEntity entity = worldIn.getBlockEntity(pos);
         if(entity instanceof BaseBlockEntity)
             ((BaseBlockEntity)entity).readData(tag);
-    }
-
-    @Override
-    public ResourceLocation getLootTable(){
-        if(this.drops == null){
-            if(this.properties == null || this.properties.lootTableBlock == null)
-                return super.getLootTable();
-
-            Block block = this.properties.lootTableBlock.get();
-            if(block == null){
-                CoreLib.LOGGER.warn("Received null block from BlockProperties#lootTableFrom's supplier for block '" + Registries.BLOCKS.getIdentifier(this) + "'!");
-                return super.getLootTable();
-            }
-            this.drops = block.getLootTable();
-        }
-
-        return this.drops;
     }
 
     @Override
