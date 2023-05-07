@@ -8,8 +8,6 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.IDataProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +26,14 @@ public class GeneratorRegistrationHandler {
      * Contains one registration helper per modid
      */
     private static final Map<String,GeneratorRegistrationHandler> REGISTRATION_HELPER_MAP = new HashMap<>();
+
+    /**
+     * @deprecated for internal use only
+     */
+    @Deprecated
+    public static boolean hasHandlerForModid(String modid){
+        return REGISTRATION_HELPER_MAP.containsKey(modid);
+    }
 
     /**
      * Get a registration handler for a given modid. This will always return one unique registration handler per modid.
@@ -54,7 +60,6 @@ public class GeneratorRegistrationHandler {
 
     private GeneratorRegistrationHandler(String modid){
         this.modid = modid;
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleGatherDataEvent);
     }
 
     /**
@@ -131,15 +136,20 @@ public class GeneratorRegistrationHandler {
         this.addProvider((dataGenerator, existingFileHelper) -> provider);
     }
 
-    private void handleGatherDataEvent(GatherDataEvent e){
+    /**
+     * @deprecated for internal use only
+     */
+    @Deprecated
+    public void registerProviders(DataGenerator dataGenerator, ExistingFileHelper existingFileHelper, ResourceCache cache){
         this.hasEventBeenFired = true;
 
         // Resolve and add all the generators and providers
         this.generatorsAndProviders
             .stream()
-            .map(either -> either.mapLeft(generator -> ResourceGenerator.createDataProvider(generator, e.getExistingFileHelper(), e.getGenerator())))
-            .map(either -> either.mapRight(provider -> provider.apply(e.getGenerator(), e.getExistingFileHelper())))
+            .map(either -> either.mapLeft(generator -> generator.apply(cache)))
+            .map(either -> either.mapLeft(ResourceGenerator::createDataProvider))
+            .map(either -> either.mapRight(provider -> provider.apply(dataGenerator, existingFileHelper)))
             .map(either -> either.leftOrElseGet(either::right))
-            .forEach(provider -> e.getGenerator().addProvider(provider));
+            .forEach(dataGenerator::addProvider);
     }
 }
