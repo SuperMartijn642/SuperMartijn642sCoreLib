@@ -1,6 +1,10 @@
 package com.supermartijn642.core.generator;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.supermartijn642.core.generator.aggregator.AtlasSourceAggregator;
 import com.supermartijn642.core.registry.RegistryUtil;
 import com.supermartijn642.core.render.TextureAtlases;
 import com.supermartijn642.core.util.Pair;
@@ -16,33 +20,26 @@ import java.util.*;
 public abstract class AtlasSourceGenerator extends ResourceGenerator {
 
     private static final Gson GSON = new GsonBuilder().setLenient().create();
-    private static final Map<String,Map<ResourceLocation,AtlasBuilder>> BUILDERS = new HashMap<>();
-    private static final Map<String,AtlasSourceGenerator> PRIMARY_BUILDERS = new HashMap<>();
+    private final Map<ResourceLocation,AtlasBuilder> builders = new HashMap<>();
 
     public AtlasSourceGenerator(String modid, ResourceCache cache){
         super(modid, cache);
-        PRIMARY_BUILDERS.put(modid, this);
     }
 
     @Override
     public void save(){
-        if(PRIMARY_BUILDERS.get(this.modid) != this)
-            return;
-
-        for(Map.Entry<ResourceLocation,AtlasBuilder> atlas : BUILDERS.getOrDefault(this.modid, Collections.emptyMap()).entrySet()){
-            JsonObject json = this.saveAtlas(atlas.getValue());
+        for(Map.Entry<ResourceLocation,AtlasBuilder> atlas : this.builders.entrySet()){
+            Set<ResourceLocation> textures = this.gatherTextures(atlas.getValue());
 
             // Save the object to the cache
             ResourceLocation identifier = atlas.getKey();
-            this.cache.saveJsonResource(ResourceType.ASSET, json, identifier.getNamespace(), "atlases", identifier.getPath());
+            this.cache.saveResource(ResourceType.ASSET, AtlasSourceAggregator.INSTANCE, textures, identifier.getNamespace(), "atlases", identifier.getPath(), ".json");
         }
     }
 
-    private JsonObject saveAtlas(AtlasBuilder builder){
-        // Gather all the textures
-        Set<ResourceLocation> textures = new HashSet<>();
+    private Set<ResourceLocation> gatherTextures(AtlasBuilder builder){
         // Add the regular textures
-        textures.addAll(builder.textures);
+        Set<ResourceLocation> textures = new HashSet<>(builder.textures);
 
         // Gather all parent models
         Set<ResourceLocation> parents = new HashSet<>();
@@ -64,20 +61,7 @@ public abstract class AtlasSourceGenerator extends ResourceGenerator {
             if(parent != null && !done.contains(parent))
                 parents.add(parent);
         }
-
-        // Create a json array with all the textures
-        JsonArray sources = new JsonArray();
-        textures.forEach(texture -> {
-            JsonObject object = new JsonObject();
-            object.addProperty("type", "minecraft:single");
-            object.addProperty("resource", texture.toString());
-            sources.add(object);
-        });
-
-        // Return a json object containing the array
-        JsonObject json = new JsonObject();
-        json.add("sources", sources);
-        return json;
+        return textures;
     }
 
     private ResourceLocation readModelData(ResourceLocation model, boolean forced, Set<ResourceLocation> textures){
@@ -120,7 +104,7 @@ public abstract class AtlasSourceGenerator extends ResourceGenerator {
     protected AtlasBuilder atlas(ResourceLocation identifier){
         if(identifier.getPath().startsWith("textures/atlas/") && identifier.getPath().endsWith(".png"))
             identifier = new ResourceLocation(identifier.getNamespace(), identifier.getPath().substring("textures/atlas/".length(), identifier.getPath().length() - ".png".length()));
-        return BUILDERS.computeIfAbsent(this.modid, i -> new HashMap<>()).computeIfAbsent(identifier, i -> new AtlasBuilder(this.modid, i));
+        return this.builders.computeIfAbsent(identifier, i -> new AtlasBuilder(this.modid, i));
     }
 
     /**
