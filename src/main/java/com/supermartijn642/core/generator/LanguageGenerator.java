@@ -5,7 +5,7 @@ import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public abstract class LanguageGenerator extends ResourceGenerator {
 
-    private final Map<String,String> translations = new HashMap<>();
+    private final Map<String,String> translations = new LinkedHashMap<>();
     protected final String langCode;
 
     public LanguageGenerator(String modid, ResourceCache cache, String langCode){
