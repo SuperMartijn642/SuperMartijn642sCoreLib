@@ -3,16 +3,14 @@ package com.supermartijn642.core.generator;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.forgespi.language.IModInfo;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Created 04/08/2022 by SuperMartijn642
@@ -23,25 +21,8 @@ public abstract class ResourceGenerator {
      * Wraps the given resource generator in a data provider using the given file helper and data generator.
      * @return a data provider wrapping the resource generator
      */
-    public static DataProvider createDataProvider(Function<ResourceCache,ResourceGenerator> generator, ExistingFileHelper existingFileHelper, DataGenerator dataGenerator){
-        return new DataProvider() {
-            private String name = "Resource Generator";
-
-            @Override
-            public void run(CachedOutput cachedOutput){
-                ResourceCache resourceCache = ResourceCache.wrap(existingFileHelper, cachedOutput, dataGenerator.getOutputFolder());
-                ResourceGenerator resourceGenerator = generator.apply(resourceCache);
-                this.name = resourceGenerator.getName();
-                // Run the resource generator
-                resourceGenerator.generate();
-                resourceGenerator.save();
-            }
-
-            @Override
-            public String getName(){
-                return this.name;
-            }
-        };
+    public static DataProvider createDataProvider(ResourceGenerator generator){
+        return new DataProviderInstance(generator);
     }
 
     protected final String modid;
@@ -73,8 +54,7 @@ public abstract class ResourceGenerator {
     /**
      * Saves any generated resources. {@link #cache} may be used to check for existing files and to save the generated files.
      */
-    public void save(){
-    }
+    public abstract void save();
 
     /**
      * Gives the name of this data generator. A good name should include the name of the owning mod and the type of data the generator generates, e.g. Your Mod's model generator.
@@ -88,5 +68,34 @@ public abstract class ResourceGenerator {
      */
     public final String getOwnerModid(){
         return this.modid;
+    }
+
+    @ApiStatus.Internal
+    public static class DataProviderInstance implements DataProvider {
+
+        private final ResourceGenerator generator;
+        private boolean generated = false;
+
+        public DataProviderInstance(ResourceGenerator generator){
+            this.generator = generator;
+        }
+
+        public void generate(){
+            this.generated = true;
+            this.generator.generate();
+        }
+
+        @Override
+        public void run(CachedOutput output){
+            // Run the resource generator
+            if(!this.generated)
+                this.generator.generate();
+            this.generator.save();
+        }
+
+        @Override
+        public String getName(){
+            return this.generator.getName();
+        }
     }
 }
