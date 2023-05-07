@@ -195,7 +195,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
         protected final String modid;
         protected final ResourceLocation identifier;
         private final List<ResourceCondition> conditions = new ArrayList<>();
-        private final Map<String,ICriterionInstance> criteria = new HashMap<>();
+        private final Map<String,ICriterionInstance> criteria = new LinkedHashMap<>();
         private final List<String[]> requirements = new ArrayList<>();
         private final List<ResourceLocation> rewardLootTables = new ArrayList<>();
         private final List<ResourceLocation> rewardRecipes = new ArrayList<>();

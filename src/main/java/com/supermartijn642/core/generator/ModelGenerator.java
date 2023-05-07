@@ -456,8 +456,8 @@ public abstract class ModelGenerator extends ResourceGenerator {
 
         protected final String modid;
         protected final ResourceLocation identifier;
-        private final Map<String,String> textures = new HashMap<>();
-        private final Map<ItemCameraTransforms.TransformType,TransformBuilder> transforms = new HashMap<>();
+        private final Map<String,String> textures = new LinkedHashMap<>();
+        private final Map<ItemCameraTransforms.TransformType,TransformBuilder> transforms = new LinkedHashMap<>();
         private final List<ElementBuilder> elements = new ArrayList<>();
         private ResourceLocation parent;
         private ResourceLocation renderType;
