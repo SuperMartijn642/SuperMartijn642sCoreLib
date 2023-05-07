@@ -7,7 +7,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public abstract class LanguageGenerator extends ResourceGenerator {
 
-    private final Map<String,String> translations = new HashMap<>();
+    private final Map<String,String> translations = new LinkedHashMap<>();
     protected final String langCode;
 
     public LanguageGenerator(String modid, ResourceCache cache, String langCode){
