@@ -6,6 +6,8 @@
   "refmap": "${mod_id}.mixins.refmap.json",
   "mixins": [
     "CraftingHelperMixin",
+    "DataGeneratorMixin",
+    "DatagenModLoaderAccessor",
     "EntityMixin",
     "ForgeHooksMixin",
     "GameDataMixin",
