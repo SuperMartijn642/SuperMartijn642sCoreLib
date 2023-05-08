@@ -83,17 +83,26 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
 
     @Override
     public Item getItemDropped(IBlockState state, Random random, int fortune){
-        return this.properties.noLootTable ? Items.AIR : this.properties.lootTableBlock != null ? this.properties.lootTableBlock.get().getItemDropped(state, random, fortune) : super.getItemDropped(state, random, fortune);
+        return this.properties.noLootTable ? Items.AIR
+            : this.properties.lootTableBlock != null ? this.properties.lootTableBlock.get().getItemDropped(state, random, fortune)
+            : this.properties.copyLootTableBlock != null ? this.properties.copyLootTableBlock.getItemDropped(state, random, fortune)
+            : super.getItemDropped(state, random, fortune);
     }
 
     @Override
     public int damageDropped(IBlockState state){
-        return this.properties.noLootTable ? 0 : this.properties.lootTableBlock != null ? this.properties.lootTableBlock.get().damageDropped(state) : super.damageDropped(state);
+        return this.properties.noLootTable ? 0
+            : this.properties.lootTableBlock != null ? this.properties.lootTableBlock.get().damageDropped(state)
+            : this.properties.copyLootTableBlock != null ? this.properties.copyLootTableBlock.damageDropped(state)
+            : super.damageDropped(state);
     }
 
     @Override
     public int quantityDropped(IBlockState state, int fortune, Random random){
-        return this.properties.noLootTable ? 0 : this.properties.lootTableBlock != null ? this.properties.lootTableBlock.get().quantityDropped(state, fortune, random) : super.quantityDropped(state, fortune, random);
+        return this.properties.noLootTable ? 0
+            : this.properties.lootTableBlock != null ? this.properties.lootTableBlock.get().quantityDropped(state, fortune, random)
+            : this.properties.copyLootTableBlock != null ? this.properties.copyLootTableBlock.quantityDropped(state, fortune, random)
+            : super.quantityDropped(state, fortune, random);
     }
 
     @Override
@@ -134,6 +143,11 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
         if(this.properties.lootTableBlock != null){
             NonNullList<ItemStack> drops = NonNullList.create();
             this.properties.lootTableBlock.get().getDrops(drops, level, pos, state, fortune);
+            if(drops.size() != 1 || drops.get(0).getItem() != Item.getItemFromBlock(this.properties.lootTableBlock.get()))
+                return drops;
+        }else if(this.properties.copyLootTableBlock != null){
+            NonNullList<ItemStack> drops = NonNullList.create();
+            this.properties.copyLootTableBlock.getDrops(drops, level, pos, state, fortune);
             return drops;
         }
         if(!(level instanceof WorldServer) || this.properties.noLootTable)
@@ -146,7 +160,9 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
         ((LootContextExtension)context).coreLibSetExplosionRadius(explosionRadius);
 
         ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
-        ResourceLocation lootTableLocation = new ResourceLocation(identifier.getResourceDomain(), "blocks/" + identifier.getResourcePath());
+        ResourceLocation lootTableLocation = this.properties.lootTableSupplier == null ? null : this.properties.lootTableSupplier.get();
+        if(lootTableLocation == null)
+            lootTableLocation = new ResourceLocation(identifier.getResourceDomain(), "blocks/" + identifier.getResourcePath());
         LootTable lootTable = CommonUtils.getLevel(DimensionType.OVERWORLD).getLootTableManager().getLootTableFromLocation(lootTableLocation);
         return lootTable.generateLootForPools(((WorldServer)level).rand, context);
     }

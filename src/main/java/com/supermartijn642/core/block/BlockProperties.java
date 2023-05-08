@@ -6,6 +6,7 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.EnumDyeColor;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -43,7 +44,7 @@ public class BlockProperties {
         properties.jumpFactor = 1;
         properties.isAir = block.blockMaterial == Material.AIR;
         properties.isSuffocating = block::causesSuffocation;
-        properties.lootTableBlock = () -> block;
+        properties.copyLootTableBlock = block;
         return properties;
     }
 
@@ -64,6 +65,8 @@ public class BlockProperties {
     Predicate<IBlockState> isSuffocating = (state) -> state.getMaterial().blocksMovement() && state.isFullCube();
     boolean noLootTable = false;
     Supplier<Block> lootTableBlock;
+    Block copyLootTableBlock;
+    Supplier<ResourceLocation> lootTableSupplier;
 
     private BlockProperties(Material material, MapColor color){
         this.material = material;
@@ -150,12 +153,24 @@ public class BlockProperties {
     public BlockProperties noLootTable(){
         this.noLootTable = true;
         this.lootTableBlock = null;
+        this.copyLootTableBlock = null;
+        this.lootTableSupplier = null;
+        return this;
+    }
+
+    public BlockProperties lootTable(ResourceLocation lootTable){
+        this.noLootTable = false;
+        this.lootTableBlock = null;
+        this.copyLootTableBlock = null;
+        this.lootTableSupplier = () -> lootTable;
         return this;
     }
 
     public BlockProperties lootTableFrom(Supplier<Block> block){
         this.noLootTable = false;
         this.lootTableBlock = block;
+        this.copyLootTableBlock = null;
+        this.lootTableSupplier = null;
         return this;
     }
 }
