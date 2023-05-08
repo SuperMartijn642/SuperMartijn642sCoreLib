@@ -9,6 +9,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.generator.aggregator.ResourceAggregator;
+import com.supermartijn642.core.util.Pair;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -21,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -65,6 +68,17 @@ public abstract class ResourceCache {
     /**
      * Saves the given data in the appropriate location. Also checks if a file is already present to avoid redundant writes.
      * @param resourceType whether the given data is part of the server data or the client assets
+     * @param aggregator   aggregator used when multiple generator write to the same file location
+     * @param namespace    the namespace which the data should be saved under
+     * @param directory    name of the directory within the namespace
+     * @param fileName     name of the file
+     * @param extension    extension of the file
+     */
+    public abstract <T> void saveResource(ResourceType resourceType, ResourceAggregator<?,T> aggregator, T data, String namespace, String directory, String fileName, String extension);
+
+    /**
+     * Saves the given data in the appropriate location. Also checks if a file is already present to avoid redundant writes.
+     * @param resourceType whether the given data is part of the server data or the client assets
      * @param json         the data to be saved
      * @param namespace    the namespace which the data should be saved under
      * @param directory    name of the directory within the namespace
@@ -84,7 +98,7 @@ public abstract class ResourceCache {
      * @param extension    the file's extension
      * @return an input stream for the requested resource, or an empty optional if the resource does not exist
      */
-    public abstract Optional<InputStream> getManualResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension);
+    public abstract Optional<InputStream> getExistingResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension);
 
     static ResourceCache create(Path outputDirectory, Path manualDirectory){
         return new Impl(outputDirectory, manualDirectory);
@@ -95,11 +109,13 @@ public abstract class ResourceCache {
 
         private final Map<Path,HashCode> presentFiles = new HashMap<>();
         private final Map<Path,HashCode> writtenFiles = new HashMap<>();
-        private final List<Path> toBeGenerated = new ArrayList<>(); // TODO validate this is empty after datagen
+        private final Map<Path,Pair<ResourceAggregator<Object,Object>,Object>> aggregatedResources = new HashMap<>();
+        private final List<Path> toBeGenerated = new ArrayList<>();
 
         private final Path outputDirectory;
         private final Path manualDirectory;
         private final File cacheFile;
+        private boolean allowWrites = true;
 
         private Impl(Path outputFolder, Path manualFolder){
             if(outputFolder == null)
@@ -203,14 +219,8 @@ public abstract class ResourceCache {
                 .forEach(File::delete);
         }
 
-        private Path constructPath(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
-            if(!extension.isEmpty() && extension.charAt(0) != '.')
-                extension = '.' + extension;
-            return Paths.get(resourceType.getDirectoryName(), namespace, directory, fileName + extension);
-        }
-
         private boolean existsInGeneratedFiles(Path path){
-            return this.toBeGenerated.contains(path) || this.writtenFiles.containsKey(path);
+            return this.toBeGenerated.contains(path) || this.writtenFiles.containsKey(path) || this.aggregatedResources.containsKey(path);
         }
 
         private boolean existsInManualFiles(Path path){
@@ -229,6 +239,12 @@ public abstract class ResourceCache {
             }
         }
 
+        private Path constructPath(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
+            if(!extension.isEmpty() && extension.charAt(0) != '.')
+                extension = '.' + extension;
+            return Paths.get(resourceType.getDirectoryName(), namespace, directory, fileName + extension);
+        }
+
         @Override
         public boolean doesResourceExist(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
@@ -243,7 +259,7 @@ public abstract class ResourceCache {
         }
 
         @Override
-        public Optional<InputStream> getManualResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
+        public Optional<InputStream> getExistingResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
             Path fullPath = this.outputDirectory.resolve(path);
             if(!Files.exists(fullPath))
@@ -257,8 +273,11 @@ public abstract class ResourceCache {
 
         @Override
         public void saveResource(ResourceType resourceType, byte[] data, String namespace, String directory, String fileName, String extension){
+            if(!this.allowWrites)
+                throw new RuntimeException("Resources cannot be saved during this stage!");
+
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
-            if(this.writtenFiles.containsKey(path))
+            if(this.writtenFiles.containsKey(path) || this.aggregatedResources.containsKey(path))
                 throw new RuntimeException("Duplicate file '" + path + "'!");
             if(this.existsInManualFiles(path))
                 throw new RuntimeException("File '" + path + "' clashes with a manually created file!");
@@ -273,7 +292,7 @@ public abstract class ResourceCache {
             }
 
             // Write the data to file
-            fullPath.getParent().toFile().mkdirs();
+            fullPath.toFile().getParentFile().mkdirs();
             try(OutputStream outputStream = Files.newOutputStream(fullPath)){
                 outputStream.write(data);
             }catch(IOException e){
@@ -281,6 +300,81 @@ public abstract class ResourceCache {
             }
             this.writtenFiles.put(path, hashCode);
             this.toBeGenerated.remove(path);
+        }
+
+        @Override
+        public <T> void saveResource(ResourceType resourceType, ResourceAggregator<?,T> aggregator, T data, String namespace, String directory, String fileName, String extension){
+            if(!this.allowWrites)
+                throw new RuntimeException("Resources cannot be saved during this stage!");
+
+            Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
+            if(this.writtenFiles.containsKey(path))
+                throw new RuntimeException("Duplicate file '" + path + "'!");
+            if(this.existsInManualFiles(path))
+                throw new RuntimeException("File '" + path + "' clashes with a manually created file!");
+
+            // Validate the aggregators match
+            Pair<ResourceAggregator<Object,Object>,Object> oldEntry = this.aggregatedResources.get(path);
+            if(oldEntry != null && oldEntry.left() != aggregator)
+                throw new RuntimeException("Incompatible aggregators for file '" + path + "': '" + oldEntry.left().getClass() + "' and '" + aggregator.getClass() + "'!");
+
+            // Combine the old with the new data
+            Object oldData = oldEntry == null ? aggregator.initialData() : oldEntry.right();
+            try{
+                //noinspection unchecked
+                oldData = ((ResourceAggregator<Object,Object>)aggregator).combine(oldData, data);
+            }catch(Exception e){
+                throw new RuntimeException("Failed to combine data for file '" + path + "'!", e);
+            }
+            //noinspection unchecked
+            this.aggregatedResources.put(path, Pair.of((ResourceAggregator<Object,Object>)aggregator, oldData));
+        }
+
+        public void allowWrites(boolean allow){
+            this.allowWrites = allow;
+        }
+
+        public void finish(){
+            // Write all aggregated resources
+            this.aggregatedResources.forEach((path, pair) -> {
+                // Convert the data to bytes
+                ResourceAggregator<Object,Object> aggregator = pair.left();
+                Object data = pair.right();
+                byte[] bytes;
+                try(ByteArrayOutputStream stream = new ByteArrayOutputStream()){
+                    aggregator.write(stream, data);
+                    bytes = stream.toByteArray();
+                }catch(Exception e){
+                    throw new RuntimeException(e);
+                }
+
+                // Skip writing if the present file matches the one to be written
+                Path fullPath = this.outputDirectory.resolve(path);
+                HashCode hashCode = Hashing.sha1().hashBytes(bytes);
+                if(this.presentFiles.containsKey(path) && this.presentFiles.get(path).equals(hashCode) && fullPath.toFile().exists()){
+                    this.writtenFiles.put(path, hashCode);
+                    this.toBeGenerated.remove(path);
+                    return;
+                }
+
+                // Write the data to file
+                fullPath.toFile().getParentFile().mkdirs();
+                try(OutputStream outputStream = Files.newOutputStream(fullPath)){
+                    outputStream.write(bytes);
+                }catch(IOException e){
+                    throw new RuntimeException(e);
+                }
+                this.writtenFiles.put(path, hashCode);
+                this.toBeGenerated.remove(path);
+            });
+
+            // Write the cache file
+            this.removeRemnants();
+            this.writeCacheToFile();
+
+            // Validate all promised files have actually been written
+            if(!this.toBeGenerated.isEmpty())
+                throw new RuntimeException("Some tracked files did not get written: " + this.toBeGenerated.stream().map(Path::toString).map(s -> "'" + s + "'").collect(Collectors.joining(",")));
         }
     }
 }

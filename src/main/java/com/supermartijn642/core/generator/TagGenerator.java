@@ -1,8 +1,11 @@
 package com.supermartijn642.core.generator;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.data.TagLoader;
+import com.supermartijn642.core.generator.aggregator.ResourceAggregator;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.block.Block;
@@ -10,6 +13,10 @@ import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -29,6 +36,66 @@ public abstract class TagGenerator extends ResourceGenerator {
         TAG_DIRECTORIES.put(Registries.ENTITY_TYPES, "entity_types");
     }
 
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    private static final ResourceAggregator<TagBuilder<?>,TagBuilder<?>> AGGREGATOR = new ResourceAggregator<TagBuilder<?>,TagBuilder<?>>() {
+        @Override
+        public TagBuilder<?> initialData(){
+            return null;
+        }
+
+        @Override
+        public TagBuilder<?> combine(TagBuilder<?> data, TagBuilder<?> newData){
+            if(data != null){
+                //noinspection unchecked,rawtypes
+                ((TagBuilder)data).addAll(newData);
+                return data;
+            }
+            return newData;
+        }
+
+        @Override
+        public void write(OutputStream stream, TagBuilder<?> tag) throws IOException{
+            // Convert the tag into a json object
+            JsonObject json = new JsonObject();
+            // Replace
+            json.addProperty("replace", tag.replace);
+            // Entries & references
+            JsonArray entries = new JsonArray();
+            tag.entries.forEach(entries::add);
+            tag.references.stream().map(ResourceLocation::toString).map(s -> "#" + s).forEach(entries::add);
+            tag.optionalEntries.stream().map(e -> {
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("id", e);
+                jsonObject.addProperty("required", false);
+                return jsonObject;
+            }).forEach(entries::add);
+            tag.optionalReferences.stream().map(e -> {
+                JsonObject entryObject = new JsonObject();
+                entryObject.addProperty("id", "#" + e);
+                entryObject.addProperty("required", false);
+                return entryObject;
+            }).forEach(entries::add);
+            if(entries.size() > 0 || tag.remove.isEmpty())
+                json.add("values", entries);
+            // Removed
+            JsonArray removedEntries = new JsonArray();
+            tag.remove.forEach(removedEntries::add);
+            tag.optionalRemove.stream().map(e -> {
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("id", e);
+                jsonObject.addProperty("required", false);
+                return jsonObject;
+            }).forEach(entries::add);
+            if(removedEntries.size() > 0)
+                json.add("remove", removedEntries);
+
+            // Write the data
+            try(Writer writer = new OutputStreamWriter(stream)){
+                GSON.toJson(json, writer);
+            }
+        }
+    };
+
     private final Map<Registries.Registry<?>,Map<ResourceLocation,TagBuilder<?>>> tags = new HashMap<>();
 
     public TagGenerator(String modid, ResourceCache cache){
@@ -40,8 +107,6 @@ public abstract class TagGenerator extends ResourceGenerator {
         // Loop over all registries
         for(Map.Entry<Registries.Registry<?>,Map<ResourceLocation,TagBuilder<?>>> registryEntry : this.tags.entrySet()){
             String directoryName = getTagDirectoryName(registryEntry.getKey());
-            if(directoryName.startsWith("tags/"))
-                directoryName = directoryName.substring("tags/".length());
             // Loop over all tags
             for(TagBuilder<?> tag : registryEntry.getValue().values()){
                 // Validate tag references
@@ -50,55 +115,20 @@ public abstract class TagGenerator extends ResourceGenerator {
                         continue;
                     if(TagLoader.getTag(registryEntry.getKey(), reference) != null)
                         continue;
-                    if(this.cache.doesResourceExist(ResourceType.DATA, reference.getResourceDomain(), "tags/" + directoryName, reference.getResourcePath(), ".json"))
+                    if(this.cache.doesResourceExist(ResourceType.DATA, reference.getResourceDomain(), directoryName, reference.getResourcePath(), ".json"))
                         continue;
 
                     throw new RuntimeException("Could not find tag reference '" + reference + "'!");
                 }
-
-                // Convert the tag into a json object
-                JsonObject object = new JsonObject();
-                // Replace
-                object.addProperty("replace", tag.replace);
-                // Entries & references
-                JsonArray entries = new JsonArray();
-                tag.entries.forEach(entries::add);
-                tag.references.stream().map(ResourceLocation::toString).map(s -> "#" + s).forEach(entries::add);
-                tag.optionalEntries.stream().map(e -> {
-                    JsonObject jsonObject = new JsonObject();
-                    jsonObject.addProperty("id", e);
-                    jsonObject.addProperty("required", false);
-                    return jsonObject;
-                }).forEach(entries::add);
-                tag.optionalReferences.stream().map(e -> {
-                    JsonObject entryObject = new JsonObject();
-                    entryObject.addProperty("id", "#" + e);
-                    entryObject.addProperty("required", false);
-                    return entryObject;
-                }).forEach(entries::add);
-                if(entries.size() > 0 || tag.remove.isEmpty())
-                    object.add("values", entries);
-                // Removed
-                JsonArray removedEntries = new JsonArray();
-                tag.remove.forEach(removedEntries::add);
-                tag.optionalRemove.stream().map(e -> {
-                    JsonObject jsonObject = new JsonObject();
-                    jsonObject.addProperty("id", e);
-                    jsonObject.addProperty("required", false);
-                    return jsonObject;
-                }).forEach(entries::add);
-                if(removedEntries.size() > 0)
-                    object.add("remove", removedEntries);
-
                 // Save the object to the cache
                 ResourceLocation identifier = tag.identifier;
-                this.cache.saveJsonResource(ResourceType.DATA, object, identifier.getResourceDomain(), "tags/" + directoryName, identifier.getResourcePath());
+                this.cache.saveResource(ResourceType.DATA, AGGREGATOR, tag, identifier.getResourceDomain(), directoryName, identifier.getResourcePath(), ".json");
             }
         }
     }
 
     private static String getTagDirectoryName(Registries.Registry<?> registry){
-        return TAG_DIRECTORIES.get(registry);
+        return "tags/" + TAG_DIRECTORIES.get(registry);
     }
 
     /**
@@ -544,6 +574,15 @@ public abstract class TagGenerator extends ResourceGenerator {
 
             this.removeOptional(new ResourceLocation(entry));
             return this;
+        }
+
+        private void addAll(TagBuilder<T> other){
+            this.entries.addAll(other.entries);
+            this.optionalEntries.addAll(other.optionalEntries);
+            this.references.addAll(other.references);
+            this.optionalReferences.addAll(other.optionalReferences);
+            this.remove.addAll(other.remove);
+            this.optionalRemove.addAll(other.optionalRemove);
         }
     }
 }

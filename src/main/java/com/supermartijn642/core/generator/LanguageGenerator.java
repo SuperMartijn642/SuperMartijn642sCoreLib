@@ -1,6 +1,6 @@
 package com.supermartijn642.core.generator;
 
-import com.google.gson.JsonObject;
+import com.supermartijn642.core.generator.aggregator.TranslationsAggregator;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -25,11 +25,8 @@ public abstract class LanguageGenerator extends ResourceGenerator {
 
     @Override
     public void save(){
-        // Convert all translations to a json object
-        JsonObject object = new JsonObject();
-        this.translations.forEach(object::addProperty);
         // Save the object to the cache
-        this.cache.saveJsonResource(ResourceType.ASSET, object, this.modid, "lang", this.langCode);
+        this.cache.saveResource(ResourceType.ASSET, TranslationsAggregator.INSTANCE, this.translations, this.modid, "lang", this.langCode, ".json");
     }
 
     /**

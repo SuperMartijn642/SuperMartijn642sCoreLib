@@ -28,6 +28,7 @@ public class GeneratorManager {
         if(!outputFolderFile.exists())
             outputFolderFile.mkdirs();
         ResourceCache cache = ResourceCache.create(outputFolderFile.toPath(), existingFolderFile.toPath());
+        ((ResourceCache.Impl)cache).allowWrites(false);
 
         // Remove the mod's resources from the resource manager
         for(FallbackResourceManager resourceManager : ((SimpleReloadableResourceManager)ClientUtils.getMinecraft().getResourceManager()).domainResourceManagers.values()){
@@ -57,6 +58,7 @@ public class GeneratorManager {
                 CoreLib.LOGGER.info("Generator '" + generator.getName() + "' finished after " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
                 stopwatch.reset();
             }
+            ((ResourceCache.Impl)cache).allowWrites(true);
             for(ResourceGenerator generator : GENERATORS){
                 CoreLib.LOGGER.info("Saving generator '" + generator.getName() + "'...");
                 stopwatch.start();
@@ -73,7 +75,6 @@ public class GeneratorManager {
         }
 
         // Write the cache file
-        ((ResourceCache.Impl)cache).removeRemnants();
-        ((ResourceCache.Impl)cache).writeCacheToFile();
+        ((ResourceCache.Impl)cache).finish();
     }
 }
