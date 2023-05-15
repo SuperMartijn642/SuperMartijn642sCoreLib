@@ -34,6 +34,8 @@ public class BaseItem extends Item {
         super();
         this.properties = properties;
         this.groups = properties.groups.toArray(new CreativeTabs[0]);
+        if(this.groups.length > 0)
+            this.setCreativeTab(this.groups[0]);
         this.setMaxStackSize(properties.maxStackSize);
         this.setMaxDamage(properties.durability);
         if(!properties.groups.isEmpty())
