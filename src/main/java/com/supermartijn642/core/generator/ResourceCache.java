@@ -110,7 +110,7 @@ public abstract class ResourceCache {
         private final Map<Path,HashCode> presentFiles = new HashMap<>();
         private final Map<Path,HashCode> writtenFiles = new HashMap<>();
         private final Map<Path,Pair<ResourceAggregator<Object,Object>,Object>> aggregatedResources = new HashMap<>();
-        private final List<Path> toBeGenerated = new ArrayList<>();
+        private final Set<Path> toBeGenerated = new HashSet<>();
 
         private final Path outputDirectory;
         private final Path manualDirectory;
