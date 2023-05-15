@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.7a
+- Fix items not appearing in the creative search tab
+
 ### SuperMartijn642's Core Library 1.1.7
 - Fix `RecipeGenerator`'s smelting smelting recipes not working for multiple smelting types
 - Fix `ModelGenerator#itemHandheld` using wrong parent model
