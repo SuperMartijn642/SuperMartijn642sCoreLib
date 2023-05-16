@@ -84,7 +84,8 @@ public class ItemProperties {
     public Item.Properties toUnderlying(){
         Item.Properties properties = new Item.Properties();
         properties.stacksTo(this.maxStackSize);
-        properties.durability(this.durability);
+        if(this.durability != 0)
+            properties.durability(this.durability);
         properties.craftRemainder(this.craftingRemainingItem);
         properties.rarity(this.rarity);
         properties.food(this.foodProperties);
