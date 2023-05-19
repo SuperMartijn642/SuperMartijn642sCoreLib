@@ -50,7 +50,7 @@ public final class CreativeItemGroup extends CreativeModeTab {
     }
 
     public static CreativeModeTab getBuildingBlocks(){
-        return CreativeModeTab.TAB_DECORATIONS;
+        return CreativeModeTab.TAB_BUILDING_BLOCKS;
     }
 
     public static CreativeModeTab getDecoration(){
@@ -58,35 +58,35 @@ public final class CreativeItemGroup extends CreativeModeTab {
     }
 
     public static CreativeModeTab getRedstone(){
-        return CreativeModeTab.TAB_DECORATIONS;
+        return CreativeModeTab.TAB_REDSTONE;
     }
 
     public static CreativeModeTab getTransportation(){
-        return CreativeModeTab.TAB_DECORATIONS;
+        return CreativeModeTab.TAB_TRANSPORTATION;
     }
 
     public static CreativeModeTab getMisc(){
-        return CreativeModeTab.TAB_DECORATIONS;
+        return CreativeModeTab.TAB_MISC;
     }
 
     public static CreativeModeTab getSearch(){
-        return CreativeModeTab.TAB_DECORATIONS;
+        return CreativeModeTab.TAB_SEARCH;
     }
 
     public static CreativeModeTab getFood(){
-        return CreativeModeTab.TAB_DECORATIONS;
+        return CreativeModeTab.TAB_FOOD;
     }
 
     public static CreativeModeTab getTools(){
-        return CreativeModeTab.TAB_DECORATIONS;
+        return CreativeModeTab.TAB_TOOLS;
     }
 
     public static CreativeModeTab getCombat(){
-        return CreativeModeTab.TAB_DECORATIONS;
+        return CreativeModeTab.TAB_COMBAT;
     }
 
     public static CreativeModeTab getBrewing(){
-        return CreativeModeTab.TAB_DECORATIONS;
+        return CreativeModeTab.TAB_BREWING;
     }
 
     private final String identifier;
