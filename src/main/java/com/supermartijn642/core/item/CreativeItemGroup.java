@@ -45,7 +45,7 @@ public final class CreativeItemGroup extends ItemGroup {
     }
 
     public static ItemGroup getBuildingBlocks(){
-        return ItemGroup.TAB_DECORATIONS;
+        return ItemGroup.TAB_BUILDING_BLOCKS;
     }
 
     public static ItemGroup getDecoration(){
@@ -53,35 +53,35 @@ public final class CreativeItemGroup extends ItemGroup {
     }
 
     public static ItemGroup getRedstone(){
-        return ItemGroup.TAB_DECORATIONS;
+        return ItemGroup.TAB_REDSTONE;
     }
 
     public static ItemGroup getTransportation(){
-        return ItemGroup.TAB_DECORATIONS;
+        return ItemGroup.TAB_TRANSPORTATION;
     }
 
     public static ItemGroup getMisc(){
-        return ItemGroup.TAB_DECORATIONS;
+        return ItemGroup.TAB_MISC;
     }
 
     public static ItemGroup getSearch(){
-        return ItemGroup.TAB_DECORATIONS;
+        return ItemGroup.TAB_SEARCH;
     }
 
     public static ItemGroup getFood(){
-        return ItemGroup.TAB_DECORATIONS;
+        return ItemGroup.TAB_FOOD;
     }
 
     public static ItemGroup getTools(){
-        return ItemGroup.TAB_DECORATIONS;
+        return ItemGroup.TAB_TOOLS;
     }
 
     public static ItemGroup getCombat(){
-        return ItemGroup.TAB_DECORATIONS;
+        return ItemGroup.TAB_COMBAT;
     }
 
     public static ItemGroup getBrewing(){
-        return ItemGroup.TAB_DECORATIONS;
+        return ItemGroup.TAB_BREWING;
     }
 
     private final String identifier;
