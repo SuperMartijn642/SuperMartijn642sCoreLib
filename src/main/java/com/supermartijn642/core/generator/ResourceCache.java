@@ -12,13 +12,16 @@ import net.minecraft.resources.IResource;
 import net.minecraft.resources.ResourcePackType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.generators.ExistingFileHelper;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -109,6 +112,28 @@ public abstract class ResourceCache {
     @Deprecated
     public static class HashCacheWrapper extends ResourceCache {
 
+        /**
+         * {@link DirectoryCache#newCache}
+         */
+        private static final Function<DirectoryCache,Map<Path,String>> NEW_CACHE_FIELD;
+
+        static{
+            Field newCacheField = ObfuscationReflectionHelper.findField(DirectoryCache.class, "field_208329_f");
+            try{
+                newCacheField.setAccessible(true);
+            }catch(Exception e){
+                throw new RuntimeException("Failed to make DirectoryCache#newCache accessible!", e);
+            }
+            NEW_CACHE_FIELD = cache -> {
+                try{
+                    //noinspection unchecked
+                    return (Map<Path,String>)newCacheField.get(cache);
+                }catch(IllegalAccessException e){
+                    throw new RuntimeException(e);
+                }
+            };
+        }
+
         private final Map<Path,HashCode> presentFiles = new HashMap<>();
         private final Map<Path,HashCode> writtenFiles = new HashMap<>();
         private final Map<Path,Pair<ResourceAggregator<Object,Object>,Object>> aggregatedResources = new HashMap<>();
@@ -131,7 +156,7 @@ public abstract class ResourceCache {
         }
 
         private boolean existsInGeneratedFiles(Path path){
-            return this.toBeGenerated.contains(path) || this.aggregatedResources.containsKey(path) || this.cache.newCache.containsKey(this.outputDirectory.resolve(path));
+            return this.toBeGenerated.contains(path) || this.aggregatedResources.containsKey(path) || NEW_CACHE_FIELD.apply(this.cache).containsKey(this.outputDirectory.resolve(path));
         }
 
         private boolean existsInLoadedResources(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
@@ -174,7 +199,7 @@ public abstract class ResourceCache {
 
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
             Path fullPath = this.outputDirectory.resolve(path);
-            if(this.writtenFiles.containsKey(path) || this.aggregatedResources.containsKey(path) || this.cache.newCache.containsKey(fullPath))
+            if(this.writtenFiles.containsKey(path) || this.aggregatedResources.containsKey(path) || NEW_CACHE_FIELD.apply(this.cache).containsKey(fullPath))
                 throw new RuntimeException("Duplicate file '" + path + "'!");
 
             // Skip writing if the present file matches the one to be written
@@ -205,7 +230,7 @@ public abstract class ResourceCache {
 
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
             Path fullPath = this.outputDirectory.resolve(path);
-            if(this.writtenFiles.containsKey(path) || this.cache.newCache.containsKey(fullPath))
+            if(this.writtenFiles.containsKey(path) || NEW_CACHE_FIELD.apply(this.cache).containsKey(fullPath))
                 throw new RuntimeException("Duplicate file '" + path + "'!");
 
             // Validate the aggregators match
