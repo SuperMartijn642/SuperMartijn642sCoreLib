@@ -6,11 +6,12 @@
   "refmap": "${mod_id}.mixins.refmap.json",
   "mixins": [
     "HolderReferenceMixin",
+    "MappedRegistryMixin",
     "ServerPlayerGameModeMixin"
   ],
   "client": [
-    "FabricDataGenHelperMixin",
     "DataGeneratorMixin",
+    "FabricDataGenHelperMixin",
     "LevelRendererMixin",
     "MinecraftMixin",
     "ModelManagerMixin",

@@ -1,6 +1,7 @@
 package com.supermartijn642.core.mixin;
 
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.extensions.CoreLibDataGenerator;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.impl.datagen.FabricDataGenHelper;
@@ -37,7 +38,8 @@ public class FabricDataGenHelperMixin {
                 return new EntrypointContainer<DataGeneratorEntrypoint>() {
                     @Override
                     public DataGeneratorEntrypoint getEntrypoint(){
-                        return registrationHandler::registerProviders;
+                        //noinspection DataFlowIssue
+                        return dataGenerator -> ((CoreLibDataGenerator)(Object)dataGenerator).setGeneratorRegistrationHandler(registrationHandler);
                     }
 
                     @Override

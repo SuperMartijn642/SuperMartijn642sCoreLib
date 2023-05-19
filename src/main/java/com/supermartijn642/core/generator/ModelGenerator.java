@@ -24,19 +24,13 @@ import java.util.function.Consumer;
 public abstract class ModelGenerator extends ResourceGenerator {
 
     private final Map<ResourceLocation,ModelBuilder> models = new HashMap<>();
-    private final ModelAtlasSourceGenerator atlasSourceGenerator;
 
     public ModelGenerator(String modid, ResourceCache cache){
         super(modid, cache);
-        this.atlasSourceGenerator = new ModelAtlasSourceGenerator(modid, cache);
     }
 
     @Override
     public void save(){
-        // Save all the texture atlas entries
-        this.atlasSourceGenerator.generate();
-        this.atlasSourceGenerator.save();
-
         // Loop over all models
         for(ModelBuilder modelBuilder : this.models.values()){
             JsonObject json = this.convertToJson(modelBuilder);
@@ -620,9 +614,9 @@ public abstract class ModelGenerator extends ResourceGenerator {
 
     protected static class TransformBuilder {
 
-        private Vector3f rotation = ItemTransform.Deserializer.DEFAULT_ROTATION;
-        private Vector3f translation = ItemTransform.Deserializer.DEFAULT_TRANSLATION;
-        private Vector3f scale = ItemTransform.Deserializer.DEFAULT_SCALE;
+        private Vector3f rotation = ItemTransform.Deserializer.DEFAULT_ROTATION.copy();
+        private Vector3f translation = ItemTransform.Deserializer.DEFAULT_TRANSLATION.copy();
+        private Vector3f scale = ItemTransform.Deserializer.DEFAULT_SCALE.copy();
 
         protected TransformBuilder(){
         }
@@ -955,25 +949,6 @@ public abstract class ModelGenerator extends ResourceGenerator {
 
             this.emissivity = emissivity;
             return this;
-        }
-    }
-
-    private class ModelAtlasSourceGenerator extends AtlasSourceGenerator {
-
-        public ModelAtlasSourceGenerator(String modid, ResourceCache cache){
-            super(modid, cache);
-        }
-
-        @Override
-        public void generate(){
-            for(ModelBuilder modelBuilder : ModelGenerator.this.models.values()){
-                // Add the textures used by the model
-                modelBuilder.textures.values().stream().filter(i -> i.charAt(0) != '#').map(ResourceLocation::new).forEach(this.blockAtlas()::texture);
-                // Add the parent model
-                ResourceLocation parent = modelBuilder.parent;
-                if(parent != null && !ModelGenerator.this.models.containsKey(parent) && this.cache.getExistingResource(ResourceType.ASSET, parent.getNamespace(), "models", parent.getPath(), ".json").isPresent())
-                    this.blockAtlas().texturesFromModel(modelBuilder.parent);
-            }
         }
     }
 }

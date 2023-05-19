@@ -4,17 +4,12 @@ import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.generator.ResourceCache;
 import com.supermartijn642.core.generator.ResourceGenerator;
 import com.supermartijn642.core.util.Either;
-import com.supermartijn642.core.util.Holder;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -129,34 +124,14 @@ public class GeneratorRegistrationHandler {
 
     @ApiStatus.Internal
     @Deprecated
-    public void registerProviders(FabricDataGenerator dataGenerator){
-        // Get the output folder and manual files folder
-        String manualFolderProperty = System.getProperty("fabric-api.datagen.manual-dir");
-        Path outputFolder = dataGenerator.getOutputFolder(), manualFolder = manualFolderProperty == null || manualFolderProperty.isBlank() ? null : Paths.get(manualFolderProperty);
-        if(manualFolder == null)
-            CoreLib.LOGGER.warn("Property 'fabric-api.datagen.manual-dir' has not been set! Manually created files may not be recognised!");
-
-        // Create a resource cache from the hash cache supplied when providers run
-        Holder<ResourceCache> cacheHolder = new Holder<>();
-        dataGenerator.addProvider(new DataProvider() {
-
-            @Override
-            public void run(CachedOutput cachedOutput) throws IOException{
-//                cacheHolder.set(ResourceCache.wrap(() -> cachedOutput, outputFolder, manualFolder));
-            }
-
-            @Override
-            public String getName(){
-                return "Dummy Data Provider";
-            }
-        });
-
+    public void registerProviders(FabricDataGenerator dataGenerator, ResourceCache cache){
         // Resolve and add all the generators and providers
-//        this.generatorsAndProviders
-//            .stream()
-//            .map(either -> either.mapLeft(generator -> ResourceGenerator.createDataProvider(generator, cacheHolder::get)))
-//            .map(either -> either.mapRight(provider -> provider.apply(dataGenerator)))
-//            .map(either -> either.leftOrElseGet(either::right))
-//            .forEach(dataGenerator::addProvider);
+        this.generatorsAndProviders
+            .stream()
+            .map(either -> either.mapLeft(generator -> generator.apply(cache)))
+            .map(either -> either.mapLeft(ResourceGenerator::createDataProvider))
+            .map(either -> either.mapRight(provider -> provider.apply(dataGenerator)))
+            .map(either -> either.leftOrElseGet(either::right))
+            .forEach(dataGenerator::addProvider);
     }
 }

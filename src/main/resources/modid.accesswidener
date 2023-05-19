@@ -26,6 +26,26 @@ accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties
 extendable class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
 # GuiComponent
 accessible method net/minecraft/client/gui/GuiComponent fillGradient (Lcom/mojang/math/Matrix4f;Lcom/mojang/blaze3d/vertex/BufferBuilder;IIIIIII)V # fillGradient
+# HashCache
+accessible field net/minecraft/data/HashCache cachePaths Ljava/util/Set; # cachePaths
+accessible field net/minecraft/data/HashCache existingCaches Ljava/util/Map; # caches
+accessible field net/minecraft/data/HashCache cachesToWrite Ljava/util/Map; # cachesToWrite
+accessible field net/minecraft/data/HashCache initialCount I # initialCount
+accessible field net/minecraft/data/HashCache versionId Ljava/lang/String; # versionId
+accessible method net/minecraft/data/HashCache getProviderCachePath (Lnet/minecraft/data/DataProvider;)Ljava/nio/file/Path; # getProviderCachePath
+accessible method net/minecraft/data/HashCache readCache (Ljava/nio/file/Path;Ljava/nio/file/Path;)Lnet/minecraft/data/HashCache$ProviderCache; # readCache
+mutable field net/minecraft/data/HashCache initialCount I # initialCount
+# HashCache$CacheUpdater
+accessible field net/minecraft/data/HashCache$CacheUpdater newCache Lnet/minecraft/data/HashCache$ProviderCache; # newCache
+accessible field net/minecraft/data/HashCache$CacheUpdater oldCache Lnet/minecraft/data/HashCache$ProviderCache; # oldCache
+accessible field net/minecraft/data/HashCache$CacheUpdater writes I # writes
+accessible method net/minecraft/data/HashCache$CacheUpdater <init> (Ljava/lang/String;Lnet/minecraft/data/HashCache$ProviderCache;)V # <init>
+accessible class net/minecraft/data/HashCache$CacheUpdater
+mutable field net/minecraft/data/HashCache$CacheUpdater newCache Lnet/minecraft/data/HashCache$ProviderCache; # newCache
+# HashCache$ProviderCache
+accessible method net/minecraft/data/HashCache$ProviderCache <init> (Ljava/lang/String;)V # <init>
+accessible method net/minecraft/data/HashCache$ProviderCache <init> (Ljava/lang/String;Ljava/util/Map;)V # <init>
+accessible class net/minecraft/data/HashCache$ProviderCache
 # Ingredient
 accessible field net/minecraft/world/item/crafting/Ingredient values [Lnet/minecraft/world/item/crafting/Ingredient$Value; # values
 accessible method net/minecraft/world/item/crafting/Ingredient fromValues (Ljava/util/stream/Stream;)Lnet/minecraft/world/item/crafting/Ingredient; # fromValues
