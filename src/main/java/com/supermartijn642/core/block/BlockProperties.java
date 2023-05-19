@@ -185,7 +185,7 @@ public class BlockProperties {
 
     public BlockProperties lootTableFrom(Supplier<Block> block){
         this.noLootTable = false;
-        this.lootTableSupplier = () -> block.get().getLootTable();
+        this.lootTableSupplier = block == null ? null : () -> block.get().getLootTable();
         return this;
     }
 
