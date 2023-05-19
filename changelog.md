@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.9
+- Fixed crash when `null` is passed into `BlockProperties#lootTableFrom`
+
 ### SuperMartijn642's Core Library 1.1.8
 - Added `ResourceAggregator` to allow multiple data generators to write to the same file
 - All data generators will now generate before anything gets saved
