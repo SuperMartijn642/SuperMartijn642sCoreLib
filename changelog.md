@@ -1,3 +1,10 @@
+### SuperMartijn642's Core Library 1.1.8
+- Added `ResourceAggregator` to allow multiple data generators to write to the same file
+- All data generators will now generate before anything gets saved
+- Entries in json files from data generators will now always generate in the same order
+- Fixed `ClientUtils#getPartialTicks` returning the wrong value when the game is paused
+- Fixed loot table handling in `BlockProperties`
+
 ### SuperMartijn642's Core Library 1.1.7a
 - Fix items not appearing in the creative search tab
 
