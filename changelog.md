@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.9b
+- Fixed atlas sprites registered through `ClientRegistrationHandler` not getting stitched
+
 ### SuperMartijn642's Core Library 1.1.9a
 - Prevent crashes when scanning for `RegistryEntryAcceptor` entries
 
