@@ -69,73 +69,85 @@ public @interface RegistryEntryAcceptor {
         public static void gatherAnnotatedFields(){
             for(EntrypointContainer<ModInitializer> entrypoint : FabricLoader.getInstance().getEntrypointContainers("main", ModInitializer.class)){
                 // Fields
-                for(Field field : entrypoint.getEntrypoint().getClass().getFields()){
-                    RegistryEntryAcceptor annotation = field.getAnnotation(RegistryEntryAcceptor.class);
-                    if(annotation == null)
-                        continue;
+                try{
+                    for(Field field : entrypoint.getEntrypoint().getClass().getFields()){
+                        RegistryEntryAcceptor annotation = field.getAnnotation(RegistryEntryAcceptor.class);
+                        if(annotation == null)
+                            continue;
 
-                    String namespace = annotation.namespace();
-                    if(!RegistryUtil.isValidNamespace(namespace))
-                        throw new IllegalArgumentException("Namespace '" + namespace + "' must only contain characters [a-z0-9_.-]!");
-                    String identifier = annotation.identifier();
-                    if(!RegistryUtil.isValidPath(identifier))
-                        throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
-                    Registry registry = annotation.registry();
-                    if(registry == null)
-                        throw new IllegalArgumentException("Registry must not be null!");
+                        String namespace = annotation.namespace();
+                        if(!RegistryUtil.isValidNamespace(namespace))
+                            throw new IllegalArgumentException("Namespace '" + namespace + "' must only contain characters [a-z0-9_.-]!");
+                        String identifier = annotation.identifier();
+                        if(!RegistryUtil.isValidPath(identifier))
+                            throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
+                        Registry registry = annotation.registry();
+                        if(registry == null)
+                            throw new IllegalArgumentException("Registry must not be null!");
 
-                    // Check if the field is static
-                    if(!Modifier.isStatic(field.getModifiers()))
-                        throw new RuntimeException("Field must be static!");
-                    // Check if the field is non-final
-                    if(Modifier.isFinal(field.getModifiers()))
-                        throw new RuntimeException("Field must not be final!");
-                    // Check if the field has the correct type
-                    if(!registry.registry.getValueClass().isAssignableFrom(field.getType()))
-                        throw new RuntimeException("Field must have a type assignable from '" + registry.registry.getValueClass().getName() + "'!");
+                        // Check if the field is static
+                        if(!Modifier.isStatic(field.getModifiers()))
+                            throw new RuntimeException("Field must be static!");
+                        // Check if the field is non-final
+                        if(Modifier.isFinal(field.getModifiers()))
+                            throw new RuntimeException("Field must not be final!");
+                        // Check if the field has the correct type
+                        if(!registry.registry.getValueClass().isAssignableFrom(field.getType()))
+                            throw new RuntimeException("Field must have a type assignable from '" + registry.registry.getValueClass().getName() + "'!");
 
-                    // Make the field accessible
-                    field.setAccessible(true);
+                        // Make the field accessible
+                        field.setAccessible(true);
 
-                    // Add the field
-                    FIELDS.computeIfAbsent(registry.registry, o -> new HashMap<>())
-                        .computeIfAbsent(new ResourceLocation(namespace, identifier), o -> new HashSet<>())
-                        .add(field);
+                        // Add the field
+                        FIELDS.computeIfAbsent(registry.registry, o -> new HashMap<>())
+                            .computeIfAbsent(new ResourceLocation(namespace, identifier), o -> new HashSet<>())
+                            .add(field);
+                    }
+                }catch(NoClassDefFoundError ignored){
+                }catch(Exception e){
+                    CoreLib.LOGGER.error("Encountered an exception whilst scanning fields in 'main' entrypoint for mod '" + entrypoint.getProvider().getMetadata().getName() + "'!", e);
+                    continue;
                 }
 
                 // Methods
-                for(Method method : entrypoint.getEntrypoint().getClass().getMethods()){
-                    RegistryEntryAcceptor annotation = method.getAnnotation(RegistryEntryAcceptor.class);
-                    if(annotation == null)
-                        continue;
+                try{
+                    for(Method method : entrypoint.getEntrypoint().getClass().getMethods()){
+                        RegistryEntryAcceptor annotation = method.getAnnotation(RegistryEntryAcceptor.class);
+                        if(annotation == null)
+                            continue;
 
-                    String namespace = annotation.namespace();
-                    if(!RegistryUtil.isValidNamespace(namespace))
-                        throw new IllegalArgumentException("Namespace '" + namespace + "' must only contain characters [a-z0-9_.-]!");
-                    String identifier = annotation.identifier();
-                    if(!RegistryUtil.isValidPath(identifier))
-                        throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
-                    Registry registry = annotation.registry();
-                    if(registry == null)
-                        throw new IllegalArgumentException("Registry must not be null!");
+                        String namespace = annotation.namespace();
+                        if(!RegistryUtil.isValidNamespace(namespace))
+                            throw new IllegalArgumentException("Namespace '" + namespace + "' must only contain characters [a-z0-9_.-]!");
+                        String identifier = annotation.identifier();
+                        if(!RegistryUtil.isValidPath(identifier))
+                            throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
+                        Registry registry = annotation.registry();
+                        if(registry == null)
+                            throw new IllegalArgumentException("Registry must not be null!");
 
-                    // Check if the method is static
-                    if(!Modifier.isStatic(method.getModifiers()))
-                        throw new RuntimeException("Method must be static!");
-                    // Check if the method has exactly one parameter
-                    if(method.getParameterCount() != 1)
-                        throw new RuntimeException("Method must have exactly 1 parameter!");
-                    // Check if the parameter has the correct type
-                    if(!registry.registry.getValueClass().isAssignableFrom(method.getParameterTypes()[0]))
-                        throw new RuntimeException("Method parameter must have a type assignable from '" + registry.registry.getValueClass().getName() + "'!");
+                        // Check if the method is static
+                        if(!Modifier.isStatic(method.getModifiers()))
+                            throw new RuntimeException("Method must be static!");
+                        // Check if the method has exactly one parameter
+                        if(method.getParameterCount() != 1)
+                            throw new RuntimeException("Method must have exactly 1 parameter!");
+                        // Check if the parameter has the correct type
+                        if(!registry.registry.getValueClass().isAssignableFrom(method.getParameterTypes()[0]))
+                            throw new RuntimeException("Method parameter must have a type assignable from '" + registry.registry.getValueClass().getName() + "'!");
 
-                    // Make the method accessible
-                    method.setAccessible(true);
+                        // Make the method accessible
+                        method.setAccessible(true);
 
-                    // Add the method
-                    METHODS.computeIfAbsent(registry.registry, o -> new HashMap<>())
-                        .computeIfAbsent(new ResourceLocation(namespace, identifier), o -> new HashSet<>())
-                        .add(method);
+                        // Add the method
+                        METHODS.computeIfAbsent(registry.registry, o -> new HashMap<>())
+                            .computeIfAbsent(new ResourceLocation(namespace, identifier), o -> new HashSet<>())
+                            .add(method);
+                    }
+                }catch(NoClassDefFoundError ignored){
+                    // Some mods have methods with client class parameters in their main class apparently ¯\(o_o)/¯
+                }catch(Exception e){
+                    CoreLib.LOGGER.error("Encountered an exception whilst scanning methods in 'main' entrypoint for mod '" + entrypoint.getProvider().getMetadata().getName() + "'!", e);
                 }
             }
 
