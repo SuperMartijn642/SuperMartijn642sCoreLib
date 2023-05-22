@@ -374,9 +374,6 @@ public class ClientRegistrationHandler {
         if(!RegistryUtil.isValidPath(spriteLocation))
             throw new IllegalArgumentException("Sprite location '" + spriteLocation + "' must only contain characters [a-z0-9_./-]!");
 
-        if(textureAtlas.getPath().startsWith("textures/atlas/") && textureAtlas.getPath().endsWith(".png"))
-            textureAtlas = new ResourceLocation(textureAtlas.getNamespace(), textureAtlas.getPath().substring("textures/atlas/".length(), textureAtlas.getPath().length() - ".png".length()));
-
         ResourceLocation fullSpriteLocation = new ResourceLocation(this.modid, spriteLocation);
         this.textureAtlasSprites.putIfAbsent(textureAtlas, new HashSet<>());
         if(this.textureAtlasSprites.get(textureAtlas).contains(fullSpriteLocation))
