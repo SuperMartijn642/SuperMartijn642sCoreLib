@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.9a
+- Fixed crash with Emendatus Enigmatica
+
 ### SuperMartijn642's Core Library 1.1.9
 - Fixed crash when `null` is passed into `BlockProperties#lootTableFrom`
 
