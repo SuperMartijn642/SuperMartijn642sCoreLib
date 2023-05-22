@@ -7,6 +7,7 @@ import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DirectoryCache;
 import net.minecraft.data.IDataProvider;
+import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,17 +51,20 @@ public class DataGeneratorMixin {
         locals = LocalCapture.CAPTURE_FAILHARD
     )
     private void runHead(CallbackInfo ci, DirectoryCache hashCache){
-        DatagenModLoaderAccessor.getDataGeneratorConfig().getMods().stream().filter(GeneratorRegistrationHandler::hasHandlerForModid).forEach(modid -> {
-            GeneratorRegistrationHandler handler = GeneratorRegistrationHandler.get(modid);
-            DataGenerator dataGenerator = (DataGenerator)(Object)this;
-            // Get the output folder
-            Path outputFolder = this.outputFolder;
-            // Create a ResourceCache instance
-            if(this.resourceCache == null)
-                this.resourceCache = ResourceCache.wrap(DatagenModLoaderAccessor.getExistingFileHelper(), hashCache, outputFolder);
-            ((ResourceCache.HashCacheWrapper)this.resourceCache).allowWrites(false);
-            handler.registerProviders(dataGenerator, DatagenModLoaderAccessor.getExistingFileHelper(), this.resourceCache);
-        });
+        GatherDataEvent.DataGeneratorConfig dataGeneratorConfig = DatagenModLoaderAccessor.getDataGeneratorConfig();
+        if(dataGeneratorConfig != null){ // Some mods run data generators themselves
+            dataGeneratorConfig.getMods().stream().filter(GeneratorRegistrationHandler::hasHandlerForModid).forEach(modid -> {
+                GeneratorRegistrationHandler handler = GeneratorRegistrationHandler.get(modid);
+                DataGenerator dataGenerator = (DataGenerator)(Object)this;
+                // Get the output folder
+                Path outputFolder = this.outputFolder;
+                // Create a ResourceCache instance
+                if(this.resourceCache == null)
+                    this.resourceCache = ResourceCache.wrap(DatagenModLoaderAccessor.getExistingFileHelper(), hashCache, outputFolder);
+                ((ResourceCache.HashCacheWrapper)this.resourceCache).allowWrites(false);
+                handler.registerProviders(dataGenerator, DatagenModLoaderAccessor.getExistingFileHelper(), this.resourceCache);
+            });
+        }
     }
 
     @Inject(
