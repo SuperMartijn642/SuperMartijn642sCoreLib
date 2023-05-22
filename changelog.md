@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.9a
+- Prevent crashes when scanning for `RegistryEntryAcceptor` entries
+
 ### SuperMartijn642's Core Library 1.1.9
 - Fixed crash when `null` is passed into `BlockProperties#lootTableFrom`
 
