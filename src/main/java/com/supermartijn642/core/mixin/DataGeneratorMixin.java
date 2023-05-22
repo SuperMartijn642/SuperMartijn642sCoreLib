@@ -8,6 +8,7 @@ import net.minecraft.WorldVersion;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
+import net.minecraftforge.data.event.GatherDataEvent;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -58,25 +59,28 @@ public class DataGeneratorMixin {
         locals = LocalCapture.CAPTURE_FAILHARD
     )
     private void runHead(CallbackInfo ci, HashCache hashCache){
-        DatagenModLoaderAccessor.getDataGeneratorConfig().getMods().stream().filter(GeneratorRegistrationHandler::hasHandlerForModid).forEach(modid -> {
-            GeneratorRegistrationHandler handler = GeneratorRegistrationHandler.get(modid);
-            DataGenerator dataGenerator = (DataGenerator)(Object)this;
-            // Get the output folder
-            Path outputFolder = dataGenerator.rootOutputFolder;
-            // Create a ResourceCache instance
-            if(this.resourceCache == null)
-                this.resourceCache = ResourceCache.wrap(DatagenModLoaderAccessor.getExistingFileHelper(), hashCache, outputFolder);
-            ((ResourceCache.HashCacheWrapper)this.resourceCache).allowWrites(false);
-            handler.registerProviders(dataGenerator, DatagenModLoaderAccessor.getExistingFileHelper(), this.resourceCache);
-            // Add the new providers to the hash cache
-            for(String provider : this.allProviderIds){
-                Path cachePath = hashCache.getProviderCachePath(provider);
-                hashCache.cachePaths.add(cachePath);
-                HashCache.ProviderCache providerCache = HashCache.readCache(outputFolder, cachePath);
-                hashCache.caches.put(provider, providerCache);
-                hashCache.initialCount += providerCache.count();
-            }
-        });
+        GatherDataEvent.DataGeneratorConfig dataGeneratorConfig = DatagenModLoaderAccessor.getDataGeneratorConfig();
+        if(dataGeneratorConfig != null){ // Some mods run data generators themselves
+            dataGeneratorConfig.getMods().stream().filter(GeneratorRegistrationHandler::hasHandlerForModid).forEach(modid -> {
+                GeneratorRegistrationHandler handler = GeneratorRegistrationHandler.get(modid);
+                DataGenerator dataGenerator = (DataGenerator)(Object)this;
+                // Get the output folder
+                Path outputFolder = dataGenerator.rootOutputFolder;
+                // Create a ResourceCache instance
+                if(this.resourceCache == null)
+                    this.resourceCache = ResourceCache.wrap(DatagenModLoaderAccessor.getExistingFileHelper(), hashCache, outputFolder);
+                ((ResourceCache.HashCacheWrapper)this.resourceCache).allowWrites(false);
+                handler.registerProviders(dataGenerator, DatagenModLoaderAccessor.getExistingFileHelper(), this.resourceCache);
+                // Add the new providers to the hash cache
+                for(String provider : this.allProviderIds){
+                    Path cachePath = hashCache.getProviderCachePath(provider);
+                    hashCache.cachePaths.add(cachePath);
+                    HashCache.ProviderCache providerCache = HashCache.readCache(outputFolder, cachePath);
+                    hashCache.caches.put(provider, providerCache);
+                    hashCache.initialCount += providerCache.count();
+                }
+            });
+        }
         if(this.resourceCache != null)
             ((ResourceCache.HashCacheWrapper)this.resourceCache).readHashCache();
     }
