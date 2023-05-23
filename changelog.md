@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.9c
+- Fixed `ScreenUtils#drawTooltip`
+
 ### SuperMartijn642's Core Library 1.1.9b
 - Fixed atlas sprites registered through `ClientRegistrationHandler` not getting stitched
 
