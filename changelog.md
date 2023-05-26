@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.9d
+- Fixed items appearing in all creative tabs
+
 ### SuperMartijn642's Core Library 1.1.9c
 - Fixed `ScreenUtils#drawTooltip`
 
