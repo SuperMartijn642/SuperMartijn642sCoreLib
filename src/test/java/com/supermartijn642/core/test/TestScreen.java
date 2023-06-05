@@ -1,9 +1,9 @@
 package com.supermartijn642.core.test;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.ScreenUtils;
 import com.supermartijn642.core.gui.widget.BaseWidget;
+import com.supermartijn642.core.gui.widget.WidgetRenderContext;
 import com.supermartijn642.core.gui.widget.premade.TextFieldWidget;
 import net.minecraft.network.chat.Component;
 
@@ -28,8 +28,8 @@ public class TestScreen extends BaseWidget {
     }
 
     @Override
-    public void renderBackground(PoseStack poseStack, int mouseX, int mouseY){
-        ScreenUtils.drawScreenBackground(poseStack, this.x, this.y, this.width, this.height);
-        super.renderBackground(poseStack, mouseX, mouseY);
+    public void renderBackground(WidgetRenderContext context, int mouseX, int mouseY){
+        ScreenUtils.drawScreenBackground(context.poseStack(), this.x, this.y, this.width, this.height);
+        super.renderBackground(context, mouseX, mouseY);
     }
 }

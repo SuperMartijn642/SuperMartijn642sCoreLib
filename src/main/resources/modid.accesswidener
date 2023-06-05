@@ -9,8 +9,8 @@ accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScr
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackStartX I # snapbackStartX
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackStartY I # snapbackStartY
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackTime J # snapbackTime
-accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderFloatingItem (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V # renderFloatingItem
-accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderSlot (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/inventory/Slot;)V # renderSlot
+accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderFloatingItem (Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V # renderFloatingItem
+accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderSlot (Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/inventory/Slot;)V # renderSlot
 # AbstractContainerMenu
 mutable field net/minecraft/world/inventory/AbstractContainerMenu containerId I # containerId
 # BlockBehaviour
@@ -18,11 +18,11 @@ accessible field net/minecraft/world/level/block/state/BlockBehaviour properties
 extendable method net/minecraft/world/level/block/state/BlockBehaviour getLootTable ()Lnet/minecraft/resources/ResourceLocation; # getLootTable
 # BlockBehaviour$Properties
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties drops Lnet/minecraft/resources/ResourceLocation; # drops
-accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties material Lnet/minecraft/world/level/material/Material; # material
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties hasCollision Z # hasCollision
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties lightEmission Ljava/util/function/ToIntFunction; # lightEmission
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties isRedstoneConductor Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate; # isRedstoneConductor
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties isSuffocating Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate; # isSuffocating
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties mapColor Ljava/util/function/Function; # mapColor
 # BlockEntityType$BlockEntitySupplier
 extendable class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
 # CreativeModeTab
@@ -32,8 +32,13 @@ accessible method net/minecraft/world/item/CreativeModeTab <init> (Lnet/minecraf
 mutable field net/minecraft/world/item/CreativeModeTab displayItemsGenerator Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator; # displayItemsGenerator
 # DataGenerator
 accessible field net/minecraft/data/DataGenerator rootOutputFolder Ljava/nio/file/Path; # rootOutputFolder
-# GuiComponent
-accessible method net/minecraft/client/gui/GuiComponent fillGradient (Lorg/joml/Matrix4f;Lcom/mojang/blaze3d/vertex/BufferBuilder;IIIIIII)V # fillGradient
+# GuiGraphics
+accessible field net/minecraft/client/gui/GuiGraphics minecraft Lnet/minecraft/client/Minecraft; # minecraft
+accessible field net/minecraft/client/gui/GuiGraphics pose Lcom/mojang/blaze3d/vertex/PoseStack; # pose
+accessible field net/minecraft/client/gui/GuiGraphics bufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource; # bufferSource
+mutable field net/minecraft/client/gui/GuiGraphics minecraft Lnet/minecraft/client/Minecraft; # minecraft
+mutable field net/minecraft/client/gui/GuiGraphics pose Lcom/mojang/blaze3d/vertex/PoseStack; # pose
+mutable field net/minecraft/client/gui/GuiGraphics bufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource; # bufferSource
 # HashCache
 accessible field net/minecraft/data/HashCache cachePaths Ljava/util/Set; # cachePaths
 accessible field net/minecraft/data/HashCache caches Ljava/util/Map; # caches

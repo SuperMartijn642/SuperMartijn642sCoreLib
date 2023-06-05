@@ -7,9 +7,11 @@ import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.ScreenUtils;
 import com.supermartijn642.core.gui.widget.BaseWidget;
+import com.supermartijn642.core.gui.widget.WidgetRenderContext;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
@@ -63,9 +65,9 @@ public class TextFieldWidget extends BaseWidget {
     }
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY){
+    public void render(WidgetRenderContext context, int mouseX, int mouseY){
         if(this.drawBackground)
-            this.drawBackground(poseStack);
+            this.drawBackground(context.poseStack());
 
         int textColor = this.active ? this.activeTextColor : this.inactiveTextColor;
         int relativeCursor = this.cursorPosition - this.lineScrollOffset;
@@ -83,7 +85,7 @@ public class TextFieldWidget extends BaseWidget {
 
         if(!s.isEmpty()){
             String s1 = cursorInView ? s.substring(0, relativeCursor) : s;
-            leftOffset = fontRenderer.draw(poseStack, s1, left, top, textColor) + 1;
+            leftOffset = fontRenderer.drawInBatch(s1, left, top, textColor, false, context.poseStack().last().pose(), context.buffers(), Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT) + 1;
         }
 
         boolean cursorAtEnd = this.cursorPosition < this.text.length();
@@ -98,23 +100,23 @@ public class TextFieldWidget extends BaseWidget {
 
         // draw text
         if(!s.isEmpty() && cursorInView && relativeCursor < s.length())
-            fontRenderer.draw(poseStack, s.substring(relativeCursor), leftOffset, top, textColor);
+            fontRenderer.drawInBatch(s.substring(relativeCursor), leftOffset, top, textColor, false, context.poseStack().last().pose(), context.buffers(), Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
 
         // draw suggestion
         if(!this.suggestion.isEmpty() && this.text.isEmpty())
-            fontRenderer.drawShadow(poseStack, fontRenderer.plainSubstrByWidth(this.suggestion, this.width - 8 - fontRenderer.width("...")) + "...", cursorX, top, -8355712);
+            fontRenderer.drawInBatch(fontRenderer.plainSubstrByWidth(this.suggestion, this.width - 8 - fontRenderer.width("...")) + "...", cursorX, top, -8355712, true, context.poseStack().last().pose(), context.buffers(), Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
 
         // draw cursor
         if(shouldBlink){
             if(cursorAtEnd)
-                ScreenUtils.fillRect(poseStack, cursorX - 0.5f, top - 1, 1, fontRenderer.lineHeight, -3092272);
+                ScreenUtils.fillRect(context.poseStack(), cursorX - 0.5f, top - 1, 1, fontRenderer.lineHeight, -3092272);
             else
-                fontRenderer.drawShadow(poseStack, "_", cursorX, top, textColor);
+                fontRenderer.drawInBatch("_", cursorX, top, textColor, true, context.poseStack().last().pose(), context.buffers(), Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         }
 
         if(relativeSelection != relativeCursor){
             int l1 = left + fontRenderer.width(s.substring(0, relativeSelection));
-            this.drawSelectionBox(poseStack, cursorX, top - 1, l1 - 1, top + 1 + fontRenderer.lineHeight);
+            this.drawSelectionBox(context.poseStack(), cursorX, top - 1, l1 - 1, top + 1 + fontRenderer.lineHeight);
         }
     }
 

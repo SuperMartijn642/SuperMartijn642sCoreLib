@@ -151,7 +151,7 @@ public class PacketChannel {
      * @param packet packet to be send
      */
     public void sendToAllTrackingEntity(Entity entity, BasePacket packet){
-        if(entity.level.isClientSide)
+        if(entity.level().isClientSide)
             throw new IllegalStateException("This must only be called server-side!");
         this.checkRegistration(packet);
         PlayerLookup.tracking(entity).forEach(player -> this.sendToPlayer(player, packet));

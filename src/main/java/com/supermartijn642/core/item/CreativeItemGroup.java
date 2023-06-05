@@ -2,7 +2,8 @@ package com.supermartijn642.core.item;
 
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.registry.RegistryUtil;
-import net.fabricmc.fabric.impl.itemgroup.ItemGroupHelper;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -48,51 +49,51 @@ public final class CreativeItemGroup extends CreativeModeTab {
     }
 
     public static CreativeModeTab getBuildingBlocks(){
-        return CreativeModeTabs.BUILDING_BLOCKS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.BUILDING_BLOCKS);
     }
 
     public static CreativeModeTab getColoredBlocks(){
-        return CreativeModeTabs.COLORED_BLOCKS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.COLORED_BLOCKS);
     }
 
     public static CreativeModeTab getNaturalBlocks(){
-        return CreativeModeTabs.NATURAL_BLOCKS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.NATURAL_BLOCKS);
     }
 
     public static CreativeModeTab getFunctionalBlocks(){
-        return CreativeModeTabs.FUNCTIONAL_BLOCKS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.FUNCTIONAL_BLOCKS);
     }
 
     public static CreativeModeTab getRedstoneBlocks(){
-        return CreativeModeTabs.REDSTONE_BLOCKS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.REDSTONE_BLOCKS);
     }
 
     public static CreativeModeTab getToolsAndUtilities(){
-        return CreativeModeTabs.TOOLS_AND_UTILITIES;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.TOOLS_AND_UTILITIES);
     }
 
     public static CreativeModeTab getCombat(){
-        return CreativeModeTabs.COMBAT;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.COMBAT);
     }
 
     public static CreativeModeTab getFoodAndDrinks(){
-        return CreativeModeTabs.FOOD_AND_DRINKS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.FOOD_AND_DRINKS);
     }
 
     public static CreativeModeTab getIngredients(){
-        return CreativeModeTabs.INGREDIENTS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.INGREDIENTS);
     }
 
     public static CreativeModeTab getSpawnEggs(){
-        return CreativeModeTabs.SPAWN_EGGS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.SPAWN_EGGS);
     }
 
     public static CreativeModeTab getOperatorUtilities(){
-        return CreativeModeTabs.OP_BLOCKS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.OP_BLOCKS);
     }
 
     public static CreativeModeTab getSearch(){
-        return CreativeModeTabs.SEARCH;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.SEARCH);
     }
 
     private final String modid, identifier;
@@ -107,8 +108,7 @@ public final class CreativeItemGroup extends CreativeModeTab {
         this.identifier = identifier;
         this.displayItemsGenerator = (flags, output) -> this.applyFiller(output::accept);
 
-        //noinspection UnstableApiUsage
-        ItemGroupHelper.appendItemGroup(this);
+        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, new ResourceLocation(modid, identifier), this);
     }
 
     private void applyFiller(Consumer<ItemStack> output){
@@ -153,10 +153,5 @@ public final class CreativeItemGroup extends CreativeModeTab {
     @Override
     public Collection<ItemStack> getDisplayItems(){
         return this.sortedDisplayItems == null ? super.getDisplayItems() : this.sortedDisplayItems;
-    }
-
-    @Override
-    public ResourceLocation getId(){
-        return new ResourceLocation(this.modid, this.identifier);
     }
 }

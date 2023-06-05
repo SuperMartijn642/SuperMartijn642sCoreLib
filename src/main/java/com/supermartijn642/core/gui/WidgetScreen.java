@@ -1,10 +1,11 @@
 package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
+import com.supermartijn642.core.gui.widget.MutableWidgetRenderContext;
 import com.supermartijn642.core.gui.widget.Widget;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -21,6 +22,7 @@ public class WidgetScreen<T extends Widget> extends Screen {
         return new WidgetScreen<>(widget, isPauseScreen);
     }
 
+    private final MutableWidgetRenderContext widgetRenderContext = MutableWidgetRenderContext.create();
     protected final T widget;
     private boolean initialized = false;
     private boolean isPauseScreen = false;
@@ -55,8 +57,9 @@ public class WidgetScreen<T extends Widget> extends Screen {
     }
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks){
-        this.renderBackground(poseStack);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks){
+        this.widgetRenderContext.update(guiGraphics, partialTicks);
+        this.renderBackground(guiGraphics);
 
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
         mouseX -= offsetX;
@@ -70,15 +73,15 @@ public class WidgetScreen<T extends Widget> extends Screen {
         this.widget.setFocused(mouseX >= 0 && mouseX < this.widget.width() && mouseY >= 0 && mouseY < this.widget.height());
 
         // Render the widget background
-        this.widget.renderBackground(poseStack, mouseX, mouseY);
+        this.widget.renderBackground(this.widgetRenderContext, mouseX, mouseY);
         // Render the widget
-        this.widget.render(poseStack, mouseX, mouseY);
+        this.widget.render(this.widgetRenderContext, mouseX, mouseY);
         // Render the widget's foreground
-        this.widget.renderForeground(poseStack, mouseX, mouseY);
+        this.widget.renderForeground(this.widgetRenderContext, mouseX, mouseY);
         // Render the widget's overlay
-        this.widget.renderOverlay(poseStack, mouseX, mouseY);
+        this.widget.renderOverlay(this.widgetRenderContext, mouseX, mouseY);
         // Render the widget's tooltips
-        this.widget.renderTooltips(poseStack, mouseX, mouseY);
+        this.widget.renderTooltips(this.widgetRenderContext, mouseX, mouseY);
 
         RenderSystem.getModelViewStack().popPose();
         RenderSystem.applyModelViewMatrix();

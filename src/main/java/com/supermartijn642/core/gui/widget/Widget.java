@@ -1,6 +1,5 @@
 package com.supermartijn642.core.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -51,30 +50,30 @@ public interface Widget {
     /**
      * Renders the widget's background. This will be called first in the render chain.
      */
-    void renderBackground(PoseStack poseStack, int mouseX, int mouseY);
+    void renderBackground(WidgetRenderContext context, int mouseX, int mouseY);
 
     /**
      * Renders the widget's main features.
      * Called after the background and slots are drawn, but before items are drawn.
      */
-    void render(PoseStack poseStack, int mouseX, int mouseY);
+    void render(WidgetRenderContext context, int mouseX, int mouseY);
 
     /**
      * Renders the widget's foreground.
      * Called after main features and items are drawn, but before cursor item and overlay are drawn.
      */
-    void renderForeground(PoseStack poseStack, int mouseX, int mouseY);
+    void renderForeground(WidgetRenderContext context, int mouseX, int mouseY);
 
     /**
      * Called after foreground and cursor item are drawn, but before tooltips are drawn.
      */
-    void renderOverlay(PoseStack poseStack, int mouseX, int mouseY);
+    void renderOverlay(WidgetRenderContext context, int mouseX, int mouseY);
 
     /**
      * Renders tooltips for the given {@code mouseX} and {@code mouseY}.
      * This will be called last in the render chain.
      */
-    void renderTooltips(PoseStack poseStack, int mouseX, int mouseY);
+    void renderTooltips(WidgetRenderContext context, int mouseX, int mouseY);
 
     /**
      * Called when the widget is disposed of.

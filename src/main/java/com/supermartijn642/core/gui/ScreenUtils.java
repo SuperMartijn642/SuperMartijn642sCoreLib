@@ -4,14 +4,16 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import org.joml.Matrix4f;
 
 import java.util.Collections;
@@ -25,15 +27,18 @@ public class ScreenUtils {
 
     private static final ResourceLocation BUTTON_BACKGROUND = new ResourceLocation("supermartijn642corelib", "textures/gui/buttons.png");
     private static final ResourceLocation SCREEN_BACKGROUND = new ResourceLocation("supermartijn642corelib", "textures/gui/background.png");
+    private static final GuiGraphics GUI_GRAPHICS = new GuiGraphics(null, null);
 
     public static final int DEFAULT_TEXT_COLOR = 4210752, ACTIVE_TEXT_COLOR = 14737632, INACTIVE_TEXT_COLOR = 7368816;
 
     public static void drawString(PoseStack poseStack, Font fontRenderer, Component text, float x, float y, int color){
-        fontRenderer.draw(poseStack, text, x, y, color);
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        fontRenderer.drawInBatch(text, x, y, color, false, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        bufferSource.endBatch();
     }
 
     public static void drawString(PoseStack poseStack, Font fontRenderer, Component text, float x, float y){
-        fontRenderer.draw(poseStack, text, x, y, DEFAULT_TEXT_COLOR);
+        drawString(poseStack, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawString(PoseStack poseStack, Component text, float x, float y, int color){
@@ -45,11 +50,13 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, Font fontRenderer, Component text, float x, float y, int color){
-        fontRenderer.drawShadow(poseStack, text, x, y, color);
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        fontRenderer.drawInBatch(text, x, y, color, true, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        bufferSource.endBatch();
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, Font fontRenderer, Component text, float x, float y){
-        fontRenderer.drawShadow(poseStack, text, x, y, DEFAULT_TEXT_COLOR);
+        drawStringWithShadow(poseStack, fontRenderer, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, Component text, float x, float y, int color){
@@ -61,11 +68,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredString(PoseStack poseStack, Font fontRenderer, Component text, float x, float y, int color){
-        fontRenderer.draw(poseStack, text, x - fontRenderer.width(text) / 2f, y, color);
+        drawString(poseStack, text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredString(PoseStack poseStack, Font fontRenderer, Component text, float x, float y){
-        fontRenderer.draw(poseStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawCenteredString(poseStack, fontRenderer, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredString(PoseStack poseStack, Component text, float x, float y, int color){
@@ -77,11 +84,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredStringWithShadow(PoseStack poseStack, Font fontRenderer, Component text, float x, float y, int color){
-        fontRenderer.drawShadow(poseStack, text, x - fontRenderer.width(text) / 2f, y, color);
+        drawStringWithShadow(poseStack, text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredStringWithShadow(PoseStack poseStack, Font fontRenderer, Component text, float x, float y){
-        fontRenderer.drawShadow(poseStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawCenteredStringWithShadow(poseStack, fontRenderer, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredStringWithShadow(PoseStack poseStack, Component text, float x, float y, int color){
@@ -93,11 +100,13 @@ public class ScreenUtils {
     }
 
     public static void drawString(PoseStack poseStack, Font fontRenderer, String text, float x, float y, int color){
-        fontRenderer.draw(poseStack, text, x, y, color);
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        fontRenderer.drawInBatch(text, x, y, color, false, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        bufferSource.endBatch();
     }
 
     public static void drawString(PoseStack poseStack, Font fontRenderer, String text, float x, float y){
-        fontRenderer.draw(poseStack, text, x, y, DEFAULT_TEXT_COLOR);
+        drawString(poseStack, fontRenderer, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawString(PoseStack poseStack, String text, float x, float y, int color){
@@ -109,11 +118,13 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, Font fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawShadow(poseStack, text, x - fontRenderer.width(text) / 2f, y, color);
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        fontRenderer.drawInBatch(text, x, y, color, true, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        bufferSource.endBatch();
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, Font fontRenderer, String text, float x, float y){
-        fontRenderer.drawShadow(poseStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawStringWithShadow(poseStack, fontRenderer, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, String text, float x, float y, int color){
@@ -125,11 +136,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredString(PoseStack poseStack, Font fontRenderer, String text, float x, float y, int color){
-        fontRenderer.draw(poseStack, text, x - fontRenderer.width(text) / 2f, y, color);
+        drawString(poseStack, fontRenderer, text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredString(PoseStack poseStack, Font fontRenderer, String text, float x, float y){
-        fontRenderer.draw(poseStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawCenteredString(poseStack, fontRenderer, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredString(PoseStack poseStack, String text, float x, float y, int color){
@@ -141,11 +152,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredStringWithShadow(PoseStack poseStack, Font fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawShadow(poseStack, text, x - fontRenderer.width(text) / 2f, y, color);
+        drawStringWithShadow(poseStack, fontRenderer, text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredStringWithShadow(PoseStack poseStack, Font fontRenderer, String text, float x, float y){
-        fontRenderer.drawShadow(poseStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawCenteredStringWithShadow(poseStack, fontRenderer, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredStringWithShadow(PoseStack poseStack, String text, float x, float y, int color){
@@ -306,15 +317,15 @@ public class ScreenUtils {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         Matrix4f matrix4f = poseStack.last().pose();
-        GuiComponent.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY - 4, tooltipX + tooltipWidth + 3, tooltipY - 3, 400, -267386864, -267386864);
-        GuiComponent.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipWidth + 3, tooltipY + tooltipHeight + 4, 400, -267386864, -267386864);
-        GuiComponent.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY - 3, tooltipX + tooltipWidth + 3, tooltipY + tooltipHeight + 3, 400, -267386864, -267386864);
-        GuiComponent.fillGradient(matrix4f, bufferbuilder, tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, 400, -267386864, -267386864);
-        GuiComponent.fillGradient(matrix4f, bufferbuilder, tooltipX + tooltipWidth + 3, tooltipY - 3, tooltipX + tooltipWidth + 4, tooltipY + tooltipHeight + 3, 400, -267386864, -267386864);
-        GuiComponent.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, 400, -267386864, -267386864);
-        GuiComponent.fillGradient(matrix4f, bufferbuilder, tooltipX + tooltipWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipWidth + 3, tooltipY + tooltipHeight + 3 - 1, 400, 1347420415, 1344798847);
-        GuiComponent.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY - 3, tooltipX + tooltipWidth + 3, tooltipY - 3 + 1, 400, 1347420415, 1347420415);
-        GuiComponent.fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipWidth + 3, tooltipY + tooltipHeight + 3, 400, 1344798847, 1344798847);
+        fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY - 4, tooltipX + tooltipWidth + 3, tooltipY - 3, 400, -267386864, -267386864);
+        fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipWidth + 3, tooltipY + tooltipHeight + 4, 400, -267386864, -267386864);
+        fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY - 3, tooltipX + tooltipWidth + 3, tooltipY + tooltipHeight + 3, 400, -267386864, -267386864);
+        fillGradient(matrix4f, bufferbuilder, tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, 400, -267386864, -267386864);
+        fillGradient(matrix4f, bufferbuilder, tooltipX + tooltipWidth + 3, tooltipY - 3, tooltipX + tooltipWidth + 4, tooltipY + tooltipHeight + 3, 400, -267386864, -267386864);
+        fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, 400, -267386864, -267386864);
+        fillGradient(matrix4f, bufferbuilder, tooltipX + tooltipWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipWidth + 3, tooltipY + tooltipHeight + 3 - 1, 400, 1347420415, 1344798847);
+        fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY - 3, tooltipX + tooltipWidth + 3, tooltipY - 3 + 1, 400, 1347420415, 1347420415);
+        fillGradient(matrix4f, bufferbuilder, tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipWidth + 3, tooltipY + tooltipHeight + 3, 400, 1344798847, 1344798847);
         RenderSystem.enableDepthTest();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -322,6 +333,9 @@ public class ScreenUtils {
         RenderSystem.disableBlend();
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         poseStack.translate(0.0D, 0.0D, 400.0D);
+        GUI_GRAPHICS.minecraft = ClientUtils.getMinecraft();
+        GUI_GRAPHICS.pose = poseStack;
+        GUI_GRAPHICS.bufferSource = bufferSource;
 
         int offsetY = tooltipY;
 
@@ -337,8 +351,23 @@ public class ScreenUtils {
 
         for(int index = 0; index < components.size(); ++index){
             ClientTooltipComponent component = components.get(index);
-            component.renderImage(ClientUtils.getFontRenderer(), tooltipX, offsetY, poseStack, ClientUtils.getItemRenderer());
+            component.renderImage(ClientUtils.getFontRenderer(), tooltipX, offsetY, GUI_GRAPHICS);
             offsetY += component.getHeight() + (index == 0 ? 2 : 0);
         }
+    }
+
+    private static void fillGradient(Matrix4f matrix4f, VertexConsumer vertexConsumer, int startX, int startY, int endX, int endY, int zOffset, int startColor, int endColor){
+        float startAlpha = (float)FastColor.ARGB32.alpha(startColor) / 255.0f;
+        float startRed = (float)FastColor.ARGB32.red(startColor) / 255.0f;
+        float startGreen = (float)FastColor.ARGB32.green(startColor) / 255.0f;
+        float startBlue = (float)FastColor.ARGB32.blue(startColor) / 255.0f;
+        float endAlpha = (float)FastColor.ARGB32.alpha(endColor) / 255.0f;
+        float endRed = (float)FastColor.ARGB32.red(endColor) / 255.0f;
+        float endGreen = (float)FastColor.ARGB32.green(endColor) / 255.0f;
+        float endBlue = (float)FastColor.ARGB32.blue(endColor) / 255.0f;
+        vertexConsumer.vertex(matrix4f, startX, startY, zOffset).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        vertexConsumer.vertex(matrix4f, startX, endY, zOffset).color(endRed, endGreen, endBlue, endAlpha).endVertex();
+        vertexConsumer.vertex(matrix4f, endX, endY, zOffset).color(endRed, endGreen, endBlue, endAlpha).endVertex();
+        vertexConsumer.vertex(matrix4f, endX, startY, zOffset).color(startRed, startGreen, startBlue, startAlpha).endVertex();
     }
 }

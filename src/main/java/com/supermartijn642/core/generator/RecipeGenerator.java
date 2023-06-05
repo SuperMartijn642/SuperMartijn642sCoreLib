@@ -12,8 +12,10 @@ import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
@@ -31,7 +33,7 @@ import java.util.*;
  */
 public abstract class RecipeGenerator extends ResourceGenerator {
 
-    private static final Map<CreativeModeTab,RecipeCategory> TAB_TO_CATEGORY = new HashMap<>();
+    private static final Map<ResourceKey<CreativeModeTab>,RecipeCategory> TAB_TO_CATEGORY = new HashMap<>();
 
     static{
         TAB_TO_CATEGORY.put(CreativeModeTabs.BUILDING_BLOCKS, RecipeCategory.BUILDING_BLOCKS);
@@ -1424,7 +1426,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private Ingredient base, addition;
 
         private SmithingRecipeBuilder(ResourceLocation identifier, ItemLike output, CompoundTag outputTag, int outputCount){
-            super(identifier, RecipeSerializer.SMITHING, output, outputTag, outputCount);
+            super(identifier, RecipeSerializer.SMITHING_TRANSFORM, output, outputTag, outputCount);
         }
 
         /**
@@ -1576,9 +1578,12 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 String category = RecipeCategory.MISC.getFolderName();
                 for(CreativeModeTab tab : CreativeModeTabs.allTabs()){
                     if(tab.contains(outputItem.getDefaultInstance())){
-                        category = TAB_TO_CATEGORY.containsKey(tab) ?
-                            TAB_TO_CATEGORY.get(tab).getFolderName() :
-                            tab.getId().getPath();
+                        ResourceKey<CreativeModeTab> key = BuiltInRegistries.CREATIVE_MODE_TAB.getResourceKey(tab).orElse(null);
+                        if(key != null){
+                            category = TAB_TO_CATEGORY.containsKey(key) ?
+                                TAB_TO_CATEGORY.get(key).getFolderName() :
+                                key.location().getPath();
+                        }
                     }
                 }
                 String namespace = recipe.identifier.getNamespace();
