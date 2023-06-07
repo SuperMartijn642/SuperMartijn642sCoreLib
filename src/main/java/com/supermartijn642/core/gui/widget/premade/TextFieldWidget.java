@@ -11,7 +11,6 @@ import com.supermartijn642.core.gui.widget.WidgetRenderContext;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
@@ -85,7 +84,8 @@ public class TextFieldWidget extends BaseWidget {
 
         if(!s.isEmpty()){
             String s1 = cursorInView ? s.substring(0, relativeCursor) : s;
-            leftOffset = fontRenderer.drawInBatch(s1, left, top, textColor, false, context.poseStack().last().pose(), context.buffers(), Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT) + 1;
+            ScreenUtils.drawString(context.poseStack(), fontRenderer, s1, left, top, textColor);
+            leftOffset += fontRenderer.width(s1) + 1;
         }
 
         boolean cursorAtEnd = this.cursorPosition < this.text.length();
@@ -100,18 +100,18 @@ public class TextFieldWidget extends BaseWidget {
 
         // draw text
         if(!s.isEmpty() && cursorInView && relativeCursor < s.length())
-            fontRenderer.drawInBatch(s.substring(relativeCursor), leftOffset, top, textColor, false, context.poseStack().last().pose(), context.buffers(), Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+            ScreenUtils.drawString(context.poseStack(), fontRenderer, s.substring(relativeCursor), leftOffset, top, textColor);
 
         // draw suggestion
         if(!this.suggestion.isEmpty() && this.text.isEmpty())
-            fontRenderer.drawInBatch(fontRenderer.plainSubstrByWidth(this.suggestion, this.width - 8 - fontRenderer.width("...")) + "...", cursorX, top, -8355712, true, context.poseStack().last().pose(), context.buffers(), Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+            ScreenUtils.drawStringWithShadow(context.poseStack(), fontRenderer, fontRenderer.plainSubstrByWidth(this.suggestion, this.width - 8 - fontRenderer.width("...")) + "...", cursorX, top, -8355712);
 
         // draw cursor
         if(shouldBlink){
             if(cursorAtEnd)
                 ScreenUtils.fillRect(context.poseStack(), cursorX - 0.5f, top - 1, 1, fontRenderer.lineHeight, -3092272);
             else
-                fontRenderer.drawInBatch("_", cursorX, top, textColor, true, context.poseStack().last().pose(), context.buffers(), Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+                ScreenUtils.drawStringWithShadow(context.poseStack(), fontRenderer, "_", cursorX, top, textColor);
         }
 
         if(relativeSelection != relativeCursor){

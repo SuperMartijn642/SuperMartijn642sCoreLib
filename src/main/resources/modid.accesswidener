@@ -36,6 +36,7 @@ accessible field net/minecraft/data/DataGenerator rootOutputFolder Ljava/nio/fil
 accessible field net/minecraft/client/gui/GuiGraphics minecraft Lnet/minecraft/client/Minecraft; # minecraft
 accessible field net/minecraft/client/gui/GuiGraphics pose Lcom/mojang/blaze3d/vertex/PoseStack; # pose
 accessible field net/minecraft/client/gui/GuiGraphics bufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource; # bufferSource
+accessible method net/minecraft/client/gui/GuiGraphics renderTooltipInternal (Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;)V # renderTooltipInternal
 mutable field net/minecraft/client/gui/GuiGraphics minecraft Lnet/minecraft/client/Minecraft; # minecraft
 mutable field net/minecraft/client/gui/GuiGraphics pose Lcom/mojang/blaze3d/vertex/PoseStack; # pose
 mutable field net/minecraft/client/gui/GuiGraphics bufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource; # bufferSource

@@ -86,9 +86,8 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         int offsetMouseX = mouseX - offsetX;
         int offsetMouseY = mouseY - offsetY;
 
-        RenderSystem.getModelViewStack().pushPose();
-        RenderSystem.getModelViewStack().translate(offsetX, offsetY, 0);
-        RenderSystem.applyModelViewMatrix();
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(offsetX, offsetY, 0);
         RenderSystem.disableDepthTest();
 
         // Update whether the widget is focused
@@ -160,8 +159,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         // Render the widget's tooltips
         this.widget.renderTooltips(this.widgetRenderContext, offsetMouseX, offsetMouseY);
 
-        RenderSystem.getModelViewStack().popPose();
-        RenderSystem.applyModelViewMatrix();
+        guiGraphics.pose().popPose();
         RenderSystem.enableDepthTest();
     }
 
