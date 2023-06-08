@@ -2,17 +2,20 @@ package com.supermartijn642.core.item;
 
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.registry.RegistryUtil;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.CreativeModeTabRegistry;
-import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.RegisterEvent;
 
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -48,51 +51,51 @@ public final class CreativeItemGroup extends CreativeModeTab {
     }
 
     public static CreativeModeTab getBuildingBlocks(){
-        return CreativeModeTabs.BUILDING_BLOCKS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.BUILDING_BLOCKS);
     }
 
     public static CreativeModeTab getColoredBlocks(){
-        return CreativeModeTabs.COLORED_BLOCKS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.COLORED_BLOCKS);
     }
 
     public static CreativeModeTab getNaturalBlocks(){
-        return CreativeModeTabs.NATURAL_BLOCKS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.NATURAL_BLOCKS);
     }
 
     public static CreativeModeTab getFunctionalBlocks(){
-        return CreativeModeTabs.FUNCTIONAL_BLOCKS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.FUNCTIONAL_BLOCKS);
     }
 
     public static CreativeModeTab getRedstoneBlocks(){
-        return CreativeModeTabs.REDSTONE_BLOCKS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.REDSTONE_BLOCKS);
     }
 
     public static CreativeModeTab getToolsAndUtilities(){
-        return CreativeModeTabs.TOOLS_AND_UTILITIES;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.TOOLS_AND_UTILITIES);
     }
 
     public static CreativeModeTab getCombat(){
-        return CreativeModeTabs.COMBAT;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.COMBAT);
     }
 
     public static CreativeModeTab getFoodAndDrinks(){
-        return CreativeModeTabs.FOOD_AND_DRINKS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.FOOD_AND_DRINKS);
     }
 
     public static CreativeModeTab getIngredients(){
-        return CreativeModeTabs.INGREDIENTS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.INGREDIENTS);
     }
 
     public static CreativeModeTab getSpawnEggs(){
-        return CreativeModeTabs.SPAWN_EGGS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.SPAWN_EGGS);
     }
 
     public static CreativeModeTab getOperatorUtilities(){
-        return CreativeModeTabs.OP_BLOCKS;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.OP_BLOCKS);
     }
 
     public static CreativeModeTab getSearch(){
-        return CreativeModeTabs.SEARCH;
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.SEARCH);
     }
 
     private final String modid, identifier;
@@ -108,7 +111,10 @@ public final class CreativeItemGroup extends CreativeModeTab {
         this.background = new ResourceLocation("textures/gui/container/creative_inventory/tab_items.png");
         this.displayItemsGenerator = (flags, output) -> this.applyFiller(output::accept);
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<CreativeModeTabEvent.Register>)event -> registerTab(this));
+        FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<RegisterEvent>)event -> {
+            if(event.getRegistryKey() == Registries.CREATIVE_MODE_TAB)
+                event.register(Registries.CREATIVE_MODE_TAB, new ResourceLocation(modid, identifier), () -> this);
+        });
     }
 
     private void applyFiller(Consumer<ItemStack> output){
@@ -158,32 +164,5 @@ public final class CreativeItemGroup extends CreativeModeTab {
     @Override
     public ResourceLocation getBackgroundLocation(){
         return this.background;
-    }
-
-    /**
-     * {@link CreativeModeTabRegistry#processCreativeModeTab(CreativeModeTab, ResourceLocation, List, List)}
-     */
-    @SuppressWarnings("JavadocReference")
-    private static final Method processCreativeModeTab;
-
-    static{
-        try{
-            processCreativeModeTab = CreativeModeTabRegistry.class.getDeclaredMethod("processCreativeModeTab", CreativeModeTab.class, ResourceLocation.class, List.class, List.class);
-            processCreativeModeTab.setAccessible(true);
-        }catch(Exception e){
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static void registerTab(CreativeItemGroup tab){
-        ResourceLocation identifier = new ResourceLocation(tab.modid, tab.identifier);
-        if(CreativeModeTabRegistry.getTab(identifier) != null)
-            throw new IllegalStateException("Duplicate creative mode tab with name: " + identifier);
-
-        try{
-            processCreativeModeTab.invoke(null, tab, identifier, Collections.emptyList(), Collections.emptyList());
-        }catch(Exception e){
-            throw new RuntimeException(e);
-        }
     }
 }

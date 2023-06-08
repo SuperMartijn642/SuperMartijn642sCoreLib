@@ -1,6 +1,5 @@
 package com.supermartijn642.core.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -152,71 +151,71 @@ public abstract class ObjectBaseContainerWidget<T, C extends AbstractContainerMe
     }
 
     @Override
-    public final void renderBackground(PoseStack poseStack, int mouseX, int mouseY){
+    public final void renderBackground(WidgetRenderContext context, int mouseX, int mouseY){
         if(this.validateObjectOrClose())
-            this.renderBackground(poseStack, mouseX, mouseY, this.object);
+            this.renderBackground(context, mouseX, mouseY, this.object);
     }
 
     /**
      * Renders the widget's background. This will be called first in the render chain.
      */
-    protected void renderBackground(PoseStack poseStack, int mouseX, int mouseY, T object){
-        super.renderBackground(poseStack, mouseX, mouseY);
+    protected void renderBackground(WidgetRenderContext context, int mouseX, int mouseY, T object){
+        super.renderBackground(context, mouseX, mouseY);
     }
 
     @Override
-    public final void render(PoseStack poseStack, int mouseX, int mouseY){
+    public final void render(WidgetRenderContext context, int mouseX, int mouseY){
         if(this.validateObjectOrClose())
-            this.render(poseStack, mouseX, mouseY, this.object);
+            this.render(context, mouseX, mouseY, this.object);
     }
 
     /**
      * Renders the widget's main features.
      * Called after the background and slots are drawn, but before items are drawn.
      */
-    protected void render(PoseStack poseStack, int mouseX, int mouseY, T object){
-        super.render(poseStack, mouseX, mouseY);
+    protected void render(WidgetRenderContext context, int mouseX, int mouseY, T object){
+        super.render(context, mouseX, mouseY);
     }
 
     @Override
-    public final void renderForeground(PoseStack poseStack, int mouseX, int mouseY){
+    public final void renderForeground(WidgetRenderContext context, int mouseX, int mouseY){
         if(this.validateObjectOrClose())
-            this.renderForeground(poseStack, mouseX, mouseY, this.object);
+            this.renderForeground(context, mouseX, mouseY, this.object);
     }
 
     /**
      * Renders the widget's foreground.
      * Called after main features and items are drawn, but before cursor item and overlay are drawn.
      */
-    protected void renderForeground(PoseStack poseStack, int mouseX, int mouseY, T object){
-        super.renderForeground(poseStack, mouseX, mouseY);
+    protected void renderForeground(WidgetRenderContext context, int mouseX, int mouseY, T object){
+        super.renderForeground(context, mouseX, mouseY);
     }
 
     @Override
-    public final void renderOverlay(PoseStack poseStack, int mouseX, int mouseY){
+    public final void renderOverlay(WidgetRenderContext context, int mouseX, int mouseY){
         if(this.validateObjectOrClose())
-            this.renderOverlay(poseStack, mouseX, mouseY, this.object);
+            this.renderOverlay(context, mouseX, mouseY, this.object);
     }
 
     /**
      * Called after foreground and cursor item are drawn, but before tooltips are drawn.
      */
-    protected void renderOverlay(PoseStack poseStack, int mouseX, int mouseY, T object){
-        super.renderOverlay(poseStack, mouseX, mouseY);
+    protected void renderOverlay(WidgetRenderContext context, int mouseX, int mouseY, T object){
+        super.renderOverlay(context, mouseX, mouseY);
     }
 
     @Override
-    public final void renderTooltips(PoseStack poseStack, int mouseX, int mouseY){
+    public final void renderTooltips(WidgetRenderContext context, int mouseX, int mouseY){
         if(this.validateObjectOrClose())
-            this.renderTooltips(poseStack, mouseX, mouseY, this.object);
+            this.renderTooltips(context, mouseX, mouseY, this.object);
     }
 
     /**
      * Renders tooltips for the given {@code mouseX} and {@code mouseY}.
      * This will be called last in the render chain.
      */
-    protected void renderTooltips(PoseStack poseStack, int mouseX, int mouseY, T object){
-        super.renderTooltips(poseStack, mouseX, mouseY);
+    protected void renderTooltips(WidgetRenderContext context, int mouseX, int mouseY, T object){
+        super.renderTooltips(context, mouseX, mouseY);
     }
 
     @Override
@@ -226,7 +225,7 @@ public abstract class ObjectBaseContainerWidget<T, C extends AbstractContainerMe
     }
 
     /**
-     * Gathers the tooltips to be rendered in {@link #renderTooltips(PoseStack, int, int)}. Tooltips will only be shown when this widget is focused.
+     * Gathers the tooltips to be rendered in {@link #renderTooltips(WidgetRenderContext, int, int)}. Tooltips will only be shown when this widget is focused.
      * @param tooltips consumer for tooltips to be rendered
      */
     protected void getTooltips(Consumer<Component> tooltips, T object){

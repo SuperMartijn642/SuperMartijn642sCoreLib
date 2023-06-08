@@ -40,7 +40,7 @@ public class PacketContext {
      * @return the client world if client-side, or the sending player's world if server-side
      */
     public Level getWorld(){
-        return this.getHandlingSide() == CoreSide.CLIENT ? ClientUtils.getWorld() : this.getSendingPlayer().level;
+        return this.getHandlingSide() == CoreSide.CLIENT ? ClientUtils.getWorld() : this.getSendingPlayer().level();
     }
 
     public void queueTask(Runnable task){

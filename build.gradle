@@ -153,7 +153,7 @@ task prepareDataResources(type: Sync) {
 
 // Run prepareDataResources before prepareRunData
 tasks.whenTaskAdded {
-    if(it.name == "prepareRunData")
+    if (it.name == "prepareRunData")
         it.dependsOn "prepareDataResources"
 }
 
@@ -209,13 +209,15 @@ modrinth {
     changelog = file("changelog.md").text
     uploadFile = jar // With Loom, this MUST be set to `remapJar` instead of `jar`!
     loaders = ["forge"]
-    dependencies {
-        // Required dependencies
-        if (!project.modrinth_required_dependency_ids.isEmpty())
-            project.modrinth_required_dependency_ids.split(" ").each required::project
-        // Optional dependencies
-        if (!project.modrinth_optional_dependency_ids.isEmpty())
-            project.modrinth_optional_dependency_ids.split(" ").each optional::project
+    if (!project.modrinth_required_dependency_ids.isEmpty() || !project.modrinth_optional_dependency_ids.isEmpty()) {
+        dependencies {
+            // Required dependencies
+            if (!project.modrinth_required_dependency_ids.isEmpty())
+                project.modrinth_required_dependency_ids.split(" ").each required::project
+            // Optional dependencies
+            if (!project.modrinth_optional_dependency_ids.isEmpty())
+                project.modrinth_optional_dependency_ids.split(" ").each optional::project
+        }
     }
 }
 

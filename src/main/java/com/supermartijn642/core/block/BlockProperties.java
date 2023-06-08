@@ -3,16 +3,15 @@ package com.supermartijn642.core.block;
 import com.supermartijn642.core.mixin.BlockPropertiesAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.common.util.TriPredicate;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 
@@ -21,21 +20,14 @@ import java.util.function.ToIntFunction;
  */
 public class BlockProperties {
 
-    public static BlockProperties create(Material material, MaterialColor color){
-        return new BlockProperties(material, color);
-    }
-
-    public static BlockProperties create(Material material, DyeColor color){
-        return new BlockProperties(material, color.getMaterialColor());
-    }
-
-    public static BlockProperties create(Material material){
-        return new BlockProperties(material, material.getColor());
+    public static BlockProperties create(){
+        return new BlockProperties();
     }
 
     public static BlockProperties copy(Block block){
         BlockBehaviour.Properties sourceProperties = block.properties;
-        BlockProperties properties = create(sourceProperties.material, block.defaultMaterialColor());
+        BlockProperties properties = create();
+        properties.mapColor = sourceProperties.mapColor;
         properties.hasCollision = sourceProperties.hasCollision;
         properties.canOcclude = block.defaultBlockState().canOcclude();
         properties.soundType = block.getSoundType(block.defaultBlockState());
@@ -55,8 +47,7 @@ public class BlockProperties {
         return properties;
     }
 
-    private final Material material;
-    private final MaterialColor mapColor;
+    private Function<BlockState,MapColor> mapColor;
     private boolean hasCollision = true;
     private boolean canOcclude = true;
     private SoundType soundType = SoundType.STONE;
@@ -69,15 +60,19 @@ public class BlockProperties {
     private float speedFactor = 1.0f;
     private float jumpFactor = 1.0f;
     private boolean isAir = false;
-    private TriPredicate<BlockState,BlockGetter,BlockPos> isRedstoneConductor = (state, level, pos) -> state.getMaterial().isSolidBlocking() && state.isCollisionShapeFullBlock(level, pos);
-    private TriPredicate<BlockState,BlockGetter,BlockPos> isSuffocating = (state, level, pos) -> state.getMaterial().blocksMotion() && state.isCollisionShapeFullBlock(level, pos);
+    private TriPredicate<BlockState,BlockGetter,BlockPos> isRedstoneConductor = BlockBehaviour.BlockStateBase::isCollisionShapeFullBlock;
+    private TriPredicate<BlockState,BlockGetter,BlockPos> isSuffocating = (state, level, pos) -> state.blocksMotion() && state.isCollisionShapeFullBlock(level, pos);
     private boolean hasDynamicShape = false;
     private boolean noLootTable = false;
     private Supplier<ResourceLocation> lootTableSupplier;
 
-    private BlockProperties(Material material, MaterialColor color){
-        this.material = material;
-        this.mapColor = color;
+    public BlockProperties mapColor(Function<BlockState,MapColor> colorFunction){
+        this.mapColor = colorFunction;
+        return this;
+    }
+
+    public BlockProperties mapColor(MapColor color){
+        return this.mapColor(state -> color);
     }
 
     public BlockProperties noCollision(){
@@ -194,7 +189,9 @@ public class BlockProperties {
      */
     @Deprecated
     public BlockBehaviour.Properties toUnderlying(){
-        BlockBehaviour.Properties properties = BlockBehaviour.Properties.of(this.material, this.mapColor);
+        BlockBehaviour.Properties properties = BlockBehaviour.Properties.of();
+        if(this.mapColor != null)
+            properties.mapColor(this.mapColor);
         if(!this.hasCollision)
             properties.noCollission();
         properties.sound(this.soundType);

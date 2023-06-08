@@ -20,7 +20,7 @@ public class TestModClient {
 
     @SubscribeEvent
     public static void onBlockBreak(LivingEvent.LivingJumpEvent e){
-        if(e.getEntity().getLevel().isClientSide)
+        if(e.getEntity().level().isClientSide)
             ClientUtils.displayScreen(WidgetScreen.of(new TestScreen()));
     }
 

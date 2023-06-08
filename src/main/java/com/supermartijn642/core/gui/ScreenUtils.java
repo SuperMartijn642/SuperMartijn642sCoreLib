@@ -1,21 +1,29 @@
 package com.supermartijn642.core.gui;
 
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.supermartijn642.core.ClientUtils;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
-import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.event.RenderTooltipEvent;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
 import java.util.Collections;
@@ -29,15 +37,18 @@ public class ScreenUtils {
 
     private static final ResourceLocation BUTTON_BACKGROUND = new ResourceLocation("supermartijn642corelib", "textures/gui/buttons.png");
     private static final ResourceLocation SCREEN_BACKGROUND = new ResourceLocation("supermartijn642corelib", "textures/gui/background.png");
+    private static final GuiGraphics GUI_GRAPHICS = new GuiGraphics(null, null);
 
     public static final int DEFAULT_TEXT_COLOR = 4210752, ACTIVE_TEXT_COLOR = 14737632, INACTIVE_TEXT_COLOR = 7368816;
 
     public static void drawString(PoseStack poseStack, Font fontRenderer, Component text, float x, float y, int color){
-        fontRenderer.draw(poseStack, text, x, y, color);
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        fontRenderer.drawInBatch(text, x, y, color, false, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        bufferSource.endBatch();
     }
 
     public static void drawString(PoseStack poseStack, Font fontRenderer, Component text, float x, float y){
-        fontRenderer.draw(poseStack, text, x, y, DEFAULT_TEXT_COLOR);
+        drawString(poseStack, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawString(PoseStack poseStack, Component text, float x, float y, int color){
@@ -49,11 +60,13 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, Font fontRenderer, Component text, float x, float y, int color){
-        fontRenderer.drawShadow(poseStack, text, x, y, color);
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        fontRenderer.drawInBatch(text, x, y, color, true, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        bufferSource.endBatch();
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, Font fontRenderer, Component text, float x, float y){
-        fontRenderer.drawShadow(poseStack, text, x, y, DEFAULT_TEXT_COLOR);
+        drawStringWithShadow(poseStack, fontRenderer, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, Component text, float x, float y, int color){
@@ -65,11 +78,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredString(PoseStack poseStack, Font fontRenderer, Component text, float x, float y, int color){
-        fontRenderer.draw(poseStack, text, x - fontRenderer.width(text) / 2f, y, color);
+        drawString(poseStack, text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredString(PoseStack poseStack, Font fontRenderer, Component text, float x, float y){
-        fontRenderer.draw(poseStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawCenteredString(poseStack, fontRenderer, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredString(PoseStack poseStack, Component text, float x, float y, int color){
@@ -81,11 +94,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredStringWithShadow(PoseStack poseStack, Font fontRenderer, Component text, float x, float y, int color){
-        fontRenderer.drawShadow(poseStack, text, x - fontRenderer.width(text) / 2f, y, color);
+        drawStringWithShadow(poseStack, text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredStringWithShadow(PoseStack poseStack, Font fontRenderer, Component text, float x, float y){
-        fontRenderer.drawShadow(poseStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawCenteredStringWithShadow(poseStack, fontRenderer, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredStringWithShadow(PoseStack poseStack, Component text, float x, float y, int color){
@@ -97,11 +110,13 @@ public class ScreenUtils {
     }
 
     public static void drawString(PoseStack poseStack, Font fontRenderer, String text, float x, float y, int color){
-        fontRenderer.draw(poseStack, text, x, y, color);
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        fontRenderer.drawInBatch(text, x, y, color, false, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        bufferSource.endBatch();
     }
 
     public static void drawString(PoseStack poseStack, Font fontRenderer, String text, float x, float y){
-        fontRenderer.draw(poseStack, text, x, y, DEFAULT_TEXT_COLOR);
+        drawString(poseStack, fontRenderer, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawString(PoseStack poseStack, String text, float x, float y, int color){
@@ -113,11 +128,13 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, Font fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawShadow(poseStack, text, x - fontRenderer.width(text) / 2f, y, color);
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        fontRenderer.drawInBatch(text, x, y, color, true, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        bufferSource.endBatch();
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, Font fontRenderer, String text, float x, float y){
-        fontRenderer.drawShadow(poseStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawStringWithShadow(poseStack, fontRenderer, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, String text, float x, float y, int color){
@@ -129,11 +146,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredString(PoseStack poseStack, Font fontRenderer, String text, float x, float y, int color){
-        fontRenderer.draw(poseStack, text, x - fontRenderer.width(text) / 2f, y, color);
+        drawString(poseStack, fontRenderer, text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredString(PoseStack poseStack, Font fontRenderer, String text, float x, float y){
-        fontRenderer.draw(poseStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawCenteredString(poseStack, fontRenderer, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredString(PoseStack poseStack, String text, float x, float y, int color){
@@ -145,11 +162,11 @@ public class ScreenUtils {
     }
 
     public static void drawCenteredStringWithShadow(PoseStack poseStack, Font fontRenderer, String text, float x, float y, int color){
-        fontRenderer.drawShadow(poseStack, text, x - fontRenderer.width(text) / 2f, y, color);
+        drawStringWithShadow(poseStack, fontRenderer, text, x - fontRenderer.width(text) / 2f, y, color);
     }
 
     public static void drawCenteredStringWithShadow(PoseStack poseStack, Font fontRenderer, String text, float x, float y){
-        fontRenderer.drawShadow(poseStack, text, x - fontRenderer.width(text) / 2f, y, DEFAULT_TEXT_COLOR);
+        drawCenteredStringWithShadow(poseStack, fontRenderer, text, x, y, DEFAULT_TEXT_COLOR);
     }
 
     public static void drawCenteredStringWithShadow(PoseStack poseStack, String text, float x, float y, int color){
@@ -268,76 +285,53 @@ public class ScreenUtils {
     }
 
     /**
-     * Copied from {@link Screen#renderTooltipInternal(PoseStack, List, int, int, ClientTooltipPositioner)}.
+     * Copied from {@link GuiGraphics#renderTooltipInternal(Font, List, int, int, ClientTooltipPositioner)}.
      */
     private static void drawTooltipInternal(PoseStack poseStack, Font fontRenderer, List<ClientTooltipComponent> components, int x, int y){
         if(components.isEmpty())
             return;
 
-        int windowWidth = ClientUtils.getMinecraft().getWindow().getGuiScaledWidth();
-        int windowHeight = ClientUtils.getMinecraft().getWindow().getGuiScaledHeight();
+        GUI_GRAPHICS.minecraft = ClientUtils.getMinecraft();
+        GUI_GRAPHICS.pose = poseStack;
+        GUI_GRAPHICS.bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        GUI_GRAPHICS.renderTooltipInternal(fontRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE);
+        GUI_GRAPHICS.bufferSource.endBatch();
+    }
 
-        RenderTooltipEvent.Pre preEvent = ForgeHooksClient.onRenderTooltipPre(ItemStack.EMPTY, poseStack, x, y, windowWidth, windowHeight, components, fontRenderer, ClientUtils.getFontRenderer());
-        if(preEvent.isCanceled())
+    /**
+     * Copied from {@link GuiGraphics#renderItem(LivingEntity, Level, ItemStack, int, int, int, int)}
+     */
+    @SuppressWarnings("JavadocReference")
+    public static void drawItem(PoseStack poseStack, ItemStack stack, @Nullable Level level, int x, int y){
+        if(stack.isEmpty())
             return;
 
-        int tooltipWidth = 0;
-        int tooltipHeight = components.size() == 1 ? -2 : 0;
-
-        for(ClientTooltipComponent component : components){
-            int componentWidth = component.getWidth(preEvent.getFont());
-            if(componentWidth > tooltipWidth)
-                tooltipWidth = componentWidth;
-
-            tooltipHeight += component.getHeight();
-        }
-
-        int tooltipX = preEvent.getX() + 12;
-        int tooltipY = preEvent.getY() - 12;
-        if(tooltipX + tooltipWidth > windowWidth){
-            tooltipX -= 28 + tooltipWidth;
-        }
-
-        if(tooltipY + tooltipHeight + 6 > windowHeight){
-            tooltipY = windowHeight - tooltipHeight - 6;
-        }
-
-        if(y - tooltipHeight - 8 < 0){
-            tooltipY = y + 8;
-        }
-
         poseStack.pushPose();
+        poseStack.translate(x + 8, y + 8, 150);
+        poseStack.scale(16, -16, 16);
+        try{
+            BakedModel model = ClientUtils.getItemRenderer().getModel(stack, level, null, 0);
+            boolean useFlatLighting = !model.usesBlockLight();
+            if(useFlatLighting)
+                Lighting.setupForFlatItems();
+            RenderSystem.disableDepthTest();
 
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        Matrix4f matrix4f = poseStack.last().pose();
-        TooltipRenderUtil.renderTooltipBackground(GuiComponent::fillGradient, matrix4f, bufferbuilder, tooltipX, tooltipY, tooltipWidth, tooltipHeight, 400);
-        RenderSystem.enableDepthTest();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        BufferUploader.drawWithShader(bufferbuilder.end());
-        RenderSystem.disableBlend();
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        poseStack.translate(0.0D, 0.0D, 400.0D);
+            MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            ClientUtils.getItemRenderer().render(stack, ItemDisplayContext.GUI, false, poseStack, bufferSource, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, model);
+            bufferSource.endBatch();
 
-        int offsetY = tooltipY;
-
-        for(int index = 0; index < components.size(); ++index){
-            ClientTooltipComponent component = components.get(index);
-            component.renderText(preEvent.getFont(), tooltipX, offsetY, matrix4f, bufferSource);
-            offsetY += component.getHeight() + (index == 0 ? 2 : 0);
+            RenderSystem.enableDepthTest();
+            if(useFlatLighting)
+                Lighting.setupFor3DItems();
+        }catch(Throwable throwable){
+            CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering item");
+            CrashReportCategory crashReportCategory = crashReport.addCategory("Item being rendered");
+            crashReportCategory.setDetail("Item Type", () -> String.valueOf(stack.getItem()));
+            crashReportCategory.setDetail("Item Damage", () -> String.valueOf(stack.getDamageValue()));
+            crashReportCategory.setDetail("Item NBT", () -> String.valueOf(stack.getTag()));
+            crashReportCategory.setDetail("Item Foil", () -> String.valueOf(stack.hasFoil()));
+            throw new ReportedException(crashReport);
         }
-
-        bufferSource.endBatch();
         poseStack.popPose();
-        offsetY = tooltipY;
-
-        for(int index = 0; index < components.size(); ++index){
-            ClientTooltipComponent component = components.get(index);
-            component.renderImage(preEvent.getFont(), tooltipX, offsetY, poseStack, ClientUtils.getItemRenderer());
-            offsetY += component.getHeight() + (index == 0 ? 2 : 0);
-        }
     }
 }

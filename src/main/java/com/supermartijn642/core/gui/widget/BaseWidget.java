@@ -1,14 +1,10 @@
 package com.supermartijn642.core.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.gui.ScreenUtils;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -17,28 +13,6 @@ import java.util.function.Consumer;
  * Created 14/07/2022 by SuperMartijn642
  */
 public abstract class BaseWidget implements Widget {
-
-    private static final Consumer<String> NARRATOR;
-
-    static{
-        Consumer<String> narrator;
-        try{ // Try to load the 1.19 narrator, if that fails use the 1.19.1 narrator
-            Class<?> clazz = Class.forName("net.minecraft.client.gui.chat.NarratorChatListener");
-            Field instanceField = ObfuscationReflectionHelper.findField(clazz, "f_9331" + "1_");
-            Object instance = instanceField.get(null);
-            Method sayNowMethod = ObfuscationReflectionHelper.findMethod(clazz, "m_9331" + "9_", String.class);
-            narrator = s -> {
-                try{
-                    sayNowMethod.invoke(instance, s);
-                }catch(Exception e){
-                    throw new RuntimeException(e);
-                }
-            };
-        }catch(Exception ignore){
-            narrator = ClientUtils.getMinecraft().getNarrator()::sayNow;
-        }
-        NARRATOR = narrator;
-    }
 
     protected final List<Widget> widgets = new ArrayList<>();
     protected Widget focusedWidget = null;
@@ -127,7 +101,7 @@ public abstract class BaseWidget implements Widget {
     }
 
     @Override
-    public void renderBackground(PoseStack poseStack, int mouseX, int mouseY){
+    public void renderBackground(WidgetRenderContext context, int mouseX, int mouseY){
         // Update the focused widget
         if(!this.focused)
             this.focusedWidget = null;
@@ -149,57 +123,57 @@ public abstract class BaseWidget implements Widget {
             Component message = this.getNarrationMessage();
             String s = message == null ? "" : message.getString();
             if(!s.isEmpty()){
-                NARRATOR.accept(s);
+                ClientUtils.getMinecraft().getNarrator().sayNow(s);
                 this.nextNarration = Long.MAX_VALUE;
             }
         }
 
         // Render internal widgets' background
-        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.renderBackground(poseStack, mouseX, mouseY));
+        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.renderBackground(context, mouseX, mouseY));
         if(this.focusedWidget != null)
-            this.focusedWidget.renderBackground(poseStack, mouseX, mouseY);
+            this.focusedWidget.renderBackground(context, mouseX, mouseY);
     }
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY){
+    public void render(WidgetRenderContext context, int mouseX, int mouseY){
         // Render internal widgets
-        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.render(poseStack, mouseX, mouseY));
+        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.render(context, mouseX, mouseY));
         if(this.focusedWidget != null)
-            this.focusedWidget.render(poseStack, mouseX, mouseY);
+            this.focusedWidget.render(context, mouseX, mouseY);
     }
 
     @Override
-    public void renderForeground(PoseStack poseStack, int mouseX, int mouseY){
+    public void renderForeground(WidgetRenderContext context, int mouseX, int mouseY){
         // Render internal widgets' foreground
-        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.renderForeground(poseStack, mouseX, mouseY));
+        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.renderForeground(context, mouseX, mouseY));
         if(this.focusedWidget != null)
-            this.focusedWidget.renderForeground(poseStack, mouseX, mouseY);
+            this.focusedWidget.renderForeground(context, mouseX, mouseY);
     }
 
     @Override
-    public void renderOverlay(PoseStack poseStack, int mouseX, int mouseY){
+    public void renderOverlay(WidgetRenderContext context, int mouseX, int mouseY){
         // Render internal widgets
-        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.renderOverlay(poseStack, mouseX, mouseY));
+        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.renderOverlay(context, mouseX, mouseY));
         if(this.focusedWidget != null)
-            this.focusedWidget.renderOverlay(poseStack, mouseX, mouseY);
+            this.focusedWidget.renderOverlay(context, mouseX, mouseY);
     }
 
     @Override
-    public void renderTooltips(PoseStack poseStack, int mouseX, int mouseY){
+    public void renderTooltips(WidgetRenderContext context, int mouseX, int mouseY){
         if(this.focused){
             if(this.focusedWidget != null)
-                this.focusedWidget.renderTooltips(poseStack, mouseX, mouseY);
+                this.focusedWidget.renderTooltips(context, mouseX, mouseY);
             else{
                 // Find a better way to do this, preferably without instantiating an array list unless needed
                 List<Component> tooltips = new ArrayList<>(0);
                 this.getTooltips(tooltips::add);
-                ScreenUtils.drawTooltip(poseStack, tooltips, mouseX, mouseY);
+                ScreenUtils.drawTooltip(context.poseStack(), tooltips, mouseX, mouseY);
             }
         }
     }
 
     /**
-     * Gathers the tooltips to be rendered in {@link #renderTooltips(PoseStack, int, int)}. Tooltips will only be shown when this widget is focused.
+     * Gathers the tooltips to be rendered in {@link #renderTooltips(WidgetRenderContext, int, int)}. Tooltips will only be shown when this widget is focused.
      * @param tooltips consumer for tooltips to be rendered
      */
     protected void getTooltips(Consumer<Component> tooltips){

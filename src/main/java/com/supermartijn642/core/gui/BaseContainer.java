@@ -16,7 +16,7 @@ public abstract class BaseContainer extends AbstractContainerMenu {
     public BaseContainer(BaseContainerType<?> type, Player player){
         super(type, 0);
         this.player = player;
-        this.level = player.level;
+        this.level = player.level();
     }
 
     public void setContainerId(int id){

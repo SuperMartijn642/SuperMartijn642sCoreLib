@@ -20,7 +20,7 @@ public abstract class BlockEntityBaseContainer<T extends BlockEntity> extends Ob
     }
 
     public BlockEntityBaseContainer(BaseContainerType<?> type, Player player, BlockPos blockEntityPos){
-        this(type, player, player.level, blockEntityPos);
+        this(type, player, player.level(), blockEntityPos);
     }
 
     @SuppressWarnings("unchecked")

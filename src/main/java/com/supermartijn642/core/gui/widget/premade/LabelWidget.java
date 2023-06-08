@@ -1,8 +1,8 @@
 package com.supermartijn642.core.gui.widget.premade;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.gui.ScreenUtils;
 import com.supermartijn642.core.gui.widget.BaseWidget;
+import com.supermartijn642.core.gui.widget.WidgetRenderContext;
 import net.minecraft.network.chat.Component;
 
 import java.util.function.Supplier;
@@ -40,12 +40,12 @@ public class LabelWidget extends BaseWidget {
     }
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY){
+    public void render(WidgetRenderContext context, int mouseX, int mouseY){
         if(this.active){
-            ScreenUtils.fillRect(poseStack, this.x, this.y, this.width, this.height, -6250336);
-            ScreenUtils.fillRect(poseStack, this.x + 1, this.y + 1, this.width - 2, this.height - 2, 0xff404040);
+            ScreenUtils.fillRect(context.poseStack(), this.x, this.y, this.width, this.height, -6250336);
+            ScreenUtils.fillRect(context.poseStack(), this.x + 1, this.y + 1, this.width - 2, this.height - 2, 0xff404040);
 
-            ScreenUtils.drawCenteredStringWithShadow(poseStack, this.text.get(), this.x + this.width / 2f, this.y + 2, this.active ? ScreenUtils.ACTIVE_TEXT_COLOR : ScreenUtils.INACTIVE_TEXT_COLOR);
+            ScreenUtils.drawCenteredStringWithShadow(context.poseStack(), this.text.get(), this.x + this.width / 2f, this.y + 2, this.active ? ScreenUtils.ACTIVE_TEXT_COLOR : ScreenUtils.INACTIVE_TEXT_COLOR);
         }
     }
 }

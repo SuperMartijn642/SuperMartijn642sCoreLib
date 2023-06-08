@@ -153,7 +153,7 @@ public class PacketChannel {
      * @param packet packet to be send
      */
     public void sendToAllTrackingEntity(Entity entity, BasePacket packet){
-        if(entity.level.isClientSide)
+        if(entity.level().isClientSide)
             throw new IllegalStateException("This must only be called server-side!");
         this.checkRegistration(packet);
         this.channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new InternalPacket().setPacket(packet));

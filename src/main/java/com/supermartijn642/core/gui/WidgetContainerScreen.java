@@ -2,13 +2,14 @@ package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.ContainerWidget;
+import com.supermartijn642.core.gui.widget.MutableWidgetRenderContext;
 import com.supermartijn642.core.gui.widget.Widget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -33,6 +34,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         return new WidgetContainerScreen<>(widget, container, drawSlots);
     }
 
+    private final MutableWidgetRenderContext widgetRenderContext = MutableWidgetRenderContext.create();
     protected final X container;
     protected final T widget;
     private boolean initialized = false;
@@ -79,61 +81,59 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     }
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks){
-        this.renderBackground(poseStack);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks){
+        this.widgetRenderContext.update(guiGraphics, partialTicks);
+        this.renderBackground(guiGraphics);
 
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
         int offsetMouseX = mouseX - offsetX;
         int offsetMouseY = mouseY - offsetY;
 
-        RenderSystem.getModelViewStack().pushPose();
-        RenderSystem.getModelViewStack().translate(offsetX, offsetY, 0);
-        RenderSystem.applyModelViewMatrix();
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(offsetX, offsetY, 0);
         RenderSystem.disableDepthTest();
 
         // Update whether the widget is focused
         this.widget.setFocused(offsetMouseX >= 0 && offsetMouseX < this.widget.width() && offsetMouseY >= 0 && offsetMouseY < this.widget.height());
 
         // Render the widget background
-        this.widget.renderBackground(poseStack, offsetMouseX, offsetMouseY);
+        this.widget.renderBackground(this.widgetRenderContext, offsetMouseX, offsetMouseY);
 
         if(this.drawSlots){
             for(Slot slot : this.container.slots){
                 ScreenUtils.bindTexture(SLOT_TEXTURE);
-                ScreenUtils.drawTexture(poseStack, slot.x - 1, slot.y - 1, 18, 18);
+                ScreenUtils.drawTexture(guiGraphics.pose(), slot.x - 1, slot.y - 1, 18, 18);
             }
         }
 
-        RenderSystem.getModelViewStack().popPose();
-        RenderSystem.applyModelViewMatrix();
+        guiGraphics.pose().popPose();
 
-        MinecraftForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Background(this, poseStack, mouseX, mouseY));
+        MinecraftForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Background(this, guiGraphics, mouseX, mouseY));
 
-        RenderSystem.getModelViewStack().pushPose();
-        RenderSystem.getModelViewStack().translate(offsetX, offsetY, 0);
-        RenderSystem.applyModelViewMatrix();
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(offsetX, offsetY, 0);
 
         // Render the widget
-        this.widget.render(poseStack, offsetMouseX, offsetMouseY);
+        this.widget.render(this.widgetRenderContext, offsetMouseX, offsetMouseY);
 
         this.hoveredSlot = null;
         for(Slot slot : this.container.slots){
             if(!slot.isActive())
                 continue;
 
-            this.renderSlot(poseStack, slot);
+            this.renderSlot(guiGraphics, slot);
             if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
                 this.hoveredSlot = slot;
-                renderSlotHighlight(poseStack, slot.x, slot.y, 0, this.getSlotColor(0));
+                renderSlotHighlight(guiGraphics, slot.x, slot.y, 0, this.getSlotColor(0));
             }
         }
 
         // Render the widget's foreground
-        this.widget.renderForeground(poseStack, offsetMouseX, offsetMouseY);
+        this.widget.renderForeground(this.widgetRenderContext, offsetMouseX, offsetMouseY);
 
-        this.renderTooltip(poseStack, offsetMouseX, offsetMouseY);
+        this.renderTooltip(guiGraphics, offsetMouseX, offsetMouseY);
 
-        MinecraftForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Foreground(this, poseStack, mouseX, mouseY));
+        MinecraftForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Foreground(this, guiGraphics, mouseX, mouseY));
 
         ItemStack cursorStack = this.draggingItem.isEmpty() ? this.menu.getCarried() : this.draggingItem;
         if(!cursorStack.isEmpty()){
@@ -149,7 +149,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
                     s = ChatFormatting.YELLOW + "0";
             }
 
-            this.renderFloatingItem(poseStack, cursorStack, offsetMouseX - 8, offsetMouseY - offset, s);
+            this.renderFloatingItem(guiGraphics, cursorStack, offsetMouseX - 8, offsetMouseY - offset, s);
         }
 
         if(!this.snapbackItem.isEmpty()){
@@ -163,21 +163,20 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             int k2 = this.snapbackEnd.y - this.snapbackStartY;
             int j1 = this.snapbackStartX + (int)(j2 * f);
             int k1 = this.snapbackStartY + (int)(k2 * f);
-            this.renderFloatingItem(poseStack, this.snapbackItem, j1, k1, null);
+            this.renderFloatingItem(guiGraphics, this.snapbackItem, j1, k1, null);
         }
 
         // Render the widget's overlay
-        this.widget.renderOverlay(poseStack, offsetMouseX, offsetMouseY);
+        this.widget.renderOverlay(this.widgetRenderContext, offsetMouseX, offsetMouseY);
         // Render the widget's tooltips
-        this.widget.renderTooltips(poseStack, offsetMouseX, offsetMouseY);
+        this.widget.renderTooltips(this.widgetRenderContext, offsetMouseX, offsetMouseY);
 
-        RenderSystem.getModelViewStack().popPose();
-        RenderSystem.applyModelViewMatrix();
+        guiGraphics.pose().popPose();
         RenderSystem.enableDepthTest();
     }
 
     @Override
-    protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY){
+    protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY){
     }
 
     @Override
