@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.9b
+- Fixed `ResourceCache#getExistingResource` checking incorrect files
+
 ### SuperMartijn642's Core Library 1.1.9a
 - Fixed packet error when opening a container on a dedicated server
 
