@@ -13,6 +13,7 @@ import com.supermartijn642.core.generator.aggregator.ResourceAggregator;
 import com.supermartijn642.core.util.Pair;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.client.resources.SimpleResource;
 import net.minecraft.util.ResourceLocation;
 
 import java.io.*;
@@ -260,15 +261,28 @@ public abstract class ResourceCache {
 
         @Override
         public Optional<InputStream> getExistingResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
+            // Check manual files
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
-            Path fullPath = this.outputDirectory.resolve(path);
-            if(!Files.exists(fullPath))
-                return Optional.empty();
+            if(Files.exists(this.manualDirectory.resolve(path))){
+                try{
+                    return Optional.of(Files.newInputStream(this.manualDirectory.resolve(path)));
+                }catch(IOException e){
+                    throw new RuntimeException(e);
+                }
+            }
+
+            // Check resource packs
+            IResourceManager resourceManager = ClientUtils.getMinecraft().getResourceManager();
             try{
-                return Optional.of(Files.newInputStream(fullPath));
+                IResource resource = resourceManager.getResource(new ResourceLocation(namespace, directory + "/" + fileName + extension));
+                if(resource instanceof SimpleResource && resource.hasMetadata()) // This should cover most cases and since it's just for datagen, meh ㄟ( -, - )ㄏ
+                    ((SimpleResource)resource).mcmetaInputStream.close();
+                return Optional.of(resource.getInputStream());
+            }catch(FileNotFoundException ignored){
             }catch(IOException e){
                 throw new RuntimeException(e);
             }
+            return Optional.empty();
         }
 
         @Override
