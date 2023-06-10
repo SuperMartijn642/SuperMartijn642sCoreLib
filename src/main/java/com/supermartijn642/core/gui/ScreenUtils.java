@@ -308,7 +308,8 @@ public class ScreenUtils {
 
         poseStack.pushPose();
         poseStack.translate(x + 8, y + 8, 150);
-        poseStack.scale(16, -16, 16);
+        poseStack.mulPoseMatrix(new Matrix4f().scaling(1.0F, -1.0F, 1.0F));
+        poseStack.scale(16, 16, 16);
         try{
             BakedModel model = ClientUtils.getItemRenderer().getModel(stack, level, null, 0);
             boolean useFlatLighting = !model.usesBlockLight();
