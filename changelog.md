@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.9e
+- Improved registry overrides
+
 ### SuperMartijn642's Core Library 1.1.9d
 - Fixed items appearing in all creative tabs
 
