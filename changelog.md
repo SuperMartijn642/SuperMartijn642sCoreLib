@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.9b
+- Fixed data generators only running when environment is set to client
+
 ### SuperMartijn642's Core Library 1.1.9a
 - Fixed crash with Emendatus Enigmatica
 
