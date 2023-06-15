@@ -58,7 +58,6 @@ public class MappedRegistryMixin implements CoreLibMappedRegistry {
             Object oldValue = this.keyToObject.get(key);
             if(oldValue != null){
                 this.toId.removeInt(oldValue);
-                this.byValue.remove(oldValue);
                 this.lifecycles.remove(oldValue);
             }
             // Redirect the old reference to the new reference's values
