@@ -7,12 +7,12 @@
   "mixins": [
     "BlockPropertiesAccessor",
     "CraftingHelperMixin",
+    "DataGeneratorMixin",
+    "DatagenModLoaderAccessor",
     "ForgeHooksMixin",
     "GameDataMixin"
   ],
   "client": [
-    "DataGeneratorMixin",
-    "DatagenModLoaderAccessor",
     "LevelRendererMixin"
   ],
   "server": [],
