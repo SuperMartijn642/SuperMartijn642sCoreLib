@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.9b
+- Improved registry overrides
+
 ### SuperMartijn642's Core Library 1.1.9a
 - Prevent crashes when scanning for `RegistryEntryAcceptor` entries
 
