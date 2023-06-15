@@ -26,6 +26,8 @@ public class MappedRegistryMixin implements CoreLibMappedRegistry {
     private Function<?,Holder.Reference<?>> customHolderProvider;
     @Shadow
     private Map<ResourceKey<?>,Holder.Reference<?>> byKey;
+    @Shadow
+    private Map<Object,Holder.Reference<?>> byValue;
     @Unique
     private boolean registeringOverrides = false;
     @Unique
@@ -48,6 +50,8 @@ public class MappedRegistryMixin implements CoreLibMappedRegistry {
         if(this.registeringOverrides && this.customHolderProvider != null && this.overwrittenReference != null){
             Holder.Reference<?> newReference = this.byKey.get(key);
             if(newReference != null && newReference != this.overwrittenReference){
+                // Add back the old entry to the 'byValue' map
+                this.byValue.put(this.overwrittenReference.value(), this.overwrittenReference);
                 // Redirect the old reference to the new reference's values
                 ((CoreLibHolderReference)this.overwrittenReference).supermartijn642corelibOverride(key, object);
             }
