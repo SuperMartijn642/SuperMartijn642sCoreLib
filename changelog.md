@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.9b
+- Registry overrides now replace values in vanilla fields
+
 ### SuperMartijn642's Core Library 1.1.9a
 - Improved registry overrides
 - Fixed lighting for `ScreenUtils#drawItem`
