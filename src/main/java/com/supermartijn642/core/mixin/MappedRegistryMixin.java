@@ -50,6 +50,10 @@ public class MappedRegistryMixin implements CoreLibMappedRegistry {
     )
     private void registerMappingTail(int id, ResourceKey<?> key, Object object, Lifecycle lifecycle, boolean checkDuplicates, CallbackInfoReturnable<Holder<?>> ci){
         if(this.registeringOverrides && this.overwrittenReference != null){
+            // Call the override consumer
+            if(this.overrideConsumer != null)
+                this.overrideConsumer.accept(this.overwrittenReference.value(), object);
+            // Redirect the old holder
             Holder.Reference<?> newReference = this.byKey.get(key);
             if(newReference != null && newReference != this.overwrittenReference){
                 // Add back the old entry to the 'byValue' map
@@ -57,9 +61,6 @@ public class MappedRegistryMixin implements CoreLibMappedRegistry {
                 // Redirect the old reference to the new reference's values
                 ((CoreLibHolderReference)this.overwrittenReference).supermartijn642corelibOverride(key, object);
             }
-            // Call the override consumer
-            if(this.overrideConsumer != null)
-                this.overrideConsumer.accept(this.overwrittenReference.value(), object);
         }
     }
 
