@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.9c
+- Registry overrides now replace values in vanilla fields
+
 ### SuperMartijn642's Core Library 1.1.9b
 - Improved registry overrides
 
