@@ -1,5 +1,6 @@
-// 1.19.2	2023-05-19T16:33:23.9900473	Core Lib Generators
+// 1.19.2	2023-06-16T17:21:14.6392624	Core Lib Generators
 8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\blocks\mineable\pickaxe.json
+2b2471bd45df516d467d5125d994edb4d0f26160 data\supermartijn642corelib\accesswidener\generated-entries.accesswidener
 8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\blocks\needs_diamond_tool.json
 8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\blocks\needs_stone_tool.json
 8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\blocks\mineable\shovel.json
