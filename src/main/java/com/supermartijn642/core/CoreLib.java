@@ -2,6 +2,7 @@ package com.supermartijn642.core;
 
 import com.supermartijn642.core.data.condition.*;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
+import com.supermartijn642.core.generator.standard.CoreLibAccessWidenerGenerator;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
 import com.supermartijn642.core.item.BaseBlockItem;
 import com.supermartijn642.core.item.BaseItem;
@@ -36,6 +37,8 @@ public class CoreLib implements ModInitializer {
 
         // Register generator for default tags
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));
+        // Register generator for access widener entries
+        GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibAccessWidenerGenerator("supermartijn642corelib", cache));
 
         // Add all BaseItem instances to their respective creative tabs
         ItemGroupEvents.MODIFY_ENTRIES_ALL.register(((group, entries) -> {

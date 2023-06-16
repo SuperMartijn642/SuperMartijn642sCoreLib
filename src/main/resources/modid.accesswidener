@@ -59,6 +59,8 @@ accessible method net/minecraft/data/HashCache$ProviderCache <init> (Ljava/lang/
 accessible class net/minecraft/data/HashCache$ProviderCache
 # HashCache$ProviderCacheBuilder
 accessible class net/minecraft/data/HashCache$ProviderCacheBuilder
+# Holder$Reference
+accessible method net/minecraft/core/Holder$Reference bindKey (Lnet/minecraft/resources/ResourceKey;)V # bindKey
 # Ingredient
 accessible field net/minecraft/world/item/crafting/Ingredient values [Lnet/minecraft/world/item/crafting/Ingredient$Value; # values
 accessible method net/minecraft/world/item/crafting/Ingredient fromValues (Ljava/util/stream/Stream;)Lnet/minecraft/world/item/crafting/Ingredient; # fromValues
@@ -79,3 +81,6 @@ accessible field net/minecraft/client/Minecraft resourcePackRepository Lnet/mine
 accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
 # Player
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
+
+# Append the generated entries
+# generated

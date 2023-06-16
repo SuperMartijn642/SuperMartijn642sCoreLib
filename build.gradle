@@ -47,6 +47,11 @@ processResources {
             copyProperties.mod_version = modVersion.substring(0, modVersion.length() - 1) + "-" + modVersion.chars[-1]
         expand copyProperties
     }
+    filesMatching("modid.accesswidener") {
+        File generatedEntries = file("src/generated/resources/data/supermartijn642corelib/accesswidener/generated-entries.accesswidener")
+        if (generatedEntries.exists())
+            filter(s -> (s as String).replace("# generated", generatedEntries.text))
+    }
 
     exclude "**/*.pdn"
 
