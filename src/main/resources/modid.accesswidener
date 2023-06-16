@@ -49,3 +49,6 @@ accessible field net/minecraft/client/Minecraft pausePartialTick F # pausePartia
 accessible field net/minecraft/client/Minecraft resourcePackRepository Lnet/minecraft/server/packs/repository/PackRepository; # resourcePackRepository
 # Player
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
+
+# Append the generated entries
+# generated
