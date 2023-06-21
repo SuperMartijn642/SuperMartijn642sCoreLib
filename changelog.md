@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.10
+- `RegistrationHandler` will now register entries in the same order as they are submitted in
+
 ### SuperMartijn642's Core Library 1.1.9b
 - Fixed data generators only running when environment is set to client
 
