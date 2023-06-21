@@ -439,7 +439,7 @@ public class RegistrationHandler {
             throw new IllegalArgumentException("Entry supplier for '" + namespace + ":" + identifier + "' must not be null!");
 
         ResourceLocation fullIdentifier = new ResourceLocation(namespace, identifier);
-        Map<ResourceLocation,Supplier<?>> entries = this.entryMap.computeIfAbsent(registry, o -> new HashMap<>());
+        Map<ResourceLocation,Supplier<?>> entries = this.entryMap.computeIfAbsent(registry, o -> new LinkedHashMap<>());
         if(entries.containsKey(fullIdentifier))
             throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + registry.getRegistryIdentifier() + "'!");
 
@@ -519,7 +519,7 @@ public class RegistrationHandler {
                 throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
             ResourceLocation fullIdentifier = new ResourceLocation(namespace, identifier);
-            Map<ResourceLocation,Supplier<?>> entries = RegistrationHandler.this.entryMap.computeIfAbsent(this.registry, o -> new HashMap<>());
+            Map<ResourceLocation,Supplier<?>> entries = RegistrationHandler.this.entryMap.computeIfAbsent(this.registry, o -> new LinkedHashMap<>());
             if(entries.containsKey(fullIdentifier))
                 throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + this.registry.getRegistryIdentifier() + "'!");
 
