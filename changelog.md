@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.10
+- `RegistrationHandler` will now register entries in the same order as they are submitted in
+
 ### SuperMartijn642's Core Library 1.1.9b
 - Registry overrides now replace values in vanilla fields
 
