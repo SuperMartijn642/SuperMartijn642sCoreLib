@@ -50,7 +50,15 @@ public class RegistryOverrideHandlers {
 
     public static final BiConsumer<Object,Object> BLOCKS = overrideFields(Blocks.class, Block.class);
     public static final BiConsumer<Object,Object> FLUIDS = overrideFields(Fluids.class, Fluid.class);
-    public static final BiConsumer<Object,Object> ITEMS = overrideFields(Items.class, Item.class);
+    public static final BiConsumer<Object,Object> ITEMS = overrideFields(Items.class, Item.class).andThen(
+        (oldValue, newValue) -> {
+            // Replace entries in the block->item map
+            Item.BY_BLOCK.entrySet().stream()
+                .filter(entry -> entry.getValue() == oldValue)
+                .toList()
+                .forEach(entry -> Item.BY_BLOCK.put(entry.getKey(), (Item)newValue));
+        }
+    );
     public static final BiConsumer<Object,Object> MOB_EFFECTS = overrideFields(MobEffects.class, MobEffect.class);
     public static final BiConsumer<Object,Object> SOUND_EVENTS = overrideFields(SoundEvents.class, SoundEvent.class);
     public static final BiConsumer<Object,Object> POTIONS = overrideFields(Potions.class, Potion.class);
