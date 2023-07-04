@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.10a
+- Item registry overrides will now also override the block->item map
+
 ### SuperMartijn642's Core Library 1.1.10
 - `RegistrationHandler` will now register entries in the same order as they are submitted in
 
