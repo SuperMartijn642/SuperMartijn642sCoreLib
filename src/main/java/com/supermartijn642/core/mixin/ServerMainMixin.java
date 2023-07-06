@@ -22,7 +22,7 @@ public class ServerMainMixin {
         ),
         method = "main"
     )
-    private static void beforeInitServer(CallbackInfo ci){
+    private static void beforeInit(CallbackInfo ci){
         CoreLib.beforeInitialize();
     }
 
@@ -35,7 +35,7 @@ public class ServerMainMixin {
         ),
         method = "main"
     )
-    private static void afterInitServer(CallbackInfo ci){
-        CoreLib.afterInitialize();
+    private static void afterInit(CallbackInfo ci){
+        CoreLib.afterInitializeAll();
     }
 }
