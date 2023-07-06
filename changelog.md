@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.10b
+- Fixed crash when Plant In A Jar is installed
+
 ### SuperMartijn642's Core Library 1.1.10a
 - Item registry overrides will now also override the block->item map
 
