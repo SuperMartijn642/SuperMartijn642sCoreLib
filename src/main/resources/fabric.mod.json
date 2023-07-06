@@ -17,6 +17,9 @@
   "entrypoints": {
     "main": [
       "${mod_package}.${mod_main_class}"
+    ],
+    "preLaunch": [
+      "${mod_package}.${mod_main_class}"
     ]
   },
   "mixins": [

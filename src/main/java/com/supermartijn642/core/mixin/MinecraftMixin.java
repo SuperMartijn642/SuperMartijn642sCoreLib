@@ -22,7 +22,7 @@ public class MinecraftMixin {
         ),
         method = "<init>"
     )
-    private void beforeInitClient(CallbackInfo ci){
+    private void beforeInit(CallbackInfo ci){
         CoreLib.beforeInitialize();
     }
 
@@ -35,7 +35,7 @@ public class MinecraftMixin {
         ),
         method = "<init>"
     )
-    private void afterInitClient(CallbackInfo ci){
-        CoreLib.afterInitialize();
+    private void afterInit(CallbackInfo ci){
+        CoreLib.afterInitializeAll();
     }
 }
