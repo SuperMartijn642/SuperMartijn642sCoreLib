@@ -1,5 +1,5 @@
 plugins {
-    id "fabric-loom" version "0.12-SNAPSHOT"
+    id "fabric-loom" version "1.3-SNAPSHOT"
     id "com.matthewprenger.cursegradle" version "1.4.0"
     id "com.modrinth.minotaur" version "2.+"
 }
@@ -171,13 +171,15 @@ modrinth {
     changelog = file("changelog.md").text
     uploadFile = remapJar // With Loom, this MUST be set to `remapJar` instead of `jar`!
     loaders = ["fabric"]
-    dependencies {
-        // Required dependencies
-        if (!project.modrinth_required_dependency_ids.isEmpty())
-            project.modrinth_required_dependency_ids.split(" ").each required::project
-        // Optional dependencies
-        if (!project.modrinth_optional_dependency_ids.isEmpty())
-            project.modrinth_optional_dependency_ids.split(" ").each optional::project
+    if (!project.modrinth_required_dependency_ids.isEmpty() && !project.modrinth_optional_dependency_ids.isEmpty()) {
+        dependencies {
+            // Required dependencies
+            if (!project.modrinth_required_dependency_ids.isEmpty())
+                project.modrinth_required_dependency_ids.split(" ").each required::project
+            // Optional dependencies
+            if (!project.modrinth_optional_dependency_ids.isEmpty())
+                project.modrinth_optional_dependency_ids.split(" ").each optional::project
+        }
     }
 }
 
