@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.10c
+- Added compatibility for Quilt loader
+
 ### SuperMartijn642's Core Library 1.1.10b
 - Fixed crash when Plant In A Jar is installed
 
