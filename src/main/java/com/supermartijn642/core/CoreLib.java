@@ -84,7 +84,7 @@ public class CoreLib implements ModInitializer, PreLaunchEntrypoint {
                 entryConstructor.setAccessible(true);
 
                 // Get the entrypoint map
-                Object storage = storageField.get(FabricLoaderImpl.INSTANCE);
+                Object storage = storageField.get(QuiltLoaderImpl.INSTANCE);
                 //noinspection unchecked
                 Map<String,List<Object>> entries = (Map<String,List<Object>>)entriesField.get(storage);
 
