@@ -1,7 +1,5 @@
 package com.supermartijn642.core.render;
 
-import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -9,16 +7,16 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class TextureAtlases {
 
-    private static final ResourceLocation BLOCKS = TextureAtlas.LOCATION_BLOCKS;
-    private static final ResourceLocation PARTICLES = TextureAtlas.LOCATION_PARTICLES;
+    private static final ResourceLocation BLOCKS = new ResourceLocation("textures/atlas/blocks.png");
+    private static final ResourceLocation PARTICLES = new ResourceLocation("textures/atlas/particles.png");
     private static final ResourceLocation MOB_EFFECTS = new ResourceLocation("textures/atlas/mob_effects.png");
     private static final ResourceLocation PAINTINGS = new ResourceLocation("textures/atlas/paintings.png");
-    private static final ResourceLocation SHULKER_BOXES = Sheets.SHULKER_SHEET;
-    private static final ResourceLocation BEDS = Sheets.BED_SHEET;
-    private static final ResourceLocation BANNERS = Sheets.BANNER_SHEET;
-    private static final ResourceLocation SHIELDS = Sheets.SHIELD_SHEET;
-    private static final ResourceLocation SIGNS = Sheets.SIGN_SHEET;
-    private static final ResourceLocation CHESTS = Sheets.CHEST_SHEET;
+    private static final ResourceLocation SHULKER_BOXES = new ResourceLocation("textures/atlas/shulker_boxes.png");
+    private static final ResourceLocation BEDS = new ResourceLocation("textures/atlas/beds.png");
+    private static final ResourceLocation BANNERS = new ResourceLocation("textures/atlas/banner_patterns.png");
+    private static final ResourceLocation SHIELDS = new ResourceLocation("textures/atlas/shield_patterns.png");
+    private static final ResourceLocation SIGNS = new ResourceLocation("textures/atlas/signs.png");
+    private static final ResourceLocation CHESTS = new ResourceLocation("textures/atlas/chest.png");
 
     public static ResourceLocation getBlocks(){
         return BLOCKS;
