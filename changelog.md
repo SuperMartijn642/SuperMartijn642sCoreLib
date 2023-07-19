@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.11
+- Initialization of `TextureAtlases` will no longer load the `Sheets` class
+
 ### SuperMartijn642's Core Library 1.1.10c
 - Added compatibility for Quilt loader
 
