@@ -1,6 +1,5 @@
 package com.supermartijn642.core.render;
 
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -8,7 +7,7 @@ import net.minecraft.util.ResourceLocation;
  */
 public class TextureAtlases {
 
-    private static final ResourceLocation BLOCKS = TextureMap.LOCATION_BLOCKS_TEXTURE;
+    private static final ResourceLocation BLOCKS = new ResourceLocation("textures/atlas/blocks.png");
 
     public static ResourceLocation getBlocks(){
         return BLOCKS;
