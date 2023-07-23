@@ -17,6 +17,8 @@ import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.network.NetworkHooks;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
@@ -90,5 +92,9 @@ public class CommonUtils {
      */
     public static void closeContainer(PlayerEntity player){
         player.closeContainer();
+    }
+
+    public static Logger getLogger(String modid){
+        return LogManager.getLogger(modid);
     }
 }
