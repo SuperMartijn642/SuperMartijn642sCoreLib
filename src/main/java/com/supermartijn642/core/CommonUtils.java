@@ -15,6 +15,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created 20/03/2022 by SuperMartijn642
@@ -91,5 +93,9 @@ public class CommonUtils {
      */
     public static void closeContainer(Player player){
         player.closeContainer();
+    }
+
+    public static Logger getLogger(String modid){
+        return LoggerFactory.getLogger(modid);
     }
 }
