@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.12
+- Added `CommonUtils#getLogger`
+
 ### SuperMartijn642's Core Library 1.1.11
 - Initialization of `TextureAtlases` will no longer load the `Sheets` class
 
