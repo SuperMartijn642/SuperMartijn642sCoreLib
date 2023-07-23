@@ -18,7 +18,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -27,7 +26,7 @@ import org.apache.logging.log4j.Logger;
 @Mod(modid = "@mod_id@", name = "@mod_name@", version = "@mod_version@")
 public class CoreLib {
 
-    public static final Logger LOGGER = LogManager.getLogger("supermartijn642corelib");
+    public static final Logger LOGGER = CommonUtils.getLogger("supermartijn642corelib");
 
     public static final PacketChannel CHANNEL = PacketChannel.create("supermartijn642corelib");
 

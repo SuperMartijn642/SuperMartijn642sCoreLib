@@ -16,6 +16,8 @@ import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -120,5 +122,9 @@ public class CommonUtils {
      */
     public static void closeContainer(EntityPlayer player){
         player.closeScreen();
+    }
+
+    public static Logger getLogger(String modid){
+        return LogManager.getLogger(modid);
     }
 }
