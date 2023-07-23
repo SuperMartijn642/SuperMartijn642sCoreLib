@@ -19,7 +19,6 @@ import org.quiltmc.loader.api.QuiltLoader;
 import org.quiltmc.loader.api.plugin.ModContainerExt;
 import org.quiltmc.loader.impl.QuiltLoaderImpl;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -31,7 +30,7 @@ import java.util.Map;
  */
 public class CoreLib implements ModInitializer, PreLaunchEntrypoint {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger("supermartijn642corelib");
+    public static final Logger LOGGER = CommonUtils.getLogger("supermartijn642corelib");
 
     @Override
     public void onInitialize(){
