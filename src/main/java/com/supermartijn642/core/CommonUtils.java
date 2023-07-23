@@ -19,6 +19,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.Consumer;
 
@@ -92,5 +94,9 @@ public class CommonUtils {
      */
     public static void closeContainer(Player player){
         player.closeContainer();
+    }
+
+    public static Logger getLogger(String modid){
+        return LoggerFactory.getLogger(modid);
     }
 }
