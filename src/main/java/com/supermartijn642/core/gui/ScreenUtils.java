@@ -293,7 +293,7 @@ public class ScreenUtils {
 
         GUI_GRAPHICS.minecraft = ClientUtils.getMinecraft();
         GUI_GRAPHICS.pose = poseStack;
-        GUI_GRAPHICS.bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        GUI_GRAPHICS.bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
         GUI_GRAPHICS.renderTooltipInternal(fontRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE);
         GUI_GRAPHICS.bufferSource.endBatch();
     }

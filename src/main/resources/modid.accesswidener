@@ -32,6 +32,8 @@ accessible method net/minecraft/world/item/CreativeModeTab <init> (Lnet/minecraf
 mutable field net/minecraft/world/item/CreativeModeTab displayItemsGenerator Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator; # displayItemsGenerator
 # DataGenerator
 accessible field net/minecraft/data/DataGenerator rootOutputFolder Ljava/nio/file/Path; # rootOutputFolder
+# GameRenderer
+accessible field net/minecraft/client/renderer/GameRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
 # GuiGraphics
 accessible field net/minecraft/client/gui/GuiGraphics minecraft Lnet/minecraft/client/Minecraft; # minecraft
 accessible field net/minecraft/client/gui/GuiGraphics pose Lcom/mojang/blaze3d/vertex/PoseStack; # pose
