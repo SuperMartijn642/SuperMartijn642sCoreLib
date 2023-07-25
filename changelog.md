@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.12a
+- Fixed wrong buffer source being used for `ScreenUtils#drawTooltip`
+
 ### SuperMartijn642's Core Library 1.1.12
 - Added `CommonUtils#getLogger`
 
