@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.12b
+- Fixed crash caused by Fabric API 0.86.0
+
 ### SuperMartijn642's Core Library 1.1.12a
 - Fixed wrong buffer source being used for `ScreenUtils#drawTooltip`
 
