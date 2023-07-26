@@ -6,10 +6,10 @@ import com.supermartijn642.core.render.CustomItemRenderer;
 import com.supermartijn642.core.util.Pair;
 import com.supermartijn642.core.util.TriFunction;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.impl.client.model.loading.ModelLoadingPluginManager;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -24,7 +24,6 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
@@ -115,7 +114,7 @@ public class ClientRegistrationHandler {
 
     private ClientRegistrationHandler(String modid){
         this.modid = modid;
-        ModelLoadingRegistry.INSTANCE.registerModelProvider(this::handleModelRegistryEvent);
+        ModelLoadingPluginManager.registerPlugin(context -> this.handleModelRegistryEvent(context::addModels));
     }
 
     /**
@@ -635,12 +634,11 @@ public class ClientRegistrationHandler {
         }
     }
 
-    private void handleModelRegistryEvent(ResourceManager manager, Consumer<ResourceLocation> out){
+    private void handleModelRegistryEvent(Consumer<Collection<ResourceLocation>> out){
         this.passedModelRegistry = true;
 
         // Additional models
-        for(ResourceLocation model : this.models)
-            out.accept(model);
+        out.accept(this.models);
     }
 
     private void registerModelOverwrites(Map<ResourceLocation,BakedModel> modelRegistry){
