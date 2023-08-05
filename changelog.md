@@ -1,3 +1,8 @@
+### SuperMartijn642's Core Library 1.1.12a
+- Added workaround for when Tool Progression is installed
+- Added workaround for when RealBench is installed
+- Renamed jar-file so it gets loaded before Phosphor and VanillaFix
+
 ### SuperMartijn642's Core Library 1.1.12
 - Added `CommonUtils#getLogger`
 
