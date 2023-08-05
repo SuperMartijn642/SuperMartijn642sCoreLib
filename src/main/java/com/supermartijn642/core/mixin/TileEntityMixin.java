@@ -12,6 +12,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespaced;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.LoaderState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -31,7 +33,7 @@ public class TileEntityMixin {
         at = @At("HEAD")
     )
     private static void register(String id, Class<? extends TileEntity> clazz, CallbackInfo ci){
-        if(Registries.BLOCK_ENTITY_TYPES.hasIdentifier(new ResourceLocation(id)))
+        if(Loader.instance().getLoaderState() != LoaderState.NOINIT && Registries.BLOCK_ENTITY_TYPES.hasIdentifier(new ResourceLocation(id))) // State check is need because RealBench causes entities to be registered way too early
             CoreLib.LOGGER.warn("Overlapping block entity class and block entity type registration for identifier '" + new ResourceLocation(id) + "'!");
     }
 
