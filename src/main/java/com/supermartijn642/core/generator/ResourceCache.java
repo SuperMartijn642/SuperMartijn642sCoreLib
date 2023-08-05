@@ -275,7 +275,7 @@ public abstract class ResourceCache {
             IResourceManager resourceManager = ClientUtils.getMinecraft().getResourceManager();
             try{
                 IResource resource = resourceManager.getResource(new ResourceLocation(namespace, directory + "/" + fileName + extension));
-                if(resource instanceof SimpleResource && resource.hasMetadata()) // This should cover most cases and since it's just for datagen, meh ㄟ( -, - )ㄏ
+                if(resource instanceof SimpleResource && resource.hasMetadata()) // This should cover most cases and since it's just for datagen, meh
                     ((SimpleResource)resource).mcmetaInputStream.close();
                 return Optional.of(resource.getInputStream());
             }catch(FileNotFoundException ignored){
