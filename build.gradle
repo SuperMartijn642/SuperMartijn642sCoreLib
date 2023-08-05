@@ -41,8 +41,8 @@ dependencies {
     minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
 
     // SpongePowered Mixin
-    annotationProcessor "org.spongepowered:mixin:0.8.3-SNAPSHOT:processor"
-    implementation("org.spongepowered:mixin:0.8.3-SNAPSHOT") {
+    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
+    implementation("org.spongepowered:mixin:0.8.2") {
         exclude module: "guava"
         exclude module: "commons-io"
         exclude module: "gson"
@@ -152,7 +152,7 @@ mixin {
 jar {
     from {
         configurations.compileClasspath
-                .filter { "mixin-0.8.3-SNAPSHOT.jar" == it.name }
+                .filter { "mixin-0.8.2.jar" == it.name }
                 .collect { it.isDirectory() ? it : zipTree(it) }
     } {
         exclude "LICENSE.txt", "META-INF/MANIFSET.MF", "META-INF/maven/**", "META-INF/*.RSA", "META-INF/*.SF"
@@ -227,7 +227,7 @@ curseforge {
             }
         }
 
-        mainArtifact(jar) {
+        mainArtifact(file('build/renamedLibs/_' + jar.getArchiveFileName().get())) {
             displayName = "${project.mod_name} ${project.mod_version} for Forge ${project.minecraft_suffix.substring(2)}"
         }
     }
@@ -254,7 +254,8 @@ modrinth {
     gameVersions = project.modrinth_game_versions.split(" ") as List
     // Convert the changelog file to text
     changelog = file("changelog.md").text
-    uploadFile = jar // With Loom, this MUST be set to `remapJar` instead of `jar`!
+    uploadFile = file('build/renamedLibs/_' + jar.getArchiveFileName().get())
+    // With Loom, this MUST be set to `remapJar` instead of `jar`!
     loaders = ["forge"]
     dependencies {
         // Required dependencies
@@ -265,6 +266,15 @@ modrinth {
             project.modrinth_optional_dependency_ids.split(" ").each optional::project
     }
 }
+
+// Create task which copies from 'jar', but renames the file
+tasks.register('renameJar', Copy) {
+    dependsOn build
+    from jar
+    into 'build/renamedLibs'
+    rename "_"::concat
+}
+jar.finalizedBy renameJar
 
 // Create a task to upload to both CurseForge and Modrinth
 task publishAll {
