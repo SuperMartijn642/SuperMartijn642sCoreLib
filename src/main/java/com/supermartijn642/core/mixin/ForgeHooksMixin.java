@@ -46,7 +46,8 @@ public class ForgeHooksMixin {
             value = "INVOKE",
             target = "Lnet/minecraft/item/Item;getHarvestLevel(Lnet/minecraft/item/ItemStack;Ljava/lang/String;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/block/state/IBlockState;)I"
         ),
-        remap = false
+        remap = false,
+        require = 0
     )
     private static int canHarvestBlockRedirect(Item item, ItemStack stack, String type, EntityPlayer player, IBlockState state){
         if(state.getBlock() instanceof BaseBlock){
