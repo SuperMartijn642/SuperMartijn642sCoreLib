@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.12b
+- Add workarounds for SpongeForge using unnecessary Overwrite mixins
+
 ### SuperMartijn642's Core Library 1.1.12a
 - Added workaround for when Tool Progression is installed
 - Added workaround for when RealBench is installed
