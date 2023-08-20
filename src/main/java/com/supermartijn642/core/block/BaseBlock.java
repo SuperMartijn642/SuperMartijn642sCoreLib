@@ -22,10 +22,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.*;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootTable;
 
@@ -39,6 +36,11 @@ import java.util.function.Consumer;
  * Created 1/26/2021 by SuperMartijn642
  */
 public class BaseBlock extends Block implements EditableBlockRenderLayer {
+
+    /**
+     * Used to obtain the explosion context in {@link #dropBlockAsItemWithChance}.
+     */
+    public static final ThreadLocal<Explosion> IN_EXPLOSION = ThreadLocal.withInitial(() -> null);
 
     private static final ResourceLocation MINEABLE_WITH_AXE = new ResourceLocation("mineable/axe");
     private static final ResourceLocation MINEABLE_WITH_HOE = new ResourceLocation("mineable/hoe");
@@ -176,8 +178,12 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
     }
 
     @Override
-    public void dropBlockAsItemWithChance(World p_180653_1_, BlockPos p_180653_2_, IBlockState p_180653_3_, float p_180653_4_, int p_180653_5_){
-        super.dropBlockAsItemWithChance(p_180653_1_, p_180653_2_, p_180653_3_, p_180653_4_, p_180653_5_);
+    public void dropBlockAsItemWithChance(World level, BlockPos pos, IBlockState state, float chance, int fortune){
+        Explosion explosion = IN_EXPLOSION.get();
+        if(explosion != null)
+            this.dropItemsFromExplosion(level, pos, state, explosion.size);
+        else
+            super.dropBlockAsItemWithChance(level, pos, state, chance, fortune);
     }
 
     @Override
