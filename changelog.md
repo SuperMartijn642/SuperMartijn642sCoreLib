@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.12b
+- Added calls to Architectury's client events in `WidgetContainerScreen`
+
 ### SuperMartijn642's Core Library 1.1.12a
 - Fixed crash caused by Fabric API 0.86.0
 
