@@ -32,8 +32,11 @@ public class CoreLib implements ModInitializer, PreLaunchEntrypoint {
 
     public static final Logger LOGGER = CommonUtils.getLogger("supermartijn642corelib");
 
+    public static boolean isArchitecturyLoaded = false;
+
     @Override
     public void onInitialize(){
+        isArchitecturyLoaded = CommonUtils.isModLoaded("architectury");
         CommonUtils.initialize();
 
         // Register conditional recipe type
