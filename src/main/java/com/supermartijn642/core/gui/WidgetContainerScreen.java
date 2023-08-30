@@ -2,10 +2,12 @@ package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.ContainerWidget;
 import com.supermartijn642.core.gui.widget.MutableWidgetRenderContext;
 import com.supermartijn642.core.gui.widget.Widget;
+import dev.architectury.event.events.client.ClientGuiEvent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
@@ -82,6 +84,10 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         this.widgetRenderContext.update(guiGraphics, partialTicks);
         this.renderBackground(guiGraphics);
 
+        // Call Architectury's client events
+        if(CoreLib.isArchitecturyLoaded)
+            ClientGuiEvent.RENDER_CONTAINER_BACKGROUND.invoker().render(this, guiGraphics, mouseX, mouseY, partialTicks);
+
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
         int offsetMouseX = mouseX - offsetX;
         int offsetMouseY = mouseY - offsetY;
@@ -122,6 +128,10 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         this.widget.renderForeground(this.widgetRenderContext, offsetMouseX, offsetMouseY);
 
         this.renderTooltip(guiGraphics, offsetMouseX, offsetMouseY);
+
+        // Call Architectury's client events
+        if(CoreLib.isArchitecturyLoaded)
+            ClientGuiEvent.RENDER_CONTAINER_FOREGROUND.invoker().render(this, guiGraphics, mouseX, mouseY, partialTicks);
 
         ItemStack cursorStack = this.draggingItem.isEmpty() ? this.menu.getCarried() : this.draggingItem;
         if(!cursorStack.isEmpty()){
