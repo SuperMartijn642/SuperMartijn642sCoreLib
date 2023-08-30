@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.12a
+- Added calls to Architectury's client events in `WidgetContainerScreen`
+
 ### SuperMartijn642's Core Library 1.1.12
 - Added `CommonUtils#getLogger`
 
