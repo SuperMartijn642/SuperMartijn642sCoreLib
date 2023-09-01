@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.12d
+- Prevent other mod's mixin errors from showing up in Core Lib's pre-launch entrypoint
+
 ### SuperMartijn642's Core Library 1.1.12c
 - Added calls to Architectury's client events in `WidgetContainerScreen`
 
