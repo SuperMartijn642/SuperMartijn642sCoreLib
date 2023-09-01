@@ -19,7 +19,7 @@
       "${mod_package}.${mod_main_class}"
     ],
     "preLaunch": [
-      "${mod_package}.${mod_main_class}"
+      "${mod_package}.${mod_pre_launch_class}"
     ]
   },
   "mixins": [
