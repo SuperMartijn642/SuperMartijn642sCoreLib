@@ -3,6 +3,7 @@ package com.supermartijn642.core.data.recipe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
 import com.supermartijn642.core.data.condition.ResourceCondition;
 import com.supermartijn642.core.data.condition.ResourceConditionContext;
 import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
@@ -13,25 +14,22 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 
 /**
  * Created 26/08/2022 by SuperMartijn642
  */
-public class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> {
+public final class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> {
 
     private static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.register("supermartijn642corelib:dummy");
+    private static final DummyRecipe DUMMY_RECIPE = new DummyRecipe();
     public static final ConditionalRecipeSerializer INSTANCE = new ConditionalRecipeSerializer();
 
     private ConditionalRecipeSerializer(){
     }
 
-    @Override
-    public Recipe<?> fromJson(ResourceLocation location, JsonObject json){
+    public static RecipeHolder<?> fromJson(ResourceLocation location, JsonObject json){
         if(!json.has("conditions") || !json.get("conditions").isJsonArray())
             throw new RuntimeException("Conditional recipe '" + location + "' must have 'conditions' array!");
         if(!json.has("recipe") || !json.get("recipe").isJsonObject())
@@ -61,7 +59,7 @@ public class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> 
             }
 
             if(!condition.test(new ResourceConditionContext()))
-                return new DummyRecipe(location);
+                return new RecipeHolder<>(location, DUMMY_RECIPE);
         }
 
         // Now return the recipe
@@ -69,15 +67,20 @@ public class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> 
     }
 
     @Override
-    public Recipe<?> fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf){
-        return new DummyRecipe(resourceLocation);
+    public Codec<Recipe<?>> codec(){
+        return Codec.unit(null);
+    }
+
+    @Override
+    public Recipe<?> fromNetwork(FriendlyByteBuf friendlyByteBuf){
+        return new DummyRecipe();
     }
 
     @Override
     public void toNetwork(FriendlyByteBuf friendlyByteBuf, Recipe<?> recipe){
     }
 
-    private record DummyRecipe(ResourceLocation identifier) implements Recipe<Container> {
+    private static class DummyRecipe implements Recipe<Container> {
 
         @Override
         public boolean matches(Container container, Level level){
@@ -97,11 +100,6 @@ public class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> 
         @Override
         public ItemStack getResultItem(RegistryAccess registryAccess){
             return ItemStack.EMPTY;
-        }
-
-        @Override
-        public ResourceLocation getId(){
-            return this.identifier;
         }
 
         @Override

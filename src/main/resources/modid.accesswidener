@@ -83,6 +83,8 @@ accessible field net/minecraft/client/Minecraft resourcePackRepository Lnet/mine
 accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
 # Player
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
+# RecipeManager
+accessible method net/minecraft/world/item/crafting/RecipeManager fromJson (Lnet/minecraft/resources/ResourceLocation;Lcom/google/gson/JsonObject;)Lnet/minecraft/world/item/crafting/RecipeHolder; # fromJson
 
 # Append the generated entries
 # generated

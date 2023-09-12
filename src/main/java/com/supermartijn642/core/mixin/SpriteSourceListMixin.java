@@ -1,8 +1,8 @@
 package com.supermartijn642.core.mixin;
 
 import com.supermartijn642.core.registry.ClientRegistrationHandler;
-import net.minecraft.client.renderer.texture.atlas.SpriteResourceLoader;
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
+import net.minecraft.client.renderer.texture.atlas.SpriteSourceList;
 import net.minecraft.client.renderer.texture.atlas.sources.SingleFile;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -16,11 +16,11 @@ import java.util.Optional;
 /**
  * Created 01/01/2023 by SuperMartijn642
  */
-@Mixin(SpriteResourceLoader.class)
-public class SpriteResourceLoaderMixin {
+@Mixin(SpriteSourceList.class)
+public class SpriteSourceListMixin {
 
     @ModifyVariable(
-        method = "load(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/texture/atlas/SpriteResourceLoader;",
+        method = "load(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/texture/atlas/SpriteSourceList;",
         at = @At("STORE"),
         ordinal = 0
     )

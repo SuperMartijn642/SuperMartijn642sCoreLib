@@ -7,6 +7,7 @@
   "mixins": [
     "HolderReferenceMixin",
     "MappedRegistryMixin",
+    "RecipeManagerMixin",
     "ServerPlayerGameModeMixin"
   ],
   "client": [
@@ -16,7 +17,7 @@
     "MinecraftMixin",
     "ModelManagerMixin",
     "MultiPlayerGameModeMixin",
-    "SpriteResourceLoaderMixin"
+    "SpriteSourceListMixin"
   ],
   "server": [
     "ServerMainMixin"
