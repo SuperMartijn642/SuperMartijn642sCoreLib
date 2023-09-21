@@ -2,11 +2,15 @@ package com.supermartijn642.core.generator;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import com.supermartijn642.core.data.condition.ModLoadedResourceCondition;
 import com.supermartijn642.core.data.condition.NotResourceCondition;
 import com.supermartijn642.core.data.condition.ResourceCondition;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
 import com.supermartijn642.core.registry.Registries;
+import com.supermartijn642.core.util.Pair;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
@@ -24,7 +28,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 
 import java.util.*;
@@ -95,7 +98,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 // Keys
                 JsonObject keysJson = new JsonObject();
                 for(Map.Entry<Character,Ingredient> input : ((ShapedRecipeBuilder)recipeBuilder).inputs.entrySet())
-                    keysJson.add(input.getKey().toString(), input.getValue().toJson());
+                    keysJson.add(input.getKey().toString(), input.getValue().toJson(true));
                 json.add("key", keysJson);
                 // Result
                 JsonObject resultJson = new JsonObject();
@@ -112,7 +115,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 // Ingredients
                 JsonArray ingredientsJson = new JsonArray();
                 for(Ingredient input : ((ShapelessRecipeBuilder)recipeBuilder).inputs)
-                    ingredientsJson.add(input.toJson());
+                    ingredientsJson.add(input.toJson(true));
                 json.add("ingredients", ingredientsJson);
                 // Result
                 JsonObject resultJson = new JsonObject();
@@ -150,9 +153,9 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 // Group
                 json.addProperty("group", recipeBuilder.group);
                 // Base
-                json.add("base", ((SmithingRecipeBuilder)recipeBuilder).base.toJson());
+                json.add("base", ((SmithingRecipeBuilder)recipeBuilder).base.toJson(false));
                 // Addition
-                json.add("addition", ((SmithingRecipeBuilder)recipeBuilder).addition.toJson());
+                json.add("addition", ((SmithingRecipeBuilder)recipeBuilder).addition.toJson(false));
                 // Result
                 JsonObject resultJson = new JsonObject();
                 resultJson.addProperty("item", Registries.ITEMS.getIdentifier(recipeBuilder.output.asItem()).toString());
@@ -166,7 +169,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 // Group
                 json.addProperty("group", recipeBuilder.group);
                 // Ingredient
-                json.add("ingredient", ((StoneCuttingRecipeBuilder)recipeBuilder).input.toJson());
+                json.add("ingredient", ((StoneCuttingRecipeBuilder)recipeBuilder).input.toJson(false));
                 // Result
                 json.addProperty("result", Registries.ITEMS.getIdentifier(recipeBuilder.output.asItem()).toString());
                 // Count
@@ -182,7 +185,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                     newJson.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE).toString());
                     JsonArray conditionsJson = new JsonArray();
                     for(ICondition condition : recipeBuilder.conditions)
-                        conditionsJson.add(CraftingHelper.serialize(condition));
+                        conditionsJson.add(ICondition.CODEC.encodeStart(JsonOps.INSTANCE, condition).getOrThrow(false, s -> {}));
                     newJson.add("conditions", conditionsJson);
                     newJson.add("recipe", json);
                     json = newJson;
@@ -202,7 +205,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         // Group
         json.addProperty("group", ((RecipeBuilder<?>)recipeBuilder).group);
         // Ingredient
-        json.add("ingredient", recipeBuilder.input.toJson());
+        json.add("ingredient", recipeBuilder.input.toJson(false));
         // Result
         if(((RecipeBuilder<?>)recipeBuilder).outputTag == null && ((RecipeBuilder<?>)recipeBuilder).outputCount == 1)
             json.addProperty("result", Registries.ITEMS.getIdentifier(((RecipeBuilder<?>)recipeBuilder).output.asItem()).toString());
@@ -960,7 +963,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private RecipeSerializer<?> serializer;
         private String group;
         private boolean hasAdvancement = true;
-        private final List<CriterionTriggerInstance> unlockedBy = new ArrayList<>();
+        private final List<Pair<CriterionTrigger<?>,CriterionTriggerInstance>> unlockedBy = new ArrayList<>();
 
         protected RecipeBuilder(ResourceLocation identifier, RecipeSerializer<?> serializer, ItemLike output, CompoundTag outputTag, int outputCount){
             this.identifier = identifier;
@@ -1034,12 +1037,16 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         /**
          * Sets which criterion should be met to unlock this recipe in its generated advancement.
          */
-        public T unlockedBy(CriterionTriggerInstance criterion){
-            if(this.unlockedBy.contains(criterion))
-                throw new RuntimeException("Duplicate unlockedBy criterion '" + criterion + "'!");
-
-            this.unlockedBy.add(criterion);
+        public <S extends CriterionTriggerInstance> T unlockedBy(CriterionTrigger<S> trigger, S instance){
+            this.unlockedBy.add(Pair.of(trigger, instance));
             return this.self();
+        }
+
+        /**
+         * Sets which criterion should be met to unlock this recipe in its generated advancement.
+         */
+        public <S extends CriterionTriggerInstance> T unlockedBy(Criterion<S> criterion){
+            return this.unlockedBy(criterion.trigger(), criterion.triggerInstance());
         }
 
         /**
@@ -1618,11 +1625,15 @@ public abstract class RecipeGenerator extends ResourceGenerator {
             String[] triggers = new String[recipe.unlockedBy.size() + 1];
             triggers[0] = "has_the_recipe";
             if(recipe.unlockedBy.size() == 1){
-                builder.criterion("recipe_condition", recipe.unlockedBy.get(0));
+                Pair<CriterionTrigger<?>,CriterionTriggerInstance> criterion = recipe.unlockedBy.get(0);
+                //noinspection unchecked,rawtypes
+                builder.criterion("recipe_condition", new Criterion(criterion.left(), criterion.right()));
                 triggers[1] = "recipe_condition";
             }else{
                 for(int i = 0; i < recipe.unlockedBy.size(); i++){
-                    builder.criterion("recipe_condition" + (i + 1), recipe.unlockedBy.get(i));
+                    Pair<CriterionTrigger<?>,CriterionTriggerInstance> criterion = recipe.unlockedBy.get(i);
+                    //noinspection unchecked,rawtypes
+                    builder.criterion("recipe_condition" + (i + 1), new Criterion(criterion.left(), criterion.right()));
                     triggers[i + 1] = "recipe_condition" + (i + 1);
                 }
             }

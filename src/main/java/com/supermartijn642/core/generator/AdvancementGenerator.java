@@ -2,20 +2,19 @@ package com.supermartijn642.core.generator;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import com.supermartijn642.core.data.condition.ModLoadedResourceCondition;
 import com.supermartijn642.core.data.condition.NotResourceCondition;
 import com.supermartijn642.core.data.condition.ResourceCondition;
 import com.supermartijn642.core.registry.Registries;
-import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.advancements.FrameType;
+import com.supermartijn642.core.util.Pair;
+import net.minecraft.advancements.*;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 
 import java.util.*;
@@ -55,7 +54,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             if(!advancementBuilder.conditions.isEmpty()){
                 JsonArray conditionsJson = new JsonArray();
                 for(ICondition condition : advancementBuilder.conditions)
-                    conditionsJson.add(CraftingHelper.serialize(condition));
+                    conditionsJson.add(ICondition.CODEC.encodeStart(JsonOps.INSTANCE, condition).getOrThrow(false, s -> {}));
                 json.add("conditions", conditionsJson);
             }
             // Parent
@@ -103,10 +102,10 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             json.add("display", displayJson);
             // Criteria
             JsonObject criteriaJson = new JsonObject();
-            for(Map.Entry<String,CriterionTriggerInstance> criterion : advancementBuilder.criteria.entrySet()){
+            for(Map.Entry<String,Pair<CriterionTrigger<?>,CriterionTriggerInstance>> criterion : advancementBuilder.criteria.entrySet()){
                 JsonObject criterionJson = new JsonObject();
-                criterionJson.addProperty("trigger", criterion.getValue().getCriterion().toString());
-                JsonObject conditionsJson = criterion.getValue().serializeToJson(SerializationContext.INSTANCE);
+                criterionJson.addProperty("trigger", CriteriaTriggers.getId(criterion.getValue().left()).toString());
+                JsonObject conditionsJson = criterion.getValue().right().serializeToJson();
                 if(conditionsJson.size() > 0)
                     criterionJson.add("conditions", conditionsJson);
                 criteriaJson.add(criterion.getKey(), criterionJson);
@@ -195,7 +194,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
         protected final String modid;
         protected final ResourceLocation identifier;
         private final List<ICondition> conditions = new ArrayList<>();
-        private final Map<String,CriterionTriggerInstance> criteria = new LinkedHashMap<>();
+        private final Map<String,Pair<CriterionTrigger<?>,CriterionTriggerInstance>> criteria = new LinkedHashMap<>();
         private final List<String[]> requirements = new ArrayList<>();
         private final List<ResourceLocation> rewardLootTables = new ArrayList<>();
         private final List<ResourceLocation> rewardRecipes = new ArrayList<>();
@@ -447,11 +446,24 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
          * @param name      name for the criterion
          * @param criterion criterion to be added
          */
-        public AdvancementBuilder criterion(String name, CriterionTriggerInstance criterion){
+        public <T extends CriterionTriggerInstance> AdvancementBuilder criterion(String name, CriterionTrigger<T> criterion, T instance){
             if(this.criteria.containsKey(name))
                 throw new RuntimeException("Duplicate criterion with name '" + name + "' for advancement '" + this.identifier + "'!");
 
-            this.criteria.put(name, criterion);
+            this.criteria.put(name, Pair.of(criterion, instance));
+            return this;
+        }
+
+        /**
+         * Adds a criterion to this advancement. The criterion should be added to be requirements using the given name.
+         * @param name      name for the criterion
+         * @param criterion criterion to be added
+         */
+        public AdvancementBuilder criterion(String name, Criterion<?> criterion){
+            if(this.criteria.containsKey(name))
+                throw new RuntimeException("Duplicate criterion with name '" + name + "' for advancement '" + this.identifier + "'!");
+
+            this.criteria.put(name, Pair.of(criterion.trigger(), criterion.triggerInstance()));
             return this;
         }
 

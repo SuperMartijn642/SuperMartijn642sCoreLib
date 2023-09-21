@@ -1,6 +1,7 @@
 package com.supermartijn642.core.registry;
 
 import com.google.common.collect.Lists;
+import com.mojang.serialization.Codec;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
 import net.minecraft.core.particles.ParticleType;
@@ -20,14 +21,11 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
+import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -40,7 +38,7 @@ public final class Registries {
 
     static final Map<ResourceLocation,Registry<?>> IDENTIFIER_TO_REGISTRY = new HashMap<>();
     static final Map<net.minecraft.core.Registry<?>,Registry<?>> VANILLA_REGISTRY_MAP = new HashMap<>();
-    static final Map<IForgeRegistry<?>,Registry<?>> FORGE_REGISTRY_MAP = new HashMap<>();
+    static final Map<ResourceLocation,Registry<?>> FORGE_REGISTRY_MAP = new HashMap<>();
     /**
      * Each entry is a registry which has a vanilla registry and a list of registries which do not have a vanilla registry.
      */
@@ -51,20 +49,14 @@ public final class Registries {
             throw new RuntimeException("Duplicate registry registration for identifier '" + registry.getRegistryIdentifier() + "'!");
         if(registry.hasVanillaRegistry() && VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
             throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
-        if(registry.hasForgeRegistry() && FORGE_REGISTRY_MAP.containsKey(registry.getForgeRegistry()))
+        if(registry.hasForgeRegistry() && FORGE_REGISTRY_MAP.containsKey(registry.getRegistryIdentifier()))
             throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
 
         IDENTIFIER_TO_REGISTRY.put(registry.getRegistryIdentifier(), registry);
         if(registry.hasVanillaRegistry())
             VANILLA_REGISTRY_MAP.put(registry.getVanillaRegistry(), registry);
         if(registry.hasForgeRegistry())
-            FORGE_REGISTRY_MAP.put(registry.getForgeRegistry(), registry);
-    }
-
-    @ApiStatus.Internal
-    @Deprecated
-    public static void onRecipeConditionSerializerAdded(IConditionSerializer<?> serializer){
-        ((RecipeConditionSerializerRegistry)RECIPE_CONDITION_SERIALIZERS).onObjectAdded(serializer);
+            FORGE_REGISTRY_MAP.put(registry.getRegistryIdentifier(), registry);
     }
 
     @SuppressWarnings("unchecked")
@@ -76,7 +68,7 @@ public final class Registries {
     @SuppressWarnings("unchecked")
     @Deprecated
     public static <T> Registry<T> fromUnderlying(IForgeRegistry<T> registry){
-        return (Registry<T>)FORGE_REGISTRY_MAP.get(registry);
+        return (Registry<T>)FORGE_REGISTRY_MAP.get(registry.getRegistryName());
     }
 
     /**
@@ -104,7 +96,7 @@ public final class Registries {
     public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZERS = forge(RECIPE_SERIALIZER, ForgeRegistries.RECIPE_SERIALIZERS, RecipeSerializer.class);
     public static final Registry<Attribute> ATTRIBUTES = forge(ATTRIBUTE, ForgeRegistries.ATTRIBUTES, Attribute.class);
     public static final Registry<StatType<?>> STAT_TYPES = forge(STAT_TYPE, ForgeRegistries.STAT_TYPES, StatType.class);
-    public static final Registry<IConditionSerializer<?>> RECIPE_CONDITION_SERIALIZERS = new RecipeConditionSerializerRegistry();
+    public static final Registry<Codec<? extends ICondition>> RECIPE_CONDITION_SERIALIZERS = forge(ForgeRegistries.CONDITION_SERIALIZERS, ForgeRegistries.Keys.CONDITION_SERIALIZERS.location(), Codec.class);
 
     static{
         // Add all registries which don't have a forge registry
@@ -117,6 +109,10 @@ public final class Registries {
 
     private static <T> Registry<T> forge(net.minecraft.core.Registry<T> registry, IForgeRegistry<T> forgeRegistry, Class<? super T> valueClass){
         return new ForgeRegistryWrapper<>(registry, forgeRegistry, valueClass);
+    }
+
+    private static <T> Registry<T> forge(Supplier<IForgeRegistry<T>> forgeRegistry, ResourceLocation identifier, Class<? super T> valueClass){
+        return new ForgeRegistryWrapper<>(forgeRegistry, identifier, valueClass);
     }
 
     public interface Registry<T> {
@@ -234,18 +230,39 @@ public final class Registries {
     private static class ForgeRegistryWrapper<T> implements Registry<T> {
 
         private final net.minecraft.core.Registry<T> registry;
-        private final IForgeRegistry<T> forgeRegistry;
+        private final Supplier<IForgeRegistry<T>> forgeRegistrySupplier;
+        private IForgeRegistry<T> forgeRegistry;
         private final ResourceLocation identifier;
         private final Class<T> valueClass;
 
         private ForgeRegistryWrapper(net.minecraft.core.Registry<T> registry, IForgeRegistry<T> forgeRegistry, Class<? super T> valueClass){
             this.registry = registry;
+            this.forgeRegistrySupplier = null;
             this.forgeRegistry = forgeRegistry;
             this.identifier = forgeRegistry.getRegistryName();
             //noinspection unchecked
             this.valueClass = (Class<T>)valueClass;
 
             addRegistry(this);
+        }
+
+        private ForgeRegistryWrapper(Supplier<IForgeRegistry<T>> forgeRegistry, ResourceLocation identifier, Class<? super T> valueClass){
+            this.registry = null;
+            this.forgeRegistrySupplier = forgeRegistry;
+            this.identifier = identifier;
+            //noinspection unchecked
+            this.valueClass = (Class<T>)valueClass;
+
+            addRegistry(this);
+        }
+
+        private IForgeRegistry<T> resolveForgeRegistry(){
+            if(this.forgeRegistry == null){
+                this.forgeRegistry = this.forgeRegistrySupplier.get();
+                if(this.forgeRegistry == null)
+                    throw new IllegalStateException("Tried resolving for Forge registry '" + this.identifier + "' too early!");
+            }
+            return this.forgeRegistry;
         }
 
         @Override
@@ -267,7 +284,7 @@ public final class Registries {
         @Nullable
         @Deprecated
         public IForgeRegistry<T> getForgeRegistry(){
-            return this.forgeRegistry;
+            return this.resolveForgeRegistry();
         }
 
         @Override
@@ -276,32 +293,32 @@ public final class Registries {
         }
 
         public void register(ResourceLocation identifier, T object){
-            this.forgeRegistry.register(identifier, object);
+            this.resolveForgeRegistry().register(identifier, object);
         }
 
         public ResourceLocation getIdentifier(T object){
-            return this.forgeRegistry.getKey(object);
+            return this.resolveForgeRegistry().getKey(object);
         }
 
         @Override
         public boolean hasIdentifier(ResourceLocation identifier){
-            return this.forgeRegistry.containsKey(identifier);
+            return this.resolveForgeRegistry().containsKey(identifier);
         }
 
         public T getValue(ResourceLocation identifier){
-            return this.forgeRegistry.getValue(identifier);
+            return this.resolveForgeRegistry().getValue(identifier);
         }
 
         public Set<ResourceLocation> getIdentifiers(){
-            return this.forgeRegistry.getKeys();
+            return this.resolveForgeRegistry().getKeys();
         }
 
         public Collection<T> getValues(){
-            return this.forgeRegistry.getValues();
+            return this.resolveForgeRegistry().getValues();
         }
 
         public Set<Pair<ResourceLocation,T>> getEntries(){
-            return MappedSetView.map(this.forgeRegistry.getEntries(), entry -> Pair.of(entry.getKey().location(), entry.getValue()));
+            return MappedSetView.map(this.resolveForgeRegistry().getEntries(), entry -> Pair.of(entry.getKey().location(), entry.getValue()));
         }
 
         public Class<T> getValueClass(){
@@ -310,124 +327,7 @@ public final class Registries {
 
         @Override
         public int hashCode(){
-            int result = this.registry.hashCode();
-            result = 31 * result + this.forgeRegistry.hashCode();
-            result = 31 * result + this.valueClass.hashCode();
-            return result;
-        }
-    }
-
-    private static class RecipeConditionSerializerRegistry implements Registry<IConditionSerializer<?>> {
-
-        private static final Supplier<Map<ResourceLocation,IConditionSerializer<?>>> craftingHelperConditions;
-
-        static{
-            try{
-                Field field = CraftingHelper.class.getDeclaredField("conditions");
-                field.setAccessible(true);
-                craftingHelperConditions = () -> {
-                    try{
-                        //noinspection unchecked
-                        return (Map<ResourceLocation,IConditionSerializer<?>>)field.get(null);
-                    }catch(IllegalAccessException e){
-                        throw new RuntimeException(e);
-                    }
-                };
-            }catch(NoSuchFieldException e){
-                throw new RuntimeException(e);
-            }
-        }
-
-        private static final ResourceLocation IDENTIFIER = new ResourceLocation("supermartijn642corelib", "resource_conditions");
-
-        private final Map<ResourceLocation,IConditionSerializer<?>> identifierToObject;
-        private final Map<IConditionSerializer<?>,ResourceLocation> objectToIdentifier = new HashMap<>();
-        private final Set<Pair<ResourceLocation,IConditionSerializer<?>>> entries = new HashSet<>();
-        private final Class<IConditionSerializer<?>> valueClass;
-
-        private RecipeConditionSerializerRegistry(){
-            this.identifierToObject = craftingHelperConditions.get();
-            //noinspection unchecked
-            this.valueClass = (Class<IConditionSerializer<?>>)(Object)IConditionSerializer.class;
-        }
-
-        @Override
-        public ResourceLocation getRegistryIdentifier(){
-            return IDENTIFIER;
-        }
-
-        @Nullable
-        @Override
-        public net.minecraft.core.Registry<IConditionSerializer<?>> getVanillaRegistry(){
-            return null;
-        }
-
-        @Override
-        public boolean hasVanillaRegistry(){
-            return false;
-        }
-
-        @Nullable
-        @Override
-        public IForgeRegistry<IConditionSerializer<?>> getForgeRegistry(){
-            return null;
-        }
-
-        @Override
-        public boolean hasForgeRegistry(){
-            return false;
-        }
-
-        @Override
-        public void register(ResourceLocation identifier, IConditionSerializer<?> object){
-            if(this.identifierToObject.containsKey(identifier))
-                throw new RuntimeException("Duplicate registry for identifier '" + identifier + "'!");
-            if(this.objectToIdentifier.containsKey(object))
-                throw new RuntimeException("Duplicate registry for object under '" + this.objectToIdentifier.get(object) + "' and '" + identifier + "'!");
-            if(!identifier.equals(object.getID()))
-                throw new IllegalArgumentException("Condition serializer's id '" + object.getID() + "' does not match the given id '" + identifier + "'!");
-
-            CraftingHelper.register(object);
-        }
-
-        public void onObjectAdded(IConditionSerializer<?> object){
-            this.objectToIdentifier.put(object, object.getID());
-            this.entries.add(Pair.of(object.getID(), object));
-        }
-
-        @Override
-        public ResourceLocation getIdentifier(IConditionSerializer<?> object){
-            return this.objectToIdentifier.get(object);
-        }
-
-        @Override
-        public boolean hasIdentifier(ResourceLocation identifier){
-            return this.identifierToObject.containsKey(identifier);
-        }
-
-        @Override
-        public IConditionSerializer<?> getValue(ResourceLocation identifier){
-            return this.identifierToObject.get(identifier);
-        }
-
-        @Override
-        public Set<ResourceLocation> getIdentifiers(){
-            return Collections.unmodifiableSet(this.identifierToObject.keySet());
-        }
-
-        @Override
-        public Collection<IConditionSerializer<?>> getValues(){
-            return Collections.unmodifiableCollection(this.objectToIdentifier.keySet());
-        }
-
-        @Override
-        public Set<Pair<ResourceLocation,IConditionSerializer<?>>> getEntries(){
-            return Collections.unmodifiableSet(this.entries);
-        }
-
-        @Override
-        public Class<IConditionSerializer<?>> getValueClass(){
-            return this.valueClass;
+            return this.identifier.hashCode();
         }
     }
 }

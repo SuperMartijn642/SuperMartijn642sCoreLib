@@ -3,33 +3,32 @@ package com.supermartijn642.core.data.recipe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 
 /**
  * Created 26/08/2022 by SuperMartijn642
  */
-public class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> {
+public final class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> {
 
+    public static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.simple(new ResourceLocation("supermartijn642corelib:dummy"));
+    private static final DummyRecipe DUMMY_RECIPE = new DummyRecipe();
     public static final ConditionalRecipeSerializer INSTANCE = new ConditionalRecipeSerializer();
 
     private ConditionalRecipeSerializer(){
     }
 
-    @Override
-    public Recipe<?> fromJson(ResourceLocation location, JsonObject json){
-        return this.fromJson(location, json, ICondition.IContext.EMPTY);
-    }
-
-    @Override
-    public Recipe<?> fromJson(ResourceLocation location, JsonObject json, ICondition.IContext context){
+    public static RecipeHolder<?> fromJson(ResourceLocation location, JsonObject json){
         if(!json.has("conditions") || !json.get("conditions").isJsonArray())
             throw new RuntimeException("Conditional recipe '" + location + "' must have 'conditions' array!");
         if(!json.has("recipe") || !json.get("recipe").isJsonObject())
@@ -47,19 +46,19 @@ public class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> 
             if(!RegistryUtil.isValidIdentifier(type))
                 throw new RuntimeException("Condition for recipe '" + location + "' has invalid type '" + type + "'!");
 
-            IConditionSerializer<?> serializer = Registries.RECIPE_CONDITION_SERIALIZERS.getValue(new ResourceLocation(type));
+            Codec<? extends ICondition> serializer = Registries.RECIPE_CONDITION_SERIALIZERS.getValue(new ResourceLocation(type));
             if(serializer == null)
                 throw new RuntimeException("Condition for recipe '" + location + "' has unknown type '" + new ResourceLocation(type) + "'!");
 
             ICondition condition;
             try{
-                condition = serializer.read(conditionJson);
+                condition = serializer.decode(JsonOps.INSTANCE, conditionJson).getOrThrow(false, s -> {}).getFirst();
             }catch(Exception e){
                 throw new RuntimeException("Encountered exception whilst testing condition '" + new ResourceLocation(type) + "' for recipe '" + location + "'!");
             }
 
-            if(!condition.test(context))
-                return null;
+            if(!condition.test(ICondition.IContext.EMPTY))
+                return new RecipeHolder<>(location, DUMMY_RECIPE);
         }
 
         // Now return the recipe
@@ -67,11 +66,54 @@ public class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> 
     }
 
     @Override
-    public Recipe<?> fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf){
-        return null;
+    public Codec<Recipe<?>> codec(){
+        return Codec.unit(null);
+    }
+
+    @Override
+    public Recipe<?> fromNetwork(FriendlyByteBuf friendlyByteBuf){
+        return new DummyRecipe();
     }
 
     @Override
     public void toNetwork(FriendlyByteBuf friendlyByteBuf, Recipe<?> recipe){
+    }
+
+    private static class DummyRecipe implements Recipe<Container> {
+
+        @Override
+        public boolean matches(Container container, Level level){
+            return false;
+        }
+
+        @Override
+        public ItemStack assemble(Container container, RegistryAccess registryAccess){
+            return ItemStack.EMPTY;
+        }
+
+        @Override
+        public boolean canCraftInDimensions(int i, int j){
+            return false;
+        }
+
+        @Override
+        public ItemStack getResultItem(RegistryAccess registryAccess){
+            return ItemStack.EMPTY;
+        }
+
+        @Override
+        public RecipeSerializer<?> getSerializer(){
+            return INSTANCE;
+        }
+
+        @Override
+        public RecipeType<?> getType(){
+            return DUMMY_RECIPE_TYPE;
+        }
+
+        @Override
+        public boolean isIncomplete(){
+            return true;
+        }
     }
 }

@@ -1,8 +1,8 @@
 package com.supermartijn642.core.generator;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
@@ -15,18 +15,16 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.storage.loot.Deserializers;
 import net.minecraft.world.level.storage.loot.entries.*;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
-import net.minecraft.world.level.storage.loot.providers.number.BinomialDistributionGenerator;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
-import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
-import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
+import net.minecraft.world.level.storage.loot.providers.number.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,8 +36,6 @@ import java.util.function.Consumer;
  * Created 20/08/2022 by SuperMartijn642
  */
 public abstract class LootTableGenerator extends ResourceGenerator {
-
-    private static final Gson GSON = Deserializers.createLootTableSerializer().create();
 
     private final Map<ResourceLocation,LootTableBuilder> lootTables = new HashMap<>();
 
@@ -54,12 +50,12 @@ public abstract class LootTableGenerator extends ResourceGenerator {
             JsonObject json = new JsonObject();
             // Type
             if(lootTableBuilder.parameters != LootContextParamSets.ALL_PARAMS)
-                json.addProperty("type", LootContextParamSets.getKey(lootTableBuilder.parameters).toString());
+                json.add("type", LootContextParamSets.CODEC.encodeStart(JsonOps.INSTANCE, lootTableBuilder.parameters).getOrThrow(false, s -> {}));
             // Functions
             if(!lootTableBuilder.functions.isEmpty()){
                 JsonArray functionsJson = new JsonArray();
                 for(LootItemFunction function : lootTableBuilder.functions)
-                    functionsJson.add(GSON.toJsonTree(function));
+                    functionsJson.add(LootItemFunctions.CODEC.encodeStart(JsonOps.INSTANCE, function).getOrThrow(false, s -> {}));
                 json.add("functions", functionsJson);
             }
             // Pools
@@ -72,22 +68,22 @@ public abstract class LootTableGenerator extends ResourceGenerator {
                     if(pool.name != null && !pool.name.isEmpty())
                         poolJson.addProperty("name", pool.name);
                     // Rolls
-                    poolJson.add("rolls", GSON.toJsonTree(pool.rolls));
+                    poolJson.add("rolls", NumberProviders.CODEC.encodeStart(JsonOps.INSTANCE, pool.rolls).getOrThrow(false, s -> {}));
                     // Bonus rolls
                     if(!(pool.bonusRolls instanceof ConstantValue) || pool.bonusRolls.getInt(null) != 0)
-                        poolJson.add("bonus_rolls", GSON.toJsonTree(pool.bonusRolls));
+                        poolJson.add("bonus_rolls", NumberProviders.CODEC.encodeStart(JsonOps.INSTANCE, pool.bonusRolls).getOrThrow(false, s -> {}));
                     // Conditions
                     if(!pool.conditions.isEmpty()){
                         JsonArray conditionsJson = new JsonArray();
                         for(LootItemCondition condition : pool.conditions)
-                            conditionsJson.add(GSON.toJsonTree(condition));
+                            conditionsJson.add(LootItemConditions.CODEC.encodeStart(JsonOps.INSTANCE, condition).getOrThrow(false, s -> {}));
                         poolJson.add("conditions", conditionsJson);
                     }
                     // Functions
                     if(!pool.functions.isEmpty()){
                         JsonArray functionsJson = new JsonArray();
                         for(LootItemFunction function : pool.functions)
-                            functionsJson.add(GSON.toJsonTree(function));
+                            functionsJson.add(LootItemFunctions.CODEC.encodeStart(JsonOps.INSTANCE, function).getOrThrow(false, s -> {}));
                         poolJson.add("functions", functionsJson);
                     }
                     // Entries
@@ -95,7 +91,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
                         throw new RuntimeException("Loot table '" + lootTableBuilder.identifier + "' has loot pool without any entries!");
                     JsonArray entriesJson = new JsonArray();
                     for(LootPoolEntryContainer entry : pool.entries)
-                        entriesJson.add(GSON.toJsonTree(entry));
+                        entriesJson.add(LootPoolEntries.CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow(false, s -> {}));
                     poolJson.add("entries", entriesJson);
 
                     poolsJson.add(poolJson);
@@ -171,7 +167,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * Sets the loot table type to the given parameter set.
          */
         public LootTableBuilder parameters(LootContextParamSet parameters){
-            if(LootContextParamSets.getKey(parameters) == null)
+            if(LootContextParamSets.CODEC.encodeStart(JsonOps.INSTANCE, parameters).error().isPresent())
                 throw new IllegalArgumentException("Cannot use unregistered parameter set '" + parameters + "'!");
 
             this.parameters = parameters;

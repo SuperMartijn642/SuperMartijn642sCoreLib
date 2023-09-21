@@ -5,20 +5,18 @@ import com.supermartijn642.core.gui.BaseContainerType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.extensions.IForgeServerPlayer;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.network.NetworkHooks;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,18 +67,17 @@ public class CommonUtils {
      */
     public static void openContainer(BaseContainer container){
         Player player = container.player;
-        if(!(container.player instanceof ServerPlayer))
+        if(!(container.player instanceof IForgeServerPlayer))
             return;
 
         // Open the container
         //noinspection unchecked,rawtypes
-        NetworkHooks.openScreen((ServerPlayer)player, new MenuProvider() {
+        ((IForgeServerPlayer)player).openMenu(new MenuProvider() {
             @Override
             public Component getDisplayName(){
                 return Component.empty();
             }
 
-            @Nullable
             @Override
             public AbstractContainerMenu createMenu(int windowId, Inventory inventory, Player player){
                 container.setContainerId(windowId);

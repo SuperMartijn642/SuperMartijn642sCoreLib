@@ -1,5 +1,6 @@
 package com.supermartijn642.core.registry;
 
+import com.mojang.serialization.Codec;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import net.minecraft.core.particles.ParticleType;
@@ -19,7 +20,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
+import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.RegisterEvent;
@@ -386,53 +387,53 @@ public class RegistrationHandler {
         this.addCallback(Registries.STAT_TYPES, callback);
     }
 
-    public void registerConditionSerializer(String identifier, Supplier<IConditionSerializer<?>> recipeSerializer){
-        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, identifier, recipeSerializer);
+    public void registerConditionSerializer(String identifier, Supplier<Codec<? extends ICondition>> conditionSerializer){
+        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, identifier, conditionSerializer);
     }
 
-    public void registerConditionSerializer(String identifier, IConditionSerializer<?> recipeSerializer){
-        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, identifier, () -> recipeSerializer);
+    public void registerConditionSerializer(String identifier, Codec<? extends ICondition> conditionSerializer){
+        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, identifier, () -> conditionSerializer);
     }
 
-    public void registerConditionSerializerOverride(String namespace, String identifier, Supplier<IConditionSerializer<?>> recipeSerializer){
-        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, namespace, identifier, recipeSerializer);
+    public void registerConditionSerializerOverride(String namespace, String identifier, Supplier<Codec<? extends ICondition>> conditionSerializer){
+        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, namespace, identifier, conditionSerializer);
     }
 
-    public void registerConditionSerializerOverride(String namespace, String identifier, IConditionSerializer<?> recipeSerializer){
-        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, namespace, identifier, () -> recipeSerializer);
+    public void registerConditionSerializerOverride(String namespace, String identifier, Codec<? extends ICondition> conditionSerializer){
+        this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, namespace, identifier, () -> conditionSerializer);
     }
 
-    public void registerConditionSerializerCallback(Consumer<Helper<IConditionSerializer<?>>> callback){
+    public void registerConditionSerializerCallback(Consumer<Helper<Codec<? extends ICondition>>> callback){
         this.addCallback(Registries.RECIPE_CONDITION_SERIALIZERS, callback);
     }
 
     public void registerResourceConditionSerializer(String identifier, Supplier<ResourceConditionSerializer<?>> conditionSerializer){
-        this.registerConditionSerializer(identifier, () -> ResourceConditionSerializer.createForgeConditionSerializer(new ResourceLocation(this.modid, identifier), conditionSerializer.get()));
+        this.registerConditionSerializer(identifier, () -> ResourceConditionSerializer.createForgeConditionCodec(conditionSerializer.get()));
     }
 
     public void registerResourceConditionSerializer(String identifier, ResourceConditionSerializer<?> conditionSerializer){
-        this.registerConditionSerializer(identifier, () -> ResourceConditionSerializer.createForgeConditionSerializer(new ResourceLocation(this.modid, identifier), conditionSerializer));
+        this.registerConditionSerializer(identifier, () -> ResourceConditionSerializer.createForgeConditionCodec(conditionSerializer));
     }
 
     public void registerResourceConditionSerializerOverride(String namespace, String identifier, Supplier<ResourceConditionSerializer<?>> conditionSerializer){
-        this.registerConditionSerializerOverride(namespace, identifier, () -> ResourceConditionSerializer.createForgeConditionSerializer(new ResourceLocation(namespace, identifier), conditionSerializer.get()));
+        this.registerConditionSerializerOverride(namespace, identifier, () -> ResourceConditionSerializer.createForgeConditionCodec(conditionSerializer.get()));
     }
 
     public void registerResourceConditionSerializerOverride(String namespace, String identifier, ResourceConditionSerializer<?> conditionSerializer){
-        this.registerConditionSerializerOverride(namespace, identifier, () -> ResourceConditionSerializer.createForgeConditionSerializer(new ResourceLocation(namespace, identifier), conditionSerializer));
+        this.registerConditionSerializerOverride(namespace, identifier, () -> ResourceConditionSerializer.createForgeConditionCodec(conditionSerializer));
     }
 
     public void registerResourceConditionSerializerCallback(Consumer<Helper<ResourceConditionSerializer<?>>> callback){
-        this.registerConditionSerializerCallback(helper -> callback.accept(new Helper<ResourceConditionSerializer<?>>(null) {
+        this.registerConditionSerializerCallback(helper -> callback.accept(new Helper<>(null) {
             @Override
             public <X extends ResourceConditionSerializer<?>> X register(String identifier, X object){
-                helper.register(identifier, ResourceConditionSerializer.createForgeConditionSerializer(new ResourceLocation(RegistrationHandler.this.modid, identifier), object));
+                helper.register(identifier, ResourceConditionSerializer.createForgeConditionCodec(object));
                 return object;
             }
 
             @Override
             public <X extends ResourceConditionSerializer<?>> X registerOverride(String namespace, String identifier, X object){
-                helper.register(namespace, identifier, ResourceConditionSerializer.createForgeConditionSerializer(new ResourceLocation(namespace, identifier), object));
+                helper.register(namespace, identifier, ResourceConditionSerializer.createForgeConditionCodec(object));
                 return object;
             }
         }));

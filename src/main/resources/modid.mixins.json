@@ -6,14 +6,13 @@
   "refmap": "${mod_id}.mixins.refmap.json",
   "mixins": [
     "BlockPropertiesAccessor",
-    "CraftingHelperMixin",
     "GameDataMixin"
   ],
   "client": [
     "DataGeneratorMixin",
     "DatagenModLoaderAccessor",
     "LevelRendererMixin",
-    "SpriteResourceLoaderMixin"
+    "SpriteSourceListMixin"
   ],
   "server": [],
   "injectors": {

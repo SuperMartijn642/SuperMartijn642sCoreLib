@@ -83,7 +83,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks){
         this.widgetRenderContext.update(guiGraphics, partialTicks);
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
 
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
         int offsetMouseX = mouseX - offsetX;
@@ -192,9 +192,9 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount){
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount){
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        return this.widget.mouseScrolled((int)mouseX - offsetX, (int)mouseY - offsetY, amount, false) || super.mouseScrolled(mouseX, mouseY, amount);
+        return this.widget.mouseScrolled((int)mouseX - offsetX, (int)mouseY - offsetY, horizontalAmount, false) || super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     @Override

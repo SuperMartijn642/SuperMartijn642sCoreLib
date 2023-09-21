@@ -31,6 +31,7 @@ public class CoreLib {
 
         // Register conditional recipe type
         RegistrationHandler handler = RegistrationHandler.get("supermartijn642corelib");
+        handler.registerRecipeType("dummy", ConditionalRecipeSerializer.DUMMY_RECIPE_TYPE);
         handler.registerRecipeSerializer("conditional", ConditionalRecipeSerializer.INSTANCE);
         handler.registerResourceConditionSerializer("mod_loaded", ModLoadedResourceCondition.SERIALIZER);
         handler.registerResourceConditionSerializer("not", NotResourceCondition.SERIALIZER);

@@ -2,7 +2,7 @@ package com.supermartijn642.core.data.condition;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.minecraftforge.common.crafting.CraftingHelper;
+import com.mojang.serialization.JsonOps;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ public class OrResourceCondition implements ResourceCondition {
         public void serialize(JsonObject json, OrResourceCondition condition){
             JsonArray conditions = new JsonArray();
             for(ICondition alternative : condition.conditions)
-                conditions.add(CraftingHelper.serialize(alternative));
+                conditions.add(ICondition.CODEC.encodeStart(JsonOps.INSTANCE, alternative).getOrThrow(false, s -> {}));
             json.add("conditions", conditions);
         }
 
@@ -64,7 +64,7 @@ public class OrResourceCondition implements ResourceCondition {
             JsonArray conditionsJson = json.getAsJsonArray("conditions");
             ICondition[] conditions = new ICondition[conditionsJson.size()];
             for(int i = 0; i < conditionsJson.size(); i++)
-                conditions[i] = CraftingHelper.getCondition(conditionsJson.get(i).getAsJsonObject());
+                conditions[i] = ICondition.CODEC.decode(JsonOps.INSTANCE, conditionsJson.get(i).getAsJsonObject()).getOrThrow(false, s -> {}).getFirst();
             return new OrResourceCondition(conditions);
         }
     }

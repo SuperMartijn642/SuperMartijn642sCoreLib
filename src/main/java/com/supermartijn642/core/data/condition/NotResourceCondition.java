@@ -1,7 +1,7 @@
 package com.supermartijn642.core.data.condition;
 
 import com.google.gson.JsonObject;
-import net.minecraftforge.common.crafting.CraftingHelper;
+import com.mojang.serialization.JsonOps;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 
 /**
@@ -35,7 +35,7 @@ public class NotResourceCondition implements ResourceCondition {
 
         @Override
         public void serialize(JsonObject json, NotResourceCondition condition){
-            json.add("condition", CraftingHelper.serialize(condition.condition));
+            json.add("condition", ICondition.CODEC.encodeStart(JsonOps.INSTANCE, condition.condition).getOrThrow(false, s -> {}));
         }
 
         @Override
@@ -43,7 +43,7 @@ public class NotResourceCondition implements ResourceCondition {
             if(!json.has("condition") || !json.get("condition").isJsonObject())
                 throw new RuntimeException("Condition must have key 'condition' with a json object!");
 
-            return new NotResourceCondition(CraftingHelper.getCondition(json.get("condition").getAsJsonObject()));
+            return new NotResourceCondition(ICondition.CODEC.decode(JsonOps.INSTANCE, json.get("condition").getAsJsonObject()).getOrThrow(false, s -> {}).getFirst());
         }
     }
 }

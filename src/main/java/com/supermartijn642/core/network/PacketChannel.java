@@ -11,13 +11,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.network.SimpleChannel;
 
 import java.util.HashMap;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -73,11 +74,15 @@ public class PacketChannel {
     private PacketChannel(String modid, String name){
         this.modid = modid;
         this.name = name;
-        this.channel = NetworkRegistry.newSimpleChannel(new ResourceLocation(modid, name), () -> "1", "1"::equals, "1"::equals);
-        this.channel.registerMessage(0, InternalPacket.class,
-            (message, buffer) -> InternalPacket.write(this, message, buffer),
-            buffer -> InternalPacket.read(this, buffer),
-            (message, context) -> InternalPacket.handle(this, message, context));
+        this.channel = ChannelBuilder.named(new ResourceLocation(modid, name))
+            .networkProtocolVersion(1)
+            .acceptedVersions((status, version) -> version == 1)
+            .simpleChannel();
+        this.channel.messageBuilder(InternalPacket.class, 0)
+            .encoder((message, buffer) -> InternalPacket.write(this, message, buffer))
+            .decoder(buffer -> InternalPacket.read(this, buffer))
+            .consumerNetworkThread((BiConsumer<InternalPacket,CustomPayloadEvent.Context>)(message, context) -> InternalPacket.handle(this, message, context))
+            .add();
     }
 
     /**
@@ -98,48 +103,48 @@ public class PacketChannel {
 
     /**
      * Sends the given {@code packet} to the server. Must only be used client-side.
-     * @param packet packet to be send
+     * @param packet packet to be sent
      */
     public void sendToServer(BasePacket packet){
         this.checkRegistration(packet);
-        this.channel.sendToServer(new InternalPacket().setPacket(packet));
+        this.channel.send(new InternalPacket().setPacket(packet), PacketDistributor.SERVER.noArg());
     }
 
     /**
      * Sends the given {@code packet} to the server. Must only be used server-side.
      * @param player player to send the packet to
-     * @param packet packet to be send
+     * @param packet packet to be sent
      */
     public void sendToPlayer(Player player, BasePacket packet){
         if(!(player instanceof ServerPlayer))
             throw new IllegalStateException("This must only be called server-side!");
         this.checkRegistration(packet);
-        this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer)player), new InternalPacket().setPacket(packet));
+        this.channel.send(new InternalPacket().setPacket(packet), PacketDistributor.PLAYER.with((ServerPlayer)player));
     }
 
     /**
      * Sends the given {@code packet} to all players. Must only be used server-side.
-     * @param packet packet to be send
+     * @param packet packet to be sent
      */
     public void sendToAllPlayers(BasePacket packet){
         this.checkRegistration(packet);
-        this.channel.send(PacketDistributor.ALL.noArg(), new InternalPacket().setPacket(packet));
+        this.channel.send(new InternalPacket().setPacket(packet), PacketDistributor.ALL.noArg());
     }
 
     /**
      * Sends the given {@code packet} to all players in the given {@code dimension}. Must only be used server-side.
      * @param dimension dimension to send the packet to
-     * @param packet    packet to be send
+     * @param packet    packet to be sent
      */
     public void sendToDimension(ResourceKey<Level> dimension, BasePacket packet){
         this.checkRegistration(packet);
-        this.channel.send(PacketDistributor.DIMENSION.with(() -> dimension), new InternalPacket().setPacket(packet));
+        this.channel.send(new InternalPacket().setPacket(packet), PacketDistributor.DIMENSION.with(dimension));
     }
 
     /**
      * Sends the given {@code packet} to all players in the given {@code world}. Must only be used server-side.
      * @param world  world to send the packet to
-     * @param packet packet to be send
+     * @param packet packet to be sent
      */
     public void sendToDimension(Level world, BasePacket packet){
         if(world.isClientSide)
@@ -150,27 +155,27 @@ public class PacketChannel {
     /**
      * Sends the given {@code packet} to all players tracking the given {@code entity}. Must only be used server-side.
      * @param entity entity which should be tracked
-     * @param packet packet to be send
+     * @param packet packet to be sent
      */
     public void sendToAllTrackingEntity(Entity entity, BasePacket packet){
         if(entity.level().isClientSide)
             throw new IllegalStateException("This must only be called server-side!");
         this.checkRegistration(packet);
-        this.channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new InternalPacket().setPacket(packet));
+        this.channel.send(new InternalPacket().setPacket(packet), PacketDistributor.TRACKING_ENTITY.with(entity));
     }
 
     /**
      * Sends the given {@code packet} to all players tracking the given position in the given {@code world}. Must only be used server-side.
-     * @param packet packet to be send
+     * @param packet packet to be sent
      */
     public void sendToAllNear(ResourceKey<Level> world, double x, double y, double z, double radius, BasePacket packet){
         this.checkRegistration(packet);
-        this.channel.send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(x, y, z, radius, world)), new InternalPacket().setPacket(packet));
+        this.channel.send(new InternalPacket().setPacket(packet), PacketDistributor.NEAR.with(new PacketDistributor.TargetPoint(x, y, z, radius, world)));
     }
 
     /**
      * Sends the given {@code packet} to all players tracking the given position in the given {@code world}. Must only be used server-side.
-     * @param packet packet to be send
+     * @param packet packet to be sent
      */
     public void sendToAllNear(ResourceKey<Level> world, BlockPos pos, double radius, BasePacket packet){
         this.sendToAllNear(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, radius, packet);
@@ -178,7 +183,7 @@ public class PacketChannel {
 
     /**
      * Sends the given {@code packet} to all players tracking the given position in the given {@code world}. Must only be used server-side.
-     * @param packet packet to be send
+     * @param packet packet to be sent
      */
     public void sendToAllNear(Level world, double x, double y, double z, double radius, BasePacket packet){
         if(world.isClientSide)
@@ -188,7 +193,7 @@ public class PacketChannel {
 
     /**
      * Sends the given {@code packet} to all players tracking the given position in the given {@code world}. Must only be used server-side.
-     * @param packet packet to be send
+     * @param packet packet to be sent
      */
     public void sendToAllNear(Level world, BlockPos pos, double radius, BasePacket packet){
         if(world.isClientSide)
@@ -218,9 +223,9 @@ public class PacketChannel {
         return packet;
     }
 
-    private void handle(BasePacket packet, Supplier<NetworkEvent.Context> contextSupplier){
-        contextSupplier.get().setPacketHandled(true);
-        PacketContext context = new PacketContext(contextSupplier.get());
+    private void handle(BasePacket packet, CustomPayloadEvent.Context contextSupplier){
+        contextSupplier.setPacketHandled(true);
+        PacketContext context = new PacketContext(contextSupplier);
         if(packet.verify(context)){
             if(this.packet_to_queued.get(packet.getClass()))
                 context.queueTask(() -> packet.handle(context));
@@ -239,7 +244,7 @@ public class PacketChannel {
             channel.write(packet.packet, buffer);
         }
 
-        public static void handle(PacketChannel channel, InternalPacket packet, Supplier<NetworkEvent.Context> context){
+        public static void handle(PacketChannel channel, InternalPacket packet, CustomPayloadEvent.Context context){
             channel.handle(packet.packet, context);
         }
 
