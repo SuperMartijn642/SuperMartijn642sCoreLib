@@ -23,7 +23,7 @@ public class RecipeManagerMixin {
         at = @At("HEAD"),
         cancellable = true
     )
-    public static void fromJson(ResourceLocation recipeLocation, JsonObject json, CallbackInfoReturnable<RecipeHolder<?>> ci){
+    private static void fromJson(ResourceLocation recipeLocation, JsonObject json, CallbackInfoReturnable<RecipeHolder<?>> ci){
         // Intercept conditional recipes
         if(json != null && json.has("type") && json.get("type").isJsonPrimitive() && json.getAsJsonPrimitive("type").isString()){
             String type = json.get("type").getAsString();
