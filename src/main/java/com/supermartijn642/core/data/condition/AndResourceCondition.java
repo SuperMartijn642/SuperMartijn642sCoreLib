@@ -52,7 +52,7 @@ public class AndResourceCondition implements ResourceCondition {
         public void serialize(JsonObject json, AndResourceCondition condition){
             JsonArray conditions = new JsonArray();
             for(ICondition alternative : condition.conditions)
-                ICondition.CODEC.encodeStart(JsonOps.INSTANCE, alternative).getOrThrow(false, s -> {});
+                conditions.add(ICondition.CODEC.encodeStart(JsonOps.INSTANCE, alternative).getOrThrow(false, s -> {}));
             json.add("conditions", conditions);
         }
 

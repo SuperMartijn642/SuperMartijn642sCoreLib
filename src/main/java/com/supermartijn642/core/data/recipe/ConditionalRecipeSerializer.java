@@ -5,8 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
-import com.supermartijn642.core.registry.Registries;
-import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -37,24 +35,11 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
         // Test all conditions
         JsonArray conditions = json.getAsJsonArray("conditions");
         for(JsonElement conditionElement : conditions){
-            if(!conditionElement.isJsonObject())
-                throw new RuntimeException("Conditions array for recipe '" + location + "' must only contain objects!");
-            JsonObject conditionJson = conditionElement.getAsJsonObject();
-            if(!conditionJson.has("type") || !conditionJson.get("type").isJsonPrimitive() || !conditionJson.get("type").getAsJsonPrimitive().isString())
-                throw new RuntimeException("Condition for recipe '" + location + "' is missing 'type' key!");
-            String type = conditionJson.get("type").getAsString();
-            if(!RegistryUtil.isValidIdentifier(type))
-                throw new RuntimeException("Condition for recipe '" + location + "' has invalid type '" + type + "'!");
-
-            Codec<? extends ICondition> serializer = Registries.RECIPE_CONDITION_SERIALIZERS.getValue(new ResourceLocation(type));
-            if(serializer == null)
-                throw new RuntimeException("Condition for recipe '" + location + "' has unknown type '" + new ResourceLocation(type) + "'!");
-
             ICondition condition;
             try{
-                condition = serializer.decode(JsonOps.INSTANCE, conditionJson).getOrThrow(false, s -> {}).getFirst();
+                condition = ICondition.CODEC.decode(JsonOps.INSTANCE, conditionElement).getOrThrow(false, s -> {}).getFirst();
             }catch(Exception e){
-                throw new RuntimeException("Encountered exception whilst testing condition '" + new ResourceLocation(type) + "' for recipe '" + location + "'!");
+                throw new RuntimeException("Encountered exception whilst testing conditions for recipe '" + location + "'!", e);
             }
 
             if(!condition.test(ICondition.IContext.EMPTY))

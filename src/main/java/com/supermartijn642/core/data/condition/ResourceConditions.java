@@ -5,17 +5,23 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created 27/08/2022 by SuperMartijn642
  */
 class ResourceConditions {
 
+    private static final Map<ResourceConditionSerializer<?>,Codec<? extends ICondition>> TO_UNDERLYING_MAP = new HashMap<>();
+
+
     static ConditionWrapper wrap(ResourceCondition condition){
         return new ConditionWrapper(condition);
     }
 
-    static Codec<? extends ICondition> wrap(ResourceConditionSerializer<?> serializer){
-        return Codec.<ConditionWrapper>of(new Encoder<>() {
+    static Codec<? extends ICondition> serializerCodec(ResourceConditionSerializer<?> serializer){
+        return TO_UNDERLYING_MAP.computeIfAbsent(serializer, s -> Codec.<ConditionWrapper>of(new Encoder<>() {
             @Override
             public <T> DataResult<T> encode(ConditionWrapper input, DynamicOps<T> ops, T prefix){
                 JsonObject json = new JsonObject();
@@ -34,10 +40,10 @@ class ResourceConditions {
                 try{
                     return DataResult.success(Pair.of(new ConditionWrapper(serializer.deserialize(((JsonObject)input))), input));
                 }catch(Exception e){
-                    return DataResult.error(() -> "Failed to decode condition: " + e.getMessage());
+                    throw new RuntimeException("Failed to decode condition for serializer class '" + serializer.getClass() + "'!", e);
                 }
             }
-        });
+        }));
     }
 
     private static class ConditionWrapper implements ICondition {
@@ -56,9 +62,7 @@ class ResourceConditions {
 
         @Override
         public Codec<? extends ICondition> codec(){
-            if(this.codec == null)
-                this.codec = wrap(this.condition.getSerializer());
-            return this.codec;
+            return serializerCodec(this.condition.getSerializer());
         }
     }
 }

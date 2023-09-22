@@ -10,7 +10,7 @@ import net.minecraftforge.common.crafting.conditions.ICondition;
 public interface ResourceConditionSerializer<T extends ResourceCondition> {
 
     static Codec<? extends ICondition> createForgeConditionCodec(ResourceConditionSerializer<?> serializer){
-        return ResourceConditions.wrap(serializer);
+        return ResourceConditions.serializerCodec(serializer);
     }
 
     void serialize(JsonObject json, T condition);
