@@ -37,7 +37,7 @@ public class ScreenUtils {
 
     private static final ResourceLocation BUTTON_BACKGROUND = new ResourceLocation("supermartijn642corelib", "textures/gui/buttons.png");
     private static final ResourceLocation SCREEN_BACKGROUND = new ResourceLocation("supermartijn642corelib", "textures/gui/background.png");
-    private static final GuiGraphics GUI_GRAPHICS = new GuiGraphics(null, null);
+    private static final GuiGraphics GUI_GRAPHICS = new GuiGraphics(ClientUtils.getMinecraft(), null);
 
     public static final int DEFAULT_TEXT_COLOR = 4210752, ACTIVE_TEXT_COLOR = 14737632, INACTIVE_TEXT_COLOR = 7368816;
 
