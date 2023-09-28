@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.12c
+- Fixed crash when translating block names on the server
+
 ### SuperMartijn642's Core Library 1.1.12b
 - Add workarounds for SpongeForge using unnecessary Overwrite mixins
 
