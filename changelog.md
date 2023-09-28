@@ -1,3 +1,7 @@
+### SuperMartijn642's Core Library 1.1.13
+- Improved `LootTableGenerator.LootPoolBuilder` with additional helpers
+- `BaseBlockEntity#dataChanged` will now be true initially to avoid issues with Create contraptions
+
 ### SuperMartijn642's Core Library 1.1.12c
 - Fixed crash when translating block names on the server
 
