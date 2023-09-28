@@ -20,8 +20,10 @@ import net.minecraft.world.storage.loot.conditions.ILootCondition;
 import net.minecraft.world.storage.loot.conditions.LootConditionManager;
 import net.minecraft.world.storage.loot.conditions.MatchTool;
 import net.minecraft.world.storage.loot.conditions.SurvivesExplosion;
+import net.minecraft.world.storage.loot.functions.EnchantWithLevels;
 import net.minecraft.world.storage.loot.functions.ILootFunction;
 import net.minecraft.world.storage.loot.functions.LootFunctionManager;
+import net.minecraft.world.storage.loot.functions.SetCount;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -151,14 +153,14 @@ public abstract class LootTableGenerator extends ResourceGenerator {
         return this.modName + " Loot Table Generator";
     }
 
-    protected static class LootTableBuilder {
+    public static class LootTableBuilder {
 
         protected final ResourceLocation identifier;
         private final List<LootPoolBuilder> pools = new ArrayList<>();
         private final List<ILootFunction> functions = new ArrayList<>();
         private LootParameterSet parameters = LootParameterSets.ALL_PARAMS;
 
-        public LootTableBuilder(ResourceLocation identifier){
+        protected LootTableBuilder(ResourceLocation identifier){
             this.identifier = identifier;
         }
 
@@ -211,7 +213,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
         }
     }
 
-    protected static class LootPoolBuilder {
+    public static class LootPoolBuilder {
 
         private final List<ILootCondition> conditions = new ArrayList<>();
         private final List<ILootFunction> functions = new ArrayList<>();
@@ -219,6 +221,9 @@ public abstract class LootTableGenerator extends ResourceGenerator {
         private IRandomRange rolls = ConstantRange.exactly(1);
         private IRandomRange bonusRolls = ConstantRange.exactly(0);
         private String name;
+
+        protected LootPoolBuilder(){
+        }
 
         /**
          * Sets the number provider for the number of rolls for this loot pool.
@@ -357,11 +362,35 @@ public abstract class LootTableGenerator extends ResourceGenerator {
             return this;
         }
 
+        private LootPoolBuilder entry(StandaloneLootEntry.Builder<?> entry, int weight){
+            if(weight <= 0)
+                throw new IllegalArgumentException("Loot entry weight must be greater than zero, not '" + weight + "'!");
+
+            return this.entry(entry.setWeight(weight).build());
+        }
+
+        /**
+         * Adds an empty entry to this loot pool.
+         * @param weight weight of the entry
+         */
+        public LootPoolBuilder emptyEntry(int weight){
+            return this.entry(EmptyLootEntry.emptyItem(), weight);
+        }
+
         /**
          * Adds an empty entry to this loot pool.
          */
         public LootPoolBuilder emptyEntry(){
-            return this.entry(EmptyLootEntry.emptyItem().build());
+            return this.emptyEntry(1);
+        }
+
+        /**
+         * Adds an item entry to this loot pool.
+         * @param item   item to be added as an entry
+         * @param weight weight of the entry
+         */
+        public LootPoolBuilder itemEntry(IItemProvider item, int weight){
+            return this.entry(ItemLootEntry.lootTableItem(item), weight);
         }
 
         /**
@@ -369,7 +398,28 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param item item to be added as an entry
          */
         public LootPoolBuilder itemEntry(IItemProvider item){
-            return this.entry(ItemLootEntry.lootTableItem(item).build());
+            return this.itemEntry(item, 1);
+        }
+
+        /**
+         * Adds an item entry to this loot pool.
+         * @param item   item to be added as an entry
+         * @param count  the number of items in the item stack
+         * @param weight weight of the entry
+         */
+        public LootPoolBuilder itemEntry(IItemProvider item, int count, int weight){
+            return this.entry(ItemLootEntry.lootTableItem(item).apply(SetCount.setCount(ConstantRange.exactly(count))), weight);
+        }
+
+        /**
+         * Adds an item entry to this loot pool.
+         * @param item   item to be added as an entry
+         * @param min    the minimum size of the item stack
+         * @param max    the maximum size of the item stack
+         * @param weight weight of the entry
+         */
+        public LootPoolBuilder itemEntry(IItemProvider item, int min, int max, int weight){
+            return this.entry(ItemLootEntry.lootTableItem(item).apply(SetCount.setCount(RandomValueRange.between(min, max))), weight);
         }
 
         /**
@@ -393,11 +443,58 @@ public abstract class LootTableGenerator extends ResourceGenerator {
         }
 
         /**
+         * Adds an item entry which will be enchanted.
+         * @param item        item to be enchanted
+         * @param levels      the number of levels the item will be enchanted with
+         * @param allowCurses whether the items may be enchanted with curses
+         * @param weight      weight of the entry
+         */
+        public LootPoolBuilder enchantedItemEntry(IItemProvider item, int levels, boolean allowCurses, int weight){
+            EnchantWithLevels.Builder builder = EnchantWithLevels.enchantWithLevels(ConstantRange.exactly(levels));
+            if(allowCurses)
+                builder.allowTreasure();
+            return this.entry(ItemLootEntry.lootTableItem(item).apply(builder), weight);
+        }
+
+        /**
+         * Adds an item entry which will be enchanted.
+         * @param item        item to be enchanted
+         * @param minLevels   the minimum number of levels the item will be enchanted with
+         * @param maxLevels   the maximum number of levels the item will be enchanted with
+         * @param allowCurses whether the items may be enchanted with curses
+         * @param weight      weight of the entry
+         */
+        public LootPoolBuilder enchantedItemEntry(IItemProvider item, int minLevels, int maxLevels, boolean allowCurses, int weight){
+            EnchantWithLevels.Builder builder = EnchantWithLevels.enchantWithLevels(RandomValueRange.between(minLevels, maxLevels));
+            if(allowCurses)
+                builder.allowTreasure();
+            return this.entry(ItemLootEntry.lootTableItem(item).apply(builder), weight);
+        }
+
+        /**
+         * Adds a tag entry to this loot pool.
+         * @param tagKey tag to be added as an entry
+         * @param weight weight of the entry
+         */
+        public LootPoolBuilder tagEntry(Tag<Item> tagKey, int weight){
+            return this.entry(TagLootEntry.expandTag(tagKey), weight);
+        }
+
+        /**
          * Adds a tag entry to this loot pool.
          * @param tag tag to be added as an entry
          */
         public LootPoolBuilder tagEntry(Tag<Item> tag){
             return this.entry(TagLootEntry.expandTag(tag).build());
+        }
+
+        /**
+         * Adds a tag entry to this loot pool.
+         * @param tag    tag to be added as an entry
+         * @param weight weight of the entry
+         */
+        public LootPoolBuilder tagEntry(ResourceLocation tag, int weight){
+            return this.tagEntry(new ItemTags.Wrapper(tag), weight);
         }
 
         /**
@@ -412,6 +509,16 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * Adds a tag entry to this loot pool.
          * @param namespace namespace of the tag to be added as an entry
          * @param path      path of the tag to be added as an entry
+         * @param weight    weight of the entry
+         */
+        public LootPoolBuilder tagEntry(String namespace, String path, int weight){
+            return this.tagEntry(new ResourceLocation(namespace, path), weight);
+        }
+
+        /**
+         * Adds a tag entry to this loot pool.
+         * @param namespace namespace of the tag to be added as an entry
+         * @param path      path of the tag to be added as an entry
          */
         public LootPoolBuilder tagEntry(String namespace, String path){
             return this.tagEntry(new ResourceLocation(namespace, path));
@@ -420,9 +527,28 @@ public abstract class LootTableGenerator extends ResourceGenerator {
         /**
          * Adds a loot table entry to this loot pool.
          * @param lootTable loot table to be added as an entry
+         * @param weight    weight of the entry
+         */
+        public LootPoolBuilder lootTableEntry(ResourceLocation lootTable, int weight){
+            return this.entry(TableLootEntry.lootTableReference(lootTable), weight);
+        }
+
+        /**
+         * Adds a loot table entry to this loot pool.
+         * @param lootTable loot table to be added as an entry
          */
         public LootPoolBuilder lootTableEntry(ResourceLocation lootTable){
-            return this.entry(TableLootEntry.lootTableReference(lootTable).build());
+            return this.lootTableEntry(lootTable, 1);
+        }
+
+        /**
+         * Adds a loot table entry to this loot pool.
+         * @param namespace namespace of the loot table to be added as an entry
+         * @param path      path of the loot table to be added as an entry
+         * @param weight    weight of the entry
+         */
+        public LootPoolBuilder lootTableEntry(String namespace, String path, int weight){
+            return this.lootTableEntry(new ResourceLocation(namespace, path), weight);
         }
 
         /**
