@@ -16,7 +16,10 @@ public abstract class BaseBlockEntity extends TileEntity {
 
     // Used for block drops
     boolean destroyedByCreativePlayer = false;
-    private boolean dataChanged = false;
+    /**
+     * Create's contraptions call {@link #getUpdatePacket()} when placing back blocks, so this should be {@code true} initially
+     */
+    private boolean dataChanged = true;
 
     public BaseBlockEntity(BaseBlockEntityType<?> type){
         super();
