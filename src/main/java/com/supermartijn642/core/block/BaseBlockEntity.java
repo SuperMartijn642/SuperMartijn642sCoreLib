@@ -12,7 +12,10 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public abstract class BaseBlockEntity extends BlockEntity {
 
-    private boolean dataChanged = false;
+    /**
+     * Create's contraptions call {@link #getUpdatePacket()} when placing back blocks, so this should be {@code true} initially
+     */
+    private boolean dataChanged = true;
 
     public BaseBlockEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state){
         super(tileEntityTypeIn, pos, state);
