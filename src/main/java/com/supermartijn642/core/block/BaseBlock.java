@@ -6,7 +6,6 @@ import com.supermartijn642.core.extensions.LootContextExtension;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -22,6 +21,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.*;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootTable;
@@ -316,7 +316,7 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
 
     @Override
     public String getLocalizedName(){
-        return I18n.format(this.getUnlocalizedName()).trim();
+        return I18n.translateToLocal(this.getUnlocalizedName()).trim();
     }
 
     @Override
