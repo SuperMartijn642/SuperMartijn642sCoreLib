@@ -11,7 +11,10 @@ import net.minecraft.tileentity.TileEntityType;
  */
 public abstract class BaseBlockEntity extends TileEntity {
 
-    private boolean dataChanged = false;
+    /**
+     * Create's contraptions call {@link #getUpdatePacket()} when placing back blocks, so this should be {@code true} initially
+     */
+    private boolean dataChanged = true;
 
     public BaseBlockEntity(TileEntityType<?> tileEntityTypeIn){
         super(tileEntityTypeIn);
