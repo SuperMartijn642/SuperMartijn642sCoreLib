@@ -108,7 +108,7 @@ public abstract class BaseBlockEntity extends TileEntity {
             this.dataChanged = false;
             NBTTagCompound data = this.writeClientData();
             if(data != null && !data.hasNoTags())
-                return new SPacketUpdateTileEntity(this.pos, 0, this.writeClientData());
+                return new SPacketUpdateTileEntity(this.pos, 0, data);
         }
         return null;
     }
