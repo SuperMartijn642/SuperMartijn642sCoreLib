@@ -99,7 +99,7 @@ public abstract class BaseBlockEntity extends BlockEntity {
             this.dataChanged = false;
             return ClientboundBlockEntityDataPacket.create(this, entity -> {
                 CompoundTag data = ((BaseBlockEntity)entity).writeClientData();
-                return data != null && !data.isEmpty() ? data : null;
+                return data != null ? data : new CompoundTag();
             });
         }
         return null;
