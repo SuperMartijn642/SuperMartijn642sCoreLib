@@ -97,7 +97,9 @@ public abstract class BaseBlockEntity extends BlockEntity {
     public ClientboundBlockEntityDataPacket getUpdatePacket(){
         if(this.dataChanged){
             this.dataChanged = false;
-            return new ClientboundBlockEntityDataPacket(this.worldPosition, 0, this.writeClientData());
+            CompoundTag data = this.writeClientData();
+            if(data != null && !data.isEmpty())
+                return new ClientboundBlockEntityDataPacket(this.worldPosition, 0, this.writeClientData());
         }
         return null;
     }
