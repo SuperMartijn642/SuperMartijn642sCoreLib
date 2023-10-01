@@ -97,7 +97,7 @@ public abstract class BaseBlockEntity extends TileEntity {
             this.dataChanged = false;
             CompoundNBT data = this.writeClientData();
             if(data != null && !data.isEmpty())
-                return new SUpdateTileEntityPacket(this.worldPosition, 0, this.writeClientData());
+                return new SUpdateTileEntityPacket(this.worldPosition, 0, data);
         }
         return null;
     }
