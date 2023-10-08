@@ -3,6 +3,7 @@ package com.supermartijn642.core.data.recipe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.supermartijn642.core.data.condition.ResourceCondition;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.network.FriendlyByteBuf;
@@ -10,10 +11,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * Created 26/08/2022 by SuperMartijn642
@@ -21,6 +26,26 @@ import org.jetbrains.annotations.Nullable;
 public class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> {
 
     public static final ConditionalRecipeSerializer INSTANCE = new ConditionalRecipeSerializer();
+
+    public static JsonObject wrapRecipeWithForgeConditions(JsonObject recipe, Collection<ICondition> conditions){
+        JsonObject json = new JsonObject();
+        json.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE).toString());
+        JsonArray conditionsJson = new JsonArray();
+        for(ICondition condition : conditions)
+            conditionsJson.add(CraftingHelper.serialize(condition));
+        json.add("conditions", conditionsJson);
+        json.add("recipe", recipe);
+        return json;
+    }
+
+    public static JsonObject wrapRecipe(JsonObject recipe, Collection<ResourceCondition> conditions){
+        return wrapRecipeWithForgeConditions(
+            recipe,
+            conditions.stream()
+                .map(ResourceCondition::createForgeCondition)
+                .collect(Collectors.toList())
+        );
+    }
 
     private ResourceLocation registryName;
 
