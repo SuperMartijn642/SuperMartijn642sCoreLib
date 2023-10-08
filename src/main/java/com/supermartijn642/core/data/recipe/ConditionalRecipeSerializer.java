@@ -17,6 +17,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 
+import java.util.Collection;
+
 /**
  * Created 26/08/2022 by SuperMartijn642
  */
@@ -25,6 +27,22 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
     private static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.register("supermartijn642corelib:dummy");
     private static final DummyRecipe DUMMY_RECIPE = new DummyRecipe();
     public static final ConditionalRecipeSerializer INSTANCE = new ConditionalRecipeSerializer();
+
+    public static JsonObject wrapRecipe(JsonObject recipe, Collection<ResourceCondition> conditions){
+        JsonObject json = new JsonObject();
+        json.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE).toString());
+        JsonArray conditionsJson = new JsonArray();
+        for(ResourceCondition condition : conditions){
+            JsonObject conditionJson = new JsonObject();
+            conditionJson.addProperty("type", Registries.RESOURCE_CONDITION_SERIALIZERS.getIdentifier(condition.getSerializer()).toString());
+            //noinspection unchecked,rawtypes
+            ((ResourceConditionSerializer)condition.getSerializer()).serialize(conditionJson, condition);
+            conditionsJson.add(conditionJson);
+        }
+        json.add("conditions", conditionsJson);
+        json.add("recipe", recipe);
+        return json;
+    }
 
     private ConditionalRecipeSerializer(){
     }
