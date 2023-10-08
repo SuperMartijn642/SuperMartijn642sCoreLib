@@ -5,6 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import com.supermartijn642.core.data.condition.ResourceCondition;
+import com.supermartijn642.core.registry.Registries;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -14,6 +16,9 @@ import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 /**
  * Created 26/08/2022 by SuperMartijn642
  */
@@ -22,6 +27,26 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
     public static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.simple(new ResourceLocation("supermartijn642corelib:dummy"));
     private static final DummyRecipe DUMMY_RECIPE = new DummyRecipe();
     public static final ConditionalRecipeSerializer INSTANCE = new ConditionalRecipeSerializer();
+
+    public static JsonObject wrapRecipeWithForgeConditions(JsonObject recipe, Collection<ICondition> conditions){
+        JsonObject json = new JsonObject();
+        json.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE).toString());
+        JsonArray conditionsJson = new JsonArray();
+        for(ICondition condition : conditions)
+            conditionsJson.add(ICondition.CODEC.encodeStart(JsonOps.INSTANCE, condition).getOrThrow(false, s -> {}));
+        json.add("conditions", conditionsJson);
+        json.add("recipe", recipe);
+        return json;
+    }
+
+    public static JsonObject wrapRecipe(JsonObject recipe, Collection<ResourceCondition> conditions){
+        return wrapRecipeWithForgeConditions(
+            recipe,
+            conditions.stream()
+                .map(ResourceCondition::createForgeCondition)
+                .collect(Collectors.toList())
+        );
+    }
 
     private ConditionalRecipeSerializer(){
     }
