@@ -2,7 +2,10 @@ package com.supermartijn642.core.generator;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.supermartijn642.core.data.condition.*;
+import com.supermartijn642.core.data.condition.ModLoadedResourceCondition;
+import com.supermartijn642.core.data.condition.NotResourceCondition;
+import com.supermartijn642.core.data.condition.ResourceCondition;
+import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
 import com.supermartijn642.core.extensions.ICriterionInstanceExtension;
 import com.supermartijn642.core.extensions.IngredientExtension;
 import com.supermartijn642.core.registry.Registries;
@@ -173,17 +176,8 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 json = subRecipe.getValue();
 
                 // Conditions
-                if(!recipeBuilder.conditions.isEmpty()){
-                    JsonArray conditionsJson = new JsonArray();
-                    for(ResourceCondition condition : recipeBuilder.conditions){
-                        JsonObject conditionJson = new JsonObject();
-                        conditionJson.addProperty("type", ResourceConditions.getIdentifierForSerializer(condition.getSerializer()).toString());
-                        //noinspection unchecked
-                        ((ResourceConditionSerializer<ResourceCondition>)condition.getSerializer()).serialize(conditionJson, condition);
-                        conditionsJson.add(conditionJson);
-                    }
-                    json.add("conditions", conditionsJson);
-                }
+                if(!recipeBuilder.conditions.isEmpty())
+                    ConditionalRecipeSerializer.wrapRecipe(json, recipeBuilder.conditions);
 
                 // Save the object to the cache
                 ResourceLocation identifier = recipeBuilder.identifier;
