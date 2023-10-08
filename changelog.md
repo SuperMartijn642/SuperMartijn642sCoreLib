@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.15
+- Added `ConditionalRecipeSerializer#wrapRecipe` to serialize conditional recipes
+
 ### SuperMartijn642's Core Library 1.1.14
 - Fixed error when a `BaseBlockEntity` returns null client data
 
