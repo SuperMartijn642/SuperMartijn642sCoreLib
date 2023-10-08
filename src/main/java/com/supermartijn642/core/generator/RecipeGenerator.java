@@ -24,7 +24,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 
 import java.util.*;
@@ -177,16 +176,8 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 json = subRecipe.getValue();
 
                 // Conditions
-                if(!recipeBuilder.conditions.isEmpty()){
-                    JsonObject newJson = new JsonObject();
-                    newJson.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE).toString());
-                    JsonArray conditionsJson = new JsonArray();
-                    for(ICondition condition : recipeBuilder.conditions)
-                        conditionsJson.add(CraftingHelper.serialize(condition));
-                    newJson.add("conditions", conditionsJson);
-                    newJson.add("recipe", json);
-                    json = newJson;
-                }
+                if(!recipeBuilder.conditions.isEmpty())
+                    json = ConditionalRecipeSerializer.wrapRecipeWithForgeConditions(json, recipeBuilder.conditions);
 
                 // Save the object to the cache
                 ResourceLocation identifier = recipeBuilder.identifier;
