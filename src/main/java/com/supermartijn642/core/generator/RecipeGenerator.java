@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.supermartijn642.core.data.condition.ModLoadedResourceCondition;
 import com.supermartijn642.core.data.condition.NotResourceCondition;
 import com.supermartijn642.core.data.condition.ResourceCondition;
-import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.advancements.CriterionTriggerInstance;
@@ -161,21 +160,8 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 json = subRecipe.getValue();
 
                 // Conditions
-                if(!recipeBuilder.conditions.isEmpty()){
-                    JsonObject newJson = new JsonObject();
-                    newJson.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE).toString());
-                    JsonArray conditionsJson = new JsonArray();
-                    for(ResourceCondition condition : recipeBuilder.conditions){
-                        JsonObject conditionJson = new JsonObject();
-                        conditionJson.addProperty("type", Registries.RESOURCE_CONDITION_SERIALIZERS.getIdentifier(condition.getSerializer()).toString());
-                        //noinspection unchecked,rawtypes
-                        ((ResourceConditionSerializer)condition.getSerializer()).serialize(conditionJson, condition);
-                        conditionsJson.add(conditionJson);
-                    }
-                    newJson.add("conditions", conditionsJson);
-                    newJson.add("recipe", json);
-                    json = newJson;
-                }
+                if(!recipeBuilder.conditions.isEmpty())
+                    json = ConditionalRecipeSerializer.wrapRecipe(json, recipeBuilder.conditions);
 
                 // Save the object to the cache
                 ResourceLocation identifier = recipeBuilder.identifier;
