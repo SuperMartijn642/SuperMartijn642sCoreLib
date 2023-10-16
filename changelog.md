@@ -1,3 +1,7 @@
+### SuperMartijn642's Core Library 1.1.15a
+- Added a workaround for Forge mixin issues
+- Removed use of `Ingredient#merge` from `RecipeGenerator`
+
 ### SuperMartijn642's Core Library 1.1.15
 - Added `ConditionalRecipeSerializer#wrapRecipe` to serialize conditional recipes
 
