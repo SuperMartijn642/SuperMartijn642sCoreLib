@@ -1,4 +1,4 @@
-package com.supermartijn642.core.mixin;
+package com.supermartijn642.core.mixin.dev;
 
 import com.supermartijn642.core.extensions.DataGeneratorExtension;
 import net.minecraft.data.DataGenerator;

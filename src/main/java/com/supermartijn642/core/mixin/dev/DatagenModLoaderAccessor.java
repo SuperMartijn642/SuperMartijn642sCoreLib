@@ -1,4 +1,4 @@
-package com.supermartijn642.core.mixin;
+package com.supermartijn642.core.mixin.dev;
 
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.loading.DatagenModLoader;
