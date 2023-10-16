@@ -10,6 +10,7 @@
     "RecipeManagerMixin"
   ],
   "client": [
+    "DataGeneratorConfigMixin",
     "DataGeneratorMixin",
     "DatagenModLoaderAccessor",
     "LevelRendererMixin",

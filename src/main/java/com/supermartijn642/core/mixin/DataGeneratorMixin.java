@@ -1,6 +1,7 @@
 package com.supermartijn642.core.mixin;
 
 import com.google.common.base.Stopwatch;
+import com.supermartijn642.core.extensions.DataGeneratorExtension;
 import com.supermartijn642.core.generator.ResourceCache;
 import com.supermartijn642.core.generator.ResourceGenerator;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
@@ -28,17 +29,19 @@ import java.util.concurrent.TimeUnit;
  * Created 06/05/2023 by SuperMartijn642
  */
 @Mixin(DataGenerator.class)
-public class DataGeneratorMixin {
+public class DataGeneratorMixin implements DataGeneratorExtension {
 
     @Shadow
     @Final
     private static Logger LOGGER;
 
     @Unique
+    private GatherDataEvent.DataGeneratorConfig config;
+    @Unique
     private ResourceCache resourceCache;
     @Shadow
     @Final
-    private Map<String,DataProvider> providersToRun;
+    private Map<String, DataProvider> providersToRun;
     @Shadow
     @Final
     private boolean alwaysGenerate;
@@ -48,6 +51,11 @@ public class DataGeneratorMixin {
     @Shadow
     @Final
     private Set<String> allProviderIds;
+
+    @Override
+    public void setDataGeneratorConfig(GatherDataEvent.DataGeneratorConfig config){
+        this.config = config;
+    }
 
     @Inject(
         method = "run()V",
@@ -59,7 +67,7 @@ public class DataGeneratorMixin {
         locals = LocalCapture.CAPTURE_FAILHARD
     )
     private void runHead(CallbackInfo ci, HashCache hashCache){
-        GatherDataEvent.DataGeneratorConfig dataGeneratorConfig = DatagenModLoaderAccessor.getDataGeneratorConfig();
+        GatherDataEvent.DataGeneratorConfig dataGeneratorConfig = this.config;
         if(dataGeneratorConfig != null){ // Some mods run data generators themselves
             dataGeneratorConfig.getMods().stream().filter(GeneratorRegistrationHandler::hasHandlerForModid).forEach(modid -> {
                 GeneratorRegistrationHandler handler = GeneratorRegistrationHandler.get(modid);
@@ -96,7 +104,7 @@ public class DataGeneratorMixin {
     )
     private void runBeforeGenerators(CallbackInfo ci, HashCache hashCache){
         Stopwatch stopwatch = Stopwatch.createUnstarted();
-        for(Map.Entry<String,DataProvider> entry : this.providersToRun.entrySet()){
+        for(Map.Entry<String, DataProvider> entry : this.providersToRun.entrySet()){
             if(!this.alwaysGenerate && !hashCache.shouldRunInThisVersion(entry.getKey())){
                 LOGGER.debug("Generator {} already run for version {}", entry.getKey(), (Object)this.version.getName());
                 return;
