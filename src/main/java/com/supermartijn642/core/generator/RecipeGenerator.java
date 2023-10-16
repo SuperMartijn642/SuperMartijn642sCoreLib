@@ -28,6 +28,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.minecraftforge.common.crafting.ingredients.CompoundIngredient;
 
 import java.util.*;
 
@@ -51,6 +52,12 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         TAB_TO_CATEGORY.put(CreativeModeTabs.SPAWN_EGGS, RecipeCategory.MISC);
         TAB_TO_CATEGORY.put(CreativeModeTabs.TOOLS_AND_UTILITIES, RecipeCategory.TOOLS);
         TAB_TO_CATEGORY.put(CreativeModeTabs.SEARCH, RecipeCategory.MISC);
+    }
+
+    private static Ingredient mergeIngredients(Ingredient... ingredients){
+        if(ingredients.length == 1)
+            return ingredients[0];
+        return CompoundIngredient.of(ingredients);
     }
 
     private final Map<ResourceLocation,RecipeBuilder<?>> recipes = new HashMap<>();
@@ -1128,7 +1135,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param ingredients ingredients to be associated with the key
          */
         public ShapedRecipeBuilder input(char key, Ingredient... ingredients){
-            return this.input(key, Ingredient.merge(Arrays.asList(ingredients)));
+            return this.input(key, mergeIngredients(ingredients));
         }
 
         /**
@@ -1361,7 +1368,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param ingredients ingredients to be accepted as input
          */
         public SmeltingRecipeBuilder input(Ingredient... ingredients){
-            return this.input(Ingredient.merge(Arrays.asList(ingredients)));
+            return this.input(mergeIngredients(ingredients));
         }
 
         /**
@@ -1445,7 +1452,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param ingredients ingredients to be accepted as base
          */
         public SmithingRecipeBuilder base(Ingredient... ingredients){
-            return this.base(Ingredient.merge(Arrays.asList(ingredients)));
+            return this.base(mergeIngredients(ingredients));
         }
 
         /**
@@ -1486,7 +1493,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param ingredients ingredients to be accepted as addition
          */
         public SmithingRecipeBuilder addition(Ingredient... ingredients){
-            return this.addition(Ingredient.merge(Arrays.asList(ingredients)));
+            return this.addition(mergeIngredients(ingredients));
         }
 
         /**
@@ -1536,7 +1543,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param ingredients ingredients to be accepted as input
          */
         public StoneCuttingRecipeBuilder input(Ingredient... ingredients){
-            return this.input(Ingredient.merge(Arrays.asList(ingredients)));
+            return this.input(mergeIngredients(ingredients));
         }
 
         /**
