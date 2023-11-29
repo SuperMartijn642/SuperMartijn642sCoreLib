@@ -366,20 +366,27 @@ public class ClientRegistrationHandler {
     /**
      * Adds the given sprite to the given atlas.
      */
-    public void registerAtlasSprite(ResourceLocation textureAtlas, String spriteLocation){
+    public void registerAtlasSprite(ResourceLocation textureAtlas, ResourceLocation spriteLocation){
         if(this.passedTextureStitch)
             throw new IllegalStateException("Cannot register new models after texture stitching has been completed!");
         if(textureAtlas == null)
             throw new IllegalArgumentException("Texture atlas must not be null!");
+
+        this.textureAtlasSprites.putIfAbsent(textureAtlas, new HashSet<>());
+        if(this.textureAtlasSprites.get(textureAtlas).contains(spriteLocation))
+            throw new RuntimeException("Duplicate sprite registration '" + spriteLocation + "' for atlas '" + textureAtlas + "'!");
+
+        this.textureAtlasSprites.get(textureAtlas).add(spriteLocation);
+    }
+
+    /**
+     * Adds the given sprite to the given atlas.
+     */
+    public void registerAtlasSprite(ResourceLocation textureAtlas, String spriteLocation){
         if(!RegistryUtil.isValidPath(spriteLocation))
             throw new IllegalArgumentException("Sprite location '" + spriteLocation + "' must only contain characters [a-z0-9_./-]!");
 
-        ResourceLocation fullSpriteLocation = new ResourceLocation(this.modid, spriteLocation);
-        this.textureAtlasSprites.putIfAbsent(textureAtlas, new HashSet<>());
-        if(this.textureAtlasSprites.get(textureAtlas).contains(fullSpriteLocation))
-            throw new RuntimeException("Duplicate sprite registration '" + fullSpriteLocation + "' for atlas '" + textureAtlas + "'!");
-
-        this.textureAtlasSprites.get(textureAtlas).add(fullSpriteLocation);
+        this.registerAtlasSprite(textureAtlas, new ResourceLocation(this.modid, spriteLocation));
     }
 
     /**
