@@ -131,6 +131,11 @@ public abstract class AtlasSourceGenerator extends ResourceGenerator {
         return this.atlas(TextureAtlases.getBlocks());
     }
 
+    @Override
+    public String getName(){
+        return this.modName + " Atlas Source Generator";
+    }
+
     public static class AtlasBuilder {
 
         private final String modid;
