@@ -1,3 +1,7 @@
+### SuperMartijn642's Core Library 1.1.16
+- Allow `ClientRegistrationHandler#registerAtlasSprite` to accept a different namespace
+- Fixed `AtlasSourceGenerator` using the default resource generator name
+
 ### SuperMartijn642's Core Library 1.1.15a
 - Added a workaround for Forge mixin issues
 - Removed use of `Ingredient#merge` from `RecipeGenerator`
