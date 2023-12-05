@@ -17,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -119,7 +120,7 @@ public class BaseBlock extends Block {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockGetter world, BlockPos pos, BlockState state){
+    public ItemStack getCloneItemStack(LevelReader world, BlockPos pos, BlockState state){
         ItemStack stack = super.getCloneItemStack(world, pos, state);
 
         if(!this.saveTileData)

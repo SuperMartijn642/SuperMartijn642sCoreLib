@@ -2,6 +2,7 @@ package com.supermartijn642.core.generator;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import com.supermartijn642.core.data.condition.ModLoadedResourceCondition;
 import com.supermartijn642.core.data.condition.NotResourceCondition;
 import com.supermartijn642.core.data.condition.ResourceCondition;
@@ -102,7 +103,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 // Keys
                 JsonObject keysJson = new JsonObject();
                 for(Map.Entry<Character,Ingredient> input : ((ShapedRecipeBuilder)recipeBuilder).inputs.entrySet())
-                    keysJson.add(input.getKey().toString(), input.getValue().toJson(true));
+                    keysJson.add(input.getKey().toString(), Ingredient.CODEC.encodeStart(JsonOps.INSTANCE, input.getValue()).getOrThrow(false, error -> {}));
                 json.add("key", keysJson);
                 // Result
                 JsonObject resultJson = new JsonObject();
@@ -119,7 +120,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 // Ingredients
                 JsonArray ingredientsJson = new JsonArray();
                 for(Ingredient input : ((ShapelessRecipeBuilder)recipeBuilder).inputs)
-                    ingredientsJson.add(input.toJson(true));
+                    ingredientsJson.add(Ingredient.CODEC.encodeStart(JsonOps.INSTANCE, input).getOrThrow(false, error -> {}));
                 json.add("ingredients", ingredientsJson);
                 // Result
                 JsonObject resultJson = new JsonObject();
@@ -157,9 +158,9 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 // Group
                 json.addProperty("group", recipeBuilder.group);
                 // Base
-                json.add("base", ((SmithingRecipeBuilder)recipeBuilder).base.toJson(false));
+                json.add("base", Ingredient.CODEC.encodeStart(JsonOps.INSTANCE, ((SmithingRecipeBuilder)recipeBuilder).base).getOrThrow(false, error -> {}));
                 // Addition
-                json.add("addition", ((SmithingRecipeBuilder)recipeBuilder).addition.toJson(false));
+                json.add("addition", Ingredient.CODEC.encodeStart(JsonOps.INSTANCE, ((SmithingRecipeBuilder)recipeBuilder).addition).getOrThrow(false, error -> {}));
                 // Result
                 JsonObject resultJson = new JsonObject();
                 resultJson.addProperty("item", Registries.ITEMS.getIdentifier(recipeBuilder.output.asItem()).toString());
@@ -173,7 +174,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                 // Group
                 json.addProperty("group", recipeBuilder.group);
                 // Ingredient
-                json.add("ingredient", ((StoneCuttingRecipeBuilder)recipeBuilder).input.toJson(false));
+                json.add("ingredient", Ingredient.CODEC.encodeStart(JsonOps.INSTANCE, ((StoneCuttingRecipeBuilder)recipeBuilder).input).getOrThrow(false, error -> {}));
                 // Result
                 json.addProperty("result", Registries.ITEMS.getIdentifier(recipeBuilder.output.asItem()).toString());
                 // Count
@@ -201,7 +202,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         // Group
         json.addProperty("group", ((RecipeBuilder<?>)recipeBuilder).group);
         // Ingredient
-        json.add("ingredient", recipeBuilder.input.toJson(false));
+        json.add("ingredient", Ingredient.CODEC.encodeStart(JsonOps.INSTANCE, recipeBuilder.input).getOrThrow(false, error -> {}));
         // Result
         if(((RecipeBuilder<?>)recipeBuilder).outputTag == null && ((RecipeBuilder<?>)recipeBuilder).outputCount == 1)
             json.addProperty("result", Registries.ITEMS.getIdentifier(((RecipeBuilder<?>)recipeBuilder).output.asItem()).toString());
