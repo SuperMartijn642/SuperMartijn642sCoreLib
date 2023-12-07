@@ -1,25 +1,2 @@
 ### SuperMartijn642's Core Library 1.1.16
-- Allow `ClientRegistrationHandler#registerAtlasSprite` to accept a different namespace
-- Fixed `AtlasSourceGenerator` using the default resource generator name
-
-### SuperMartijn642's Core Library 1.1.15a
-- Added a workaround for Forge mixin issues
-- Removed use of `Ingredient#merge` from `RecipeGenerator`
-
-### SuperMartijn642's Core Library 1.1.15
-- Added `ConditionalRecipeSerializer#wrapRecipe` to serialize conditional recipes
-
-### SuperMartijn642's Core Library 1.1.14
-- Fixed error when a `BaseBlockEntity` returns null client data
-
-### SuperMartijn642's Core Library 1.1.13
-- Improved `LootTableGenerator.LootPoolBuilder` with additional helpers
-- `BaseBlockEntity#dataChanged` will now be true initially to avoid issues with Create contraptions
-
-### SuperMartijn642's Core Library 1.1.12a
-- Fixed serialization for `ResourceCondition`s
-- Fixed exception when initializing `ScreenUtils`
-- Fixed conditional recipes not working
-
-### SuperMartijn642's Core Library 1.1.12
-- Initial release of SuperMartijn642's Core Library for Minecraft 1.20.2
+- Initial release of SuperMartijn642's Core Library for Forge 1.20.3

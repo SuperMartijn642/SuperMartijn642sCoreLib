@@ -1,15 +1,21 @@
 package com.supermartijn642.core.generator;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.supermartijn642.core.data.condition.ModLoadedResourceCondition;
 import com.supermartijn642.core.data.condition.NotResourceCondition;
 import com.supermartijn642.core.data.condition.ResourceCondition;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.util.Pair;
-import net.minecraft.advancements.*;
+import net.minecraft.advancements.AdvancementType;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -85,7 +91,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             description.addProperty("translate", advancementBuilder.descriptionKey);
             displayJson.add("description", description);
             // Frame
-            displayJson.addProperty("frame", advancementBuilder.frame.getName());
+            displayJson.addProperty("frame", advancementBuilder.frame.getSerializedName());
             // Background
             if(advancementBuilder.background != null){
                 if(!this.cache.doesResourceExist(ResourceType.ASSET, advancementBuilder.background.getNamespace(), "textures", advancementBuilder.background.getPath(), ".png"))
@@ -104,9 +110,10 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             JsonObject criteriaJson = new JsonObject();
             for(Map.Entry<String,Pair<CriterionTrigger<?>,CriterionTriggerInstance>> criterion : advancementBuilder.criteria.entrySet()){
                 JsonObject criterionJson = new JsonObject();
-                criterionJson.addProperty("trigger", CriteriaTriggers.getId(criterion.getValue().left()).toString());
-                JsonObject conditionsJson = criterion.getValue().right().serializeToJson();
-                if(conditionsJson.size() > 0)
+                criterionJson.addProperty("trigger", BuiltInRegistries.TRIGGER_TYPES.getKey(criterion.getValue().left()).toString());
+                //noinspection unchecked
+                JsonElement conditionsJson = ((Codec<CriterionTriggerInstance>)criterion.getValue().left().codec()).encodeStart(JsonOps.INSTANCE, criterion.getValue().right()).getOrThrow(false, error -> {});
+                if(!conditionsJson.isJsonObject() || conditionsJson.getAsJsonObject().size() > 0)
                     criterionJson.add("conditions", conditionsJson);
                 criteriaJson.add(criterion.getKey(), criterionJson);
             }
@@ -203,7 +210,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
         private CompoundTag iconTag;
         private String titleKey;
         private String descriptionKey;
-        private FrameType frame = FrameType.TASK;
+        private AdvancementType frame = AdvancementType.TASK;
         private ResourceLocation background;
         private boolean showToast = true;
         private boolean announceToChat = true;
@@ -349,7 +356,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
          * Sets the frame type for this advancement.
          * @param frameType frame type to use
          */
-        public AdvancementBuilder frame(FrameType frameType){
+        public AdvancementBuilder frame(AdvancementType frameType){
             this.frame = frameType;
             return this;
         }
@@ -358,21 +365,21 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
          * Sets the challenge frame type for this advancement.
          */
         public AdvancementBuilder challengeFrame(){
-            return this.frame(FrameType.CHALLENGE);
+            return this.frame(AdvancementType.CHALLENGE);
         }
 
         /**
          * Sets the goal frame type for this advancement.
          */
         public AdvancementBuilder goalFrame(){
-            return this.frame(FrameType.GOAL);
+            return this.frame(AdvancementType.GOAL);
         }
 
         /**
          * Sets the task frame type for this advancement.
          */
         public AdvancementBuilder taskFrame(){
-            return this.frame(FrameType.TASK);
+            return this.frame(AdvancementType.TASK);
         }
 
         /**

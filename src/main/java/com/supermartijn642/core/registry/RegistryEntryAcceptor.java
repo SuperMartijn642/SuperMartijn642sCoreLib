@@ -5,7 +5,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.moddiscovery.ModAnnotation;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import net.minecraftforge.registries.IdMappingEvent;
 import net.minecraftforge.registries.RegisterEvent;
@@ -81,7 +80,7 @@ public @interface RegistryEntryAcceptor {
                         if(!RegistryUtil.isValidPath(identifier))
                             throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-                        Registry registry = Registry.valueOf(((ModAnnotation.EnumHolder)annotationData.annotationData().get("registry")).getValue());
+                        Registry registry = Registry.valueOf(((ModFileScanData.EnumData)annotationData.annotationData().get("registry")).value());
 
                         // Get the class the annotation is located in
                         Class<?> clazz = Class.forName(annotationData.clazz().getClassName(), false, RegistryEntryAcceptor.class.getClassLoader());
