@@ -3,7 +3,7 @@ package com.supermartijn642.core.mixin;
 import com.mojang.serialization.Lifecycle;
 import com.supermartijn642.core.extensions.CoreLibHolderReference;
 import com.supermartijn642.core.extensions.CoreLibMappedRegistry;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.resources.ResourceKey;
@@ -26,7 +26,7 @@ import java.util.function.BiConsumer;
 public class MappedRegistryMixin implements CoreLibMappedRegistry {
 
     @Shadow
-    private Object2IntMap<?> toId;
+    private Reference2IntMap<?> toId;
     @Shadow
     private Map<ResourceLocation,Holder.Reference<?>> byLocation;
     @Shadow
