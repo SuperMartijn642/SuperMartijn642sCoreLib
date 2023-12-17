@@ -14,6 +14,7 @@
     "dev.DataGeneratorConfigMixin",
     "dev.DataGeneratorMixin",
     "dev.DatagenModLoaderAccessor",
+    "GuiGraphicsInvoker",
     "LevelRendererMixin",
     "SpriteSourceListMixin"
   ],

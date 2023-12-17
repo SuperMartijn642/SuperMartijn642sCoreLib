@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.mixin.GuiGraphicsInvoker;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -294,7 +295,7 @@ public class ScreenUtils {
         GUI_GRAPHICS.minecraft = ClientUtils.getMinecraft();
         GUI_GRAPHICS.pose = poseStack;
         GUI_GRAPHICS.bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
-        GUI_GRAPHICS.renderTooltipInternal(fontRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE);
+        ((GuiGraphicsInvoker)GUI_GRAPHICS).invokeRenderTooltipInternal(fontRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE);
         GUI_GRAPHICS.bufferSource.endBatch();
     }
 
