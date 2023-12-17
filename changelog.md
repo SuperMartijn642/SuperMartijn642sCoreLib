@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.16a
+- Added workaround for crash with Iceberg
+
 ### SuperMartijn642's Core Library 1.1.16
 - Allow `ClientRegistrationHandler#registerAtlasSprite` to accept a different namespace
 - Fixed `AtlasSourceGenerator` using the default resource generator name
