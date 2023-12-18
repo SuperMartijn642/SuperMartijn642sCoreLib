@@ -3,7 +3,7 @@ package com.supermartijn642.core.data.condition;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
 
 import java.util.HashMap;
 import java.util.Map;

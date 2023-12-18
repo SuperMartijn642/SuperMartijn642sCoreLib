@@ -5,18 +5,18 @@ import com.supermartijn642.core.gui.BaseContainerType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.extensions.IForgeServerPlayer;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.network.NetworkHooks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,14 +25,13 @@ import java.util.function.Consumer;
 /**
  * Created 20/03/2022 by SuperMartijn642
  */
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class CommonUtils {
 
     private static MinecraftServer server;
 
     static void initialize(){
-        MinecraftForge.EVENT_BUS.addListener((Consumer<ServerAboutToStartEvent>)(e -> server = e.getServer()));
-        MinecraftForge.EVENT_BUS.addListener((Consumer<ServerStoppedEvent>)(e -> server = null));
+        NeoForge.EVENT_BUS.addListener((Consumer<ServerAboutToStartEvent>)(e -> server = e.getServer()));
+        NeoForge.EVENT_BUS.addListener((Consumer<ServerStoppedEvent>)(e -> server = null));
     }
 
     /**
@@ -67,12 +66,12 @@ public class CommonUtils {
      */
     public static void openContainer(BaseContainer container){
         Player player = container.player;
-        if(!(container.player instanceof IForgeServerPlayer))
+        if(!(container.player instanceof ServerPlayer))
             return;
 
         // Open the container
         //noinspection unchecked,rawtypes
-        ((IForgeServerPlayer)player).openMenu(new MenuProvider() {
+        NetworkHooks.openScreen((ServerPlayer)player, new MenuProvider() {
             @Override
             public Component getDisplayName(){
                 return Component.empty();

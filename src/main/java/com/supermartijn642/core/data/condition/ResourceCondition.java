@@ -1,6 +1,6 @@
 package com.supermartijn642.core.data.condition;
 
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
 
 /**
  * Created 26/08/2022 by SuperMartijn642

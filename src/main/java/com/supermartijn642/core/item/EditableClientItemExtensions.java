@@ -1,7 +1,7 @@
 package com.supermartijn642.core.item;
 
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 /**
  * Created 24/07/2022 by SuperMartijn642

@@ -4,7 +4,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraftforge.network.IContainerFactory;
+import net.neoforged.neoforge.network.IContainerFactory;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;

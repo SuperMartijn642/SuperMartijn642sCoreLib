@@ -3,7 +3,7 @@ package com.supermartijn642.core.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraftforge.client.model.BakedModelWrapper;
+import net.neoforged.neoforge.client.model.BakedModelWrapper;
 
 /**
  * Created 25/07/2022 by SuperMartijn642

@@ -9,8 +9,8 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.neoforge.registries.RegisterEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -111,7 +111,7 @@ public final class CreativeItemGroup extends CreativeModeTab {
         this.background = new ResourceLocation("textures/gui/container/creative_inventory/tab_items.png");
         this.displayItemsGenerator = (flags, output) -> this.applyFiller(output::accept);
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<RegisterEvent>)event -> {
+        ModLoadingContext.get().getActiveContainer().getEventBus().addListener((Consumer<RegisterEvent>)event -> {
             if(event.getRegistryKey() == Registries.CREATIVE_MODE_TAB)
                 event.register(Registries.CREATIVE_MODE_TAB, new ResourceLocation(modid, identifier), () -> this);
         });

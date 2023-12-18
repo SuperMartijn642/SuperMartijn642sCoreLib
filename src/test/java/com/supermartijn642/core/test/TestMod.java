@@ -5,7 +5,7 @@ import com.supermartijn642.core.item.ItemProperties;
 import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Created 1/23/2021 by SuperMartijn642

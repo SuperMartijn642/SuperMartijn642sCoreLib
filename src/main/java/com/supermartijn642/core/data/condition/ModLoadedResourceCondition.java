@@ -1,7 +1,7 @@
 package com.supermartijn642.core.data.condition;
 
 import com.google.gson.JsonObject;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 
 /**
  * Created 26/08/2022 by SuperMartijn642

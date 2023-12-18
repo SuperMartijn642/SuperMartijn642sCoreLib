@@ -6,11 +6,11 @@ import com.supermartijn642.core.gui.WidgetScreen;
 import com.supermartijn642.core.render.RenderUtils;
 import com.supermartijn642.core.render.RenderWorldEvent;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderHighlightEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
 
 /**
  * Created 1/22/2021 by SuperMartijn642

@@ -9,10 +9,10 @@ import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import org.slf4j.Logger;
 
 import java.util.function.Consumer;
@@ -25,8 +25,8 @@ public class CoreLib {
 
     public static final Logger LOGGER = CommonUtils.getLogger("supermartijn642corelib");
 
-    public CoreLib(){
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onConstructMod);
+    public CoreLib(IEventBus eventBus){
+        eventBus.addListener(this::onConstructMod);
         CommonUtils.initialize();
 
         // Register conditional recipe type
@@ -43,8 +43,7 @@ public class CoreLib {
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));
 
         // Add all BaseItem instances to their respective creative tabs
-
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<BuildCreativeModeTabContentsEvent>)event -> {
+        eventBus.addListener((Consumer<BuildCreativeModeTabContentsEvent>)event -> {
             Registries.ITEMS.getValues().stream()
                 .filter(item -> item instanceof BaseItem || item instanceof BaseBlockItem)
                 .filter(item -> item instanceof BaseItem ? ((BaseItem)item).isInCreativeGroup(event.getTab()) : ((BaseBlockItem)item).isInCreativeGroup(event.getTab()))

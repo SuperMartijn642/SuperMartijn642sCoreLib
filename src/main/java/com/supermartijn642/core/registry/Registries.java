@@ -21,13 +21,12 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistry;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 import static net.minecraft.core.registries.BuiltInRegistries.*;
 
@@ -38,7 +37,6 @@ public final class Registries {
 
     static final Map<ResourceLocation,Registry<?>> IDENTIFIER_TO_REGISTRY = new HashMap<>();
     static final Map<net.minecraft.core.Registry<?>,Registry<?>> VANILLA_REGISTRY_MAP = new HashMap<>();
-    static final Map<ResourceLocation,Registry<?>> FORGE_REGISTRY_MAP = new HashMap<>();
     /**
      * Each entry is a registry which has a vanilla registry and a list of registries which do not have a vanilla registry.
      */
@@ -49,26 +47,16 @@ public final class Registries {
             throw new RuntimeException("Duplicate registry registration for identifier '" + registry.getRegistryIdentifier() + "'!");
         if(registry.hasVanillaRegistry() && VANILLA_REGISTRY_MAP.containsKey(registry.getVanillaRegistry()))
             throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
-        if(registry.hasForgeRegistry() && FORGE_REGISTRY_MAP.containsKey(registry.getRegistryIdentifier()))
-            throw new RuntimeException("Duplicate registry wrapper for objects of type '" + registry.getValueClass() + "'!");
 
         IDENTIFIER_TO_REGISTRY.put(registry.getRegistryIdentifier(), registry);
         if(registry.hasVanillaRegistry())
             VANILLA_REGISTRY_MAP.put(registry.getVanillaRegistry(), registry);
-        if(registry.hasForgeRegistry())
-            FORGE_REGISTRY_MAP.put(registry.getRegistryIdentifier(), registry);
     }
 
     @SuppressWarnings("unchecked")
-    @Deprecated
+    @ApiStatus.Internal
     public static <T> Registry<T> fromUnderlying(net.minecraft.core.Registry<T> registry){
         return (Registry<T>)VANILLA_REGISTRY_MAP.get(registry);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Deprecated
-    public static <T> Registry<T> fromUnderlying(IForgeRegistry<T> registry){
-        return (Registry<T>)FORGE_REGISTRY_MAP.get(registry.getRegistryName());
     }
 
     /**
@@ -80,23 +68,23 @@ public final class Registries {
         return IDENTIFIER_TO_REGISTRY.get(identifier);
     }
 
-    public static final Registry<Block> BLOCKS = forge(BLOCK, ForgeRegistries.BLOCKS, Block.class);
-    public static final Registry<Fluid> FLUIDS = forge(FLUID, ForgeRegistries.FLUIDS, Fluid.class);
-    public static final Registry<Item> ITEMS = forge(ITEM, ForgeRegistries.ITEMS, Item.class);
-    public static final Registry<MobEffect> MOB_EFFECTS = forge(MOB_EFFECT, ForgeRegistries.MOB_EFFECTS, MobEffect.class);
-    public static final Registry<SoundEvent> SOUND_EVENTS = forge(SOUND_EVENT, ForgeRegistries.SOUND_EVENTS, SoundEvent.class);
-    public static final Registry<Potion> POTIONS = forge(POTION, ForgeRegistries.POTIONS, Potion.class);
-    public static final Registry<Enchantment> ENCHANTMENTS = forge(ENCHANTMENT, ForgeRegistries.ENCHANTMENTS, Enchantment.class);
-    public static final Registry<EntityType<?>> ENTITY_TYPES = forge(ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES, EntityType.class);
-    public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPES = forge(BLOCK_ENTITY_TYPE, ForgeRegistries.BLOCK_ENTITY_TYPES, BlockEntityType.class);
-    public static final Registry<ParticleType<?>> PARTICLE_TYPES = forge(PARTICLE_TYPE, ForgeRegistries.PARTICLE_TYPES, ParticleType.class);
-    public static final Registry<MenuType<?>> MENU_TYPES = forge(MENU, ForgeRegistries.MENU_TYPES, MenuType.class);
-    public static final Registry<PaintingVariant> PAINTING_VARIANTS = forge(PAINTING_VARIANT, ForgeRegistries.PAINTING_VARIANTS, PaintingVariant.class);
-    public static final Registry<RecipeType<?>> RECIPE_TYPES = forge(RECIPE_TYPE, ForgeRegistries.RECIPE_TYPES, RecipeType.class);
-    public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZERS = forge(RECIPE_SERIALIZER, ForgeRegistries.RECIPE_SERIALIZERS, RecipeSerializer.class);
-    public static final Registry<Attribute> ATTRIBUTES = forge(ATTRIBUTE, ForgeRegistries.ATTRIBUTES, Attribute.class);
-    public static final Registry<StatType<?>> STAT_TYPES = forge(STAT_TYPE, ForgeRegistries.STAT_TYPES, StatType.class);
-    public static final Registry<Codec<? extends ICondition>> RECIPE_CONDITION_SERIALIZERS = forge(ForgeRegistries.CONDITION_SERIALIZERS, ForgeRegistries.Keys.CONDITION_SERIALIZERS.location(), Codec.class);
+    public static final Registry<Block> BLOCKS = vanilla(BLOCK, Block.class);
+    public static final Registry<Fluid> FLUIDS = vanilla(FLUID, Fluid.class);
+    public static final Registry<Item> ITEMS = vanilla(ITEM, Item.class);
+    public static final Registry<MobEffect> MOB_EFFECTS = vanilla(MOB_EFFECT, MobEffect.class);
+    public static final Registry<SoundEvent> SOUND_EVENTS = vanilla(SOUND_EVENT, SoundEvent.class);
+    public static final Registry<Potion> POTIONS = vanilla(POTION, Potion.class);
+    public static final Registry<Enchantment> ENCHANTMENTS = vanilla(ENCHANTMENT, Enchantment.class);
+    public static final Registry<EntityType<?>> ENTITY_TYPES = vanilla(ENTITY_TYPE, EntityType.class);
+    public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPES = vanilla(BLOCK_ENTITY_TYPE, BlockEntityType.class);
+    public static final Registry<ParticleType<?>> PARTICLE_TYPES = vanilla(PARTICLE_TYPE, ParticleType.class);
+    public static final Registry<MenuType<?>> MENU_TYPES = vanilla(MENU, MenuType.class);
+    public static final Registry<PaintingVariant> PAINTING_VARIANTS = vanilla(PAINTING_VARIANT, PaintingVariant.class);
+    public static final Registry<RecipeType<?>> RECIPE_TYPES = vanilla(RECIPE_TYPE, RecipeType.class);
+    public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZERS = vanilla(RECIPE_SERIALIZER, RecipeSerializer.class);
+    public static final Registry<Attribute> ATTRIBUTES = vanilla(ATTRIBUTE, Attribute.class);
+    public static final Registry<StatType<?>> STAT_TYPES = vanilla(STAT_TYPE, StatType.class);
+    public static final Registry<Codec<? extends ICondition>> RECIPE_CONDITION_SERIALIZERS = vanilla(NeoForgeRegistries.CONDITION_SERIALIZERS, Codec.class);
 
     static{
         // Add all registries which don't have a forge registry
@@ -107,14 +95,6 @@ public final class Registries {
         return new VanillaRegistryWrapper<>(registry, valueClass);
     }
 
-    private static <T> Registry<T> forge(net.minecraft.core.Registry<T> registry, IForgeRegistry<T> forgeRegistry, Class<? super T> valueClass){
-        return new ForgeRegistryWrapper<>(registry, forgeRegistry, valueClass);
-    }
-
-    private static <T> Registry<T> forge(Supplier<IForgeRegistry<T>> forgeRegistry, ResourceLocation identifier, Class<? super T> valueClass){
-        return new ForgeRegistryWrapper<>(forgeRegistry, identifier, valueClass);
-    }
-
     public interface Registry<T> {
 
         ResourceLocation getRegistryIdentifier();
@@ -122,10 +102,6 @@ public final class Registries {
         @Nullable net.minecraft.core.Registry<T> getVanillaRegistry();
 
         boolean hasVanillaRegistry();
-
-        @Nullable IForgeRegistry<T> getForgeRegistry();
-
-        boolean hasForgeRegistry();
 
         void register(ResourceLocation identifier, T object);
 
@@ -175,17 +151,6 @@ public final class Registries {
             return true;
         }
 
-        @Nullable
-        @Deprecated
-        public IForgeRegistry<T> getForgeRegistry(){
-            return null;
-        }
-
-        @Override
-        public boolean hasForgeRegistry(){
-            return false;
-        }
-
         public void register(ResourceLocation identifier, T object){
             net.minecraft.core.Registry.register(this.registry, identifier, object);
         }
@@ -224,110 +189,6 @@ public final class Registries {
             int result = this.registry.hashCode();
             result = 31 * result + this.valueClass.hashCode();
             return result;
-        }
-    }
-
-    private static class ForgeRegistryWrapper<T> implements Registry<T> {
-
-        private final net.minecraft.core.Registry<T> registry;
-        private final Supplier<IForgeRegistry<T>> forgeRegistrySupplier;
-        private IForgeRegistry<T> forgeRegistry;
-        private final ResourceLocation identifier;
-        private final Class<T> valueClass;
-
-        private ForgeRegistryWrapper(net.minecraft.core.Registry<T> registry, IForgeRegistry<T> forgeRegistry, Class<? super T> valueClass){
-            this.registry = registry;
-            this.forgeRegistrySupplier = null;
-            this.forgeRegistry = forgeRegistry;
-            this.identifier = forgeRegistry.getRegistryName();
-            //noinspection unchecked
-            this.valueClass = (Class<T>)valueClass;
-
-            addRegistry(this);
-        }
-
-        private ForgeRegistryWrapper(Supplier<IForgeRegistry<T>> forgeRegistry, ResourceLocation identifier, Class<? super T> valueClass){
-            this.registry = null;
-            this.forgeRegistrySupplier = forgeRegistry;
-            this.identifier = identifier;
-            //noinspection unchecked
-            this.valueClass = (Class<T>)valueClass;
-
-            addRegistry(this);
-        }
-
-        private IForgeRegistry<T> resolveForgeRegistry(){
-            if(this.forgeRegistry == null){
-                this.forgeRegistry = this.forgeRegistrySupplier.get();
-                if(this.forgeRegistry == null)
-                    throw new IllegalStateException("Tried resolving for Forge registry '" + this.identifier + "' too early!");
-            }
-            return this.forgeRegistry;
-        }
-
-        @Override
-        public ResourceLocation getRegistryIdentifier(){
-            return this.identifier;
-        }
-
-        @Nullable
-        @Deprecated
-        public net.minecraft.core.Registry<T> getVanillaRegistry(){
-            return this.registry;
-        }
-
-        @Override
-        public boolean hasVanillaRegistry(){
-            return this.registry != null;
-        }
-
-        @Nullable
-        @Deprecated
-        public IForgeRegistry<T> getForgeRegistry(){
-            return this.resolveForgeRegistry();
-        }
-
-        @Override
-        public boolean hasForgeRegistry(){
-            return true;
-        }
-
-        public void register(ResourceLocation identifier, T object){
-            this.resolveForgeRegistry().register(identifier, object);
-        }
-
-        public ResourceLocation getIdentifier(T object){
-            return this.resolveForgeRegistry().getKey(object);
-        }
-
-        @Override
-        public boolean hasIdentifier(ResourceLocation identifier){
-            return this.resolveForgeRegistry().containsKey(identifier);
-        }
-
-        public T getValue(ResourceLocation identifier){
-            return this.resolveForgeRegistry().getValue(identifier);
-        }
-
-        public Set<ResourceLocation> getIdentifiers(){
-            return this.resolveForgeRegistry().getKeys();
-        }
-
-        public Collection<T> getValues(){
-            return this.resolveForgeRegistry().getValues();
-        }
-
-        public Set<Pair<ResourceLocation,T>> getEntries(){
-            return MappedSetView.map(this.resolveForgeRegistry().getEntries(), entry -> Pair.of(entry.getKey().location(), entry.getValue()));
-        }
-
-        public Class<T> getValueClass(){
-            return this.valueClass;
-        }
-
-        @Override
-        public int hashCode(){
-            return this.identifier.hashCode();
         }
     }
 }

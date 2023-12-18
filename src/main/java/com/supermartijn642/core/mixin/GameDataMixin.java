@@ -1,8 +1,8 @@
 package com.supermartijn642.core.mixin;
 
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
-import net.minecraftforge.registries.GameData;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.neoforge.registries.GameData;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -27,7 +27,8 @@ public class GameDataMixin {
         method = "postRegisterEvents()V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraftforge/registries/ObjectHolderRegistry;applyObjectHolders(Ljava/util/function/Predicate;)V"
+            target = "Lnet/neoforged/fml/ModLoader;postEventWrapContainerInModOrder(Lnet/neoforged/bus/api/Event;)V",
+            shift = At.Shift.AFTER
         ),
         remap = false
     )

@@ -9,7 +9,7 @@ import net.minecraft.WorldVersion;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
-import net.minecraftforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,7 +41,7 @@ public class DataGeneratorMixin implements DataGeneratorExtension {
     private ResourceCache resourceCache;
     @Shadow
     @Final
-    private Map<String, DataProvider> providersToRun;
+    private Map<String,DataProvider> providersToRun;
     @Shadow
     @Final
     private boolean alwaysGenerate;
@@ -104,7 +104,7 @@ public class DataGeneratorMixin implements DataGeneratorExtension {
     )
     private void runBeforeGenerators(CallbackInfo ci, HashCache hashCache){
         Stopwatch stopwatch = Stopwatch.createUnstarted();
-        for(Map.Entry<String, DataProvider> entry : this.providersToRun.entrySet()){
+        for(Map.Entry<String,DataProvider> entry : this.providersToRun.entrySet()){
             if(!this.alwaysGenerate && !hashCache.shouldRunInThisVersion(entry.getKey())){
                 LOGGER.debug("Generator {} already run for version {}", entry.getKey(), (Object)this.version.getName());
                 return;

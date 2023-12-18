@@ -119,7 +119,7 @@ public abstract class TagGenerator extends ResourceGenerator {
     }
 
     private static String getTagDirectoryName(Registries.Registry<?> registry){
-        return TagManager.getTagDir(registry.hasForgeRegistry() ? registry.getForgeRegistry().getRegistryKey() : registry.getVanillaRegistry().key());
+        return TagManager.getTagDir(registry.getVanillaRegistry().key());
     }
 
     /**

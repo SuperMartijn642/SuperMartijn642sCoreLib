@@ -2,7 +2,7 @@ package com.supermartijn642.core.data.condition;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
 
 /**
  * Created 14/11/2022 by SuperMartijn642

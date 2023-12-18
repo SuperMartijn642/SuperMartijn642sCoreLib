@@ -1,12 +1,12 @@
 package com.supermartijn642.core.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 /**
  * Created 17/11/2021 by SuperMartijn642
  * <p>
- * Fired right after blocks are rendered and the {@link net.minecraftforge.client.event.RenderHighlightEvent.Block} is fired.
+ * Fired right after blocks are rendered and the {@link net.neoforged.neoforge.client.event.RenderHighlightEvent.Block} is fired.
  */
 public class RenderWorldEvent extends Event {
 

@@ -4,17 +4,17 @@ import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.CoreSide;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.network.CustomPayloadEvent;
-import net.minecraftforge.fml.LogicalSide;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.network.NetworkEvent;
 
 /**
  * Created 5/30/2021 by SuperMartijn642
  */
 public class PacketContext {
 
-    private final CustomPayloadEvent.Context context;
+    private final NetworkEvent.Context context;
 
-    public PacketContext(CustomPayloadEvent.Context context){
+    public PacketContext(NetworkEvent.Context context){
         this.context = context;
     }
 
@@ -51,7 +51,7 @@ public class PacketContext {
     }
 
     @Deprecated
-    public CustomPayloadEvent.Context getUnderlyingContext(){
+    public NetworkEvent.Context getUnderlyingContext(){
         return this.context;
     }
 

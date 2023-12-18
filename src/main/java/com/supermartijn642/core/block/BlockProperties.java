@@ -9,8 +9,9 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.common.util.TriPredicate;
+import net.neoforged.neoforge.common.util.TriPredicate;
 
+import java.lang.reflect.Field;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
@@ -19,6 +20,23 @@ import java.util.function.ToIntFunction;
  * Created 24/07/2022 by SuperMartijn642
  */
 public class BlockProperties {
+
+    private static final Function<BlockBehaviour.Properties,BlockBehaviour.StatePredicate> isRedstoneConductorField;
+
+    static{
+        try{
+            Field field = BlockBehaviour.Properties.class.getDeclaredField("isRedstoneConductor");
+            isRedstoneConductorField = properties -> {
+                try{
+                    return (BlockBehaviour.StatePredicate)field.get(properties);
+                }catch(IllegalAccessException e){
+                    throw new RuntimeException(e);
+                }
+            };
+        }catch(NoSuchFieldException e){
+            throw new RuntimeException(e);
+        }
+    }
 
     public static BlockProperties create(){
         return new BlockProperties();
@@ -40,7 +58,7 @@ public class BlockProperties {
         properties.speedFactor = block.getSpeedFactor();
         properties.jumpFactor = block.getJumpFactor();
         properties.isAir = block.defaultBlockState().isAir();
-        properties.isRedstoneConductor = sourceProperties.isRedstoneConductor::test;
+        properties.isRedstoneConductor = isRedstoneConductorField.apply(sourceProperties)::test;
         properties.isSuffocating = sourceProperties.isSuffocating::test;
         properties.hasDynamicShape = block.hasDynamicShape();
         properties.lootTableSupplier = sourceProperties.drops != null ? () -> sourceProperties.drops : ((BlockPropertiesAccessor)sourceProperties).getLootTableSupplier();

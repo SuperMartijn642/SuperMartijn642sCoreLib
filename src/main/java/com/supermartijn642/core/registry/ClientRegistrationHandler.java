@@ -33,11 +33,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.ModelEvent;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -104,9 +104,10 @@ public class ClientRegistrationHandler {
 
     private ClientRegistrationHandler(String modid){
         this.modid = modid;
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleModelRegistryEvent);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleModelBakeEvent);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleRegisterRenderersEvent);
+        IEventBus eventBus = ModLoadingContext.get().getActiveContainer().getEventBus();
+        eventBus.addListener(this::handleModelRegistryEvent);
+        eventBus.addListener(this::handleModelBakeEvent);
+        eventBus.addListener(this::handleRegisterRenderersEvent);
     }
 
     /**

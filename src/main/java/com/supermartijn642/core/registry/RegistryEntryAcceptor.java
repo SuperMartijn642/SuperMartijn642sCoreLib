@@ -2,12 +2,13 @@ package com.supermartijn642.core.registry;
 
 import com.supermartijn642.core.CoreLib;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.forgespi.language.ModFileScanData;
-import net.minecraftforge.registries.IdMappingEvent;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.moddiscovery.ModAnnotation;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.registries.IdMappingEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
+import net.neoforged.neoforgespi.language.ModFileScanData;
 import org.objectweb.asm.Type;
 
 import java.lang.annotation.ElementType;
@@ -80,7 +81,7 @@ public @interface RegistryEntryAcceptor {
                         if(!RegistryUtil.isValidPath(identifier))
                             throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-                        Registry registry = Registry.valueOf(((ModFileScanData.EnumData)annotationData.annotationData().get("registry")).value());
+                        Registry registry = Registry.valueOf(((ModAnnotation.EnumHolder)annotationData.annotationData().get("registry")).getValue());
 
                         // Get the class the annotation is located in
                         Class<?> clazz = Class.forName(annotationData.clazz().getClassName(), false, RegistryEntryAcceptor.class.getClassLoader());
@@ -135,13 +136,11 @@ public @interface RegistryEntryAcceptor {
             }
 
             // Register event listeners
-            MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, Handler::onIdRemapping);
+            NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, Handler::onIdRemapping);
         }
 
         public static void onRegisterEvent(RegisterEvent e){
-            Registries.Registry<?> registry = e.getForgeRegistry() == null ?
-                Registries.fromUnderlying(e.getVanillaRegistry()) :
-                Registries.fromUnderlying(e.getForgeRegistry());
+            Registries.Registry<?> registry = Registries.fromUnderlying(e.getRegistry());
             if(registry == null)
                 return;
 

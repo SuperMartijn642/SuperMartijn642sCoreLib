@@ -509,7 +509,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param tag tag to be added as an entry
          */
         public LootPoolBuilder tagEntry(ResourceLocation tag){
-            return this.tagEntry(TagKey.create(Registries.ITEMS.getForgeRegistry().getRegistryKey(), tag));
+            return this.tagEntry(TagKey.create(Registries.ITEMS.getVanillaRegistry().key(), tag));
         }
 
         /**

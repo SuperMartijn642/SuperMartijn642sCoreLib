@@ -1,2 +1,2 @@
 ### SuperMartijn642's Core Library 1.1.16
-- Initial release of SuperMartijn642's Core Library for Forge 1.20.3
+- Initial release of SuperMartijn642's Core Library for NeoForge 1.20.3 & 1.20.4

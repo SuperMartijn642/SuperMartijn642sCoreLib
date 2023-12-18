@@ -2,7 +2,7 @@ package com.supermartijn642.core.mixin.dev;
 
 import com.supermartijn642.core.extensions.DataGeneratorExtension;
 import net.minecraft.data.DataGenerator;
-import net.minecraftforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

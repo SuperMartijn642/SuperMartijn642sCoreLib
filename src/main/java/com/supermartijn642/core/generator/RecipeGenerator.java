@@ -28,8 +28,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.crafting.ingredients.CompoundIngredient;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 
 import java.util.*;
 

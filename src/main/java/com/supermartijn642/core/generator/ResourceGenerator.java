@@ -4,10 +4,10 @@ import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.forgespi.language.IModInfo;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.neoforgespi.language.IModInfo;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;

@@ -16,8 +16,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.ContainerScreenEvent;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.client.event.ContainerScreenEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
@@ -108,7 +108,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
         guiGraphics.pose().popPose();
 
-        MinecraftForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Background(this, guiGraphics, mouseX, mouseY));
+        NeoForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Background(this, guiGraphics, mouseX, mouseY));
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(offsetX, offsetY, 0);
@@ -133,7 +133,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
         this.renderTooltip(guiGraphics, offsetMouseX, offsetMouseY);
 
-        MinecraftForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Foreground(this, guiGraphics, mouseX, mouseY));
+        NeoForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Foreground(this, guiGraphics, mouseX, mouseY));
 
         ItemStack cursorStack = this.draggingItem.isEmpty() ? this.menu.getCarried() : this.draggingItem;
         if(!cursorStack.isEmpty()){

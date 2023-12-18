@@ -1,6 +1,6 @@
 package com.supermartijn642.core.extensions;
 
-import net.minecraftforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 /**
  * Created 16/10/2023 by SuperMartijn642

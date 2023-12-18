@@ -6,8 +6,8 @@ import com.supermartijn642.core.generator.ResourceGenerator;
 import com.supermartijn642.core.util.Either;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;

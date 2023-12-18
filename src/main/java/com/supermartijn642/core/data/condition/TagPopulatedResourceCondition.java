@@ -21,7 +21,7 @@ public class TagPopulatedResourceCondition implements ResourceCondition {
     private final ResourceLocation tag;
 
     public TagPopulatedResourceCondition(Registries.Registry<?> registry, ResourceLocation tag){
-        if(!registry.hasVanillaRegistry() && !registry.hasForgeRegistry())
+        if(!registry.hasVanillaRegistry())
             throw new IllegalArgumentException("Registry '" + registry.getRegistryIdentifier() + "' is not supported!");
 
         this.registry = registry;
@@ -30,7 +30,7 @@ public class TagPopulatedResourceCondition implements ResourceCondition {
 
     @Override
     public boolean test(ResourceConditionContext context){
-        ResourceKey<?> registryKey = this.registry.hasForgeRegistry() ? this.registry.getForgeRegistry().getRegistryKey() : this.registry.getVanillaRegistry().key();
+        ResourceKey<?> registryKey = this.registry.getVanillaRegistry().key();
         //noinspection unchecked
         return !context.getUnderlying().getAllTags((ResourceKey<? extends Registry<Object>>)registryKey).getOrDefault(this.tag, Collections.emptySet()).isEmpty();
     }

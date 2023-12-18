@@ -1,7 +1,7 @@
 package com.supermartijn642.core;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.LogicalSide;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * Created 5/30/2021 by SuperMartijn642

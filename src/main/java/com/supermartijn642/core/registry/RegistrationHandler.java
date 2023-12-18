@@ -20,10 +20,9 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.registries.RegisterEvent;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -64,7 +63,7 @@ public class RegistrationHandler {
 
     private RegistrationHandler(String modid){
         this.modid = modid;
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleRegisterEvent);
+        ModLoadingContext.get().getActiveContainer().getEventBus().addListener(this::handleRegisterEvent);
     }
 
     public void registerBlock(String identifier, Supplier<Block> block){
@@ -472,9 +471,7 @@ public class RegistrationHandler {
     }
 
     private void handleRegisterEvent(RegisterEvent event){
-        Registries.Registry<?> registry = event.getForgeRegistry() == null ?
-            Registries.fromUnderlying(event.getVanillaRegistry()) :
-            Registries.fromUnderlying(event.getForgeRegistry());
+        Registries.Registry<?> registry = Registries.fromUnderlying(event.getRegistry());
         if(registry == null)
             return;
 

@@ -14,8 +14,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.client.NamedRenderTypeManager;
-import net.minecraftforge.client.RenderTypeGroup;
+import net.neoforged.neoforge.client.NamedRenderTypeManager;
+import net.neoforged.neoforge.client.RenderTypeGroup;
 import org.joml.Vector3f;
 
 import java.lang.reflect.Field;
