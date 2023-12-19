@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.16a
+- Fixed crash with Tool Progression
+
 ### SuperMartijn642's Core Library 1.1.16
 - Allow `ClientRegistrationHandler#registerAtlasSprite` to accept a different namespace
 
