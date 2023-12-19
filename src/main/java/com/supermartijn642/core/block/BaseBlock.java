@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -273,7 +274,8 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
     }
 
     private boolean is(ResourceLocation tag){
-        return TagLoader.getTag(Registries.BLOCKS, tag).contains(Registries.BLOCKS.getIdentifier(this));
+        Set<ResourceLocation> blocks = TagLoader.getTag(Registries.BLOCKS, tag);
+        return blocks != null && blocks.contains(Registries.BLOCKS.getIdentifier(this));
     }
 
     @Override
