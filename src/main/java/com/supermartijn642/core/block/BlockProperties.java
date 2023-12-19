@@ -26,6 +26,7 @@ public class BlockProperties {
     static{
         try{
             Field field = BlockBehaviour.Properties.class.getDeclaredField("isRedstoneConductor");
+            field.setAccessible(true);
             isRedstoneConductorField = properties -> {
                 try{
                     return (BlockBehaviour.StatePredicate)field.get(properties);
