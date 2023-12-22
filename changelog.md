@@ -1,2 +1,5 @@
+### SuperMartijn642's Core Library 1.1.16a
+- Fixed recipe conditions not working correctly
+
 ### SuperMartijn642's Core Library 1.1.16
 - Initial release of SuperMartijn642's Core Library for NeoForge 1.20.3 & 1.20.4
