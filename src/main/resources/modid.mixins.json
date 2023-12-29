@@ -7,13 +7,13 @@
   "plugin": "${mod_package}.${mixin_package}.${mixin_plugin}",
   "mixins": [
     "BlockPropertiesAccessor",
+    "dev.DataGeneratorConfigMixin",
+    "dev.DataGeneratorMixin",
+    "dev.DatagenModLoaderAccessor",
     "GameDataMixin",
     "RecipeManagerMixin"
   ],
   "client": [
-    "dev.DataGeneratorConfigMixin",
-    "dev.DataGeneratorMixin",
-    "dev.DatagenModLoaderAccessor",
     "GuiGraphicsInvoker",
     "LevelRendererMixin",
     "SpriteSourceListMixin"
