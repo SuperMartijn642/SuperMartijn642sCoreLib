@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.16b
+- Workaround datagen mixins not getting applied due to Forge quirks
+
 ### SuperMartijn642's Core Library 1.1.16a
 - Added workaround for crash with Iceberg
 
