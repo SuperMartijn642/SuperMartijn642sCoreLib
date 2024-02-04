@@ -1,10 +1,13 @@
 package com.supermartijn642.core.network;
 
+import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.RegistryUtil;
 import io.netty.util.collection.IntObjectHashMap;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,10 +15,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.ModLoadingContext;
-import net.neoforged.neoforge.network.NetworkEvent;
-import net.neoforged.neoforge.network.NetworkRegistry;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.simple.SimpleChannel;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.HashMap;
 import java.util.function.Supplier;
@@ -60,7 +62,7 @@ public class PacketChannel {
     }
 
     private final String modid, name;
-    private final SimpleChannel channel;
+    private final ResourceLocation identifier;
 
     private int index = 0;
     private final HashMap<Class<? extends BasePacket>,Integer> packet_to_index = new HashMap<>();
@@ -73,16 +75,14 @@ public class PacketChannel {
     private PacketChannel(String modid, String name){
         this.modid = modid;
         this.name = name;
-        this.channel = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(modid, name))
-            .networkProtocolVersion(() -> "1")
-            .clientAcceptedVersions("1"::equals)
-            .serverAcceptedVersions("1"::equals)
-            .simpleChannel();
-        this.channel.messageBuilder(InternalPacket.class, 0)
-            .encoder((message, buffer) -> InternalPacket.write(this, message, buffer))
-            .decoder(buffer -> InternalPacket.read(this, buffer))
-            .consumerNetworkThread((message, context) -> InternalPacket.handle(this, message, context))
-            .add();
+        this.identifier = new ResourceLocation(modid, name);
+        ModLoadingContext.get().getActiveContainer().getEventBus().addListener(this::handleRegistration);
+    }
+
+    private void handleRegistration(RegisterPayloadHandlerEvent event){
+        event.registrar(this.modid)
+            .versioned("1")
+            .common(this.identifier, buffer -> InternalPacket.read(this, buffer), InternalPacket::handle);
     }
 
     /**
@@ -107,7 +107,7 @@ public class PacketChannel {
      */
     public void sendToServer(BasePacket packet){
         this.checkRegistration(packet);
-        this.channel.send(PacketDistributor.SERVER.noArg(), new InternalPacket().setPacket(packet));
+        ((LocalPlayer)ClientUtils.getPlayer()).connection.send(new InternalPacket(this).setPacket(packet)); // TODO
     }
 
     /**
@@ -119,7 +119,7 @@ public class PacketChannel {
         if(!(player instanceof ServerPlayer))
             throw new IllegalStateException("This must only be called server-side!");
         this.checkRegistration(packet);
-        this.channel.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer)player), new InternalPacket().setPacket(packet));
+        PacketDistributor.PLAYER.with(((ServerPlayer)player)).send(new InternalPacket(this).setPacket(packet));
     }
 
     /**
@@ -128,7 +128,7 @@ public class PacketChannel {
      */
     public void sendToAllPlayers(BasePacket packet){
         this.checkRegistration(packet);
-        this.channel.send(PacketDistributor.ALL.noArg(), new InternalPacket().setPacket(packet));
+        PacketDistributor.ALL.noArg().send(new InternalPacket(this).setPacket(packet));
     }
 
     /**
@@ -138,7 +138,7 @@ public class PacketChannel {
      */
     public void sendToDimension(ResourceKey<Level> dimension, BasePacket packet){
         this.checkRegistration(packet);
-        this.channel.send(PacketDistributor.DIMENSION.with(() -> dimension), new InternalPacket().setPacket(packet));
+        PacketDistributor.DIMENSION.with(dimension).send(new InternalPacket(this).setPacket(packet));
     }
 
     /**
@@ -161,7 +161,7 @@ public class PacketChannel {
         if(entity.level().isClientSide)
             throw new IllegalStateException("This must only be called server-side!");
         this.checkRegistration(packet);
-        this.channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new InternalPacket().setPacket(packet));
+        PacketDistributor.TRACKING_ENTITY.with(entity).send(new InternalPacket(this).setPacket(packet));
     }
 
     /**
@@ -170,7 +170,7 @@ public class PacketChannel {
      */
     public void sendToAllNear(ResourceKey<Level> world, double x, double y, double z, double radius, BasePacket packet){
         this.checkRegistration(packet);
-        this.channel.send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(x, y, z, radius, world)), new InternalPacket().setPacket(packet));
+        PacketDistributor.NEAR.with(new PacketDistributor.TargetPoint(x, y, z, radius, world)).send(new InternalPacket(this).setPacket(packet));
     }
 
     /**
@@ -223,8 +223,7 @@ public class PacketChannel {
         return packet;
     }
 
-    private void handle(BasePacket packet, NetworkEvent.Context contextSupplier){
-        contextSupplier.setPacketHandled(true);
+    private void handle(BasePacket packet, IPayloadContext contextSupplier){
         PacketContext context = new PacketContext(contextSupplier);
         if(packet.verify(context)){
             if(this.packet_to_queued.get(packet.getClass()))
@@ -234,25 +233,36 @@ public class PacketChannel {
         }
     }
 
-    private static class InternalPacket {
+    private static class InternalPacket implements CustomPacketPayload {
 
         public static InternalPacket read(PacketChannel channel, FriendlyByteBuf buffer){
-            return new InternalPacket().setPacket(channel.read(buffer));
+            return new InternalPacket(channel).setPacket(channel.read(buffer));
         }
 
-        public static void write(PacketChannel channel, InternalPacket packet, FriendlyByteBuf buffer){
-            channel.write(packet.packet, buffer);
+        public static void handle(InternalPacket packet, IPayloadContext context){
+            packet.channel.handle(packet.packet, context);
         }
 
-        public static void handle(PacketChannel channel, InternalPacket packet, NetworkEvent.Context context){
-            channel.handle(packet.packet, context);
-        }
-
+        private final PacketChannel channel;
         private BasePacket packet;
+
+        public InternalPacket(PacketChannel channel){
+            this.channel = channel;
+        }
 
         public InternalPacket setPacket(BasePacket packet){
             this.packet = packet;
             return this;
+        }
+
+        @Override
+        public void write(FriendlyByteBuf buffer){
+            this.channel.write(this.packet, buffer);
+        }
+
+        @Override
+        public ResourceLocation id(){
+            return this.channel.identifier;
         }
     }
 

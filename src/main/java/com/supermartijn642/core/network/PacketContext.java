@@ -4,17 +4,16 @@ import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.CoreSide;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Created 5/30/2021 by SuperMartijn642
  */
 public class PacketContext {
 
-    private final NetworkEvent.Context context;
+    private final IPayloadContext context;
 
-    public PacketContext(NetworkEvent.Context context){
+    public PacketContext(IPayloadContext context){
         this.context = context;
     }
 
@@ -22,18 +21,18 @@ public class PacketContext {
      * @return the side the packet is received on
      */
     public CoreSide getHandlingSide(){
-        return this.context.getDirection().getReceptionSide() == LogicalSide.CLIENT ? CoreSide.CLIENT : CoreSide.SERVER;
+        return this.context.flow().isClientbound() ? CoreSide.CLIENT : CoreSide.SERVER;
     }
 
     /**
      * @return the side the packet is originating from
      */
     public CoreSide getOriginatingSide(){
-        return this.context.getDirection().getOriginationSide() == LogicalSide.CLIENT ? CoreSide.CLIENT : CoreSide.SERVER;
+        return this.context.flow().isServerbound() ? CoreSide.CLIENT : CoreSide.SERVER;
     }
 
     public Player getSendingPlayer(){
-        return this.context.getSender();
+        return this.context.player().orElse(null);
     }
 
     /**
@@ -44,14 +43,11 @@ public class PacketContext {
     }
 
     public void queueTask(Runnable task){
-        if(this.getHandlingSide() == CoreSide.SERVER)
-            this.context.enqueueWork(task);
-        else
-            ClientUtils.queueTask(task);
+        this.context.workHandler().execute(task);
     }
 
     @Deprecated
-    public NetworkEvent.Context getUnderlyingContext(){
+    public IPayloadContext getUnderlyingContext(){
         return this.context;
     }
 
