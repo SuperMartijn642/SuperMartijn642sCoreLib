@@ -37,6 +37,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -108,6 +109,7 @@ public class ClientRegistrationHandler {
         eventBus.addListener(this::handleModelRegistryEvent);
         eventBus.addListener(this::handleModelBakeEvent);
         eventBus.addListener(this::handleRegisterRenderersEvent);
+        eventBus.addListener(this::handleRegisterMenuScreensEvent);
     }
 
     /**
@@ -697,20 +699,6 @@ public class ClientRegistrationHandler {
             ((EditableClientItemExtensions)renderProperties).setCustomRenderer(customRenderer);
         }
 
-        // Container Screens
-        Set<MenuType<?>> menuTypes = new HashSet<>();
-        for(Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>> entry : this.containerScreens){
-            MenuType<?> menuType = entry.left().get();
-            if(menuType == null)
-                throw new RuntimeException("Container screen registered with null menu type!");
-            if(menuTypes.contains(menuType))
-                throw new RuntimeException("Duplicate container screen for menu type '" + Registries.MENU_TYPES.getIdentifier(menuType) + "'!");
-
-            menuTypes.add(menuType);
-            //noinspection unchecked,rawtypes,NullableProblems
-            MenuScreens.register((MenuType)menuType, (MenuScreens.ScreenConstructor)entry.right()::apply);
-        }
-
         // Block render types
         Set<Block> blocks = new HashSet<>();
         for(Pair<Supplier<Block>,Supplier<RenderType>> entry : this.blockRenderTypes){
@@ -726,6 +714,22 @@ public class ClientRegistrationHandler {
             blocks.add(block);
             //noinspection removal
             ItemBlockRenderTypes.setRenderLayer(block, renderType);
+        }
+    }
+
+    private void handleRegisterMenuScreensEvent(RegisterMenuScreensEvent e){
+        // Container Screens
+        Set<MenuType<?>> menuTypes = new HashSet<>();
+        for(Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>> entry : this.containerScreens){
+            MenuType<?> menuType = entry.left().get();
+            if(menuType == null)
+                throw new RuntimeException("Container screen registered with null menu type!");
+            if(menuTypes.contains(menuType))
+                throw new RuntimeException("Duplicate container screen for menu type '" + Registries.MENU_TYPES.getIdentifier(menuType) + "'!");
+
+            menuTypes.add(menuType);
+            //noinspection deprecation,rawtypes,unchecked
+            MenuScreens.register((MenuType)menuType, (MenuScreens.ScreenConstructor)entry.right()::apply);
         }
     }
 
