@@ -1,10 +1,8 @@
 package com.supermartijn642.core.network;
 
-import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.RegistryUtil;
 import io.netty.util.collection.IntObjectHashMap;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -107,7 +105,7 @@ public class PacketChannel {
      */
     public void sendToServer(BasePacket packet){
         this.checkRegistration(packet);
-        ((LocalPlayer)ClientUtils.getPlayer()).connection.send(new InternalPacket(this).setPacket(packet)); // TODO
+        PacketDistributor.SERVER.noArg().send(new InternalPacket(this).setPacket(packet));
     }
 
     /**
