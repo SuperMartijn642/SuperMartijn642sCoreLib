@@ -8,7 +8,9 @@
   "mixins": [
     "BlockPropertiesAccessor",
     "GameDataMixin",
-    "RecipeManagerMixin"
+    "RecipeManagerMixin",
+    "TagLoaderMixin",
+    "TagManagerMixin"
   ],
   "client": [
     "dev.DataGeneratorConfigMixin",
