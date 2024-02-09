@@ -7,7 +7,11 @@
   "mixins": [
     "BlockPropertiesAccessor",
     "CraftingHelperMixin",
-    "GameDataMixin"
+    "ForgeHooksMixin",
+    "GameDataMixin",
+    "TagBuilderMixin",
+    "TagLoaderMixin",
+    "TagManagerMixin"
   ],
   "client": [
     "DataGeneratorMixin",
