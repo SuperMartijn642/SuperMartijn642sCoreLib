@@ -10,7 +10,10 @@
     "DataGeneratorMixin",
     "DatagenModLoaderAccessor",
     "ForgeHooksMixin",
-    "GameDataMixin"
+    "ForgeTagHandlerMixin",
+    "GameDataMixin",
+    "TagBuilderMixin",
+    "TagCollectionReaderMixin"
   ],
   "client": [
     "LevelRendererMixin"
