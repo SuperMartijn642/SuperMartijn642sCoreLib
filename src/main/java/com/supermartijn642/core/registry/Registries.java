@@ -5,6 +5,7 @@ import com.mojang.serialization.Lifecycle;
 import com.supermartijn642.core.data.condition.ResourceCondition;
 import com.supermartijn642.core.data.condition.ResourceConditionContext;
 import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
+import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
 import com.supermartijn642.core.extensions.CoreLibMappedRegistry;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
@@ -101,6 +102,7 @@ public final class Registries {
             });
         }
     };
+    public static final Registry<CustomTagEntrySerializer<?>> CUSTOM_TAG_ENTRY_SERIALIZERS = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "custom_tag_entries"), CustomTagEntrySerializer.class);
 
     static{
         REGISTRATION_ORDER = Lists.newArrayList(
@@ -119,7 +121,8 @@ public final class Registries {
             Registries.RECIPE_SERIALIZERS,
             Registries.ATTRIBUTES,
             Registries.STAT_TYPES,
-            Registries.RESOURCE_CONDITION_SERIALIZERS
+            Registries.RESOURCE_CONDITION_SERIALIZERS,
+            Registries.CUSTOM_TAG_ENTRY_SERIALIZERS
         );
     }
 

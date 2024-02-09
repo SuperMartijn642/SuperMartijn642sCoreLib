@@ -7,7 +7,9 @@
   "mixins": [
     "HolderReferenceMixin",
     "MappedRegistryMixin",
-    "ServerPlayerGameModeMixin"
+    "ServerPlayerGameModeMixin",
+    "TagLoaderMixin",
+    "TagManagerMixin"
   ],
   "client": [
     "DataGeneratorMixin",

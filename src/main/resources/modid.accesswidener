@@ -65,6 +65,10 @@ accessible field net/minecraft/client/Minecraft pausePartialTick F # pausePartia
 accessible field net/minecraft/client/Minecraft resourcePackRepository Lnet/minecraft/server/packs/repository/PackRepository; # resourcePackRepository
 # Player
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
+# TagEntry
+accessible field net/minecraft/tags/TagEntry CODEC Lcom/mojang/serialization/Codec;
+accessible method net/minecraft/tags/TagEntry <init> (Lnet/minecraft/resources/ResourceLocation;ZZ)V
+mutable field net/minecraft/tags/TagEntry CODEC Lcom/mojang/serialization/Codec;
 
 # Append the generated entries
 # generated
