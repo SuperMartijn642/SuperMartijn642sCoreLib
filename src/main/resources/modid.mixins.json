@@ -11,7 +11,9 @@
     "dev.DataGeneratorMixin",
     "dev.DatagenModLoaderAccessor",
     "GameDataMixin",
-    "RecipeManagerMixin"
+    "RecipeManagerMixin",
+    "TagLoaderMixin",
+    "TagManagerMixin"
   ],
   "client": [
     "LevelRendererMixin",

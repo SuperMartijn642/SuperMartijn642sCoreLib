@@ -15,7 +15,6 @@ class ResourceConditions {
 
     private static final Map<ResourceConditionSerializer<?>,Codec<? extends ICondition>> TO_UNDERLYING_MAP = new HashMap<>();
 
-
     static ConditionWrapper wrap(ResourceCondition condition){
         return new ConditionWrapper(condition);
     }
