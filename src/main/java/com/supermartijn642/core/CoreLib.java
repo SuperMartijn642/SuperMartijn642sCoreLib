@@ -2,6 +2,8 @@ package com.supermartijn642.core;
 
 import com.supermartijn642.core.data.condition.*;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
+import com.supermartijn642.core.data.tag.CustomTagEntryLoader;
+import com.supermartijn642.core.data.tag.entries.NamespaceTagEntry;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import com.supermartijn642.core.registry.RegistrationHandler;
@@ -22,6 +24,7 @@ public class CoreLib {
     public CoreLib(){
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onConstructMod);
         CommonUtils.initialize();
+        CustomTagEntryLoader.init();
 
         // Register conditional recipe type
         RegistrationHandler handler = RegistrationHandler.get("supermartijn642corelib");
@@ -31,6 +34,9 @@ public class CoreLib {
         handler.registerResourceConditionSerializer("or", OrResourceCondition.SERIALIZER);
         handler.registerResourceConditionSerializer("and", AndResourceCondition.SERIALIZER);
         handler.registerResourceConditionSerializer("tag_populated", TagPopulatedResourceCondition.SERIALIZER);
+
+        // Register custom tag entry types
+        handler.registerCustomTagEntrySerializer("namespace", NamespaceTagEntry.SERIALIZER);
 
         // Register generator for default tags
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));
