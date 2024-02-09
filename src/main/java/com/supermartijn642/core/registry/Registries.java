@@ -1,6 +1,7 @@
 package com.supermartijn642.core.registry;
 
 import com.google.common.collect.Lists;
+import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
 import net.minecraft.block.Block;
@@ -104,11 +105,12 @@ public final class Registries {
     public static final Registry<IRecipeSerializer<?>> RECIPE_SERIALIZERS = forge(RECIPE_SERIALIZER, ForgeRegistries.RECIPE_SERIALIZERS, IRecipeSerializer.class);
     public static final Registry<StatType<?>> STAT_TYPES = forge(STAT_TYPE, ForgeRegistries.STAT_TYPES, StatType.class);
     public static final Registry<IConditionSerializer<?>> RECIPE_CONDITION_SERIALIZERS = new RecipeConditionSerializerRegistry();
+    public static final Registry<CustomTagEntrySerializer<?>> CUSTOM_TAG_ENTRY_SERIALIZERS = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "custom_tag_entries"), CustomTagEntrySerializer.class);
 
     static{
         // Add all registries which don't have a forge registry
         REGISTRATION_ORDER_MAP.put(POTIONS, Lists.newArrayList(RECIPE_TYPES));
-        REGISTRATION_ORDER_MAP.put(RECIPE_SERIALIZERS, Lists.newArrayList(RECIPE_CONDITION_SERIALIZERS));
+        REGISTRATION_ORDER_MAP.put(RECIPE_SERIALIZERS, Lists.newArrayList(RECIPE_CONDITION_SERIALIZERS, CUSTOM_TAG_ENTRY_SERIALIZERS));
     }
 
     private static <T> Registry<T> vanilla(net.minecraft.util.registry.Registry<T> registry, Class<? super T> valueClass){
@@ -434,6 +436,95 @@ public final class Registries {
 
         @Override
         public Class<IConditionSerializer<?>> getValueClass(){
+            return this.valueClass;
+        }
+    }
+
+    private static class MapBackedRegistry<T> implements Registry<T> {
+
+        private final ResourceLocation identifier;
+        private final Map<ResourceLocation,T> identifierToObject = new HashMap<>();
+        private final Map<T,ResourceLocation> objectToIdentifier = new HashMap<>();
+        private final Set<Pair<ResourceLocation,T>> entries = new HashSet<>();
+        private final Class<T> valueClass;
+
+        private MapBackedRegistry(ResourceLocation identifier, Class<? super T> valueClass){
+            this.identifier = identifier;
+            //noinspection unchecked
+            this.valueClass = (Class<T>)valueClass;
+        }
+
+        @Override
+        public ResourceLocation getRegistryIdentifier(){
+            return this.identifier;
+        }
+
+        @Nullable
+        @Override
+        public net.minecraft.util.registry.Registry<T> getVanillaRegistry(){
+            return null;
+        }
+
+        @Override
+        public boolean hasVanillaRegistry(){
+            return false;
+        }
+
+        @Nullable
+        @Override
+        public <X extends IForgeRegistryEntry<X>> IForgeRegistry<X> getForgeRegistry(){
+            return null;
+        }
+
+        @Override
+        public boolean hasForgeRegistry(){
+            return false;
+        }
+
+        @Override
+        public void register(ResourceLocation identifier, T object){
+            if(this.identifierToObject.containsKey(identifier))
+                throw new RuntimeException("Duplicate registry for identifier '" + identifier + "'!");
+            if(this.objectToIdentifier.containsKey(object))
+                throw new RuntimeException("Duplicate registry for object under '" + this.objectToIdentifier.get(object) + "' and '" + identifier + "'!");
+
+            this.identifierToObject.put(identifier, object);
+            this.objectToIdentifier.put(object, identifier);
+            this.entries.add(Pair.of(identifier, object));
+        }
+
+        @Override
+        public ResourceLocation getIdentifier(T object){
+            return this.objectToIdentifier.get(object);
+        }
+
+        @Override
+        public boolean hasIdentifier(ResourceLocation identifier){
+            return this.identifierToObject.containsKey(identifier);
+        }
+
+        @Override
+        public T getValue(ResourceLocation identifier){
+            return this.identifierToObject.get(identifier);
+        }
+
+        @Override
+        public Set<ResourceLocation> getIdentifiers(){
+            return Collections.unmodifiableSet(this.identifierToObject.keySet());
+        }
+
+        @Override
+        public Collection<T> getValues(){
+            return Collections.unmodifiableCollection(this.objectToIdentifier.keySet());
+        }
+
+        @Override
+        public Set<Pair<ResourceLocation,T>> getEntries(){
+            return Collections.unmodifiableSet(this.entries);
+        }
+
+        @Override
+        public Class<T> getValueClass(){
             return this.valueClass;
         }
     }

@@ -15,7 +15,9 @@
     "GameDataMixin",
     "ItemEntityMixin",
     "LivingEntityMixin",
-    "PlayerEntityMixin"
+    "PlayerEntityMixin",
+    "TagBuilderMixin",
+    "TagCollectionMixin"
   ],
   "client": [
     "ClientPlayerEntityMixin",
