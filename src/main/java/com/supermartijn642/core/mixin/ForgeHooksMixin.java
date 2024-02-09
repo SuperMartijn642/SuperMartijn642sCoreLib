@@ -1,10 +1,15 @@
 package com.supermartijn642.core.mixin;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.supermartijn642.core.block.BaseBlock;
+import com.supermartijn642.core.data.tag.CustomTagEntryLoader;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tags.Tag;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
@@ -15,7 +20,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Created 29/07/2022 by SuperMartijn642
@@ -106,6 +115,36 @@ public class ForgeHooksMixin {
                 }
             }
             ci.setReturnValue(false);
+        }
+    }
+
+    @Inject(
+        method = "deserializeTagAdditions",
+        at = @At("HEAD"),
+        remap = false
+    )
+    private static <T> void deserializeTagAdditions(Tag.Builder<T> builder, Function<ResourceLocation,Optional<T>> valueGetter, JsonObject json, CallbackInfo ci){
+        if(json.has("optional") && json.get("optional").isJsonArray()){
+            JsonArray optionalArray = json.getAsJsonArray("optional");
+            for(int i = 0; i < optionalArray.size(); i++){
+                Tag.ITagEntry<T> entry = CustomTagEntryLoader.potentiallyDeserialize(optionalArray.get(i));
+                if(entry != null){
+                    optionalArray.remove(i);
+                    builder.add(entry);
+                    i--;
+                }
+            }
+        }
+        if(json.has("remove") && json.get("remove").isJsonArray()){
+            JsonArray removeArray = json.getAsJsonArray("remove");
+            for(int i = 0; i < removeArray.size(); i++){
+                Tag.ITagEntry<T> entry = CustomTagEntryLoader.potentiallyDeserialize(removeArray.get(i));
+                if(entry != null){
+                    removeArray.remove(i);
+                    builder.remove(entry);
+                    i--;
+                }
+            }
         }
     }
 }

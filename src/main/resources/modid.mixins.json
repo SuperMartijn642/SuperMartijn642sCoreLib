@@ -13,7 +13,9 @@
     "ForgeHooksMixin",
     "GameDataMixin",
     "ItemEntityMixin",
-    "PlayerEntityMixin"
+    "PlayerEntityMixin",
+    "TagBuilderMixin",
+    "TagCollectionMixin"
   ],
   "client": [
     "ItemRendererMixin",
