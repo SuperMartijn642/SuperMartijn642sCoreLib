@@ -87,6 +87,9 @@ accessible method net/minecraft/world/entity/player/Player closeContainer ()V # 
 accessible method net/minecraft/world/item/crafting/RecipeManager fromJson (Lnet/minecraft/resources/ResourceLocation;Lcom/google/gson/JsonObject;)Lnet/minecraft/world/item/crafting/RecipeHolder; # fromJson
 # TagEntry
 accessible field net/minecraft/tags/TagEntry CODEC Lcom/mojang/serialization/Codec;
+accessible field net/minecraft/tags/TagEntry id Lnet/minecraft/resources/ResourceLocation;
+accessible field net/minecraft/tags/TagEntry required Z
+accessible field net/minecraft/tags/TagEntry tag Z
 accessible method net/minecraft/tags/TagEntry <init> (Lnet/minecraft/resources/ResourceLocation;ZZ)V
 mutable field net/minecraft/tags/TagEntry CODEC Lcom/mojang/serialization/Codec;
 
