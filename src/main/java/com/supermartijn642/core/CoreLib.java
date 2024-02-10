@@ -2,7 +2,7 @@ package com.supermartijn642.core;
 
 import com.supermartijn642.core.data.condition.*;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
-import com.supermartijn642.core.data.tag.CustomTagEntryLoader;
+import com.supermartijn642.core.data.tag.CustomTagEntries;
 import com.supermartijn642.core.data.tag.entries.NamespaceTagEntry;
 import com.supermartijn642.core.generator.standard.CoreLibAccessWidenerGenerator;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
@@ -29,7 +29,7 @@ public class CoreLib implements ModInitializer {
     public void onInitialize(){
         isArchitecturyLoaded = CommonUtils.isModLoaded("architectury");
         CommonUtils.initialize();
-        CustomTagEntryLoader.init();
+        CustomTagEntries.init();
 
         // Register conditional recipe type
         RegistrationHandler handler = RegistrationHandler.get("supermartijn642corelib");
