@@ -77,6 +77,9 @@ accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
 # TagEntry
 accessible field net/minecraft/tags/TagEntry CODEC Lcom/mojang/serialization/Codec;
+accessible field net/minecraft/tags/TagEntry id Lnet/minecraft/resources/ResourceLocation;
+accessible field net/minecraft/tags/TagEntry required Z
+accessible field net/minecraft/tags/TagEntry tag Z
 accessible method net/minecraft/tags/TagEntry <init> (Lnet/minecraft/resources/ResourceLocation;ZZ)V
 mutable field net/minecraft/tags/TagEntry CODEC Lcom/mojang/serialization/Codec;
 
