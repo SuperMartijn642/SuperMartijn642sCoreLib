@@ -2,7 +2,7 @@ package com.supermartijn642.core.mixin;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.supermartijn642.core.data.tag.CustomTagEntryLoader;
+import com.supermartijn642.core.data.tag.CustomTagEntries;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
@@ -41,11 +41,13 @@ public class TagBuilderMixin {
         JsonArray values = json.getAsJsonArray("values");
         this.customEntries = null;
         for(int i = 0; i < values.size(); i++){
-            Tag.ITagEntry<?> entry = CustomTagEntryLoader.potentiallyDeserialize(values.get(i));
+            Tag.ITagEntry<?> entry = CustomTagEntries.potentiallyDeserialize(values.get(i));
             if(entry != null){
+                values.remove(i);
                 if(this.customEntries == null)
                     this.customEntries = new ArrayList<>();
                 this.customEntries.add(entry);
+                i--;
             }
         }
     }
