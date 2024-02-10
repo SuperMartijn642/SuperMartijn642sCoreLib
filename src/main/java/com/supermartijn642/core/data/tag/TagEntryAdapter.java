@@ -80,6 +80,6 @@ public class TagEntryAdapter<T> implements Tag.ITagEntry<T> {
 
     @Override
     public void serializeTo(JsonArray array, Function<T,ResourceLocation> elementIdentifier){
-        array.add(CustomTagEntryLoader.serialize(this));
+        array.add(CustomTagEntries.serialize(this));
     }
 }

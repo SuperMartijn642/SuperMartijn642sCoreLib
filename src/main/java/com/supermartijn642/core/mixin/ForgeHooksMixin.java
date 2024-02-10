@@ -3,7 +3,7 @@ package com.supermartijn642.core.mixin;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.block.BaseBlock;
-import com.supermartijn642.core.data.tag.CustomTagEntryLoader;
+import com.supermartijn642.core.data.tag.CustomTagEntries;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -127,7 +127,7 @@ public class ForgeHooksMixin {
         if(json.has("optional") && json.get("optional").isJsonArray()){
             JsonArray optionalArray = json.getAsJsonArray("optional");
             for(int i = 0; i < optionalArray.size(); i++){
-                Tag.ITagEntry<T> entry = CustomTagEntryLoader.potentiallyDeserialize(optionalArray.get(i));
+                Tag.ITagEntry<T> entry = CustomTagEntries.potentiallyDeserialize(optionalArray.get(i));
                 if(entry != null){
                     optionalArray.remove(i);
                     builder.add(entry);
@@ -138,7 +138,7 @@ public class ForgeHooksMixin {
         if(json.has("remove") && json.get("remove").isJsonArray()){
             JsonArray removeArray = json.getAsJsonArray("remove");
             for(int i = 0; i < removeArray.size(); i++){
-                Tag.ITagEntry<T> entry = CustomTagEntryLoader.potentiallyDeserialize(removeArray.get(i));
+                Tag.ITagEntry<T> entry = CustomTagEntries.potentiallyDeserialize(removeArray.get(i));
                 if(entry != null){
                     removeArray.remove(i);
                     builder.remove(entry);
