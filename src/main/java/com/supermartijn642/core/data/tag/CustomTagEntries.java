@@ -6,12 +6,13 @@ import com.google.gson.JsonParseException;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.Tag;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Created 09/02/2024 by SuperMartijn642
  */
-public class CustomTagEntryLoader {
+public class CustomTagEntries {
 
     static JsonObject serialize(TagEntryAdapter entry){
         JsonObject json = new JsonObject();
@@ -47,5 +48,9 @@ public class CustomTagEntryLoader {
             throw new RuntimeException("Encountered an exception whilst deserializing custom tag entry for type '" + type + "'!", e);
         }
         return new TagEntryAdapter(type, customEntry);
+    }
+
+    static Tag.Entry wrap(CustomTagEntry customEntry){
+        return new TagEntryAdapter(Registries.CUSTOM_TAG_ENTRY_SERIALIZERS.getIdentifier(customEntry.getSerializer()), customEntry);
     }
 }
