@@ -25,15 +25,16 @@ bin/
 # macos
 *.DS_Store
 
+# neoforge
+runs
+run-data
+repo
+
 # other
 eclipse/
 run/
 libs/
+lib/
 logs/
-
-# forge
-forge*changelog.txt
-
-# other
 images/
 desktop.ini
