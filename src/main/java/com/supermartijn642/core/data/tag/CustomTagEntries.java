@@ -15,7 +15,7 @@ import java.util.function.Function;
 /**
  * Created 09/02/2024 by SuperMartijn642
  */
-public class CustomTagEntryLoader {
+public class CustomTagEntries {
 
     public static void init(){
         TagEntry.CODEC = Codec.either(Codec.<TagEntry>of(
@@ -69,5 +69,9 @@ public class CustomTagEntryLoader {
                 either -> either.map(Function.identity(), Function.identity()),
                 tagEntry -> tagEntry instanceof TagEntryAdapter ? Either.left(tagEntry) : Either.right(tagEntry)
             );
+    }
+
+    static TagEntry wrap(CustomTagEntry customEntry){
+        return new TagEntryAdapter(Registries.CUSTOM_TAG_ENTRY_SERIALIZERS.getIdentifier(customEntry.getSerializer()), customEntry);
     }
 }
