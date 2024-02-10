@@ -73,6 +73,6 @@ public class TagEntryAdapter implements ITag.ITagEntry {
 
     @Override
     public void serializeTo(JsonArray array){
-        array.add(CustomTagEntryLoader.serialize(this));
+        array.add(CustomTagEntries.serialize(this));
     }
 }

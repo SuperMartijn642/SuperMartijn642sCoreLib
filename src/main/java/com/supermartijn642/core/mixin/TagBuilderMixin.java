@@ -1,7 +1,7 @@
 package com.supermartijn642.core.mixin;
 
 import com.google.gson.JsonElement;
-import com.supermartijn642.core.data.tag.CustomTagEntryLoader;
+import com.supermartijn642.core.data.tag.CustomTagEntries;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.Tag;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,7 +21,7 @@ public class TagBuilderMixin {
         cancellable = true
     )
     private static void parseEntry(JsonElement element, CallbackInfoReturnable<ITag.ITagEntry> ci){
-        ITag.ITagEntry entry = CustomTagEntryLoader.potentiallyDeserialize(element);
+        ITag.ITagEntry entry = CustomTagEntries.potentiallyDeserialize(element);
         if(entry != null)
             ci.setReturnValue(entry);
     }
