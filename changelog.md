@@ -1,3 +1,8 @@
+### SuperMartijn642's Core Library 1.1.17
+- Added support for custom tag entry types
+- Added a namespace tag entry type
+- Fixed recipe conditions getting registered twice
+
 ### SuperMartijn642's Core Library 1.1.16b
 - Workaround datagen mixins not getting applied due to Forge quirks
 
