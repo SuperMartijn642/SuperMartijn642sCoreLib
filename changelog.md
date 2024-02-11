@@ -1,3 +1,7 @@
+### SuperMartijn642's Core Library 1.1.17
+- Added support for custom tag entry types
+- Added a namespace tag entry type
+
 ### SuperMartijn642's Core Library 1.1.16
 - Allow `ClientRegistrationHandler#registerAtlasSprite` to accept a different namespace
 - Fixed `AtlasSourceGenerator` using the default resource generator name
