@@ -1,3 +1,8 @@
+### SuperMartijn642's Core Library 1.1.17
+- Added support for custom tag entry types
+- Added a namespace tag entry type
+- Fixed recipe conditions getting registered twice
+
 ### SuperMartijn642's Core Library 1.1.16b
 - Account for network changes in NeoForge 20.4.70
 - Menu screens are now registered in the dedicated event
