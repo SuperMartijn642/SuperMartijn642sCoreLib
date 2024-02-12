@@ -2,9 +2,13 @@ package com.supermartijn642.core;
 
 import com.supermartijn642.core.data.condition.*;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
+import com.supermartijn642.core.data.tag.entries.NamespaceTagEntry;
 import com.supermartijn642.core.generator.standard.CoreLibAccessWidenerGenerator;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
-import com.supermartijn642.core.registry.*;
+import com.supermartijn642.core.registry.ClientRegistrationHandler;
+import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
+import com.supermartijn642.core.registry.RegistrationHandler;
+import com.supermartijn642.core.registry.RegistryEntryAcceptor;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
@@ -33,6 +37,9 @@ public class CoreLib implements ModInitializer {
         handler.registerResourceConditionSerializer("or", OrResourceCondition.SERIALIZER);
         handler.registerResourceConditionSerializer("and", AndResourceCondition.SERIALIZER);
         handler.registerResourceConditionSerializer("tag_populated", TagPopulatedResourceCondition.SERIALIZER);
+
+        // Register custom tag entry types
+        handler.registerCustomTagEntrySerializer("namespace", NamespaceTagEntry.SERIALIZER);
 
         // Register generator for default tags
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));
