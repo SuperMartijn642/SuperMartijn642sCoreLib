@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.17a
+- Fixed `TagGenerator` errors
+
 ### SuperMartijn642's Core Library 1.1.17
 - Added support for custom tag entry types
 - Added a namespace tag entry type
