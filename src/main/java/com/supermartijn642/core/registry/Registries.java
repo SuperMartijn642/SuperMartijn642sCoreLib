@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.supermartijn642.core.CommonUtils;
 import com.supermartijn642.core.block.BaseBlockEntityType;
+import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
 import com.supermartijn642.core.extensions.RegistrySimpleExtension;
 import com.supermartijn642.core.gui.BaseContainerType;
 import com.supermartijn642.core.util.MappedSetView;
@@ -108,13 +109,14 @@ public final class Registries {
     public static final Registry<Class<? extends TileEntity>> BLOCK_ENTITY_CLASSES = vanilla(new ResourceLocation("block_entities"), TileEntity.REGISTRY, Class.class);
     public static final Registry<BaseContainerType<?>> MENU_TYPES = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "container_types"), BaseContainerType.class);
     public static final Registry<IConditionFactory> RECIPE_CONDITION_SERIALIZERS = new RecipeConditionSerializerRegistry();
+    public static final Registry<CustomTagEntrySerializer<?>> CUSTOM_TAG_ENTRY_SERIALIZERS = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "custom_tag_entries"), CustomTagEntrySerializer.class);
 
     static{
         ((RecipeConditionSerializerRegistry)RECIPE_CONDITION_SERIALIZERS).initializeMap();
 
         // Add all registries which don't have a forge registry
         REGISTRATION_ORDER_MAP.put(ITEMS, Lists.newArrayList(BLOCK_ENTITY_TYPES, BLOCK_ENTITY_CLASSES, FLUIDS));
-        REGISTRATION_ORDER_MAP.put(ENTITY_TYPES, Lists.newArrayList(MENU_TYPES));
+        REGISTRATION_ORDER_MAP.put(ENTITY_TYPES, Lists.newArrayList(MENU_TYPES, CUSTOM_TAG_ENTRY_SERIALIZERS));
     }
 
     private static <T> Registry<T> vanilla(ResourceLocation identifier, IRegistry<ResourceLocation,T> registry, Class<? super T> valueClass){

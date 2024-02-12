@@ -2,6 +2,7 @@ package com.supermartijn642.core;
 
 import com.supermartijn642.core.data.TagLoader;
 import com.supermartijn642.core.data.condition.*;
+import com.supermartijn642.core.data.tag.entries.NamespaceTagEntry;
 import com.supermartijn642.core.generator.GeneratorManager;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
 import com.supermartijn642.core.loot_table.SurvivesExplosionLootCondition;
@@ -42,6 +43,9 @@ public class CoreLib {
         handler.registerResourceConditionSerializer("or", OrResourceCondition.SERIALIZER);
         handler.registerResourceConditionSerializer("and", AndResourceCondition.SERIALIZER);
         handler.registerResourceConditionSerializer("ore_dict_populated", OreDictPopulatedResourceCondition.SERIALIZER);
+
+        // Register custom tag entry types
+        handler.registerCustomTagEntrySerializer("namespace", NamespaceTagEntry.SERIALIZER);
 
         // Register loot condition
         LootConditionManager.registerCondition(SurvivesExplosionLootCondition.SERIALIZER);

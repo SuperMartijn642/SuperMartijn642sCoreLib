@@ -3,6 +3,7 @@ package com.supermartijn642.core.registry;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.block.BaseBlockEntityType;
 import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
+import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
 import com.supermartijn642.core.gui.BaseContainerType;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
@@ -361,6 +362,26 @@ public class RegistrationHandler {
                 return object;
             }
         }));
+    }
+
+    public void registerCustomTagEntrySerializer(String identifier, Supplier<CustomTagEntrySerializer<?>> serializer){
+        this.addEntry(Registries.CUSTOM_TAG_ENTRY_SERIALIZERS, identifier, serializer);
+    }
+
+    public void registerCustomTagEntrySerializer(String identifier, CustomTagEntrySerializer<?> serializer){
+        this.addEntry(Registries.CUSTOM_TAG_ENTRY_SERIALIZERS, identifier, () -> serializer);
+    }
+
+    public void registerCustomTagEntrySerializerOverride(String namespace, String identifier, Supplier<CustomTagEntrySerializer<?>> serializer){
+        this.addEntry(Registries.CUSTOM_TAG_ENTRY_SERIALIZERS, namespace, identifier, serializer);
+    }
+
+    public void registerCustomTagEntrySerializerOverride(String namespace, String identifier, CustomTagEntrySerializer<?> serializer){
+        this.addEntry(Registries.CUSTOM_TAG_ENTRY_SERIALIZERS, namespace, identifier, () -> serializer);
+    }
+
+    public void registerCustomTagEntrySerializerCallback(Consumer<Helper<CustomTagEntrySerializer<?>>> callback){
+        this.addCallback(Registries.CUSTOM_TAG_ENTRY_SERIALIZERS, callback);
     }
 
     private <T> void addEntry(Registries.Registry<T> registry, String identifier, Supplier<T> entry){

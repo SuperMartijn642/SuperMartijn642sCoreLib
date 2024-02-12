@@ -5,6 +5,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.data.TagLoader;
+import com.supermartijn642.core.data.tag.CustomTagEntries;
+import com.supermartijn642.core.data.tag.CustomTagEntry;
+import com.supermartijn642.core.data.tag.entries.ElementTagEntry;
+import com.supermartijn642.core.data.tag.entries.TagTagEntry;
 import com.supermartijn642.core.generator.aggregator.ResourceAggregator;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
@@ -61,31 +65,12 @@ public abstract class TagGenerator extends ResourceGenerator {
             json.addProperty("replace", tag.replace);
             // Entries & references
             JsonArray entries = new JsonArray();
-            tag.entries.forEach(entries::add);
-            tag.references.stream().map(ResourceLocation::toString).map(s -> "#" + s).forEach(entries::add);
-            tag.optionalEntries.stream().map(e -> {
-                JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("id", e);
-                jsonObject.addProperty("required", false);
-                return jsonObject;
-            }).forEach(entries::add);
-            tag.optionalReferences.stream().map(e -> {
-                JsonObject entryObject = new JsonObject();
-                entryObject.addProperty("id", "#" + e);
-                entryObject.addProperty("required", false);
-                return entryObject;
-            }).forEach(entries::add);
-            if(entries.size() > 0 || tag.remove.isEmpty())
+            tag.entries.forEach(entry -> entries.add(CustomTagEntries.serialize(entry)));
+            if(entries.size() == 0 || tag.remove.isEmpty())
                 json.add("values", entries);
             // Removed
             JsonArray removedEntries = new JsonArray();
-            tag.remove.forEach(removedEntries::add);
-            tag.optionalRemove.stream().map(e -> {
-                JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("id", e);
-                jsonObject.addProperty("required", false);
-                return jsonObject;
-            }).forEach(entries::add);
+            tag.remove.forEach(entry -> removedEntries.add(CustomTagEntries.serialize(entry)));
             if(removedEntries.size() > 0)
                 json.add("remove", removedEntries);
 
@@ -110,7 +95,10 @@ public abstract class TagGenerator extends ResourceGenerator {
             // Loop over all tags
             for(TagBuilder<?> tag : registryEntry.getValue().values()){
                 // Validate tag references
-                for(ResourceLocation reference : tag.references){
+                for(CustomTagEntry entry : tag.entries){
+                    if(!(entry instanceof TagTagEntry))
+                        continue;
+                    ResourceLocation reference = ((TagTagEntry)entry).getTagIdentifier();
                     if(registryEntry.getValue().containsKey(reference))
                         continue;
                     if(TagLoader.getTag(registryEntry.getKey(), reference) != null)
@@ -292,12 +280,8 @@ public abstract class TagGenerator extends ResourceGenerator {
 
         private final Registries.Registry<T> registry;
         protected final ResourceLocation identifier;
-        private final Set<String> entries = new HashSet<>();
-        private final Set<String> optionalEntries = new HashSet<>();
-        private final Set<ResourceLocation> references = new HashSet<>();
-        private final Set<String> optionalReferences = new HashSet<>();
-        private final Set<String> remove = new HashSet<>();
-        private final Set<String> optionalRemove = new HashSet<>();
+        private final Set<CustomTagEntry> entries = new HashSet<>();
+        private final Set<CustomTagEntry> remove = new HashSet<>();
         private boolean replace;
 
         protected TagBuilder(Registries.Registry<T> registry, ResourceLocation identifier){
@@ -326,7 +310,7 @@ public abstract class TagGenerator extends ResourceGenerator {
          * @param entry entry to be added
          */
         public TagBuilder<T> add(T entry){
-            this.entries.add(this.registry.getIdentifier(entry).toString());
+            this.entries.add(new ElementTagEntry(this.registry.getIdentifier(entry), true));
             return this;
         }
 
@@ -338,7 +322,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!this.registry.hasIdentifier(entry))
                 throw new RuntimeException("Could not find any object registered under '" + entry + "'!");
 
-            this.entries.add(entry.toString());
+            this.entries.add(new ElementTagEntry(entry, true));
             return this;
         }
 
@@ -374,7 +358,7 @@ public abstract class TagGenerator extends ResourceGenerator {
          * @param entry entry to be added
          */
         public TagBuilder<T> addOptional(T entry){
-            this.optionalEntries.add(this.registry.getIdentifier(entry).toString());
+            this.entries.add(new ElementTagEntry(this.registry.getIdentifier(entry), false));
             return this;
         }
 
@@ -383,7 +367,7 @@ public abstract class TagGenerator extends ResourceGenerator {
          * @param entry entry to be added
          */
         public TagBuilder<T> addOptional(ResourceLocation entry){
-            this.optionalEntries.add(entry.toString());
+            this.entries.add(new ElementTagEntry(entry, false));
             return this;
         }
 
@@ -415,13 +399,22 @@ public abstract class TagGenerator extends ResourceGenerator {
         }
 
         /**
+         * Adds an optional custom entry to this tag.
+         * @param entry entry to be added
+         */
+        public TagBuilder<T> addOptional(CustomTagEntry entry){
+            this.entries.add(entry);
+            return this;
+        }
+
+        /**
          * Adds a reference to the given tag.
          */
         public TagBuilder<T> addReference(ResourceLocation tag){
             if(this.identifier.equals(tag))
                 throw new IllegalArgumentException("Cannot add self reference to tag '" + tag + "'!");
 
-            this.references.add(tag);
+            this.entries.add(new TagTagEntry(tag, true));
             return this;
         }
 
@@ -456,7 +449,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(this.identifier.equals(tag))
                 throw new IllegalArgumentException("Cannot add self reference to tag '" + tag + "'!");
 
-            this.optionalReferences.add(tag.toString());
+            this.entries.add(new TagTagEntry(tag, false));
             return this;
         }
 
@@ -489,7 +482,7 @@ public abstract class TagGenerator extends ResourceGenerator {
          * @param entry entry to be removed
          */
         public TagBuilder<T> remove(T entry){
-            this.remove.add(this.registry.getIdentifier(entry).toString());
+            this.remove.add(new ElementTagEntry(this.registry.getIdentifier(entry), true));
             return this;
         }
 
@@ -501,7 +494,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!this.registry.hasIdentifier(entry))
                 throw new RuntimeException("Could not find any object registered under '" + entry + "'!");
 
-            this.remove.add(entry.toString());
+            this.remove.add(new ElementTagEntry(entry, true));
             return this;
         }
 
@@ -545,7 +538,7 @@ public abstract class TagGenerator extends ResourceGenerator {
          * @param entry entry to be removed
          */
         public TagBuilder<T> removeOptional(ResourceLocation entry){
-            this.optionalRemove.add(entry.toString());
+            this.remove.add(new ElementTagEntry(entry, false));
             return this;
         }
 
@@ -578,11 +571,7 @@ public abstract class TagGenerator extends ResourceGenerator {
 
         private void addAll(TagBuilder<T> other){
             this.entries.addAll(other.entries);
-            this.optionalEntries.addAll(other.optionalEntries);
-            this.references.addAll(other.references);
-            this.optionalReferences.addAll(other.optionalReferences);
             this.remove.addAll(other.remove);
-            this.optionalRemove.addAll(other.optionalRemove);
         }
     }
 }

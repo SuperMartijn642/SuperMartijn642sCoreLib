@@ -1,10 +1,9 @@
 package com.supermartijn642.core.data;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import com.supermartijn642.core.CoreLib;
+import com.supermartijn642.core.data.tag.CustomTagEntries;
+import com.supermartijn642.core.data.tag.CustomTagEntry;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.util.ResourceLocation;
@@ -41,9 +40,11 @@ public class TagLoader {
     }
 
     public static void loadTags(){
+        for(Registries.Registry<?> registry : TAG_TYPES.values())
+            TAGS.put(registry, new HashMap<>());
         Loader.instance().getActiveModList().forEach(TagLoader::loadTags);
-        CoreLib.LOGGER.info("Loaded '" + TAGS.getOrDefault(Registries.BLOCKS, Collections.emptyMap()).keySet().size() + "' block tags");
-        CoreLib.LOGGER.info("Loaded '" + TAGS.getOrDefault(Registries.ITEMS, Collections.emptyMap()).keySet().size() + "' item tags");
+        CoreLib.LOGGER.info("Loaded '" + TAGS.get(Registries.BLOCKS).keySet().size() + "' block tags");
+        CoreLib.LOGGER.info("Loaded '" + TAGS.get(Registries.ITEMS).keySet().size() + "' item tags");
     }
 
     private static void loadTags(ModContainer mod){
@@ -60,7 +61,7 @@ public class TagLoader {
 
             if(source.isFile()){
                 try{
-                    fs = FileSystems.newFileSystem(source.toPath(), (ClassLoader)null);
+                    fs = FileSystems.newFileSystem(source.toPath(), null);
                     root = fs.getPath("/data");
                 }catch(IOException e){
                     CoreLib.LOGGER.error("Error loading FileSystem from jar!", e);
@@ -80,31 +81,30 @@ public class TagLoader {
                 namespaceFolders = stream.filter(Predicate.isEqual(root).negate()).collect(Collectors.toList());
             }
 
-            // Now go through all namespaces
-            for(Path namespaceFolder : namespaceFolders){
-                if(!Files.isDirectory(namespaceFolder))
-                    continue;
+            // Go over the different registry types
+            for(Map.Entry<String,Registries.Registry<?>> tagType : TAG_TYPES.entrySet()){
+                // Keep track of the entries per tag
+                Map<ResourceLocation,List<CustomTagEntry>> entries = new HashMap<>();
+                Map<ResourceLocation,List<CustomTagEntry>> removeEntries = new HashMap<>();
 
-                String fileName = namespaceFolder.getFileName().toString();
-                String namespace = fileName.endsWith("/") ? fileName.substring(0, fileName.length() - 1) : fileName;
-                if(!RegistryUtil.isValidNamespace(namespace))
-                    continue;
+                // First, go through all folder and read all tags
+                for(Path namespaceFolder : namespaceFolders){
+                    if(!Files.isDirectory(namespaceFolder))
+                        continue;
 
-                // Find the 'tags' folder
-                Path tagsFolder = namespaceFolder.resolve("tags");
-                if(!Files.exists(tagsFolder) || !Files.isDirectory(tagsFolder))
-                    continue;
+                    String fileName = namespaceFolder.getFileName().toString();
+                    String namespace = fileName.endsWith("/") ? fileName.substring(0, fileName.length() - 1) : fileName;
+                    if(!RegistryUtil.isValidNamespace(namespace))
+                        continue;
 
-                // Go over the different registry types
-                for(Map.Entry<String,Registries.Registry<?>> tagType : TAG_TYPES.entrySet()){
+                    // Find the 'tags' folder
+                    Path tagsFolder = namespaceFolder.resolve("tags");
+                    if(!Files.exists(tagsFolder) || !Files.isDirectory(tagsFolder))
+                        continue;
+
                     Path tagTypeFolder = tagsFolder.resolve(tagType.getKey());
                     if(!Files.exists(tagTypeFolder) || !Files.isDirectory(tagTypeFolder))
                         continue;
-
-                    // Keep track of references to other tags
-                    Map<ResourceLocation,Set<ResourceLocation>> references = new HashMap<>();
-                    Map<ResourceLocation,Set<ResourceLocation>> optionalReferences = new HashMap<>();
-                    Map<ResourceLocation,Set<ResourceLocation>> removeEntries = new HashMap<>();
 
                     // Now walk through all files in the folder to find jsons
                     try(Stream<Path> paths = Files.walk(tagTypeFolder)){
@@ -122,34 +122,44 @@ public class TagLoader {
                                 }
 
                                 ResourceLocation fullIdentifier = new ResourceLocation(namespace, identifier);
-                                readTagFile(mod, fullIdentifier, path, tagType.getKey(), tagType.getValue(), references.computeIfAbsent(fullIdentifier, f -> new HashSet<>()), optionalReferences.computeIfAbsent(fullIdentifier, f -> new HashSet<>()), removeEntries.computeIfAbsent(fullIdentifier, f -> new HashSet<>()));
+                                readTagFile(mod, fullIdentifier, path, tagType.getKey(), tagType.getValue(), entries.computeIfAbsent(fullIdentifier, f -> new ArrayList<>()), removeEntries.computeIfAbsent(fullIdentifier, f -> new ArrayList<>()));
                             }
                         );
                     }
+                }
 
-                    // Apply references TODO maybe move this to after all mods are done, depending on behaviour in 1.14+
-                    loop:
-                    for(Map.Entry<ResourceLocation,Set<ResourceLocation>> entry : references.entrySet()){
-                        for(ResourceLocation reference : entry.getValue()){
-                            if(!TAGS.get(tagType.getValue()).containsKey(reference)){
-                                CoreLib.LOGGER.warn("Tag file '" + reference.getResourceDomain() + ":" + tagType.getKey() + "/" + reference.getResourcePath() + ".json' from mod '" + mod.getName() + "' references unknown tag '" + reference + "'!");
-                                TAGS.get(tagType.getValue()).get(entry.getKey()).clear();
-                                continue loop;
-                            }
-
-                            TAGS.get(tagType.getValue()).get(entry.getKey()).addAll(TAGS.get(tagType.getValue()).get(reference));
-                        }
-                    }
-                    for(Map.Entry<ResourceLocation,Set<ResourceLocation>> entry : optionalReferences.entrySet()){
-                        for(ResourceLocation reference : entry.getValue()){
-                            if(TAGS.get(tagType.getValue()).containsKey(reference))
-                                TAGS.get(tagType.getValue()).get(entry.getKey()).addAll(TAGS.get(tagType.getValue()).get(reference));
-                        }
+                // Finally, resolve the tags
+                Stack<ResourceLocation> dependencyStack = new Stack<>();
+                //noinspection unchecked
+                Registries.Registry<Object> registry = (Registries.Registry<Object>)tagType.getValue();
+                CustomTagEntry.TagEntryResolutionContext<Object> entryResolutionContext = new CustomTagEntry.TagEntryResolutionContext<Object>() {
+                    @Override
+                    public Object getElement(ResourceLocation identifier){
+                        return registry.getValue(identifier);
                     }
 
-                    // Apply remove entries
-                    for(Map.Entry<ResourceLocation,Set<ResourceLocation>> entry : removeEntries.entrySet())
-                        TAGS.get(tagType.getValue()).get(entry.getKey()).removeAll(entry.getValue());
+                    @Override
+                    public Collection<Object> getTag(ResourceLocation identifier){
+                        return TAGS.get(registry).get(identifier).stream().map(registry::getValue).collect(Collectors.toList());
+                    }
+
+                    @Override
+                    public Collection<Object> getAllElements(){
+                        return registry.getValues();
+                    }
+
+                    @Override
+                    public Set<ResourceLocation> getAllIdentifiers(){
+                        return registry.getIdentifiers();
+                    }
+                };
+                while(!entries.isEmpty()){
+                    ResourceLocation tag = entries.keySet().stream().findAny().get();
+                    try{
+                        resolve(tag, entries, removeEntries, dependencyStack, registry, entryResolutionContext, mod);
+                    }catch(JsonParseException e){
+                        CoreLib.LOGGER.error(e);
+                    }
                 }
             }
         }catch(IOException e){
@@ -159,7 +169,7 @@ public class TagLoader {
         }
     }
 
-    private static void readTagFile(ModContainer mod, ResourceLocation identifier, Path file, String registryName, Registries.Registry<?> registry, Set<ResourceLocation> references, Set<ResourceLocation> optionalReferences, Set<ResourceLocation> removeEntries){
+    private static void readTagFile(ModContainer mod, ResourceLocation identifier, Path file, String registryName, Registries.Registry<?> registry, Collection<CustomTagEntry> entries, Collection<CustomTagEntry> removeEntries){
         // Read the file contents as a json object
         JsonObject json;
         try(Reader reader = new InputStreamReader(Files.newInputStream(file), StandardCharsets.UTF_8)){
@@ -172,147 +182,96 @@ public class TagLoader {
         }
 
         // Add the tag if not present, do this here to prevent other tags referencing this from throwing an error
-        Set<ResourceLocation> tagEntries = TAGS.computeIfAbsent(registry, r -> new HashMap<>()).computeIfAbsent(identifier, i -> new HashSet<>());
+        Set<ResourceLocation> tagEntries = TAGS.get(registry).computeIfAbsent(identifier, i -> new HashSet<>());
 
         try{
             // Check for replace flag
-            if(json.has("required") && (!json.get("required").isJsonPrimitive() || !json.get("required").getAsJsonPrimitive().isBoolean()))
+            if(json.has("replace") && (!json.get("replace").isJsonPrimitive() || !json.get("replace").getAsJsonPrimitive().isBoolean()))
                 throw new RuntimeException("'replace' must be a boolean!");
             boolean replace = json.has("replace") && json.get("replace").getAsBoolean();
             if(replace)
                 tagEntries.clear();
 
             // Read the 'values' array
-            List<String> entries = new ArrayList<>();
-            List<String> optionalEntries = new ArrayList<>();
             if(json.has("values")){
                 if(!json.get("values").isJsonArray())
                     throw new RuntimeException("'values' must be an array!");
 
                 // Loop over the entries in 'values'
                 json.get("values").getAsJsonArray().forEach(
-                    element -> {
-                        if(element.isJsonObject()){
-                            JsonObject object = element.getAsJsonObject();
-                            if(!object.has("id") || !object.get("id").isJsonPrimitive() || !object.get("id").getAsJsonPrimitive().isString())
-                                throw new RuntimeException("Entries in 'values' must contain key 'id'!");
-                            if(object.has("required") && (!object.get("required").isJsonPrimitive() || !object.get("required").getAsJsonPrimitive().isBoolean()))
-                                throw new RuntimeException("Key 'required' for entries in 'values' must be a boolean!");
-
-                            if(!object.has("required") || object.get("required").getAsBoolean())
-                                entries.add(element.getAsJsonObject().get("id").getAsString());
-                            else
-                                optionalEntries.add(element.getAsJsonObject().get("id").getAsString());
-                        }else if(element.isJsonPrimitive() && element.getAsJsonPrimitive().isString())
-                            entries.add(element.getAsString());
-                        else
-                            throw new RuntimeException("'values' must only contain objects and strings!");
-                    }
+                    element -> entries.add(CustomTagEntries.deserialize(element))
                 );
             }
 
-            // Move values starting with '#' into references
-            List<String> rawReferences = new ArrayList<>();
-            entries.stream().filter(s -> s.charAt(0) == '#').map(s -> s.substring(1)).forEach(rawReferences::add);
-            entries.removeIf(s -> s.charAt(0) == '#');
-            List<String> rawOptionalReferences = new ArrayList<>();
-            optionalEntries.stream().filter(s -> s.charAt(0) == '#').map(s -> s.substring(1)).forEach(rawOptionalReferences::add);
-            optionalEntries.removeIf(s -> s.charAt(0) == '#');
-
             // Read the 'remove' array
-            List<String> remove = new ArrayList<>();
-            List<String> optionalRemove = new ArrayList<>();
             if(json.has("remove")){
                 if(!json.get("remove").isJsonArray())
                     throw new RuntimeException("'remove' must be an array!");
 
                 // Loop over the entries in 'remove'
                 json.get("remove").getAsJsonArray().forEach(
-                    element -> {
-                        if(element.isJsonObject()){
-                            JsonObject object = element.getAsJsonObject();
-                            if(!object.has("id") || !object.get("id").isJsonPrimitive() || !object.get("id").getAsJsonPrimitive().isString())
-                                throw new RuntimeException("Entries in 'remove' must contain key 'id'!");
-                            if(object.has("required") && (!object.get("required").isJsonPrimitive() || !object.get("required").getAsJsonPrimitive().isBoolean()))
-                                throw new RuntimeException("Key 'required' for entries in 'remove' must be a boolean!");
-
-                            if(!object.has("required") || object.get("required").getAsBoolean())
-                                remove.add(element.getAsJsonObject().get("id").getAsString());
-                            else
-                                optionalRemove.add(element.getAsJsonObject().get("id").getAsString());
-                        }else if(element.isJsonPrimitive() && element.getAsJsonPrimitive().isString())
-                            remove.add(element.getAsString());
-                        else
-                            throw new RuntimeException("'remove' must only contain objects and strings!");
-                    }
+                    element -> removeEntries.add(CustomTagEntries.deserialize(element))
                 );
-            }
-
-            // Validate entries
-            for(String entry : entries){
-                if(!RegistryUtil.isValidIdentifier(entry))
-                    throw new RuntimeException("'values' entry '" + entry + "' is not a valid identifier!");
-
-                ResourceLocation entryIdentifier = new ResourceLocation(entry);
-                if(!registry.hasIdentifier(entryIdentifier))
-                    throw new RuntimeException("Could not find a registered object for 'values' entry '" + entryIdentifier + "'!");
-
-                tagEntries.add(entryIdentifier);
-            }
-
-            // Add optional entries
-            for(String entry : optionalEntries){
-                if(!RegistryUtil.isValidIdentifier(entry))
-                    throw new RuntimeException("'values' optional entry '" + entry + "' is not a valid identifier!");
-
-                ResourceLocation entryIdentifier = new ResourceLocation(entry);
-                if(registry.hasIdentifier(entryIdentifier))
-                    tagEntries.add(entryIdentifier);
-            }
-
-            // Add references
-            for(String reference : rawReferences){
-                if(!RegistryUtil.isValidIdentifier(reference))
-                    throw new RuntimeException("'values' reference '#" + reference + "' is not a valid identifier!");
-
-                references.add(new ResourceLocation(reference));
-            }
-
-            // Add optional references
-            for(String reference : rawOptionalReferences){
-                if(!RegistryUtil.isValidIdentifier(reference))
-                    throw new RuntimeException("'values' reference '#" + reference + "' is not a valid identifier!");
-
-                optionalReferences.add(new ResourceLocation(reference));
-            }
-
-            // Validate remove entries
-            for(String entry : remove){
-                if(!RegistryUtil.isValidIdentifier(entry))
-                    throw new RuntimeException("'remove' entry '" + entry + "' is not a valid identifier!");
-
-                ResourceLocation entryIdentifier = new ResourceLocation(entry);
-                if(!registry.hasIdentifier(entryIdentifier))
-                    throw new RuntimeException("Could not find a registered object for 'remove' entry '" + entryIdentifier + "'!");
-
-                removeEntries.add(entryIdentifier);
-            }
-
-            // Add optional remove entries
-            for(String entry : optionalRemove){
-                if(!RegistryUtil.isValidIdentifier(entry))
-                    throw new RuntimeException("'remove' optional entry '" + entry + "' is not a valid identifier!");
-
-                ResourceLocation entryIdentifier = new ResourceLocation(entry);
-                if(registry.hasIdentifier(entryIdentifier))
-                    removeEntries.add(entryIdentifier);
             }
         }catch(Exception e){
             CoreLib.LOGGER.error("Encountered exception in tag json '" + identifier.getResourceDomain() + ":" + registryName + "/" + identifier.getResourcePath() + ".json' in mod '" + mod.getName() + "'!", e);
             tagEntries.clear();
-            references.clear();
-            optionalReferences.clear();
+            entries.clear();
+            removeEntries.clear();
         }
+    }
+
+    private static <T> void resolve(ResourceLocation tagIdentifier, Map<ResourceLocation,List<CustomTagEntry>> entries, Map<ResourceLocation,List<CustomTagEntry>> removeEntries, Stack<ResourceLocation> dependencyStack, Registries.Registry<T> registry, CustomTagEntry.TagEntryResolutionContext<T> entryResolutionContext, ModContainer mod){
+        // Check for circular dependencies
+        if(dependencyStack.contains(tagIdentifier)){
+            TAGS.get(registry).get(tagIdentifier).clear();
+            entries.remove(tagIdentifier);
+            removeEntries.remove(tagIdentifier);
+            throw new JsonParseException("Mod " + mod.getName() + " has contains a circular tag dependency: " + dependencyStack.stream().map(ResourceLocation::toString).map(s -> "'" + s + "'").collect(Collectors.joining(" -> ")));
+        }
+        dependencyStack.push(tagIdentifier);
+
+        // Resolve dependencies first
+        try{
+            for(Map.Entry<ResourceLocation,List<CustomTagEntry>> tag : entries.entrySet()){
+                for(CustomTagEntry entry : tag.getValue()){
+                    Set<ResourceLocation> dependencies = new HashSet<>(entry.getTagDependencies());
+                    for(ResourceLocation dependency : dependencies){
+                        if(entries.containsKey(dependency))
+                            resolve(dependency, entries, removeEntries, dependencyStack, registry, entryResolutionContext, mod);
+                    }
+                }
+            }
+        }catch(Exception e){
+            TAGS.get(registry).get(tagIdentifier).clear();
+            entries.remove(tagIdentifier);
+            removeEntries.remove(tagIdentifier);
+            dependencyStack.pop();
+            throw e;
+        }
+
+        try{
+            // Add elements
+            for(CustomTagEntry entry : entries.get(tagIdentifier)){
+                Collection<T> elements = entry.resolve(entryResolutionContext);
+                if(elements != null)
+                    TAGS.get(registry).get(tagIdentifier).addAll(elements.stream().map(registry::getIdentifier).collect(Collectors.toList()));
+            }
+
+            // Remove elements
+            for(CustomTagEntry entry : removeEntries.get(tagIdentifier)){
+                Collection<T> elements = entry.resolve(entryResolutionContext);
+                if(elements != null)
+                    TAGS.get(registry).get(tagIdentifier).removeAll(elements.stream().map(registry::getIdentifier).collect(Collectors.toList()));
+            }
+        }catch(Exception e){
+            CoreLib.LOGGER.error("Encountered exception in tag json '" + tagIdentifier.getResourceDomain() + ":" + registry.getRegistryIdentifier().getResourcePath() + "/" + tagIdentifier.getResourcePath() + ".json' in mod '" + mod.getName() + "'!", e);
+            TAGS.get(registry).get(tagIdentifier).clear();
+        }
+
+        entries.remove(tagIdentifier);
+        removeEntries.remove(tagIdentifier);
+        dependencyStack.pop();
     }
 
     public static Set<ResourceLocation> getTag(Registries.Registry<?> registry, ResourceLocation identifier){
