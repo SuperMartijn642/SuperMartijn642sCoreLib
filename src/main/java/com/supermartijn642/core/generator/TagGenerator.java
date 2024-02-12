@@ -19,6 +19,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * Created 05/08/2022 by SuperMartijn642
@@ -342,7 +343,7 @@ public abstract class TagGenerator extends ResourceGenerator {
          * @param entry entry to be added
          */
         public TagBuilder<T> add(T entry){
-            this.entries.add(new Tag.ListEntry<>(Collections.singleton(this.registry.getIdentifier(entry))));
+            this.entries.add(new Tag.ListEntry<>(Collections.singleton(entry)));
             return this;
         }
 
@@ -354,7 +355,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!this.registry.hasIdentifier(entry))
                 throw new RuntimeException("Could not find any object registered under '" + entry + "'!");
 
-            this.entries.add(new Tag.ListEntry<>(Collections.singleton(entry)));
+            this.add(this.registry.getValue(entry));
             return this;
         }
 
@@ -390,7 +391,7 @@ public abstract class TagGenerator extends ResourceGenerator {
          * @param entry entry to be added
          */
         public TagBuilder<T> addOptional(T entry){
-            this.optional.add(new Tag.ListEntry<>(Collections.singleton(this.registry.getIdentifier(entry))));
+            this.optional.add(new Tag.ListEntry<>(Collections.singleton(entry)));
             return this;
         }
 
@@ -399,7 +400,17 @@ public abstract class TagGenerator extends ResourceGenerator {
          * @param entry entry to be added
          */
         public TagBuilder<T> addOptional(ResourceLocation entry){
-            this.optional.add(new Tag.ListEntry<>(Collections.singleton(entry)));
+            this.optional.add(new Tag.ITagEntry<Object>() {
+                @Override
+                public void build(Collection<Object> collection){
+                    throw new AssertionError();
+                }
+
+                @Override
+                public void serializeTo(JsonArray array, Function<Object,ResourceLocation> elementIdentifier){
+                    array.add(entry.toString());
+                }
+            });
             return this;
         }
 
@@ -528,7 +539,7 @@ public abstract class TagGenerator extends ResourceGenerator {
          * @param entry entry to be removed
          */
         public TagBuilder<T> remove(T entry){
-            this.remove.add(new Tag.ListEntry<>(Collections.singleton(this.registry.getIdentifier(entry))));
+            this.remove.add(new Tag.ListEntry<>(Collections.singleton(entry)));
             return this;
         }
 
@@ -540,7 +551,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!this.registry.hasIdentifier(entry))
                 throw new RuntimeException("Could not find any object registered under '" + entry + "'!");
 
-            this.remove.add(new Tag.ListEntry<>(Collections.singleton(entry)));
+            this.remove.add(new Tag.ListEntry<>(Collections.singleton(this.registry.getValue(entry))));
             return this;
         }
 
@@ -584,7 +595,18 @@ public abstract class TagGenerator extends ResourceGenerator {
          * @param entry entry to be removed
          */
         public TagBuilder<T> removeOptional(ResourceLocation entry){
-            return this.remove(entry); // All remove entries are treated as optional in 1.14
+            this.remove.add(new Tag.ITagEntry<Object>() {
+                @Override
+                public void build(Collection<Object> collection){
+                    throw new AssertionError();
+                }
+
+                @Override
+                public void serializeTo(JsonArray array, Function<Object,ResourceLocation> elementIdentifier){
+                    array.add(entry.toString());
+                }
+            });
+            return this;
         }
 
         /**
