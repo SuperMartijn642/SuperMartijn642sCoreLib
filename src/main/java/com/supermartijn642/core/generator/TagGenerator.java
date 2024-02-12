@@ -113,7 +113,7 @@ public abstract class TagGenerator extends ResourceGenerator {
 
     private static String getTagDirectoryName(Registries.Registry<?> registry){
         return "tags/" + TAG_DIRECTORIES.computeIfAbsent(registry, r -> {
-            String folder = ((ForgeRegistry<?>)r).getTagFolder();
+            String folder = ((ForgeRegistry<?>)r.getForgeRegistry()).getTagFolder();
             if(folder != null && folder.startsWith("tags/"))
                 folder = folder.substring("tags/".length());
             return folder;
