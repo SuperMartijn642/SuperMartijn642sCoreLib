@@ -27,6 +27,7 @@
     "LootPoolSerializerMixin",
     "MinMaxBoundsMixin",
     "NBTPredicateMixin",
+    "NetworkRegistryMixin",
     "OredictItemPredicateMixin",
     "OreIngredientMixin",
     "PlayerEntityMixin",
