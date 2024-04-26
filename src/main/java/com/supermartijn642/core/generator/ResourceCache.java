@@ -11,8 +11,6 @@ import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.generator.aggregator.ResourceAggregator;
 import com.supermartijn642.core.registry.RegistryUtil;
 import com.supermartijn642.core.util.Pair;
-import net.fabricmc.fabric.impl.resource.loader.FabricModResourcePack;
-import net.fabricmc.fabric.impl.resource.loader.GroupResourcePack;
 import net.fabricmc.fabric.impl.resource.loader.ModNioResourcePack;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -26,13 +24,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -117,25 +113,6 @@ public abstract class ResourceCache {
     @ApiStatus.Internal
     public static class HashCacheWrapper extends ResourceCache {
 
-        private static final Function<GroupResourcePack,List<PackResources>> groupResourcePackPacks;
-
-        static{
-            try{
-                Field field = GroupResourcePack.class.getDeclaredField("packs");
-                field.setAccessible(true);
-                groupResourcePackPacks = pack -> {
-                    try{
-                        //noinspection unchecked
-                        return (List<PackResources>)field.get(pack);
-                    }catch(IllegalAccessException e){
-                        throw new RuntimeException(e);
-                    }
-                };
-            }catch(NoSuchFieldException e){
-                throw new RuntimeException(e);
-            }
-        }
-
         private final Map<Path,HashCode> presentFiles = new HashMap<>();
         private final Map<Path,HashCode> writtenFiles = new HashMap<>();
         private final Map<Path,Pair<ResourceAggregator<Object,Object>,Object>> aggregatedResources = new HashMap<>();
@@ -162,23 +139,9 @@ public abstract class ResourceCache {
                 ModContainer container = FabricLoader.getInstance().getModContainer(modFilter).orElse(null);
                 if(container == null)
                     throw new RuntimeException("Property 'fabric-api.datagen.modid' is set to unknown modid '" + modFilter + "'!");
-                // Map the grouped fabric resource pack to all the individual mods' resource packs
-                this.otherResourcePacks.addAll(
-                    this.otherResourcePacks.stream()
-                        .filter(pack -> pack instanceof FabricModResourcePack)
-                        .map(FabricModResourcePack.class::cast)
-                        .map(groupResourcePackPacks)
-                        .flatMap(List::stream)
-                        .collect(Collectors.toList())
-                );
-                this.otherResourcePacks.removeIf(pack -> pack instanceof FabricModResourcePack);
                 // Remove the resource pack for the datagen mod
-                this.otherResourcePacks.removeAll(
-                    this.otherResourcePacks.stream()
-                        .filter(pack -> pack instanceof ModNioResourcePack)
-                        .map(ModNioResourcePack.class::cast)
-                        .filter(pack -> pack.getFabricModMetadata() == container.getMetadata())
-                        .collect(Collectors.toList())
+                this.otherResourcePacks.removeIf(pack ->
+                    pack instanceof ModNioResourcePack && ((ModNioResourcePack)pack).getFabricModMetadata() == container.getMetadata()
                 );
             }else
                 CoreLib.LOGGER.warn("The 'fabric-api.datagen.modid' property has not been set! The resource cache may wrongly identify previously generated files as existing files!");
