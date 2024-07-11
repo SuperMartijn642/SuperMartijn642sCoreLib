@@ -1,24 +1,15 @@
-buildscript {
-    repositories {
-        maven { url = "https://files.minecraftforge.net/maven" }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "5.1.+", changing: true
-        classpath "org.spongepowered:mixingradle:0.7.+"
-    }
-}
 plugins {
+    id "eclipse"
+    id "idea"
+    id "net.minecraftforge.gradle" version "6.0.25"
+    id "org.spongepowered.mixin" version "0.7.+"
     id "com.matthewprenger.cursegradle" version "1.4.0"
     id "com.modrinth.minotaur" version "2.+"
 }
-apply plugin: "net.minecraftforge.gradle"
-apply plugin: "eclipse"
-apply plugin: "org.spongepowered.mixin"
 
 version = project.mod_version + "-forge-" + project.minecraft_suffix
 group = project.maven_group
-archivesBaseName = project.mod_id
+base.archivesName = project.mod_id
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(project.java_target)
 
@@ -66,8 +57,8 @@ minecraft {
     accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
 
     runs {
-        client {
-            workingDirectory project.file("run")
+        configureEach {
+            workingDirectory project.file('run')
 
             property "forge.logging.markers", "REGISTRIES"
 
@@ -75,42 +66,20 @@ minecraft {
                 supermartijn642corelib {
                     source sourceSets.main
                 }
-                corelibtestmod {
-                    source sourceSets.test
-                }
+//                corelibtestmod {
+//                    source sourceSets.test
+//                }
             }
+        }
+
+        client {
         }
 
         server {
-            workingDirectory project.file("run")
-
-            property "forge.logging.markers", "REGISTRIES"
-
-            mods {
-                supermartijn642corelib {
-                    source sourceSets.main
-                }
-                corelibtestmod {
-                    source sourceSets.test
-                }
-            }
         }
 
         data {
-            workingDirectory project.file("run")
-
-            property "forge.logging.markers", "REGISTRIES"
-
             args "--mod", project.mod_id, "--all", "--output", file("src/generated/resources/"), "--existing", file("$buildDir/data_resources")
-
-            mods {
-                supermartijn642corelib {
-                    source sourceSets.main
-                }
-                corelibtestmod {
-                    source sourceSets.test
-                }
-            }
         }
     }
 }
@@ -124,19 +93,21 @@ mixin {
     debug.export = true
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
     group = "documentation"
-    classifier = "javadoc"
+    archiveClassifier = "javadoc"
     from javadoc.destinationDir
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
+tasks.register('sourcesJar', Jar) {
+    dependsOn classes
     group = "documentation"
-    classifier = 'sources'
+    archiveClassifier = "sources"
     from sourceSets.main.allSource
 }
 
-task prepareDataResources(type: Sync) {
+tasks.register('prepareDataResources', Sync) {
     from file("src/main/resources")
     into "$buildDir/data_resources"
     inputs.property "version", version
@@ -152,7 +123,7 @@ task prepareDataResources(type: Sync) {
 }
 
 // Run prepareDataResources before prepareRunData
-tasks.whenTaskAdded {
+tasks.configureEach {
     if (it.name == "prepareRunData")
         it.dependsOn "prepareDataResources"
 }
