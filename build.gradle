@@ -1,3 +1,5 @@
+import java.util.regex.Pattern
+
 plugins {
     id "eclipse"
     id "idea"
@@ -52,8 +54,14 @@ sourceSets.each {
 tasks.withType(ProcessResources).configureEach {
     inputs.property "version", project.version
 
+    // Replace the mod version
+    Map<String, ?> copyProperties = project.properties.clone() as Map<String, ?>
+    var matcher = Pattern.compile("[^.0-9]").matcher(copyProperties.mod_version as String)
+    if (matcher.find())
+        copyProperties.mod_version = copyProperties.mod_version.substring(0, matcher.start()) + "+" + copyProperties.mod_version.substring(matcher.start())
+
     filesMatching(["META-INF/mods.toml", "modid.mixins.json", "pack.mcmeta"]) {
-        expand project.properties
+        expand copyProperties
     }
 
     exclude "**/*.pdn"
