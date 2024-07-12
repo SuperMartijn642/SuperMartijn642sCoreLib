@@ -1,5 +1,6 @@
 package com.supermartijn642.core;
 
+import com.supermartijn642.core.block.BaseBlock;
 import com.supermartijn642.core.data.condition.*;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
 import com.supermartijn642.core.data.tag.CustomTagEntries;
@@ -42,6 +43,9 @@ public class CoreLib implements ModInitializer {
 
         // Register custom tag entry types
         handler.registerCustomTagEntrySerializer("namespace", NamespaceTagEntry.SERIALIZER);
+
+        // Register base block tile data component
+        handler.registerDataComponentType("tile_data", BaseBlock.TILE_DATA);
 
         // Register generator for default tags
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));

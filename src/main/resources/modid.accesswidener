@@ -15,11 +15,13 @@ accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerSc
 mutable field net/minecraft/world/inventory/AbstractContainerMenu containerId I # containerId
 # BlockBehaviour
 accessible field net/minecraft/world/level/block/state/BlockBehaviour properties Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties; # properties
-extendable method net/minecraft/world/level/block/state/BlockBehaviour getLootTable ()Lnet/minecraft/resources/ResourceLocation; # getLootTable
+extendable method net/minecraft/world/level/block/state/BlockBehaviour getLootTable ()Lnet/minecraft/resources/ResourceKey; # getLootTable
 # BlockBehaviour$Properties
-accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties drops Lnet/minecraft/resources/ResourceLocation; # drops
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties drops Lnet/minecraft/resources/ResourceKey; # drops
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties soundType Lnet/minecraft/world/level/block/SoundType; # soundType
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties hasCollision Z # hasCollision
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties lightEmission Ljava/util/function/ToIntFunction; # lightEmission
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties isRandomlyTicking Z # isRandomlyTicking
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties isRedstoneConductor Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate; # isRedstoneConductor
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties isSuffocating Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate; # isSuffocating
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties mapColor Ljava/util/function/Function; # mapColor
@@ -84,7 +86,7 @@ accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
 # Player
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
 # RecipeManager
-accessible method net/minecraft/world/item/crafting/RecipeManager fromJson (Lnet/minecraft/resources/ResourceLocation;Lcom/google/gson/JsonObject;)Lnet/minecraft/world/item/crafting/RecipeHolder; # fromJson
+accessible method net/minecraft/world/item/crafting/RecipeManager fromJson (Lnet/minecraft/resources/ResourceLocation;Lcom/google/gson/JsonObject;Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/world/item/crafting/RecipeHolder; # fromJson
 # TagEntry
 accessible field net/minecraft/tags/TagEntry CODEC Lcom/mojang/serialization/Codec;
 accessible field net/minecraft/tags/TagEntry id Lnet/minecraft/resources/ResourceLocation;

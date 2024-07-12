@@ -2,12 +2,15 @@ package com.supermartijn642.core.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.render.RenderWorldEvent;
+import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
@@ -16,30 +19,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LevelRenderer.class)
 public class LevelRendererMixin {
 
-    private PoseStack poseStack;
-    private float partialTicks;
-
-    @ModifyVariable(method = "renderLevel", at = @At("HEAD"))
-    public PoseStack modifyPoseStack(PoseStack poseStack){
-        this.poseStack = poseStack;
-        return poseStack;
-    }
-
-    @ModifyVariable(method = "renderLevel", at = @At("HEAD"))
-    public float modifyPartialTicks(float partialTicks){
-        this.partialTicks = partialTicks;
-        return partialTicks;
-    }
+    @Unique
+    private static final PoseStack POSE_STACK = new PoseStack();
 
     @Inject(method = "renderLevel",
         at = @At(
             value = "INVOKE",
-            target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V"),
-        slice = @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/BlockHitResult;getBlockPos()Lnet/minecraft/core/BlockPos;"),
-            to = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPoseMatrix(Lorg/joml/Matrix4f;)V")
-        ))
-    public void renderLevel(CallbackInfo ci){
-        RenderWorldEvent.EVENT.invoker().accept(new RenderWorldEvent(this.poseStack, this.partialTicks));
+            target = "Lnet/minecraft/client/Options;getCloudsType()Lnet/minecraft/client/CloudStatus;"
+        )
+    )
+    public void renderLevel(float partialTicks, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci){
+        RenderWorldEvent.EVENT.invoker().accept(new RenderWorldEvent(POSE_STACK, partialTicks));
+        if(!POSE_STACK.clear())
+            throw new IllegalStateException("Pose stack was not cleared properly during RenderWorldEvent!");
     }
 }

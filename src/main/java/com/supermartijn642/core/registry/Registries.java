@@ -1,16 +1,15 @@
 package com.supermartijn642.core.registry;
 
 import com.google.common.collect.Lists;
-import com.mojang.serialization.Lifecycle;
-import com.supermartijn642.core.data.condition.ResourceCondition;
-import com.supermartijn642.core.data.condition.ResourceConditionContext;
 import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
+import com.supermartijn642.core.data.condition.ResourceConditions;
 import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
 import com.supermartijn642.core.extensions.CoreLibMappedRegistry;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
-import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -87,22 +86,9 @@ public final class Registries {
     public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZERS = vanilla(RECIPE_SERIALIZER, RecipeSerializer.class, RegistryOverrideHandlers.RECIPE_SERIALIZERS);
     public static final Registry<Attribute> ATTRIBUTES = vanilla(ATTRIBUTE, Attribute.class, RegistryOverrideHandlers.ATTRIBUTES);
     public static final Registry<StatType<?>> STAT_TYPES = vanilla(STAT_TYPE, StatType.class, RegistryOverrideHandlers.STAT_TYPES);
-    public static final Registry<ResourceConditionSerializer<?>> RESOURCE_CONDITION_SERIALIZERS = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "resource_conditions"), ResourceConditionSerializer.class) {
-        @Override
-        public void register(ResourceLocation identifier, ResourceConditionSerializer<?> object){
-            super.register(identifier, object);
-            ResourceConditions.register(identifier, json -> {
-                ResourceCondition condition;
-                try{
-                    condition = object.deserialize(json);
-                }catch(Exception e){
-                    throw new RuntimeException("Encountered exception whilst testing condition '" + identifier + "'!", e);
-                }
-                return condition.test(new ResourceConditionContext());
-            });
-        }
-    };
+    public static final Registry<ResourceConditionSerializer<?>> RESOURCE_CONDITION_SERIALIZERS = new ResourceConditionRegistry(new ResourceLocation("supermartijn642corelib", "resource_conditions"), ResourceConditionSerializer.class);
     public static final Registry<CustomTagEntrySerializer<?>> CUSTOM_TAG_ENTRY_SERIALIZERS = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "custom_tag_entries"), CustomTagEntrySerializer.class);
+    public static final Registry<DataComponentType<?>> DATA_COMPONENT_TYPES = vanilla(DATA_COMPONENT_TYPE, DataComponentType.class, RegistryOverrideHandlers.DATA_COMPONENT_TYPES);
 
     static{
         REGISTRATION_ORDER = Lists.newArrayList(
@@ -138,7 +124,8 @@ public final class Registries {
 
         ResourceLocation getRegistryIdentifier();
 
-        @Nullable net.minecraft.core.Registry<T> getVanillaRegistry();
+        @Nullable
+        net.minecraft.core.Registry<T> getVanillaRegistry();
 
         boolean hasVanillaRegistry();
 
@@ -195,10 +182,8 @@ public final class Registries {
         public void register(ResourceLocation identifier, T object){
             if(this.registry instanceof MappedRegistry<T> && this.registry.containsKey(identifier)){
                 ResourceKey<T> key = ResourceKey.create(this.registry.key(), identifier);
-                T oldObject = this.registry.get(key);
-                int id = this.registry.getId(oldObject);
                 ((CoreLibMappedRegistry)this.registry).supermartijn642corelibSetRegisterOverrides(true, this.overrideConsumer);
-                ((MappedRegistry<T>)this.registry).registerMapping(id, key, object, Lifecycle.stable());
+                ((MappedRegistry<T>)this.registry).register(key, object, RegistrationInfo.BUILT_IN);
                 ((CoreLibMappedRegistry)this.registry).supermartijn642corelibSetRegisterOverrides(false, null);
                 return;
             }
@@ -280,8 +265,6 @@ public final class Registries {
                 throw new RuntimeException("Duplicate registry for identifier '" + identifier + "'!");
             if(this.objectToIdentifier.containsKey(object))
                 throw new RuntimeException("Duplicate registry for object under '" + this.objectToIdentifier.get(object) + "' and '" + identifier + "'!");
-            if(ResourceConditions.get(identifier) != null)
-                throw new RuntimeException("A resource condition with identifier '" + identifier + "' has already been registered to Fabric's registry!");
 
             this.identifierToObject.put(identifier, object);
             this.objectToIdentifier.put(object, identifier);
@@ -323,6 +306,21 @@ public final class Registries {
         @Override
         public Class<T> getValueClass(){
             return this.valueClass;
+        }
+    }
+
+    private static class ResourceConditionRegistry extends MapBackedRegistry<ResourceConditionSerializer<?>> {
+
+        private ResourceConditionRegistry(ResourceLocation identifier, Class<? super ResourceConditionSerializer<?>> valueClass){
+            super(identifier, valueClass);
+        }
+
+        @Override
+        public void register(ResourceLocation identifier, ResourceConditionSerializer<?> object){
+            if(net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions.getConditionType(identifier) != null)
+                throw new RuntimeException("A resource condition with identifier '" + identifier + "' has already been registered to Fabric's registry!");
+            super.register(identifier, object);
+            ResourceConditions.registerFabricResourceCondition(identifier, object);
         }
     }
 }

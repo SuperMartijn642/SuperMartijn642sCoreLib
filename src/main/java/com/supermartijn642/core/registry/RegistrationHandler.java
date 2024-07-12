@@ -5,6 +5,7 @@ import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -410,6 +411,26 @@ public class RegistrationHandler {
 
     public void registerCustomTagEntrySerializerCallback(Consumer<Helper<CustomTagEntrySerializer<?>>> callback){
         this.addCallback(Registries.CUSTOM_TAG_ENTRY_SERIALIZERS, callback);
+    }
+
+    public void registerDataComponentType(String identifier, Supplier<DataComponentType<?>> serializer){
+        this.addEntry(Registries.DATA_COMPONENT_TYPES, identifier, serializer);
+    }
+
+    public void registerDataComponentType(String identifier, DataComponentType<?> serializer){
+        this.addEntry(Registries.DATA_COMPONENT_TYPES, identifier, () -> serializer);
+    }
+
+    public void registerDataComponentTypeOverride(String namespace, String identifier, Supplier<DataComponentType<?>> serializer){
+        this.addEntry(Registries.DATA_COMPONENT_TYPES, namespace, identifier, serializer);
+    }
+
+    public void registerDataComponentTypeOverride(String namespace, String identifier, DataComponentType<?> serializer){
+        this.addEntry(Registries.DATA_COMPONENT_TYPES, namespace, identifier, () -> serializer);
+    }
+
+    public void registerDataComponentTypeCallback(Consumer<Helper<DataComponentType<?>>> callback){
+        this.addCallback(Registries.DATA_COMPONENT_TYPES, callback);
     }
 
     private <T> void addEntry(Registries.Registry<T> registry, String identifier, Supplier<T> entry){

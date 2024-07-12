@@ -9,6 +9,8 @@ import org.jetbrains.annotations.ApiStatus;
  */
 public class ResourceConditionContext {
 
+    public static final ResourceConditionContext EMPTY = new ResourceConditionContext();
+
     @ApiStatus.Internal
     public ResourceConditionContext(){
     }

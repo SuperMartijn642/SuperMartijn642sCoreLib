@@ -2,6 +2,7 @@ package com.supermartijn642.core.mixin;
 
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.extensions.CoreLibDataGenerator;
+import com.supermartijn642.core.generator.ResourceGenerator;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.impl.datagen.FabricDataGenHelper;
@@ -14,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created 25/08/2022 by SuperMartijn642
@@ -38,8 +40,15 @@ public class FabricDataGenHelperMixin {
                 return new EntrypointContainer<DataGeneratorEntrypoint>() {
                     @Override
                     public DataGeneratorEntrypoint getEntrypoint(){
-                        //noinspection DataFlowIssue
-                        return dataGenerator -> ((CoreLibDataGenerator)(Object)dataGenerator).setGeneratorRegistrationHandler(registrationHandler);
+                        return dataGenerator -> {
+                            try{
+                                ResourceGenerator.registryAccess = dataGenerator.getRegistries().get();
+                            }catch(InterruptedException | ExecutionException e){
+                                throw new RuntimeException(e);
+                            }
+                            //noinspection DataFlowIssue
+                            ((CoreLibDataGenerator)(Object)dataGenerator).setGeneratorRegistrationHandler(registrationHandler);
+                        };
                     }
 
                     @Override

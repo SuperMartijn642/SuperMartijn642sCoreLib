@@ -2,10 +2,10 @@ package com.supermartijn642.core.render;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4fStack;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -177,13 +177,13 @@ public class RenderStateConfiguration {
 
         public Builder useViewOffsetZLayering(){
             this.layeringState = new RenderStateEntry(() -> {
-                PoseStack posestack = RenderSystem.getModelViewStack();
-                posestack.pushPose();
-                posestack.scale(0.99975586F, 0.99975586F, 0.99975586F);
+                Matrix4fStack matrixStack = RenderSystem.getModelViewStack();
+                matrixStack.pushMatrix();
+                matrixStack.scale(0.99975586F, 0.99975586F, 0.99975586F);
                 RenderSystem.applyModelViewMatrix();
             }, () -> {
-                PoseStack posestack = RenderSystem.getModelViewStack();
-                posestack.popPose();
+                Matrix4fStack matrixStack = RenderSystem.getModelViewStack();
+                matrixStack.popMatrix();
                 RenderSystem.applyModelViewMatrix();
             });
             return this;
