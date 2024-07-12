@@ -41,12 +41,10 @@ public @interface RegistryEntryAcceptor {
         MOB_EFFECTS(Registries.MOB_EFFECTS),
         SOUND_EVENTS(Registries.SOUND_EVENTS),
         POTIONS(Registries.POTIONS),
-        ENCHANTMENTS(Registries.ENCHANTMENTS),
         ENTITY_TYPES(Registries.ENTITY_TYPES),
         BLOCK_ENTITY_TYPES(Registries.BLOCK_ENTITY_TYPES),
         PARTICLE_TYPES(Registries.PARTICLE_TYPES),
         MENU_TYPES(Registries.MENU_TYPES),
-        PAINTING_VARIANTS(Registries.PAINTING_VARIANTS),
         RECIPE_SERIALIZERS(Registries.RECIPE_SERIALIZERS),
         ATTRIBUTES(Registries.ATTRIBUTES),
         STAT_TYPES(Registries.STAT_TYPES),
@@ -100,7 +98,7 @@ public @interface RegistryEntryAcceptor {
 
                         // Add the field
                         FIELDS.computeIfAbsent(registry.registry, o -> new HashMap<>())
-                            .computeIfAbsent(new ResourceLocation(namespace, identifier), o -> new HashSet<>())
+                            .computeIfAbsent(ResourceLocation.fromNamespaceAndPath(namespace, identifier), o -> new HashSet<>())
                             .add(field);
                     }
                 }catch(NoClassDefFoundError ignored){
@@ -141,7 +139,7 @@ public @interface RegistryEntryAcceptor {
 
                         // Add the method
                         METHODS.computeIfAbsent(registry.registry, o -> new HashMap<>())
-                            .computeIfAbsent(new ResourceLocation(namespace, identifier), o -> new HashSet<>())
+                            .computeIfAbsent(ResourceLocation.fromNamespaceAndPath(namespace, identifier), o -> new HashSet<>())
                             .add(method);
                     }
                 }catch(NoClassDefFoundError ignored){

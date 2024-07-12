@@ -114,8 +114,8 @@ public class RenderUtils {
         shape.forEachEdge((x1, y1, z1, x2, y2, z2) -> {
             Vec3 normal = new Vec3(x2 - x1, y2 - y1, z2 - z1);
             normal.normalize();
-            builder.vertex(matrix, (float)x1, (float)y1, (float)z1).color(red, green, blue, alpha).normal(pose, (float)normal.x, (float)normal.y, (float)normal.z).endVertex();
-            builder.vertex(matrix, (float)x2, (float)y2, (float)z2).color(red, green, blue, alpha).normal(pose, (float)normal.x, (float)normal.y, (float)normal.z).endVertex();
+            builder.addVertex(matrix, (float)x1, (float)y1, (float)z1).setColor(red, green, blue, alpha).setNormal(pose, (float)normal.x, (float)normal.y, (float)normal.z);
+            builder.addVertex(matrix, (float)x2, (float)y2, (float)z2).setColor(red, green, blue, alpha).setNormal(pose, (float)normal.x, (float)normal.y, (float)normal.z);
         });
         renderConfiguration.end(bufferSource);
     }
@@ -133,37 +133,37 @@ public class RenderUtils {
             float minY = (float)box.minY, maxY = (float)box.maxY;
             float minZ = (float)box.minZ, maxZ = (float)box.maxZ;
 
-            builder.vertex(matrix, minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.addVertex(matrix, minX, minY, minZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, minX, maxY, minZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, maxX, maxY, minZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, maxX, minY, minZ).setColor(red, green, blue, alpha);
 
-            builder.vertex(matrix, minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-
-
-            builder.vertex(matrix, minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-
-            builder.vertex(matrix, minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.addVertex(matrix, minX, minY, maxZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, maxX, minY, maxZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, maxX, maxY, maxZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, minX, maxY, maxZ).setColor(red, green, blue, alpha);
 
 
-            builder.vertex(matrix, minX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+            builder.addVertex(matrix, minX, minY, minZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, maxX, minY, minZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, maxX, minY, maxZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, minX, minY, maxZ).setColor(red, green, blue, alpha);
 
-            builder.vertex(matrix, maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
-            builder.vertex(matrix, maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+            builder.addVertex(matrix, minX, maxY, minZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, minX, maxY, maxZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, maxX, maxY, maxZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, maxX, maxY, minZ).setColor(red, green, blue, alpha);
+
+
+            builder.addVertex(matrix, minX, minY, minZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, minX, minY, maxZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, minX, maxY, maxZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, minX, maxY, minZ).setColor(red, green, blue, alpha);
+
+            builder.addVertex(matrix, maxX, minY, minZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, maxX, maxY, minZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, maxX, maxY, maxZ).setColor(red, green, blue, alpha);
+            builder.addVertex(matrix, maxX, minY, maxZ).setColor(red, green, blue, alpha);
         });
         renderConfiguration.end(bufferSource);
     }

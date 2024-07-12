@@ -175,7 +175,7 @@ public abstract class ResourceCache {
         }
 
         private boolean existsInLoadedResources(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
-            ResourceLocation location = new ResourceLocation(namespace, directory + "/" + fileName + extension);
+            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension);
             return this.otherResourcePacks.stream().anyMatch(pack -> pack.getResource(resourceType == ResourceType.ASSET ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA, location) != null);
         }
 

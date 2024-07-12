@@ -108,7 +108,7 @@ public final class CreativeItemGroup extends CreativeModeTab {
         this.identifier = identifier;
         this.displayItemsGenerator = (flags, output) -> this.applyFiller(output::accept);
 
-        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, new ResourceLocation(modid, identifier), this);
+        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath(modid, identifier), this);
     }
 
     private void applyFiller(Consumer<ItemStack> output){

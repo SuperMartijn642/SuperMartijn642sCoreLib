@@ -78,7 +78,7 @@ public class PacketChannel {
     private PacketChannel(String modid, String name){
         this.modid = modid;
         this.name = name;
-        this.channelName = new ResourceLocation(modid, name);
+        this.channelName = ResourceLocation.fromNamespaceAndPath(modid, name);
         this.payloadType = new CustomPacketPayload.Type<>(this.channelName);
         this.payloadCodec = StreamCodec.of(
             (buffer, payload) -> this.write(payload.packet, buffer),

@@ -18,13 +18,11 @@ import net.minecraft.stats.StatType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
@@ -76,34 +74,31 @@ public final class Registries {
     public static final Registry<MobEffect> MOB_EFFECTS = vanilla(MOB_EFFECT, MobEffect.class, RegistryOverrideHandlers.MOB_EFFECTS);
     public static final Registry<SoundEvent> SOUND_EVENTS = vanilla(SOUND_EVENT, SoundEvent.class, RegistryOverrideHandlers.SOUND_EVENTS);
     public static final Registry<Potion> POTIONS = vanilla(POTION, Potion.class, RegistryOverrideHandlers.POTIONS);
-    public static final Registry<Enchantment> ENCHANTMENTS = vanilla(ENCHANTMENT, Enchantment.class, RegistryOverrideHandlers.ENCHANTMENTS);
     public static final Registry<EntityType<?>> ENTITY_TYPES = vanilla(ENTITY_TYPE, EntityType.class, RegistryOverrideHandlers.ENTITY_TYPES);
     public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPES = vanilla(BLOCK_ENTITY_TYPE, BlockEntityType.class, RegistryOverrideHandlers.BLOCK_ENTITY_TYPES);
     public static final Registry<ParticleType<?>> PARTICLE_TYPES = vanilla(PARTICLE_TYPE, ParticleType.class, RegistryOverrideHandlers.PARTICLE_TYPES);
     public static final Registry<MenuType<?>> MENU_TYPES = vanilla(MENU, MenuType.class, RegistryOverrideHandlers.MENU_TYPES);
-    public static final Registry<PaintingVariant> PAINTING_VARIANTS = vanilla(PAINTING_VARIANT, PaintingVariant.class);
     public static final Registry<RecipeType<?>> RECIPE_TYPES = vanilla(RECIPE_TYPE, RecipeType.class, RegistryOverrideHandlers.RECIPE_TYPES);
     public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZERS = vanilla(RECIPE_SERIALIZER, RecipeSerializer.class, RegistryOverrideHandlers.RECIPE_SERIALIZERS);
     public static final Registry<Attribute> ATTRIBUTES = vanilla(ATTRIBUTE, Attribute.class, RegistryOverrideHandlers.ATTRIBUTES);
     public static final Registry<StatType<?>> STAT_TYPES = vanilla(STAT_TYPE, StatType.class, RegistryOverrideHandlers.STAT_TYPES);
-    public static final Registry<ResourceConditionSerializer<?>> RESOURCE_CONDITION_SERIALIZERS = new ResourceConditionRegistry(new ResourceLocation("supermartijn642corelib", "resource_conditions"), ResourceConditionSerializer.class);
-    public static final Registry<CustomTagEntrySerializer<?>> CUSTOM_TAG_ENTRY_SERIALIZERS = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "custom_tag_entries"), CustomTagEntrySerializer.class);
+    public static final Registry<ResourceConditionSerializer<?>> RESOURCE_CONDITION_SERIALIZERS = new ResourceConditionRegistry(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "resource_conditions"), ResourceConditionSerializer.class);
+    public static final Registry<CustomTagEntrySerializer<?>> CUSTOM_TAG_ENTRY_SERIALIZERS = new MapBackedRegistry<>(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "custom_tag_entries"), CustomTagEntrySerializer.class);
     public static final Registry<DataComponentType<?>> DATA_COMPONENT_TYPES = vanilla(DATA_COMPONENT_TYPE, DataComponentType.class, RegistryOverrideHandlers.DATA_COMPONENT_TYPES);
 
     static{
         REGISTRATION_ORDER = Lists.newArrayList(
             Registries.BLOCKS,
             Registries.FLUIDS,
+            Registries.DATA_COMPONENT_TYPES,
             Registries.ITEMS,
             Registries.MOB_EFFECTS,
             Registries.SOUND_EVENTS,
             Registries.POTIONS,
-            Registries.ENCHANTMENTS,
             Registries.ENTITY_TYPES,
             Registries.BLOCK_ENTITY_TYPES,
             Registries.PARTICLE_TYPES,
             Registries.MENU_TYPES,
-            Registries.PAINTING_VARIANTS,
             Registries.RECIPE_SERIALIZERS,
             Registries.ATTRIBUTES,
             Registries.STAT_TYPES,

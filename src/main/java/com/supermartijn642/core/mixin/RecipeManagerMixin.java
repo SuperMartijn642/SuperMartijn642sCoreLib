@@ -28,7 +28,7 @@ public class RecipeManagerMixin {
         // Intercept conditional recipes
         if(json != null && json.has("type") && json.get("type").isJsonPrimitive() && json.getAsJsonPrimitive("type").isString()){
             String type = json.get("type").getAsString();
-            if(RegistryUtil.isValidIdentifier(type) && new ResourceLocation(type).equals(Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE)))
+            if(RegistryUtil.isValidIdentifier(type) && ResourceLocation.parse(type).equals(Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE)))
                 ci.setReturnValue(ConditionalRecipeSerializer.fromJson(recipeLocation, json, provider));
         }
     }

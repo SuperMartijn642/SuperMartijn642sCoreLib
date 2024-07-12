@@ -35,14 +35,14 @@ import java.util.stream.Collectors;
  */
 public class ScreenUtils {
 
-    private static final ResourceLocation BUTTON_BACKGROUND = new ResourceLocation("supermartijn642corelib", "textures/gui/buttons.png");
-    private static final ResourceLocation SCREEN_BACKGROUND = new ResourceLocation("supermartijn642corelib", "textures/gui/background.png");
+    private static final ResourceLocation BUTTON_BACKGROUND = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "textures/gui/buttons.png");
+    private static final ResourceLocation SCREEN_BACKGROUND = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "textures/gui/background.png");
     private static final GuiGraphics GUI_GRAPHICS = new GuiGraphics(ClientUtils.getMinecraft(), null);
 
     public static final int DEFAULT_TEXT_COLOR = 4210752, ACTIVE_TEXT_COLOR = 14737632, INACTIVE_TEXT_COLOR = 7368816;
 
     public static void drawString(PoseStack poseStack, Font fontRenderer, Component text, float x, float y, int color){
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
         fontRenderer.drawInBatch(text, x, y, color, false, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         bufferSource.endBatch();
     }
@@ -60,7 +60,7 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, Font fontRenderer, Component text, float x, float y, int color){
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
         fontRenderer.drawInBatch(text, x, y, color, true, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         bufferSource.endBatch();
     }
@@ -110,7 +110,7 @@ public class ScreenUtils {
     }
 
     public static void drawString(PoseStack poseStack, Font fontRenderer, String text, float x, float y, int color){
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
         fontRenderer.drawInBatch(text, x, y, color, false, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         bufferSource.endBatch();
     }
@@ -128,7 +128,7 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, Font fontRenderer, String text, float x, float y, int color){
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
         fontRenderer.drawInBatch(text, x, y, color, true, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         bufferSource.endBatch();
     }
@@ -221,13 +221,12 @@ public class ScreenUtils {
 
         Matrix4f matrix = poseStack.last().pose();
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.vertex(matrix, x, y + height, 0).uv(tx, ty + theight).endVertex();
-        buffer.vertex(matrix, x + width, y + height, 0).uv(tx + twidth, ty + theight).endVertex();
-        buffer.vertex(matrix, x + width, y, 0).uv(tx + twidth, ty).endVertex();
-        buffer.vertex(matrix, x, y, 0).uv(tx, ty).endVertex();
-        tessellator.end();
+        BufferBuilder buffer = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        buffer.addVertex(matrix, x, y + height, 0).setUv(tx, ty + theight);
+        buffer.addVertex(matrix, x + width, y + height, 0).setUv(tx + twidth, ty + theight);
+        buffer.addVertex(matrix, x + width, y, 0).setUv(tx + twidth, ty);
+        buffer.addVertex(matrix, x, y, 0).setUv(tx, ty);
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 
     public static void fillRect(PoseStack poseStack, float x, float y, float width, float height, int color){
@@ -245,13 +244,12 @@ public class ScreenUtils {
 
         Matrix4f matrix = poseStack.last().pose();
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder buffer = tesselator.getBuilder();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        buffer.vertex(matrix, x, y + height, 0).color(red, green, blue, alpha).endVertex();
-        buffer.vertex(matrix, x + width, y + height, 0).color(red, green, blue, alpha).endVertex();
-        buffer.vertex(matrix, x + width, y, 0).color(red, green, blue, alpha).endVertex();
-        buffer.vertex(matrix, x, y, 0).color(red, green, blue, alpha).endVertex();
-        tesselator.end();
+        BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        buffer.addVertex(matrix, x, y + height, 0).setColor(red, green, blue, alpha);
+        buffer.addVertex(matrix, x + width, y + height, 0).setColor(red, green, blue, alpha);
+        buffer.addVertex(matrix, x + width, y, 0).setColor(red, green, blue, alpha);
+        buffer.addVertex(matrix, x, y, 0).setColor(red, green, blue, alpha);
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
 
         RenderSystem.disableBlend();
     }
@@ -317,7 +315,7 @@ public class ScreenUtils {
                 Lighting.setupForFlatItems();
             RenderSystem.disableDepthTest();
 
-            MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();;
             ClientUtils.getItemRenderer().render(stack, ItemDisplayContext.GUI, false, poseStack, bufferSource, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, model);
             bufferSource.endBatch();
 

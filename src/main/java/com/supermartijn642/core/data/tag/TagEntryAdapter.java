@@ -19,7 +19,7 @@ public class TagEntryAdapter extends TagEntry {
     private Registry<?> registry;
 
     TagEntryAdapter(ResourceLocation identifier, CustomTagEntry customEntry){
-        super(new ResourceLocation("supermartijn642corelib", "dummy"), false, false);
+        super(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy"), false, false);
         this.identifier = identifier;
         this.customEntry = customEntry;
     }

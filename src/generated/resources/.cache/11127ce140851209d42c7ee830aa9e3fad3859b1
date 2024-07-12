@@ -1,9 +1,9 @@
-// this.cache.versionId	2024-07-13T01:30:51.4425687	Core Lib Generators
-8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\blocks\mineable\pickaxe.json
-f8082cbd45da35a5d391ffaea7176253c6c83c28 data\supermartijn642corelib\accesswidener\generated-entries.accesswidener
-8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\blocks\needs_diamond_tool.json
-8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\blocks\needs_stone_tool.json
-8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\blocks\mineable\shovel.json
-8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\blocks\mineable\hoe.json
-8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\blocks\mineable\axe.json
-8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\blocks\needs_iron_tool.json
+// this.cache.versionId	2024-07-13T01:41:44.3849583	Core Lib Generators
+8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\block\mineable\shovel.json
+8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\block\mineable\pickaxe.json
+091d72b379387d2480af60c15dc77c757b159b93 data\supermartijn642corelib\accesswidener\generated-entries.accesswidener
+8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\block\needs_stone_tool.json
+8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\block\needs_diamond_tool.json
+8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\block\mineable\hoe.json
+8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\block\mineable\axe.json
+8a23702b05296c8af5014d6aa6e9265ded85c7d9 data\minecraft\tags\block\needs_iron_tool.json

@@ -3,6 +3,7 @@ package com.supermartijn642.core.mixin;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.render.RenderWorldEvent;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
@@ -28,8 +29,8 @@ public class LevelRendererMixin {
             target = "Lnet/minecraft/client/Options;getCloudsType()Lnet/minecraft/client/CloudStatus;"
         )
     )
-    public void renderLevel(float partialTicks, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci){
-        RenderWorldEvent.EVENT.invoker().accept(new RenderWorldEvent(POSE_STACK, partialTicks));
+    public void renderLevel(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci){
+        RenderWorldEvent.EVENT.invoker().accept(new RenderWorldEvent(POSE_STACK, deltaTracker.getGameTimeDeltaPartialTick(false)));
         if(!POSE_STACK.clear())
             throw new IllegalStateException("Pose stack was not cleared properly during RenderWorldEvent!");
     }

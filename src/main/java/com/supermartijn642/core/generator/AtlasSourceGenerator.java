@@ -80,14 +80,14 @@ public abstract class AtlasSourceGenerator extends ResourceGenerator {
             if(json.has("parent") && json.get("parent").isJsonPrimitive() && json.getAsJsonPrimitive("parent").isString()){
                 String identifier = json.get("parent").getAsString();
                 if(RegistryUtil.isValidIdentifier(identifier))
-                    parent = new ResourceLocation(identifier);
+                    parent = ResourceLocation.parse(identifier);
             }
             if(json.has("textures") && json.get("textures").isJsonObject()){
                 for(Map.Entry<String,JsonElement> texture : json.getAsJsonObject("textures").entrySet()){
                     if(texture.getValue().isJsonPrimitive() && texture.getValue().getAsJsonPrimitive().isString()){
                         String identifier = texture.getValue().getAsString();
                         if(RegistryUtil.isValidIdentifier(identifier))
-                            textures.add(new ResourceLocation(identifier));
+                            textures.add(ResourceLocation.parse(identifier));
                     }
                 }
             }
@@ -103,7 +103,7 @@ public abstract class AtlasSourceGenerator extends ResourceGenerator {
      */
     protected AtlasBuilder atlas(ResourceLocation identifier){
         if(identifier.getPath().startsWith("textures/atlas/") && identifier.getPath().endsWith(".png"))
-            identifier = new ResourceLocation(identifier.getNamespace(), identifier.getPath().substring("textures/atlas/".length(), identifier.getPath().length() - ".png".length()));
+            identifier = ResourceLocation.fromNamespaceAndPath(identifier.getNamespace(), identifier.getPath().substring("textures/atlas/".length(), identifier.getPath().length() - ".png".length()));
         return this.builders.computeIfAbsent(identifier, i -> new AtlasBuilder(this.modid, i));
     }
 
@@ -113,7 +113,7 @@ public abstract class AtlasSourceGenerator extends ResourceGenerator {
      * @param identifier identifier of the atlas location
      */
     protected AtlasBuilder atlas(String namespace, String identifier){
-        return this.atlas(new ResourceLocation(namespace, identifier));
+        return this.atlas(ResourceLocation.fromNamespaceAndPath(namespace, identifier));
     }
 
     /**
@@ -163,7 +163,7 @@ public abstract class AtlasSourceGenerator extends ResourceGenerator {
          * @param path      path of the texture location
          */
         public AtlasBuilder texture(String namespace, String path){
-            return this.texture(new ResourceLocation(namespace, path));
+            return this.texture(ResourceLocation.fromNamespaceAndPath(namespace, path));
         }
 
         /**
@@ -193,7 +193,7 @@ public abstract class AtlasSourceGenerator extends ResourceGenerator {
          * @param includeParents whether the parents of the given model should also be added
          */
         public AtlasBuilder texturesFromModel(String namespace, String path, boolean includeParents){
-            return this.texturesFromModel(new ResourceLocation(namespace, path), includeParents);
+            return this.texturesFromModel(ResourceLocation.fromNamespaceAndPath(namespace, path), includeParents);
         }
 
         /**

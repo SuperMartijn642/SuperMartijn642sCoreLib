@@ -3,6 +3,7 @@ package com.supermartijn642.core.registry;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.render.CustomBlockEntityRenderer;
 import com.supermartijn642.core.render.CustomItemRenderer;
+import com.supermartijn642.core.util.Holder;
 import com.supermartijn642.core.util.Pair;
 import com.supermartijn642.core.util.TriFunction;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -63,7 +64,7 @@ public class ClientRegistrationHandler {
 
     @ApiStatus.Internal
     @Deprecated
-    public static void registerModelOverwritesInternal(Map<ResourceLocation,BakedModel> modelRegistry){
+    public static void registerModelOverwritesInternal(Map<ModelResourceLocation,BakedModel> modelRegistry){
         haveModelsBeenRegistered = true;
         REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.registerModelOverwrites(modelRegistry));
     }
@@ -96,8 +97,8 @@ public class ClientRegistrationHandler {
     private final String modid;
 
     private final Set<ResourceLocation> models = new HashSet<>();
-    private final Map<ResourceLocation,Supplier<BakedModel>> specialModels = new HashMap<>();
-    private final List<Pair<Predicate<ResourceLocation>,Function<BakedModel,BakedModel>>> modelOverwrites = new ArrayList<>();
+    private final Map<ModelResourceLocation,Supplier<BakedModel>> specialModels = new HashMap<>();
+    private final List<Pair<Predicate<ModelResourceLocation>,Function<BakedModel,BakedModel>>> modelOverwrites = new ArrayList<>();
 
     private final List<Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?>>>> entityRenderers = new ArrayList<>();
     private final List<Pair<Supplier<BlockEntityType<?>>,Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?>>>> blockEntityRenderers = new ArrayList<>();
@@ -140,7 +141,7 @@ public class ClientRegistrationHandler {
         if(!RegistryUtil.isValidPath(identifier))
             throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-        this.registerModel(new ResourceLocation(namespace, identifier));
+        this.registerModel(ResourceLocation.fromNamespaceAndPath(namespace, identifier));
     }
 
     /**
@@ -159,7 +160,7 @@ public class ClientRegistrationHandler {
         if(!RegistryUtil.isValidPath(identifier))
             throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-        ResourceLocation fullIdentifier = new ResourceLocation(this.modid, identifier);
+        ModelResourceLocation fullIdentifier = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(this.modid, identifier), "");
         if(this.specialModels.containsKey(fullIdentifier))
             throw new RuntimeException("Duplicate special model entry '" + fullIdentifier + "'!");
 
@@ -176,7 +177,7 @@ public class ClientRegistrationHandler {
     /**
      * Registers an overwrite for an already present baked model.
      */
-    public void registerModelOverwrite(ResourceLocation identifier, Function<BakedModel,BakedModel> modelOverwrite){
+    public void registerModelOverwrite(ModelResourceLocation identifier, Function<BakedModel,BakedModel> modelOverwrite){
         if(haveModelsBeenRegistered)
             throw new IllegalStateException("Cannot register new model overwrites after model baking has completed!");
         if(this.specialModels.containsKey(identifier))
@@ -196,7 +197,7 @@ public class ClientRegistrationHandler {
         if(!RegistryUtil.isValidPath(variant))
             throw new IllegalArgumentException("Variant '" + variant + "' must only contain characters [a-z0-9_./-]!");
 
-        ResourceLocation fullIdentifier = new ModelResourceLocation(namespace, identifier, variant);
+        ModelResourceLocation fullIdentifier = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(namespace, identifier), variant);
         this.registerModelOverwrite(fullIdentifier, modelOverwrite);
     }
 
@@ -204,13 +205,7 @@ public class ClientRegistrationHandler {
      * Registers an overwrite for an already present baked model.
      */
     public void registerModelOverwrite(String namespace, String identifier, Function<BakedModel,BakedModel> modelOverwrite){
-        if(!RegistryUtil.isValidNamespace(namespace))
-            throw new IllegalArgumentException("Namespace '" + namespace + "' must only contain characters [a-z0-9_.-]!");
-        if(!RegistryUtil.isValidPath(identifier))
-            throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
-
-        ResourceLocation fullIdentifier = new ResourceLocation(namespace, identifier);
-        this.registerModelOverwrite(fullIdentifier, modelOverwrite);
+        this.registerModelOverwrite(namespace, identifier, "", modelOverwrite);
     }
 
     /**
@@ -248,11 +243,14 @@ public class ClientRegistrationHandler {
         if(haveModelsBeenRegistered)
             throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
 
+        Holder<ResourceLocation> blockIdentifierHolder = new Holder<>();
         this.modelOverwrites.add(Pair.of(identifier -> {
-            ResourceLocation blockIdentifier = Registries.BLOCKS.getIdentifier(block.get());
-            return identifier instanceof ModelResourceLocation
-                && identifier.getNamespace().equals(blockIdentifier.getNamespace())
-                && identifier.getPath().equals(blockIdentifier.getPath());
+            ResourceLocation blockIdentifier = blockIdentifierHolder.get();
+            if(blockIdentifier == null){
+                blockIdentifier = Registries.BLOCKS.getIdentifier(block.get());
+                blockIdentifierHolder.set(blockIdentifier);
+            }
+            return identifier.id().equals(blockIdentifier);
         }, modelOverwrite));
     }
 
@@ -277,12 +275,16 @@ public class ClientRegistrationHandler {
         if(haveModelsBeenRegistered)
             throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
 
+        Holder<ResourceLocation> itemIdentifierHolder = new Holder<>();
         this.modelOverwrites.add(Pair.of(identifier -> {
-            ResourceLocation itemIdentifier = Registries.ITEMS.getIdentifier(item.get());
-            return identifier.getNamespace().equals(itemIdentifier.getNamespace())
-                && (identifier instanceof ModelResourceLocation ?
-                identifier.getPath().equals(itemIdentifier.getPath()) && ((ModelResourceLocation)identifier).getVariant().equals("inventory")
-                : identifier.getPath().equals("item/" + itemIdentifier.getPath()));
+            ResourceLocation itemIdentifier = itemIdentifierHolder.get();
+            if(itemIdentifier == null){
+                itemIdentifier = Registries.ITEMS.getIdentifier(item.get());
+                itemIdentifierHolder.set(itemIdentifier);
+            }
+            return identifier.id().getNamespace().equals(itemIdentifier.getNamespace())
+                && identifier.id().getPath().equals(itemIdentifier.getPath())
+                && identifier.getVariant().equals("inventory");
         }, modelOverwrite));
     }
 
@@ -374,7 +376,7 @@ public class ClientRegistrationHandler {
             throw new IllegalArgumentException("Texture atlas must not be null!");
 
         if(textureAtlas.getPath().startsWith("textures/atlas/") && textureAtlas.getPath().endsWith(".png"))
-            textureAtlas = new ResourceLocation(textureAtlas.getNamespace(), textureAtlas.getPath().substring("textures/atlas/".length(), textureAtlas.getPath().length() - ".png".length()));
+            textureAtlas = ResourceLocation.fromNamespaceAndPath(textureAtlas.getNamespace(), textureAtlas.getPath().substring("textures/atlas/".length(), textureAtlas.getPath().length() - ".png".length()));
 
         this.textureAtlasSprites.putIfAbsent(textureAtlas, new HashSet<>());
         if(this.textureAtlasSprites.get(textureAtlas).contains(spriteLocation))
@@ -390,7 +392,7 @@ public class ClientRegistrationHandler {
         if(!RegistryUtil.isValidPath(spriteLocation))
             throw new IllegalArgumentException("Sprite location '" + spriteLocation + "' must only contain characters [a-z0-9_./-]!");
 
-        this.registerAtlasSprite(textureAtlas, new ResourceLocation(this.modid, spriteLocation));
+        this.registerAtlasSprite(textureAtlas, ResourceLocation.fromNamespaceAndPath(this.modid, spriteLocation));
     }
 
     /**
@@ -648,10 +650,10 @@ public class ClientRegistrationHandler {
         out.accept(this.models);
     }
 
-    private void registerModelOverwrites(Map<ResourceLocation,BakedModel> modelRegistry){
+    private void registerModelOverwrites(Map<ModelResourceLocation,BakedModel> modelRegistry){
         // Special models
-        for(Map.Entry<ResourceLocation,Supplier<BakedModel>> entry : this.specialModels.entrySet()){
-            ResourceLocation identifier = entry.getKey();
+        for(Map.Entry<ModelResourceLocation,Supplier<BakedModel>> entry : this.specialModels.entrySet()){
+            ModelResourceLocation identifier = entry.getKey();
             if(modelRegistry.containsKey(identifier))
                 throw new RuntimeException("Special model '" + identifier + "' is trying to overwrite another model!");
 
@@ -663,13 +665,13 @@ public class ClientRegistrationHandler {
         }
 
         // Model overwrites
-        for(Pair<Predicate<ResourceLocation>,Function<BakedModel,BakedModel>> pair : this.modelOverwrites){
+        for(Pair<Predicate<ModelResourceLocation>,Function<BakedModel,BakedModel>> pair : this.modelOverwrites){
             // Find all the identifiers which should be replaced
-            List<ResourceLocation> modelIdentifiers = modelRegistry.keySet().stream()
+            List<ModelResourceLocation> modelIdentifiers = modelRegistry.keySet().stream()
                 .filter(identifier -> pair.left().test(identifier))
                 .collect(Collectors.toList());
 
-            for(ResourceLocation identifier : modelIdentifiers){
+            for(ModelResourceLocation identifier : modelIdentifiers){
                 if(!modelRegistry.containsKey(identifier))
                     throw new RuntimeException("No model registered for model overwrite '" + identifier + "'!");
 

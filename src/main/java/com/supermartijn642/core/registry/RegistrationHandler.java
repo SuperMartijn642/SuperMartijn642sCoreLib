@@ -13,12 +13,10 @@ import net.minecraft.stats.StatType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
@@ -193,26 +191,6 @@ public class RegistrationHandler {
         this.addCallback(Registries.POTIONS, callback);
     }
 
-    public void registerEnchantment(String identifier, Supplier<Enchantment> enchantment){
-        this.addEntry(Registries.ENCHANTMENTS, identifier, enchantment);
-    }
-
-    public void registerEnchantment(String identifier, Enchantment enchantment){
-        this.addEntry(Registries.ENCHANTMENTS, identifier, () -> enchantment);
-    }
-
-    public void registerEnchantmentOverride(String namespace, String identifier, Supplier<Enchantment> enchantment){
-        this.addEntry(Registries.ENCHANTMENTS, namespace, identifier, enchantment);
-    }
-
-    public void registerEnchantmentOverride(String namespace, String identifier, Enchantment enchantment){
-        this.addEntry(Registries.ENCHANTMENTS, namespace, identifier, () -> enchantment);
-    }
-
-    public void registerEnchantmentCallback(Consumer<Helper<Enchantment>> callback){
-        this.addCallback(Registries.ENCHANTMENTS, callback);
-    }
-
     public void registerEntityType(String identifier, Supplier<EntityType<?>> entityType){
         this.addEntry(Registries.ENTITY_TYPES, identifier, entityType);
     }
@@ -291,26 +269,6 @@ public class RegistrationHandler {
 
     public void registerMenuTypeCallback(Consumer<Helper<MenuType<?>>> callback){
         this.addCallback(Registries.MENU_TYPES, callback);
-    }
-
-    public void registerPaintingVariant(String identifier, Supplier<PaintingVariant> paintingVariant){
-        this.addEntry(Registries.PAINTING_VARIANTS, identifier, paintingVariant);
-    }
-
-    public void registerPaintingVariant(String identifier, PaintingVariant paintingVariant){
-        this.addEntry(Registries.PAINTING_VARIANTS, identifier, () -> paintingVariant);
-    }
-
-    public void registerPaintingVariantOverride(String namespace, String identifier, Supplier<PaintingVariant> paintingVariant){
-        this.addEntry(Registries.PAINTING_VARIANTS, namespace, identifier, paintingVariant);
-    }
-
-    public void registerPaintingVariantOverride(String namespace, String identifier, PaintingVariant paintingVariant){
-        this.addEntry(Registries.PAINTING_VARIANTS, namespace, identifier, () -> paintingVariant);
-    }
-
-    public void registerPaintingVariantCallback(Consumer<Helper<PaintingVariant>> callback){
-        this.addCallback(Registries.PAINTING_VARIANTS, callback);
     }
 
     public void registerRecipeSerializer(String identifier, Supplier<RecipeSerializer<?>> recipeSerializer){
@@ -447,7 +405,7 @@ public class RegistrationHandler {
         if(entry == null)
             throw new IllegalArgumentException("Entry supplier for '" + namespace + ":" + identifier + "' must not be null!");
 
-        ResourceLocation fullIdentifier = new ResourceLocation(namespace, identifier);
+        ResourceLocation fullIdentifier = ResourceLocation.fromNamespaceAndPath(namespace, identifier);
         Map<ResourceLocation,Supplier<?>> entries = this.entryMap.computeIfAbsent(registry, o -> new LinkedHashMap<>());
         if(entries.containsKey(fullIdentifier))
             throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + registry.getRegistryIdentifier() + "'!");
@@ -520,7 +478,7 @@ public class RegistrationHandler {
             if(!RegistryUtil.isValidPath(identifier))
                 throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-            ResourceLocation fullIdentifier = new ResourceLocation(namespace, identifier);
+            ResourceLocation fullIdentifier = ResourceLocation.fromNamespaceAndPath(namespace, identifier);
             Map<ResourceLocation,Supplier<?>> entries = RegistrationHandler.this.entryMap.computeIfAbsent(this.registry, o -> new LinkedHashMap<>());
             if(entries.containsKey(fullIdentifier))
                 throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + this.registry.getRegistryIdentifier() + "'!");

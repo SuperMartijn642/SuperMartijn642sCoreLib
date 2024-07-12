@@ -10,10 +10,11 @@ import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
@@ -25,7 +26,11 @@ import java.util.Collection;
  */
 public final class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> {
 
-    private static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.register("supermartijn642corelib:dummy");
+    private static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = Registry.register(BuiltInRegistries.RECIPE_TYPE, ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy"), new RecipeType<>() {
+        public String toString(){
+            return "supermartijn642corelib:dummy";
+        }
+    });
     private static final DummyRecipe DUMMY_RECIPE = new DummyRecipe();
     public static final ConditionalRecipeSerializer INSTANCE = new ConditionalRecipeSerializer();
 
@@ -66,15 +71,15 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
             if(!RegistryUtil.isValidIdentifier(type))
                 throw new RuntimeException("Condition for recipe '" + location + "' has invalid type '" + type + "'!");
 
-            ResourceConditionSerializer<?> serializer = Registries.RESOURCE_CONDITION_SERIALIZERS.getValue(new ResourceLocation(type));
+            ResourceConditionSerializer<?> serializer = Registries.RESOURCE_CONDITION_SERIALIZERS.getValue(ResourceLocation.parse(type));
             if(serializer == null)
-                throw new RuntimeException("Condition for recipe '" + location + "' has unknown type '" + new ResourceLocation(type) + "'!");
+                throw new RuntimeException("Condition for recipe '" + location + "' has unknown type '" + ResourceLocation.parse(type) + "'!");
 
             ResourceCondition condition;
             try{
                 condition = serializer.deserialize(conditionJson);
             }catch(Exception e){
-                throw new RuntimeException("Encountered exception whilst testing condition '" + new ResourceLocation(type) + "' for recipe '" + location + "'!");
+                throw new RuntimeException("Encountered exception whilst testing condition '" + ResourceLocation.parse(type) + "' for recipe '" + location + "'!");
             }
 
             if(!condition.test(ResourceConditionContext.EMPTY))
@@ -95,15 +100,15 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
         return StreamCodec.unit(null);
     }
 
-    private static class DummyRecipe implements Recipe<Container> {
+    private static class DummyRecipe implements Recipe<RecipeInput> {
 
         @Override
-        public boolean matches(Container container, Level level){
+        public boolean matches(RecipeInput container, Level level){
             return false;
         }
 
         @Override
-        public ItemStack assemble(Container container, HolderLookup.Provider provider){
+        public ItemStack assemble(RecipeInput container, HolderLookup.Provider provider){
             return ItemStack.EMPTY;
         }
 
