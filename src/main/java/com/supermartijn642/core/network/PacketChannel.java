@@ -2,14 +2,19 @@ package com.supermartijn642.core.network;
 
 import com.supermartijn642.core.CommonUtils;
 import com.supermartijn642.core.CoreLib;
+import com.supermartijn642.core.CoreSide;
 import com.supermartijn642.core.registry.RegistryUtil;
 import io.netty.util.collection.IntObjectHashMap;
-import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -59,6 +64,8 @@ public class PacketChannel {
 
     private final String modid, name;
     private final ResourceLocation channelName;
+    private final CustomPacketPayload.Type<Payload> payloadType;
+    private final StreamCodec<FriendlyByteBuf,Payload> payloadCodec;
 
     private int index = 0;
     private final HashMap<Class<? extends BasePacket>,Integer> packet_to_index = new HashMap<>();
@@ -72,10 +79,23 @@ public class PacketChannel {
         this.modid = modid;
         this.name = name;
         this.channelName = new ResourceLocation(modid, name);
+        this.payloadType = new CustomPacketPayload.Type<>(this.channelName);
+        this.payloadCodec = StreamCodec.of(
+            (buffer, payload) -> this.write(payload.packet, buffer),
+            buffer -> new Payload(this.read(buffer))
+        );
 
-        if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT)
-            ClientPacketHandler.registerReceiver(this.channelName, this);
-        ServerPacketHandler.registerReceiver(this.channelName, this);
+        PayloadTypeRegistry.playS2C().register(this.payloadType, this.payloadCodec);
+        if(CommonUtils.getEnvironmentSide().isClient())
+            ClientPlayNetworking.registerGlobalReceiver(this.payloadType, (payload, context) -> {
+                PacketContext packetContext = new PacketContext(CoreSide.CLIENT, null, null);
+                this.handle(payload.packet, packetContext);
+            });
+        PayloadTypeRegistry.playC2S().register(this.payloadType, this.payloadCodec);
+        ServerPlayNetworking.registerGlobalReceiver(this.payloadType, (payload, context) -> {
+            PacketContext packetContext = new PacketContext(CoreSide.SERVER, context.player(), context.server());
+            this.handle(payload.packet, packetContext);
+        });
     }
 
     /**
@@ -100,7 +120,7 @@ public class PacketChannel {
      */
     public void sendToServer(BasePacket packet){
         this.checkRegistration(packet);
-        ClientPacketHandler.sendPacket(this.channelName, this, packet);
+        ClientPlayNetworking.send(new Payload(packet));
     }
 
     /**
@@ -112,7 +132,7 @@ public class PacketChannel {
         if(!(player instanceof ServerPlayer))
             throw new IllegalStateException("This must only be called server-side!");
         this.checkRegistration(packet);
-        ServerPacketHandler.sendPacket(this.channelName, this, packet, (ServerPlayer)player);
+        ServerPlayNetworking.send((ServerPlayer)player, new Payload(packet));
     }
 
     /**
@@ -222,6 +242,19 @@ public class PacketChannel {
                 context.queueTask(() -> packet.handle(context));
             else
                 packet.handle(context);
+        }
+    }
+
+    class Payload implements CustomPacketPayload {
+        private final BasePacket packet;
+
+        private Payload(BasePacket packet){
+            this.packet = packet;
+        }
+
+        @Override
+        public Type<? extends CustomPacketPayload> type(){
+            return PacketChannel.this.payloadType;
         }
     }
 }

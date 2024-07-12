@@ -308,7 +308,7 @@ public class ScreenUtils {
 
         poseStack.pushPose();
         poseStack.translate(x + 8, y + 8, 150);
-        poseStack.mulPoseMatrix(new Matrix4f().scaling(1.0F, -1.0F, 1.0F));
+        poseStack.mulPose(new Matrix4f().scaling(1.0F, -1.0F, 1.0F));
         poseStack.scale(16, 16, 16);
         try{
             BakedModel model = ClientUtils.getItemRenderer().getModel(stack, level, null, 0);
@@ -329,7 +329,6 @@ public class ScreenUtils {
             CrashReportCategory crashReportCategory = crashReport.addCategory("Item being rendered");
             crashReportCategory.setDetail("Item Type", () -> String.valueOf(stack.getItem()));
             crashReportCategory.setDetail("Item Damage", () -> String.valueOf(stack.getDamageValue()));
-            crashReportCategory.setDetail("Item NBT", () -> String.valueOf(stack.getTag()));
             crashReportCategory.setDetail("Item Foil", () -> String.valueOf(stack.hasFoil()));
             throw new ReportedException(crashReport);
         }

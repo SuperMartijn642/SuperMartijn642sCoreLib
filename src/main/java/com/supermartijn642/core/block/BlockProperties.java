@@ -2,6 +2,8 @@ package com.supermartijn642.core.block;
 
 import com.supermartijn642.core.util.TriPredicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -9,6 +11,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.storage.loot.LootTable;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -29,12 +32,12 @@ public class BlockProperties {
         properties.mapColor = sourceProperties.mapColor;
         properties.hasCollision = sourceProperties.hasCollision;
         properties.canOcclude = block.defaultBlockState().canOcclude();
-        properties.soundType = block.getSoundType(block.defaultBlockState());
+        properties.soundType = block.properties.soundType;
         properties.lightLevel = sourceProperties.lightEmission;
         properties.explosionResistance = block.getExplosionResistance();
         properties.destroyTime = block.defaultDestroyTime();
         properties.requiresCorrectTool = block.defaultBlockState().requiresCorrectToolForDrops();
-        properties.ticksRandomly = block.isRandomlyTicking(block.defaultBlockState());
+        properties.ticksRandomly = block.properties.isRandomlyTicking;
         properties.friction = block.getFriction();
         properties.speedFactor = block.getSpeedFactor();
         properties.jumpFactor = block.getJumpFactor();
@@ -64,7 +67,7 @@ public class BlockProperties {
     private boolean hasDynamicShape = false;
     boolean noLootTable = false;
     Supplier<Block> lootTableBlock;
-    ResourceLocation lootTable;
+    ResourceKey<LootTable> lootTable;
 
     private BlockProperties(){
     }
@@ -176,11 +179,15 @@ public class BlockProperties {
         return this;
     }
 
-    public BlockProperties lootTable(ResourceLocation lootTable){
+    public BlockProperties lootTable(ResourceKey<LootTable> lootTable){
         this.noLootTable = false;
         this.lootTableBlock = null;
         this.lootTable = lootTable;
         return this;
+    }
+
+    public BlockProperties lootTable(ResourceLocation lootTable){
+        return this.lootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTable));
     }
 
     public BlockProperties lootTableFrom(Supplier<Block> block){

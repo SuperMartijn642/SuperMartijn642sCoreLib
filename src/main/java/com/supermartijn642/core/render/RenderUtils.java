@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 /**
@@ -110,13 +109,13 @@ public class RenderUtils {
         RenderConfiguration renderConfiguration = depthTest ? LINES : LINES_NO_DEPTH;
         MultiBufferSource.BufferSource bufferSource = getMainBufferSource();
         VertexConsumer builder = renderConfiguration.begin(bufferSource);
-        Matrix4f matrix4f = poseStack.last().pose();
-        Matrix3f matrix3f = poseStack.last().normal();
+        PoseStack.Pose pose = poseStack.last();
+        Matrix4f matrix = pose.pose();
         shape.forEachEdge((x1, y1, z1, x2, y2, z2) -> {
             Vec3 normal = new Vec3(x2 - x1, y2 - y1, z2 - z1);
             normal.normalize();
-            builder.vertex(matrix4f, (float)x1, (float)y1, (float)z1).color(red, green, blue, alpha).normal(matrix3f, (float)normal.x, (float)normal.y, (float)normal.z).endVertex();
-            builder.vertex(matrix4f, (float)x2, (float)y2, (float)z2).color(red, green, blue, alpha).normal(matrix3f, (float)normal.x, (float)normal.y, (float)normal.z).endVertex();
+            builder.vertex(matrix, (float)x1, (float)y1, (float)z1).color(red, green, blue, alpha).normal(pose, (float)normal.x, (float)normal.y, (float)normal.z).endVertex();
+            builder.vertex(matrix, (float)x2, (float)y2, (float)z2).color(red, green, blue, alpha).normal(pose, (float)normal.x, (float)normal.y, (float)normal.z).endVertex();
         });
         renderConfiguration.end(bufferSource);
     }

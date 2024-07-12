@@ -1,6 +1,7 @@
 package com.supermartijn642.core.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -64,23 +65,23 @@ public abstract class BaseBlockEntity extends BlockEntity {
     protected abstract void readData(CompoundTag tag);
 
     @Override
-    protected void saveAdditional(CompoundTag compound){
-        super.saveAdditional(compound);
+    protected void saveAdditional(CompoundTag compound, HolderLookup.Provider provider){
+        super.saveAdditional(compound, provider);
         CompoundTag data = this.writeData();
         if(data != null && !data.isEmpty())
             compound.put("data", data);
     }
 
     @Override
-    public void load(CompoundTag nbt){
-        super.load(nbt);
+    protected void loadAdditional(CompoundTag nbt, HolderLookup.Provider provider){
+        super.loadAdditional(nbt, provider);
         this.readData(nbt.contains("data", Tag.TAG_COMPOUND) ? nbt.getCompound("data") : new CompoundTag());
     }
 
     @Override
-    public CompoundTag getUpdateTag(){
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider){
         CompoundTag tag = new CompoundTag();
-        super.saveAdditional(tag);
+        super.saveAdditional(tag, provider);
         CompoundTag data = this.writeClientData();
         if(data != null && !data.isEmpty())
             tag.put("data", data);
@@ -91,7 +92,7 @@ public abstract class BaseBlockEntity extends BlockEntity {
     public ClientboundBlockEntityDataPacket getUpdatePacket(){
         if(this.dataChanged){
             this.dataChanged = false;
-            return ClientboundBlockEntityDataPacket.create(this, entity -> {
+            return ClientboundBlockEntityDataPacket.create(this, (entity, registryAccess) -> {
                 CompoundTag tag = new CompoundTag();
                 CompoundTag data = ((BaseBlockEntity)entity).writeClientData();
                 if(data != null && !data.isEmpty())

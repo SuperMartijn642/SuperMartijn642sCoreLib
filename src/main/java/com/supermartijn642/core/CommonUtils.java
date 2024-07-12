@@ -1,11 +1,9 @@
 package com.supermartijn642.core;
 
 import com.supermartijn642.core.gui.BaseContainer;
-import com.supermartijn642.core.gui.BaseContainerType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -66,12 +64,10 @@ public class CommonUtils {
             return;
 
         // Open the container
-        BaseContainerType<?> containerType = container.getContainerType();
-        player.openMenu(new ExtendedScreenHandlerFactory() {
+        player.openMenu(new ExtendedScreenHandlerFactory<BaseContainer>() {
             @Override
-            public void writeScreenOpeningData(ServerPlayer player, FriendlyByteBuf data){
-                //noinspection unchecked,rawtypes
-                ((BaseContainerType)containerType).writeContainer(container, data);
+            public BaseContainer getScreenOpeningData(ServerPlayer player){
+                return container;
             }
 
             @Override

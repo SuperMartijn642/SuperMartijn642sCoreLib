@@ -6,7 +6,6 @@ import com.supermartijn642.core.item.BaseItem;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -41,10 +40,10 @@ public class MultiPlayerGameModeMixin {
         if(stack.getItem() instanceof BaseItem){
             BlockPos blockPos = hitResult.getBlockPos();
             BlockInWorld blockInWorld = new BlockInWorld(level, blockPos, false);
-            if(player.getAbilities().mayBuild || stack.hasAdventureModePlaceTagForBlock(level.registryAccess().registryOrThrow(Registries.BLOCK), blockInWorld)){
+            if(player.getAbilities().mayBuild || stack.canPlaceOnBlockInAdventureMode(blockInWorld)){
                 BaseItem item = (BaseItem)stack.getItem();
                 InteractionResult result = item.interactWithBlockFirst(stack, player, hand, level, hitResult.getBlockPos(), hitResult.getDirection(), hitResult.getLocation()).getUnderlying();
-                if(result.shouldAwardStats())
+                if(result.indicateItemUse())
                     player.awardStat(Stats.ITEM_USED.get(item));
 
                 if(result != InteractionResult.PASS)
@@ -53,10 +52,10 @@ public class MultiPlayerGameModeMixin {
         }else if(stack.getItem() instanceof BaseBlockItem){
             BlockPos blockPos = hitResult.getBlockPos();
             BlockInWorld blockInWorld = new BlockInWorld(level, blockPos, false);
-            if(player.getAbilities().mayBuild || stack.hasAdventureModePlaceTagForBlock(level.registryAccess().registryOrThrow(Registries.BLOCK), blockInWorld)){
+            if(player.getAbilities().mayBuild || stack.canPlaceOnBlockInAdventureMode(blockInWorld)){
                 BaseBlockItem item = (BaseBlockItem)stack.getItem();
                 InteractionResult result = item.interactWithBlockFirst(stack, player, hand, level, hitResult.getBlockPos(), hitResult.getDirection(), hitResult.getLocation()).getUnderlying();
-                if(result.shouldAwardStats())
+                if(result.indicateItemUse())
                     player.awardStat(Stats.ITEM_USED.get(item));
 
                 if(result != InteractionResult.PASS)

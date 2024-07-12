@@ -1,11 +1,12 @@
 package com.supermartijn642.core.mixin;
 
-import com.mojang.serialization.Lifecycle;
 import com.supermartijn642.core.extensions.CoreLibHolderReference;
 import com.supermartijn642.core.extensions.CoreLibMappedRegistry;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,35 +27,36 @@ import java.util.function.BiConsumer;
 public class MappedRegistryMixin implements CoreLibMappedRegistry {
 
     @Shadow
-    private Reference2IntMap<?> toId;
+    private ObjectList<Holder.Reference<?>> byId;
+    @Shadow
+    private Reference2IntMap<Object> toId;
     @Shadow
     private Map<ResourceLocation,Holder.Reference<?>> byLocation;
     @Shadow
     private Map<Object,Holder.Reference<?>> byValue;
-    @Shadow
-    private Map<?,Lifecycle> lifecycles;
     @Unique
     private final Map<ResourceKey<?>,Object> keyToObject = new HashMap<>();
     @Unique
     private boolean registeringOverrides = false;
     @Unique
     private Holder.Reference<?> overwrittenReference;
+    @Unique
     private BiConsumer<Object,Object> overrideConsumer;
 
     @Inject(
-        method = "registerMapping(ILnet/minecraft/resources/ResourceKey;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;)Lnet/minecraft/core/Holder$Reference;",
+        method = "register(Lnet/minecraft/resources/ResourceKey;Ljava/lang/Object;Lnet/minecraft/core/RegistrationInfo;)Lnet/minecraft/core/Holder$Reference;",
         at = @At("HEAD")
     )
-    private void registerMappingHead(int id, ResourceKey<?> key, Object object, Lifecycle lifecycle, CallbackInfoReturnable<Holder<?>> ci){
+    private void registerMappingHead(ResourceKey<?> key, Object object, RegistrationInfo registrationInfo, CallbackInfoReturnable<Holder.Reference<?>> ci){
         if(this.registeringOverrides)
             this.overwrittenReference = this.byLocation.remove(key.location());
     }
 
     @Inject(
-        method = "registerMapping(ILnet/minecraft/resources/ResourceKey;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;)Lnet/minecraft/core/Holder$Reference;",
+        method = "register(Lnet/minecraft/resources/ResourceKey;Ljava/lang/Object;Lnet/minecraft/core/RegistrationInfo;)Lnet/minecraft/core/Holder$Reference;",
         at = @At("TAIL")
     )
-    private void registerMappingTail(int id, ResourceKey<?> key, Object object, Lifecycle lifecycle, CallbackInfoReturnable<Holder<?>> ci){
+    private void registerMappingTail(ResourceKey<?> key, Object object, RegistrationInfo registrationInfo, CallbackInfoReturnable<Holder.Reference<?>> ci){
         if(this.registeringOverrides){
             // Redirect the old reference to the new reference's values
             Holder.Reference<?> newReference = this.byLocation.get(key.location());
@@ -63,14 +65,16 @@ public class MappedRegistryMixin implements CoreLibMappedRegistry {
             // Remove the old object
             Object oldValue = this.keyToObject.get(key);
             if(oldValue != null){
-                this.toId.removeInt(oldValue);
+                // Re-use the id of the old object
+                int oldId = this.toId.getInt(oldValue);
+                this.toId.put(object, oldId);
+                this.byId.removeLast();
                 // Create a dummy reference
                 //noinspection unchecked, DataFlowIssue, rawtypes, deprecation
                 Holder.Reference dummy = Holder.Reference.createIntrusive(((MappedRegistry)(Object)this).holderOwner(), oldValue);
                 //noinspection unchecked
                 dummy.bindKey(this.overwrittenReference.key());
                 this.byValue.put(oldValue, dummy);
-                this.lifecycles.remove(oldValue);
 
                 // Call the override consumer
                 if(this.overrideConsumer != null)

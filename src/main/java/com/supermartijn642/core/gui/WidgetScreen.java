@@ -65,7 +65,7 @@ public class WidgetScreen<T extends Widget> extends Screen {
         mouseX -= offsetX;
         mouseY -= offsetY;
 
-        RenderSystem.getModelViewStack().pushPose();
+        RenderSystem.getModelViewStack().pushMatrix();
         RenderSystem.getModelViewStack().translate(offsetX, offsetY, 0);
         RenderSystem.applyModelViewMatrix();
 
@@ -83,7 +83,7 @@ public class WidgetScreen<T extends Widget> extends Screen {
         // Render the widget's tooltips
         this.widget.renderTooltips(this.widgetRenderContext, mouseX, mouseY);
 
-        RenderSystem.getModelViewStack().popPose();
+        RenderSystem.getModelViewStack().popMatrix();
         RenderSystem.applyModelViewMatrix();
     }
 

@@ -8,11 +8,11 @@ import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.ScreenUtils;
 import com.supermartijn642.core.gui.widget.BaseWidget;
 import com.supermartijn642.core.gui.widget.WidgetRenderContext;
-import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringUtil;
 import org.joml.Matrix4f;
 
 import java.util.function.BiConsumer;
@@ -185,7 +185,7 @@ public class TextFieldWidget extends BaseWidget {
         if(text == null)
             text = "";
         else if(text.length() > this.maxLength)
-            text = SharedConstants.filterText(text.substring(0, this.maxLength));
+            text = StringUtil.filterText(text.substring(0, this.maxLength));
 
         this.lineScrollOffset = 0;
         this.cursorPosition = 0;
@@ -196,7 +196,7 @@ public class TextFieldWidget extends BaseWidget {
     protected void addTextAtCursor(String text){
         String oldText = this.text;
 
-        text = SharedConstants.filterText(text);
+        text = StringUtil.filterText(text);
         if(text.length() + this.text.length() - this.getSelectedText().length() > this.maxLength)
             text = text.substring(0, this.maxLength - this.text.length() + this.getSelectedText().length() + 1);
 
@@ -362,7 +362,7 @@ public class TextFieldWidget extends BaseWidget {
         if(hasBeenHandled || !this.canWrite())
             return false;
 
-        if(SharedConstants.isAllowedChatCharacter(character))
+        if(StringUtil.isAllowedChatCharacter(character))
             this.addTextAtCursor(Character.toString(character));
 
         return true;
