@@ -191,7 +191,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
                 // Save the object to the cache
                 ResourceLocation identifier = recipeBuilder.identifier;
-                this.cache.saveJsonResource(ResourceType.DATA, json, identifier.getNamespace(), "recipes", identifier.getPath() + subRecipe.getKey());
+                this.cache.saveJsonResource(ResourceType.DATA, json, identifier.getNamespace(), "recipe", identifier.getPath() + subRecipe.getKey());
             }
         }
 
@@ -237,7 +237,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         if(this.recipes.containsKey(recipeLocation))
             throw new RuntimeException("Duplicate recipe '" + recipeLocation + "' of types '" + this.recipes.get(recipeLocation).getClass().getName() + "' and '" + builder.getClass().getName() + "'!");
 
-        this.cache.trackToBeGeneratedResource(ResourceType.DATA, builder.identifier.getNamespace(), "recipes", builder.identifier.getPath(), ".json");
+        this.cache.trackToBeGeneratedResource(ResourceType.DATA, builder.identifier.getNamespace(), "recipe", builder.identifier.getPath(), ".json");
         this.recipes.put(recipeLocation, builder);
         return builder;
     }
