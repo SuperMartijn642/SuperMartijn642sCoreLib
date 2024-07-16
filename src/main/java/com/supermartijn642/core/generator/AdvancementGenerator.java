@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.supermartijn642.core.data.condition.ModLoadedResourceCondition;
 import com.supermartijn642.core.data.condition.NotResourceCondition;
@@ -15,9 +16,9 @@ import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.RecipeBuilder;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
@@ -38,6 +39,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
 
     @Override
     public void save(){
+        DynamicOps<JsonElement> ops = ResourceGenerator.registryAccess.createSerializationContext(JsonOps.INSTANCE);
         // Loop over all advancements
         for(AdvancementBuilder advancementBuilder : this.advancements.values()){
             // Verify the advancement has any criteria
@@ -60,7 +62,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             if(!advancementBuilder.conditions.isEmpty()){
                 JsonArray conditionsJson = new JsonArray();
                 for(ICondition condition : advancementBuilder.conditions)
-                    conditionsJson.add(ICondition.CODEC.encodeStart(JsonOps.INSTANCE, condition).getOrThrow(false, s -> {}));
+                    conditionsJson.add(ICondition.CODEC.encodeStart(ops, condition).getOrThrow());
                 json.add("conditions", conditionsJson);
             }
             // Parent
@@ -77,9 +79,9 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
                 throw new RuntimeException("Advancement '" + advancementBuilder.identifier + "' must have an icon!");
             if(advancementBuilder.icon != null){
                 JsonObject iconJson = new JsonObject();
-                iconJson.addProperty("item", Registries.ITEMS.getIdentifier(advancementBuilder.icon).toString());
-                if(advancementBuilder.iconTag != null)
-                    iconJson.addProperty("nbt", advancementBuilder.iconTag.toString());
+                iconJson.addProperty("id", Registries.ITEMS.getIdentifier(advancementBuilder.icon).toString());
+                if(advancementBuilder.iconComponents != null && !advancementBuilder.iconComponents.isEmpty())
+                    iconJson.add("components", DataComponentPatch.CODEC.encodeStart(ops, advancementBuilder.iconComponents).getOrThrow());
                 displayJson.add("icon", iconJson);
             }
             // Title
@@ -112,8 +114,8 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
                 JsonObject criterionJson = new JsonObject();
                 criterionJson.addProperty("trigger", BuiltInRegistries.TRIGGER_TYPES.getKey(criterion.getValue().left()).toString());
                 //noinspection unchecked
-                JsonElement conditionsJson = ((Codec<CriterionTriggerInstance>)criterion.getValue().left().codec()).encodeStart(JsonOps.INSTANCE, criterion.getValue().right()).getOrThrow(false, error -> {});
-                if(!conditionsJson.isJsonObject() || conditionsJson.getAsJsonObject().size() > 0)
+                JsonElement conditionsJson = ((Codec<CriterionTriggerInstance>)criterion.getValue().left().codec()).encodeStart(ops, criterion.getValue().right()).getOrThrow();
+                if(!conditionsJson.isJsonObject() || !conditionsJson.getAsJsonObject().isEmpty())
                     criterionJson.add("conditions", conditionsJson);
                 criteriaJson.add(criterion.getKey(), criterionJson);
             }
@@ -207,7 +209,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
         private final List<ResourceLocation> rewardRecipes = new ArrayList<>();
         private ResourceLocation parent;
         private Item icon;
-        private CompoundTag iconTag;
+        private DataComponentPatch iconComponents;
         private String titleKey;
         private String descriptionKey;
         private AdvancementType frame = AdvancementType.TASK;
@@ -291,12 +293,12 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
 
         /**
          * Sets the icon for this advancement.
-         * @param item item to use as icon
-         * @param tag  tag for the item
+         * @param item       item to use as icon
+         * @param components data components for the item
          */
-        public AdvancementBuilder icon(ItemLike item, CompoundTag tag){
+        public AdvancementBuilder icon(ItemLike item, DataComponentPatch components){
             this.icon = item.asItem();
-            this.iconTag = tag;
+            this.iconComponents = components;
             return this;
         }
 

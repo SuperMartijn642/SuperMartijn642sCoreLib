@@ -27,7 +27,8 @@ public class GameDataMixin {
         method = "postRegisterEvents()V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraftforge/registries/ObjectHolderRegistry;applyObjectHolders(Ljava/util/function/Predicate;)V"
+            target = "Lnet/minecraftforge/registries/ObjectHolderRegistry;applyObjectHolders(Ljava/util/function/Predicate;)V",
+            shift = At.Shift.AFTER
         ),
         remap = false
     )

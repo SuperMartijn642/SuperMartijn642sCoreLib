@@ -4,10 +4,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import com.supermartijn642.core.registry.Registries;
-import net.minecraft.advancements.critereon.EnchantmentPredicate;
-import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.critereon.*;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -52,12 +51,12 @@ public abstract class LootTableGenerator extends ResourceGenerator {
             JsonObject json = new JsonObject();
             // Type
             if(lootTableBuilder.parameters != LootContextParamSets.ALL_PARAMS)
-                json.add("type", LootContextParamSets.CODEC.encodeStart(JsonOps.INSTANCE, lootTableBuilder.parameters).getOrThrow(false, s -> {}));
+                json.add("type", LootContextParamSets.CODEC.encodeStart(JsonOps.INSTANCE, lootTableBuilder.parameters).getOrThrow());
             // Functions
             if(!lootTableBuilder.functions.isEmpty()){
                 JsonArray functionsJson = new JsonArray();
                 for(LootItemFunction function : lootTableBuilder.functions)
-                    functionsJson.add(LootItemFunctions.CODEC.encodeStart(JsonOps.INSTANCE, function).getOrThrow(false, s -> {}));
+                    functionsJson.add(LootItemFunctions.ROOT_CODEC.encodeStart(JsonOps.INSTANCE, function).getOrThrow());
                 json.add("functions", functionsJson);
             }
             // Pools
@@ -70,22 +69,22 @@ public abstract class LootTableGenerator extends ResourceGenerator {
                     if(pool.name != null && !pool.name.isEmpty())
                         poolJson.addProperty("name", pool.name);
                     // Rolls
-                    poolJson.add("rolls", NumberProviders.CODEC.encodeStart(JsonOps.INSTANCE, pool.rolls).getOrThrow(false, s -> {}));
+                    poolJson.add("rolls", NumberProviders.CODEC.encodeStart(JsonOps.INSTANCE, pool.rolls).getOrThrow());
                     // Bonus rolls
                     if(!(pool.bonusRolls instanceof ConstantValue) || pool.bonusRolls.getInt(null) != 0)
-                        poolJson.add("bonus_rolls", NumberProviders.CODEC.encodeStart(JsonOps.INSTANCE, pool.bonusRolls).getOrThrow(false, s -> {}));
+                        poolJson.add("bonus_rolls", NumberProviders.CODEC.encodeStart(JsonOps.INSTANCE, pool.bonusRolls).getOrThrow());
                     // Conditions
                     if(!pool.conditions.isEmpty()){
                         JsonArray conditionsJson = new JsonArray();
                         for(LootItemCondition condition : pool.conditions)
-                            conditionsJson.add(LootItemConditions.CODEC.encodeStart(JsonOps.INSTANCE, condition).getOrThrow(false, s -> {}));
+                            conditionsJson.add(LootItemConditions.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, condition).getOrThrow());
                         poolJson.add("conditions", conditionsJson);
                     }
                     // Functions
                     if(!pool.functions.isEmpty()){
                         JsonArray functionsJson = new JsonArray();
                         for(LootItemFunction function : pool.functions)
-                            functionsJson.add(LootItemFunctions.CODEC.encodeStart(JsonOps.INSTANCE, function).getOrThrow(false, s -> {}));
+                            functionsJson.add(LootItemFunctions.ROOT_CODEC.encodeStart(JsonOps.INSTANCE, function).getOrThrow());
                         poolJson.add("functions", functionsJson);
                     }
                     // Entries
@@ -93,7 +92,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
                         throw new RuntimeException("Loot table '" + lootTableBuilder.identifier + "' has loot pool without any entries!");
                     JsonArray entriesJson = new JsonArray();
                     for(LootPoolEntryContainer entry : pool.entries)
-                        entriesJson.add(LootPoolEntries.CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow(false, s -> {}));
+                        entriesJson.add(LootPoolEntries.CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow());
                     poolJson.add("entries", entriesJson);
 
                     poolsJson.add(poolJson);
@@ -130,7 +129,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
      * @param block block to create the loot table for
      */
     protected LootTableBuilder lootTable(Block block){
-        return this.lootTable(block.getLootTable());
+        return this.lootTable(block.getLootTable().location());
     }
 
     /**
@@ -337,7 +336,10 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param maxLevel    maximum level of the enchantment (inclusive)
          */
         public LootPoolBuilder hasEnchantmentCondition(Enchantment enchantment, int minLevel, int maxLevel){
-            return this.condition(MatchTool.toolMatches(ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(enchantment, MinMaxBounds.Ints.between(minLevel, maxLevel)))).build());
+            return this.condition(MatchTool.toolMatches(ItemPredicate.Builder.item().withSubPredicate(
+                ItemSubPredicates.ENCHANTMENTS,
+                ItemEnchantmentsPredicate.enchantments(List.of(new EnchantmentPredicate(enchantment, MinMaxBounds.Ints.between(minLevel, maxLevel))))
+            )).build());
         }
 
         /**
@@ -346,7 +348,10 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param minLevel    minimum level of the enchantment
          */
         public LootPoolBuilder hasEnchantmentCondition(Enchantment enchantment, int minLevel){
-            return this.condition(MatchTool.toolMatches(ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(enchantment, MinMaxBounds.Ints.atLeast(minLevel)))).build());
+            return this.condition(MatchTool.toolMatches(ItemPredicate.Builder.item().withSubPredicate(
+                ItemSubPredicates.ENCHANTMENTS,
+                ItemEnchantmentsPredicate.enchantments(List.of(new EnchantmentPredicate(enchantment, MinMaxBounds.Ints.atLeast(minLevel))))
+            )).build());
         }
 
         /**
@@ -537,7 +542,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param weight    weight of the entry
          */
         public LootPoolBuilder lootTableEntry(ResourceLocation lootTable, int weight){
-            return this.entry(LootTableReference.lootTableReference(lootTable), weight);
+            return this.entry(NestedLootTable.lootTableReference(ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, lootTable)), weight);
         }
 
         /**

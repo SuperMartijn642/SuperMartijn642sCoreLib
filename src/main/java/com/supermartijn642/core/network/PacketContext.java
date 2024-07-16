@@ -5,7 +5,6 @@ import com.supermartijn642.core.CoreSide;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.network.CustomPayloadEvent;
-import net.minecraftforge.fml.LogicalSide;
 
 /**
  * Created 5/30/2021 by SuperMartijn642
@@ -22,14 +21,14 @@ public class PacketContext {
      * @return the side the packet is received on
      */
     public CoreSide getHandlingSide(){
-        return this.context.getDirection().getReceptionSide() == LogicalSide.CLIENT ? CoreSide.CLIENT : CoreSide.SERVER;
+        return this.context.isClientSide() ? CoreSide.CLIENT : CoreSide.SERVER;
     }
 
     /**
      * @return the side the packet is originating from
      */
     public CoreSide getOriginatingSide(){
-        return this.context.getDirection().getOriginationSide() == LogicalSide.CLIENT ? CoreSide.CLIENT : CoreSide.SERVER;
+        return this.context.isServerSide() ? CoreSide.CLIENT : CoreSide.SERVER;
     }
 
     public Player getSendingPlayer(){
@@ -44,10 +43,7 @@ public class PacketContext {
     }
 
     public void queueTask(Runnable task){
-        if(this.getHandlingSide() == CoreSide.SERVER)
-            this.context.enqueueWork(task);
-        else
-            ClientUtils.queueTask(task);
+        this.context.enqueueWork(task);
     }
 
     @Deprecated

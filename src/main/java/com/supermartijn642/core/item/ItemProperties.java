@@ -1,11 +1,14 @@
 package com.supermartijn642.core.item;
 
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -24,6 +27,7 @@ public class ItemProperties {
     private FoodProperties foodProperties;
     private boolean isFireResistant;
     final Set<CreativeModeTab> groups = new HashSet<>();
+    private Map<DataComponentType<Object>,Object> components;
 
     private ItemProperties(){
     }
@@ -77,6 +81,14 @@ public class ItemProperties {
         return this;
     }
 
+    public <T> ItemProperties component(DataComponentType<T> type, T value){
+        if(this.components == null)
+            this.components = new HashMap<>();
+        //noinspection unchecked
+        this.components.put((DataComponentType<Object>)type, value);
+        return this;
+    }
+
     /**
      * Converts the properties into {@link Item.Properties}.
      */
@@ -91,6 +103,8 @@ public class ItemProperties {
         properties.food(this.foodProperties);
         if(this.isFireResistant)
             properties.fireResistant();
+        if(this.components != null)
+            this.components.forEach(properties::component);
         return properties;
     }
 }

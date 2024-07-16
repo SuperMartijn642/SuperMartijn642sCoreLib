@@ -29,7 +29,7 @@ public class OrResourceCondition implements ResourceCondition {
     @Override
     public boolean test(ResourceConditionContext context){
         for(ICondition condition : this.conditions){
-            if(condition.test(context.getUnderlying()))
+            if(condition.test(context.getUnderlying(), context.getDynamicOps()))
                 return true;
         }
         return false;
@@ -52,7 +52,7 @@ public class OrResourceCondition implements ResourceCondition {
         public void serialize(JsonObject json, OrResourceCondition condition){
             JsonArray conditions = new JsonArray();
             for(ICondition alternative : condition.conditions)
-                conditions.add(ICondition.CODEC.encodeStart(JsonOps.INSTANCE, alternative).getOrThrow(false, s -> {}));
+                conditions.add(ICondition.CODEC.encodeStart(JsonOps.INSTANCE, alternative).getOrThrow());
             json.add("conditions", conditions);
         }
 
@@ -64,7 +64,7 @@ public class OrResourceCondition implements ResourceCondition {
             JsonArray conditionsJson = json.getAsJsonArray("conditions");
             ICondition[] conditions = new ICondition[conditionsJson.size()];
             for(int i = 0; i < conditionsJson.size(); i++)
-                conditions[i] = ICondition.CODEC.decode(JsonOps.INSTANCE, conditionsJson.get(i).getAsJsonObject()).getOrThrow(false, s -> {}).getFirst();
+                conditions[i] = ICondition.CODEC.decode(JsonOps.INSTANCE, conditionsJson.get(i).getAsJsonObject()).getOrThrow().getFirst();
             return new OrResourceCondition(conditions);
         }
     }

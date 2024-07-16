@@ -2,6 +2,7 @@ package com.supermartijn642.core.generator;
 
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.RegistryUtil;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraftforge.fml.ModContainer;
@@ -17,6 +18,8 @@ import java.util.concurrent.CompletableFuture;
  * Created 04/08/2022 by SuperMartijn642
  */
 public abstract class ResourceGenerator {
+
+    public static HolderLookup.Provider registryAccess; // TODO find a better solution for this
 
     /**
      * Wraps the given resource generator in a data provider using the given file helper and data generator.

@@ -6,6 +6,7 @@ import com.supermartijn642.core.generator.ResourceCache;
 import com.supermartijn642.core.generator.ResourceGenerator;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import net.minecraft.WorldVersion;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
@@ -20,9 +21,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,7 +44,7 @@ public class DataGeneratorMixin implements DataGeneratorExtension {
     private ResourceCache resourceCache;
     @Shadow
     @Final
-    private Map<String, DataProvider> providersToRun;
+    private Map<String,DataProvider> providersToRun;
     @Shadow
     @Final
     private boolean alwaysGenerate;
@@ -88,6 +91,16 @@ public class DataGeneratorMixin implements DataGeneratorExtension {
                     hashCache.initialCount += providerCache.count();
                 }
             });
+
+            // Get a reference to the lookup provider
+            try{
+                Field field = GatherDataEvent.DataGeneratorConfig.class.getDeclaredField("lookupProvider");
+                field.setAccessible(true);
+                //noinspection unchecked
+                ResourceGenerator.registryAccess = ((CompletableFuture<HolderLookup.Provider>)field.get(this.config)).get();
+            }catch(Exception e){
+                throw new RuntimeException("Failed to obtain lookup provider instance from GatherDataEvent.DataGeneratorConfig!", e);
+            }
         }
         if(this.resourceCache != null)
             ((ResourceCache.HashCacheWrapper)this.resourceCache).readHashCache();
@@ -104,7 +117,7 @@ public class DataGeneratorMixin implements DataGeneratorExtension {
     )
     private void runBeforeGenerators(CallbackInfo ci, HashCache hashCache){
         Stopwatch stopwatch = Stopwatch.createUnstarted();
-        for(Map.Entry<String, DataProvider> entry : this.providersToRun.entrySet()){
+        for(Map.Entry<String,DataProvider> entry : this.providersToRun.entrySet()){
             if(!this.alwaysGenerate && !hashCache.shouldRunInThisVersion(entry.getKey())){
                 LOGGER.debug("Generator {} already run for version {}", entry.getKey(), (Object)this.version.getName());
                 return;

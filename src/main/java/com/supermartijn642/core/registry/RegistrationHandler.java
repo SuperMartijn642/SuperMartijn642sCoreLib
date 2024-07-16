@@ -1,9 +1,10 @@
 package com.supermartijn642.core.registry;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -388,23 +389,23 @@ public class RegistrationHandler {
         this.addCallback(Registries.STAT_TYPES, callback);
     }
 
-    public void registerConditionSerializer(String identifier, Supplier<Codec<? extends ICondition>> conditionSerializer){
+    public void registerConditionSerializer(String identifier, Supplier<MapCodec<? extends ICondition>> conditionSerializer){
         this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, identifier, conditionSerializer);
     }
 
-    public void registerConditionSerializer(String identifier, Codec<? extends ICondition> conditionSerializer){
+    public void registerConditionSerializer(String identifier, MapCodec<? extends ICondition> conditionSerializer){
         this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, identifier, () -> conditionSerializer);
     }
 
-    public void registerConditionSerializerOverride(String namespace, String identifier, Supplier<Codec<? extends ICondition>> conditionSerializer){
+    public void registerConditionSerializerOverride(String namespace, String identifier, Supplier<MapCodec<? extends ICondition>> conditionSerializer){
         this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, namespace, identifier, conditionSerializer);
     }
 
-    public void registerConditionSerializerOverride(String namespace, String identifier, Codec<? extends ICondition> conditionSerializer){
+    public void registerConditionSerializerOverride(String namespace, String identifier, MapCodec<? extends ICondition> conditionSerializer){
         this.addEntry(Registries.RECIPE_CONDITION_SERIALIZERS, namespace, identifier, () -> conditionSerializer);
     }
 
-    public void registerConditionSerializerCallback(Consumer<Helper<Codec<? extends ICondition>>> callback){
+    public void registerConditionSerializerCallback(Consumer<Helper<MapCodec<? extends ICondition>>> callback){
         this.addCallback(Registries.RECIPE_CONDITION_SERIALIZERS, callback);
     }
 
@@ -458,6 +459,26 @@ public class RegistrationHandler {
 
     public void registerCustomTagEntrySerializerCallback(Consumer<Helper<CustomTagEntrySerializer<?>>> callback){
         this.addCallback(Registries.CUSTOM_TAG_ENTRY_SERIALIZERS, callback);
+    }
+
+    public void registerDataComponentType(String identifier, Supplier<DataComponentType<?>> serializer){
+        this.addEntry(Registries.DATA_COMPONENT_TYPES, identifier, serializer);
+    }
+
+    public void registerDataComponentType(String identifier, DataComponentType<?> serializer){
+        this.addEntry(Registries.DATA_COMPONENT_TYPES, identifier, () -> serializer);
+    }
+
+    public void registerDataComponentTypeOverride(String namespace, String identifier, Supplier<DataComponentType<?>> serializer){
+        this.addEntry(Registries.DATA_COMPONENT_TYPES, namespace, identifier, serializer);
+    }
+
+    public void registerDataComponentTypeOverride(String namespace, String identifier, DataComponentType<?> serializer){
+        this.addEntry(Registries.DATA_COMPONENT_TYPES, namespace, identifier, () -> serializer);
+    }
+
+    public void registerDataComponentTypeCallback(Consumer<Helper<DataComponentType<?>>> callback){
+        this.addCallback(Registries.DATA_COMPONENT_TYPES, callback);
     }
 
     private <T> void addEntry(Registries.Registry<T> registry, String identifier, Supplier<T> entry){

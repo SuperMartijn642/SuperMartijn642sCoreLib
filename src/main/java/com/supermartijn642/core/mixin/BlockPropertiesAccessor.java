@@ -1,7 +1,8 @@
 package com.supermartijn642.core.mixin;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.storage.loot.LootTable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -14,8 +15,8 @@ import java.util.function.Supplier;
 public interface BlockPropertiesAccessor {
 
     @Accessor(value = "lootTableSupplier", remap = false)
-    Supplier<ResourceLocation> getLootTableSupplier();
+    Supplier<ResourceKey<LootTable>> getLootTableSupplier();
 
     @Accessor(value = "lootTableSupplier", remap = false)
-    void setLootTableSupplier(Supplier<ResourceLocation> supplier);
+    void setLootTableSupplier(Supplier<ResourceKey<LootTable>> supplier);
 }
