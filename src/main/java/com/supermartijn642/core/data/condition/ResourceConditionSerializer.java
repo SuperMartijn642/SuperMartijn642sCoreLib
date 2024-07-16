@@ -1,7 +1,7 @@
 package com.supermartijn642.core.data.condition;
 
 import com.google.gson.JsonObject;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.neoforged.neoforge.common.conditions.ICondition;
 
 /**
@@ -9,7 +9,7 @@ import net.neoforged.neoforge.common.conditions.ICondition;
  */
 public interface ResourceConditionSerializer<T extends ResourceCondition> {
 
-    static Codec<? extends ICondition> createForgeConditionCodec(ResourceConditionSerializer<?> serializer){
+    static MapCodec<? extends ICondition> createForgeConditionCodec(ResourceConditionSerializer<?> serializer){
         return ResourceConditions.serializerCodec(serializer);
     }
 

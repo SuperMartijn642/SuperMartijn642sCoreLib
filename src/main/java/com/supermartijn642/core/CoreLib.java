@@ -1,5 +1,6 @@
 package com.supermartijn642.core;
 
+import com.supermartijn642.core.block.BaseBlock;
 import com.supermartijn642.core.data.condition.*;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
 import com.supermartijn642.core.data.tag.CustomTagEntries;
@@ -11,6 +12,8 @@ import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
@@ -45,6 +48,9 @@ public class CoreLib {
         // Register custom tag entry types
         handler.registerCustomTagEntrySerializer("namespace", NamespaceTagEntry.SERIALIZER);
 
+        // Register base block tile data component
+        handler.registerDataComponentType("tile_data", BaseBlock.TILE_DATA);
+
         // Register generator for default tags
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));
 
@@ -53,7 +59,7 @@ public class CoreLib {
             Registries.ITEMS.getValues().stream()
                 .filter(item -> item instanceof BaseItem || item instanceof BaseBlockItem)
                 .filter(item -> item instanceof BaseItem ? ((BaseItem)item).isInCreativeGroup(event.getTab()) : ((BaseBlockItem)item).isInCreativeGroup(event.getTab()))
-                .forEach(event::accept);
+                .forEach(item -> event.accept(item, event.getTabKey().equals(CreativeModeTabs.SEARCH) ? CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY : CreativeModeTab.TabVisibility.PARENT_TAB_ONLY));
         });
     }
 

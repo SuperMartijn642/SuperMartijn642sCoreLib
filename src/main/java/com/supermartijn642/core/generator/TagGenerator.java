@@ -58,14 +58,14 @@ public abstract class TagGenerator extends ResourceGenerator {
             // Entries & references
             JsonArray entries = new JsonArray();
             tag.entries.stream()
-                .map(entry -> TagEntry.CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow(false, s -> {}))
+                .map(entry -> TagEntry.CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow())
                 .forEach(entries::add);
             if(!entries.isEmpty() || tag.remove.isEmpty())
                 json.add("values", entries);
             // Removed
             JsonArray removedEntries = new JsonArray();
             tag.remove.stream()
-                .map(entry -> TagEntry.CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow(false, s -> {}))
+                .map(entry -> TagEntry.CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow())
                 .forEach(removedEntries::add);
             if(!removedEntries.isEmpty())
                 json.add("remove", removedEntries);

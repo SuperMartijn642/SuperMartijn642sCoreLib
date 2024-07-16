@@ -35,7 +35,7 @@ public class NotResourceCondition implements ResourceCondition {
 
         @Override
         public void serialize(JsonObject json, NotResourceCondition condition){
-            json.add("condition", ICondition.CODEC.encodeStart(JsonOps.INSTANCE, condition.condition).getOrThrow(false, s -> {}));
+            json.add("condition", ICondition.CODEC.encodeStart(JsonOps.INSTANCE, condition.condition).getOrThrow());
         }
 
         @Override
@@ -43,7 +43,7 @@ public class NotResourceCondition implements ResourceCondition {
             if(!json.has("condition") || !json.get("condition").isJsonObject())
                 throw new RuntimeException("Condition must have key 'condition' with a json object!");
 
-            return new NotResourceCondition(ICondition.CODEC.decode(JsonOps.INSTANCE, json.get("condition").getAsJsonObject()).getOrThrow(false, s -> {}).getFirst());
+            return new NotResourceCondition(ICondition.CODEC.decode(JsonOps.INSTANCE, json.get("condition").getAsJsonObject()).getOrThrow().getFirst());
         }
     }
 }

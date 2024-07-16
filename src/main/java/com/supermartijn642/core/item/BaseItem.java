@@ -16,11 +16,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -45,11 +43,10 @@ public class BaseItem extends Item {
     /**
      * Adds information to be displayed when hovering over this item in the inventory.
      * @param stack    the stack being hovered over
-     * @param level    the world the player is in, may be {@code null}
      * @param info     consumes the information which should be added
      * @param advanced whether advanced tooltips is enabled
      */
-    protected void appendItemInformation(ItemStack stack, @Nullable BlockGetter level, Consumer<Component> info, boolean advanced){
+    protected void appendItemInformation(ItemStack stack, Consumer<Component> info, boolean advanced){
     }
 
     /**
@@ -91,9 +88,9 @@ public class BaseItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> information, TooltipFlag flag){
-        this.appendItemInformation(stack, level, information::add, flag.isAdvanced());
-        super.appendHoverText(stack, level, information, flag);
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> information, TooltipFlag flag){
+        this.appendItemInformation(stack, information::add, flag.isAdvanced());
+        super.appendHoverText(stack, context, information, flag);
     }
 
     @Override

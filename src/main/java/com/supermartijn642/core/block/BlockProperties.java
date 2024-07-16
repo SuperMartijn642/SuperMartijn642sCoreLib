@@ -2,6 +2,8 @@ package com.supermartijn642.core.block;
 
 import com.supermartijn642.core.mixin.BlockPropertiesAccessor;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -9,6 +11,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.neoforged.neoforge.common.util.TriPredicate;
 
 import java.lang.reflect.Field;
@@ -49,17 +52,17 @@ public class BlockProperties {
         properties.mapColor = sourceProperties.mapColor;
         properties.hasCollision = sourceProperties.hasCollision;
         properties.canOcclude = block.defaultBlockState().canOcclude();
-        properties.soundType = block.getSoundType(block.defaultBlockState());
+        properties.soundType = block.properties.soundType;
         properties.lightLevel = sourceProperties.lightEmission;
         properties.explosionResistance = block.getExplosionResistance();
         properties.destroyTime = block.defaultDestroyTime();
         properties.requiresCorrectTool = block.defaultBlockState().requiresCorrectToolForDrops();
-        properties.ticksRandomly = block.isRandomlyTicking(block.defaultBlockState());
+        properties.ticksRandomly = block.properties.isRandomlyTicking;
         properties.friction = block.getFriction();
         properties.speedFactor = block.getSpeedFactor();
         properties.jumpFactor = block.getJumpFactor();
         properties.isAir = block.defaultBlockState().isAir();
-        properties.isRedstoneConductor = isRedstoneConductorField.apply(sourceProperties)::test;
+        properties.isRedstoneConductor = sourceProperties.isRedstoneConductor::test;
         properties.isSuffocating = sourceProperties.isSuffocating::test;
         properties.hasDynamicShape = block.hasDynamicShape();
         properties.lootTableSupplier = sourceProperties.drops != null ? () -> sourceProperties.drops : ((BlockPropertiesAccessor)sourceProperties).getLootTableSupplier();
@@ -83,7 +86,7 @@ public class BlockProperties {
     private TriPredicate<BlockState,BlockGetter,BlockPos> isSuffocating = (state, level, pos) -> state.blocksMotion() && state.isCollisionShapeFullBlock(level, pos);
     private boolean hasDynamicShape = false;
     private boolean noLootTable = false;
-    private Supplier<ResourceLocation> lootTableSupplier;
+    private Supplier<ResourceKey<LootTable>> lootTableSupplier;
 
     public BlockProperties mapColor(Function<BlockState,MapColor> colorFunction){
         this.mapColor = colorFunction;
@@ -191,10 +194,14 @@ public class BlockProperties {
         return this;
     }
 
-    public BlockProperties lootTable(ResourceLocation lootTable){
+    public BlockProperties lootTable(ResourceKey<LootTable> lootTable){
         this.noLootTable = false;
         this.lootTableSupplier = () -> lootTable;
         return this;
+    }
+
+    public BlockProperties lootTable(ResourceLocation lootTable){
+        return this.lootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTable));
     }
 
     public BlockProperties lootTableFrom(Supplier<Block> block){

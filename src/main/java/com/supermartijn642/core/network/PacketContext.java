@@ -32,7 +32,7 @@ public class PacketContext {
     }
 
     public Player getSendingPlayer(){
-        return this.context.player().orElse(null);
+        return this.context.player();
     }
 
     /**
@@ -43,7 +43,7 @@ public class PacketContext {
     }
 
     public void queueTask(Runnable task){
-        this.context.workHandler().execute(task);
+        this.context.enqueueWork(task);
     }
 
     @Deprecated

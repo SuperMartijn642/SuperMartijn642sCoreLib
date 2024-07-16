@@ -1,8 +1,9 @@
 package com.supermartijn642.core.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -64,23 +65,23 @@ public abstract class BaseBlockEntity extends BlockEntity {
     protected abstract void readData(CompoundTag tag);
 
     @Override
-    protected void saveAdditional(CompoundTag compound){
-        super.saveAdditional(compound);
+    protected void saveAdditional(CompoundTag compound, HolderLookup.Provider provider){
+        super.saveAdditional(compound, provider);
         CompoundTag data = this.writeData();
         if(data != null && !data.isEmpty())
             compound.put("data", data);
     }
 
     @Override
-    public void load(CompoundTag nbt){
-        super.load(nbt);
-        this.readData(nbt.getCompound("data"));
+    protected void loadAdditional(CompoundTag nbt, HolderLookup.Provider provider){
+        super.loadAdditional(nbt, provider);
+        this.readData(nbt.contains("data", Tag.TAG_COMPOUND) ? nbt.getCompound("data") : new CompoundTag());
     }
 
     @Override
-    public CompoundTag getUpdateTag(){
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider){
         CompoundTag tag = new CompoundTag();
-        super.saveAdditional(tag);
+        super.saveAdditional(tag, provider);
         CompoundTag data = this.writeClientData();
         if(data != null && !data.isEmpty())
             tag.put("data", data);
@@ -88,25 +89,17 @@ public abstract class BaseBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag){
-        super.load(tag);
-        this.readData(tag.getCompound("data"));
-    }
-
-    @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket(){
         if(this.dataChanged){
             this.dataChanged = false;
-            return ClientboundBlockEntityDataPacket.create(this, entity -> {
+            return ClientboundBlockEntityDataPacket.create(this, (entity, registryAccess) -> {
+                CompoundTag tag = new CompoundTag();
                 CompoundTag data = ((BaseBlockEntity)entity).writeClientData();
-                return data != null ? data : new CompoundTag();
+                if(data != null && !data.isEmpty())
+                    tag.put("data", data);
+                return tag;
             });
         }
         return null;
-    }
-
-    @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt){
-        this.readData(pkt.getTag() == null ? new CompoundTag() : pkt.getTag());
     }
 }

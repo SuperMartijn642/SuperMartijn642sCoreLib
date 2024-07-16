@@ -728,8 +728,8 @@ public class ClientRegistrationHandler {
                 throw new RuntimeException("Duplicate container screen for menu type '" + Registries.MENU_TYPES.getIdentifier(menuType) + "'!");
 
             menuTypes.add(menuType);
-            //noinspection deprecation,rawtypes,unchecked
-            MenuScreens.register((MenuType)menuType, (MenuScreens.ScreenConstructor)entry.right()::apply);
+            //noinspection rawtypes,unchecked
+            e.register((MenuType)menuType, (MenuScreens.ScreenConstructor)entry.right()::apply);
         }
     }
 

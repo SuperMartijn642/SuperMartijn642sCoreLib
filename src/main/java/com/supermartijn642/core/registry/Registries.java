@@ -1,10 +1,11 @@
 package com.supermartijn642.core.registry;
 
 import com.google.common.collect.Lists;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -85,8 +86,9 @@ public final class Registries {
     public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZERS = vanilla(RECIPE_SERIALIZER, RecipeSerializer.class);
     public static final Registry<Attribute> ATTRIBUTES = vanilla(ATTRIBUTE, Attribute.class);
     public static final Registry<StatType<?>> STAT_TYPES = vanilla(STAT_TYPE, StatType.class);
-    public static final Registry<Codec<? extends ICondition>> RECIPE_CONDITION_SERIALIZERS = vanilla(NeoForgeRegistries.CONDITION_SERIALIZERS, Codec.class);
+    public static final Registry<MapCodec<? extends ICondition>> RECIPE_CONDITION_SERIALIZERS = vanilla(NeoForgeRegistries.CONDITION_SERIALIZERS, MapCodec.class);
     public static final Registry<CustomTagEntrySerializer<?>> CUSTOM_TAG_ENTRY_SERIALIZERS = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "custom_tag_entries"), CustomTagEntrySerializer.class);
+    public static final Registry<DataComponentType<?>> DATA_COMPONENT_TYPES = vanilla(DATA_COMPONENT_TYPE, DataComponentType.class);
 
     static{
         // Add all registries which don't have a forge registry
@@ -101,7 +103,8 @@ public final class Registries {
 
         ResourceLocation getRegistryIdentifier();
 
-        @Nullable net.minecraft.core.Registry<T> getVanillaRegistry();
+        @Nullable
+        net.minecraft.core.Registry<T> getVanillaRegistry();
 
         boolean hasVanillaRegistry();
 

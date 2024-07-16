@@ -4,7 +4,7 @@ import com.supermartijn642.core.CoreLib;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.ModList;
-import net.neoforged.fml.loading.moddiscovery.ModAnnotation;
+import net.neoforged.fml.loading.modscan.ModAnnotation;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.registries.IdMappingEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
@@ -81,7 +81,7 @@ public @interface RegistryEntryAcceptor {
                         if(!RegistryUtil.isValidPath(identifier))
                             throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-                        Registry registry = Registry.valueOf(((ModAnnotation.EnumHolder)annotationData.annotationData().get("registry")).getValue());
+                        Registry registry = Registry.valueOf(((ModAnnotation.EnumHolder)annotationData.annotationData().get("registry")).value());
 
                         // Get the class the annotation is located in
                         Class<?> clazz = Class.forName(annotationData.clazz().getClassName(), false, RegistryEntryAcceptor.class.getClassLoader());
