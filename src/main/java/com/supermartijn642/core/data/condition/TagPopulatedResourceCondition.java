@@ -59,11 +59,11 @@ public class TagPopulatedResourceCondition implements ResourceCondition {
             if(!RegistryUtil.isValidIdentifier(json.get("tag").getAsString()))
                 throw new RuntimeException("Value for 'tag' must be a valid identifier!");
 
-            Registries.Registry<?> registry = Registries.getRegistry(new ResourceLocation(json.get("registry").getAsString()));
+            Registries.Registry<?> registry = Registries.getRegistry(ResourceLocation.parse(json.get("registry").getAsString()));
             if(registry == null)
                 throw new RuntimeException("Could not find a registry with identifier '" + json.get("registry").getAsString() + "'!");
 
-            ResourceLocation tag = new ResourceLocation(json.get("tag").getAsString());
+            ResourceLocation tag = ResourceLocation.parse(json.get("tag").getAsString());
             return new TagPopulatedResourceCondition(registry, tag);
         }
     }

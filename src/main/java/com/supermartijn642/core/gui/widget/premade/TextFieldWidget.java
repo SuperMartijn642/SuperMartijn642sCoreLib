@@ -147,17 +147,16 @@ public class TextFieldWidget extends BaseWidget {
         }
 
         Matrix4f matrix = poseStack.last().pose();
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuilder();
         RenderSystem.setShaderColor(0.0F, 0.0F, 255.0F, 255.0F); // TODO check if this works
         RenderSystem.enableColorLogicOp();
         RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        bufferbuilder.vertex(matrix, startX, endY, 0).endVertex();
-        bufferbuilder.vertex(matrix, endX, endY, 0).endVertex();
-        bufferbuilder.vertex(matrix, endX, startY, 0).endVertex();
-        bufferbuilder.vertex(matrix, startX, startY, 0).endVertex();
-        tessellator.end();
+        Tesselator tessellator = Tesselator.getInstance();
+        BufferBuilder buffer = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        buffer.addVertex(matrix, startX, endY, 0);
+        buffer.addVertex(matrix, endX, endY, 0);
+        buffer.addVertex(matrix, endX, startY, 0);
+        buffer.addVertex(matrix, startX, startY, 0);
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
         RenderSystem.disableColorLogicOp();
     }
 

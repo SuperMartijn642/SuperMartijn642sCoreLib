@@ -49,7 +49,7 @@ public class CustomTagEntries {
                         String typeString = json.get("type").getAsString();
                         if(!RegistryUtil.isValidIdentifier(typeString))
                             return DataResult.error(() -> "Invalid identifier '" + typeString + "'!");
-                        ResourceLocation type = new ResourceLocation(typeString);
+                        ResourceLocation type = ResourceLocation.parse(typeString);
                         if(!Registries.CUSTOM_TAG_ENTRY_SERIALIZERS.hasIdentifier(type))
                             return DataResult.error(() -> "Unknown custom tag entry serializer '" + typeString + "'!");
                         CustomTagEntrySerializer<?> serializer = Registries.CUSTOM_TAG_ENTRY_SERIALIZERS.getValue(type);

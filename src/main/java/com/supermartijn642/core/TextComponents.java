@@ -134,7 +134,7 @@ public class TextComponents {
      * display name.
      */
     public static TextComponentBuilder fluidStack(FluidStack stack){
-        return fromTextComponent(stack.getDisplayName());
+        return fromTextComponent(stack.getHoverName());
     }
 
     /**

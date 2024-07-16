@@ -335,7 +335,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          * @param weight     weight of the model when considering which model to pick
          */
         public VariantBuilder model(String namespace, String identifier, int xRotation, int yRotation, boolean uvLock, int weight){
-            return this.model(new ResourceLocation(namespace, identifier), xRotation, yRotation, uvLock, weight);
+            return this.model(ResourceLocation.fromNamespaceAndPath(namespace, identifier), xRotation, yRotation, uvLock, weight);
         }
 
         /**
@@ -370,7 +370,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          * @param uvLock     whether to apply uv lock to the model
          */
         public VariantBuilder model(String namespace, String identifier, int xRotation, int yRotation, boolean uvLock){
-            return this.model(new ResourceLocation(namespace, identifier), xRotation, yRotation, uvLock);
+            return this.model(ResourceLocation.fromNamespaceAndPath(namespace, identifier), xRotation, yRotation, uvLock);
         }
 
         /**
@@ -402,7 +402,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          * @param yRotation  rotation around the y-axis for the model
          */
         public VariantBuilder model(String namespace, String identifier, int xRotation, int yRotation){
-            return this.model(new ResourceLocation(namespace, identifier), xRotation, yRotation);
+            return this.model(ResourceLocation.fromNamespaceAndPath(namespace, identifier), xRotation, yRotation);
         }
 
         /**
@@ -429,7 +429,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          * @param identifier path of the model
          */
         public VariantBuilder model(String namespace, String identifier){
-            return this.model(new ResourceLocation(namespace, identifier));
+            return this.model(ResourceLocation.fromNamespaceAndPath(namespace, identifier));
         }
 
         /**
