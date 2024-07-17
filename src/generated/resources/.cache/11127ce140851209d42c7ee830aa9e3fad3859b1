@@ -1,8 +1,8 @@
-// 1.19.4	2023-05-07T03:16:36.0909462	Core Lib Generators
-8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/blocks/mineable/axe.json
-8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/blocks/mineable/hoe.json
-8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/blocks/mineable/pickaxe.json
-8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/blocks/mineable/shovel.json
-8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/blocks/needs_diamond_tool.json
-8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/blocks/needs_iron_tool.json
-8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/blocks/needs_stone_tool.json
+// 1.21	2024-07-17T09:06:14.640005	Core Lib Generators
+8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/block/mineable/axe.json
+8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/block/mineable/hoe.json
+8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/block/mineable/pickaxe.json
+8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/block/mineable/shovel.json
+8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/block/needs_diamond_tool.json
+8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/block/needs_iron_tool.json
+8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/block/needs_stone_tool.json

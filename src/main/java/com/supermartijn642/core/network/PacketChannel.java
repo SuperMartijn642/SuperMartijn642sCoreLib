@@ -74,7 +74,7 @@ public class PacketChannel {
     private PacketChannel(String modid, String name){
         this.modid = modid;
         this.name = name;
-        this.channel = ChannelBuilder.named(new ResourceLocation(modid, name))
+        this.channel = ChannelBuilder.named(ResourceLocation.fromNamespaceAndPath(modid, name))
             .networkProtocolVersion(1)
             .acceptedVersions((status, version) -> version == 1)
             .simpleChannel();

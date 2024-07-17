@@ -117,7 +117,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
             for(Map.Entry<String,String> entry : modelBuilder.textures.entrySet()){
                 // Validate the texture exists
                 if(entry.getValue().charAt(0) != '#'){
-                    ResourceLocation texture = new ResourceLocation(entry.getValue());
+                    ResourceLocation texture = ResourceLocation.parse(entry.getValue());
                     if(!this.cache.doesResourceExist(ResourceType.ASSET, texture.getNamespace(), "textures", texture.getPath(), ".png"))
                         throw new IllegalArgumentException("Could not find texture '" + texture + "' for model '" + modelBuilder.identifier + "'!");
                 }
@@ -204,7 +204,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
      * @param path      path of the model location
      */
     protected ModelBuilder model(String namespace, String path){
-        return this.model(new ResourceLocation(namespace, path));
+        return this.model(ResourceLocation.fromNamespaceAndPath(namespace, path));
     }
 
     /**
@@ -504,7 +504,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
          * @param path      path of the parent model location
          */
         public ModelBuilder parent(String namespace, String path){
-            return this.parent(new ResourceLocation(namespace, path));
+            return this.parent(ResourceLocation.fromNamespaceAndPath(namespace, path));
         }
 
         /**
@@ -533,42 +533,42 @@ public abstract class ModelGenerator extends ResourceGenerator {
          * @param identifier path of the render type
          */
         public ModelBuilder renderType(String namespace, String identifier){
-            return this.renderType(new ResourceLocation(namespace, identifier));
+            return this.renderType(ResourceLocation.fromNamespaceAndPath(namespace, identifier));
         }
 
         /**
          * Sets the render type for this model to <b>minecraft:solid</b>.
          */
         public ModelBuilder renderTypeSolid(){
-            return this.renderType(new ResourceLocation("solid"));
+            return this.renderType(ResourceLocation.withDefaultNamespace("solid"));
         }
 
         /**
          * Sets the render type for this model to <b>minecraft:cutout</b>.
          */
         public ModelBuilder renderTypeCutout(){
-            return this.renderType(new ResourceLocation("cutout"));
+            return this.renderType(ResourceLocation.withDefaultNamespace("cutout"));
         }
 
         /**
          * Sets the render type for this model to <b>minecraft:cutout_mipped</b>.
          */
         public ModelBuilder renderTypeCutoutMipped(){
-            return this.renderType(new ResourceLocation("cutout_mipped"));
+            return this.renderType(ResourceLocation.withDefaultNamespace("cutout_mipped"));
         }
 
         /**
          * Sets the render type for this model to <b>minecraft:cutout_mipped_all</b>.
          */
         public ModelBuilder renderTypeCutoutMippedAll(){
-            return this.renderType(new ResourceLocation("cutout_mipped_all"));
+            return this.renderType(ResourceLocation.withDefaultNamespace("cutout_mipped_all"));
         }
 
         /**
          * Sets the render type for this model to <b>minecraft:translucent</b>.
          */
         public ModelBuilder renderTypeTranslucent(){
-            return this.renderType(new ResourceLocation("translucent"));
+            return this.renderType(ResourceLocation.withDefaultNamespace("translucent"));
         }
 
         /**
@@ -622,7 +622,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
                 throw new IllegalArgumentException("Texture entry must either start with '#' or be a valid resource location, not '" + texture + "'!");
 
             if(texture.charAt(0) != '#')
-                return this.texture(key, texture.contains(":") ? new ResourceLocation(texture) : new ResourceLocation(this.modid, texture));
+                return this.texture(key, texture.contains(":") ? ResourceLocation.parse(texture) : ResourceLocation.fromNamespaceAndPath(this.modid, texture));
             this.textures.put(key, texture);
             return this;
         }
@@ -639,7 +639,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
             if(!RegistryUtil.isValidPath(identifier))
                 throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-            this.texture(key, new ResourceLocation(namespace, identifier));
+            this.texture(key, ResourceLocation.fromNamespaceAndPath(namespace, identifier));
             return this;
         }
 
@@ -1040,7 +1040,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
         public void generate(){
             for(ModelBuilder modelBuilder : ModelGenerator.this.models.values()){
                 // Add the textures used by the model
-                modelBuilder.textures.values().stream().filter(i -> i.charAt(0) != '#').map(ResourceLocation::new).forEach(this.blockAtlas()::texture);
+                modelBuilder.textures.values().stream().filter(i -> i.charAt(0) != '#').map(ResourceLocation::parse).forEach(this.blockAtlas()::texture);
                 // Add the parent model
                 ResourceLocation parent = modelBuilder.parent;
                 if(parent != null && !ModelGenerator.this.models.containsKey(parent) && this.cache.getExistingResource(ResourceType.ASSET, parent.getNamespace(), "models", parent.getPath(), ".json").isPresent())

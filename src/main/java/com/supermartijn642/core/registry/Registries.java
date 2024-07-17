@@ -13,13 +13,11 @@ import net.minecraft.stats.StatType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
@@ -88,18 +86,16 @@ public final class Registries {
     public static final Registry<MobEffect> MOB_EFFECTS = forge(MOB_EFFECT, ForgeRegistries.MOB_EFFECTS, MobEffect.class);
     public static final Registry<SoundEvent> SOUND_EVENTS = forge(SOUND_EVENT, ForgeRegistries.SOUND_EVENTS, SoundEvent.class);
     public static final Registry<Potion> POTIONS = forge(POTION, ForgeRegistries.POTIONS, Potion.class);
-    public static final Registry<Enchantment> ENCHANTMENTS = forge(ENCHANTMENT, ForgeRegistries.ENCHANTMENTS, Enchantment.class);
     public static final Registry<EntityType<?>> ENTITY_TYPES = forge(ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES, EntityType.class);
     public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPES = forge(BLOCK_ENTITY_TYPE, ForgeRegistries.BLOCK_ENTITY_TYPES, BlockEntityType.class);
     public static final Registry<ParticleType<?>> PARTICLE_TYPES = forge(PARTICLE_TYPE, ForgeRegistries.PARTICLE_TYPES, ParticleType.class);
     public static final Registry<MenuType<?>> MENU_TYPES = forge(MENU, ForgeRegistries.MENU_TYPES, MenuType.class);
-    public static final Registry<PaintingVariant> PAINTING_VARIANTS = forge(PAINTING_VARIANT, ForgeRegistries.PAINTING_VARIANTS, PaintingVariant.class);
     public static final Registry<RecipeType<?>> RECIPE_TYPES = forge(RECIPE_TYPE, ForgeRegistries.RECIPE_TYPES, RecipeType.class);
     public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZERS = forge(RECIPE_SERIALIZER, ForgeRegistries.RECIPE_SERIALIZERS, RecipeSerializer.class);
     public static final Registry<Attribute> ATTRIBUTES = forge(ATTRIBUTE, ForgeRegistries.ATTRIBUTES, Attribute.class);
     public static final Registry<StatType<?>> STAT_TYPES = forge(STAT_TYPE, ForgeRegistries.STAT_TYPES, StatType.class);
     public static final Registry<MapCodec<? extends ICondition>> RECIPE_CONDITION_SERIALIZERS = forge(ForgeRegistries.CONDITION_SERIALIZERS, ForgeRegistries.Keys.CONDITION_SERIALIZERS.location(), MapCodec.class);
-    public static final Registry<CustomTagEntrySerializer<?>> CUSTOM_TAG_ENTRY_SERIALIZERS = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "custom_tag_entries"), CustomTagEntrySerializer.class);
+    public static final Registry<CustomTagEntrySerializer<?>> CUSTOM_TAG_ENTRY_SERIALIZERS = new MapBackedRegistry<>(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "custom_tag_entries"), CustomTagEntrySerializer.class);
     public static final Registry<DataComponentType<?>> DATA_COMPONENT_TYPES = vanilla(DATA_COMPONENT_TYPE, DataComponentType.class);
 
     static{

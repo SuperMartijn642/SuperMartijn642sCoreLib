@@ -24,7 +24,7 @@ import net.minecraftforge.common.MinecraftForge;
  */
 public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> extends AbstractContainerScreen<X> {
 
-    private static final ResourceLocation SLOT_TEXTURE = new ResourceLocation("supermartijn642corelib", "textures/gui/slot.png");
+    private static final ResourceLocation SLOT_TEXTURE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "textures/gui/slot.png");
 
     public static <T extends Widget, X extends BaseContainer> WidgetContainerScreen<T,X> of(T widget, X container, boolean drawSlots, boolean isPauseScreen){
         return new WidgetContainerScreen<>(widget, container, drawSlots, isPauseScreen);

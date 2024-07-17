@@ -108,12 +108,12 @@ public final class CreativeItemGroup extends CreativeModeTab {
         super(CreativeModeTab.builder(Row.TOP, 0).icon(icon).title(TextComponents.translation(translationKey).get()));
         this.modid = modid;
         this.identifier = identifier;
-        this.background = new ResourceLocation("textures/gui/container/creative_inventory/tab_items.png");
+        this.background = ResourceLocation.withDefaultNamespace("textures/gui/container/creative_inventory/tab_items.png");
         this.displayItemsGenerator = (flags, output) -> this.applyFiller(output::accept);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<RegisterEvent>)event -> {
             if(event.getRegistryKey() == Registries.CREATIVE_MODE_TAB)
-                event.register(Registries.CREATIVE_MODE_TAB, new ResourceLocation(modid, identifier), () -> this);
+                event.register(Registries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath(modid, identifier), () -> this);
         });
     }
 
@@ -162,7 +162,7 @@ public final class CreativeItemGroup extends CreativeModeTab {
     }
 
     @Override
-    public ResourceLocation getBackgroundLocation(){
+    public ResourceLocation getBackgroundTexture(){
         return this.background;
     }
 }

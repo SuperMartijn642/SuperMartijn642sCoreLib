@@ -13,7 +13,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
  */
 public final class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> {
 
-    public static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.simple(new ResourceLocation("supermartijn642corelib:dummy"));
+    public static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.simple(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy"));
     private static final DummyRecipe DUMMY_RECIPE = new DummyRecipe();
     public static final ConditionalRecipeSerializer INSTANCE = new ConditionalRecipeSerializer();
 
@@ -89,15 +88,15 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
         return StreamCodec.unit(null);
     }
 
-    private static class DummyRecipe implements Recipe<Container> {
+    private static class DummyRecipe implements Recipe<RecipeInput> {
 
         @Override
-        public boolean matches(Container container, Level level){
+        public boolean matches(RecipeInput container, Level level){
             return false;
         }
 
         @Override
-        public ItemStack assemble(Container container, HolderLookup.Provider provider){
+        public ItemStack assemble(RecipeInput container, HolderLookup.Provider provider){
             return ItemStack.EMPTY;
         }
 
