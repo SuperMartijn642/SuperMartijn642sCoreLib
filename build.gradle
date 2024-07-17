@@ -117,6 +117,8 @@ mixin {
     debug.export = true
 }
 
+jar.manifest.attributes "MixinConfigs": "supermartijn642corelib.mixins.json"
+
 // Rename the IntelliJ run configs
 gradle.taskGraph.whenReady {
     tasks.genIntellijRuns.doLast {
