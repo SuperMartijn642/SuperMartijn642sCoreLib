@@ -4,6 +4,7 @@ import com.supermartijn642.core.gui.BaseContainer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -38,6 +39,11 @@ public class CommonUtils {
     public static Level getLevel(ResourceKey<Level> resourceKey){
         MinecraftServer server = getServer();
         return server == null ? null : server.getLevel(resourceKey);
+    }
+
+    public static RegistryAccess getRegistryAccess(){
+        MinecraftServer server = getServer();
+        return server == null ? null : server.registryAccess();
     }
 
     /**
