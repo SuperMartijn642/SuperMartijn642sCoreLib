@@ -94,6 +94,7 @@ public final class Registries {
         REGISTRATION_ORDER = Lists.newArrayList(
             Registries.BLOCKS,
             Registries.FLUIDS,
+            Registries.DATA_COMPONENT_TYPES,
             Registries.ITEMS,
             Registries.MOB_EFFECTS,
             Registries.SOUND_EVENTS,
