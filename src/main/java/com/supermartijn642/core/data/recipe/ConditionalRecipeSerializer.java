@@ -12,7 +12,10 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.conditions.ICondition;
 
@@ -25,7 +28,7 @@ import java.util.stream.Collectors;
 public final class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> {
 
     public static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.simple(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy"));
-    private static final DummyRecipe DUMMY_RECIPE = new DummyRecipe();
+    public static final Recipe<?> DUMMY_RECIPE = new DummyRecipe();
     public static final ConditionalRecipeSerializer INSTANCE = new ConditionalRecipeSerializer();
 
     public static JsonObject wrapRecipeWithForgeConditions(JsonObject recipe, Collection<ICondition> conditions){
@@ -51,7 +54,7 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
     private ConditionalRecipeSerializer(){
     }
 
-    public static RecipeHolder<?> fromJson(ResourceLocation location, JsonObject json, HolderLookup.Provider provider){
+    public static JsonElement unwrapRecipe(ResourceLocation location, JsonObject json){
         if(!json.has("conditions") || !json.get("conditions").isJsonArray())
             throw new RuntimeException("Conditional recipe '" + location + "' must have 'conditions' array!");
         if(!json.has("recipe") || !json.get("recipe").isJsonObject())
@@ -68,11 +71,11 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
             }
 
             if(!condition.test(ICondition.IContext.EMPTY))
-                return new RecipeHolder<>(location, DUMMY_RECIPE);
+                return null;
         }
 
         // Now return the recipe
-        return RecipeManager.fromJson(location, json.getAsJsonObject("recipe"), provider);
+        return json.getAsJsonObject("recipe");
     }
 
     @Override
