@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
 
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -18,7 +19,12 @@ public class CodecHelper {
             @Override
             public <U> DataResult<U> encode(T input, DynamicOps<U> ops, U prefix){
                 // Serialize the input to json
-                JsonElement json = serializer.apply(input);
+                JsonElement json;
+                try{
+                    json = serializer.apply(input);
+                }catch(Exception e){
+                    return DataResult.error(() -> "Failed to serialize object: " + e.getMessage());
+                }
                 // Convert json to the required format
                 return DataResult.success(JsonOps.INSTANCE.convertTo(ops, json));
             }
@@ -61,8 +67,12 @@ public class CodecHelper {
                 // Convert the input to json
                 JsonObject json = new JsonObject();
                 input.entries()
-                    .filter(entry -> entry.getFirst() instanceof String)
-                    .forEach(entry -> json.add((String)entry.getFirst(), ops.convertTo(JsonOps.INSTANCE, entry.getSecond())));
+                    .map(entry -> {
+                        DataResult<String> key = ops.getStringValue(entry.getFirst());
+                        return key.isSuccess() ? Pair.of(key.getOrThrow(), entry.getSecond()) : null;
+                    })
+                    .filter(Objects::nonNull)
+                    .forEach(entry -> json.add(entry.getFirst(), ops.convertTo(JsonOps.INSTANCE, entry.getSecond())));
                 // Deserialize from json
                 T object;
                 try{
