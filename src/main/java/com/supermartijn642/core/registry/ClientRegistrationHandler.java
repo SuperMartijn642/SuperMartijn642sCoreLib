@@ -38,6 +38,7 @@ import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -680,7 +681,7 @@ public class ClientRegistrationHandler {
             if(items.contains(item))
                 throw new RuntimeException("Duplicate custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "'!");
 
-            Object renderProperties = item.getRenderPropertiesInternal();
+            Object renderProperties = IClientItemExtensions.of(item);
             if(!(renderProperties instanceof EditableClientItemExtensions))
                 throw new RuntimeException("Cannot register custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "' without EditableClientItemExtensions render properties!");
 
