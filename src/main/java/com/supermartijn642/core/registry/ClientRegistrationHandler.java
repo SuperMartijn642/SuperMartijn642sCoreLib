@@ -124,7 +124,7 @@ public class ClientRegistrationHandler {
         if(this.specialModels.containsKey(identifier))
             throw new RuntimeException("Overlapping special model and model location '" + identifier + "'!");
 
-        this.models.add(new ModelResourceLocation(identifier, ""));
+        this.models.add(new ModelResourceLocation(identifier, "standalone"));
     }
 
     /**
