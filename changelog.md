@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.17b
+- Fixed custom model registration through `ClientRegistrationHandler`
+
 ### SuperMartijn642's Core Library 1.1.17a
 - Fixed crash with NeoForge 21.0.102
 
