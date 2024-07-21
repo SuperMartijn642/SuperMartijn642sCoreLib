@@ -13,7 +13,6 @@ import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
@@ -59,7 +58,7 @@ public class CoreLib {
             Registries.ITEMS.getValues().stream()
                 .filter(item -> item instanceof BaseItem || item instanceof BaseBlockItem)
                 .filter(item -> item instanceof BaseItem ? ((BaseItem)item).isInCreativeGroup(event.getTab()) : ((BaseBlockItem)item).isInCreativeGroup(event.getTab()))
-                .forEach(item -> event.accept(item, event.getTabKey().equals(CreativeModeTabs.SEARCH) ? CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY : CreativeModeTab.TabVisibility.PARENT_TAB_ONLY));
+                .forEach(item -> event.accept(item, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY));
         });
     }
 
