@@ -13,6 +13,7 @@ import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
@@ -55,10 +56,14 @@ public class CoreLib {
 
         // Add all BaseItem instances to their respective creative tabs
         eventBus.addListener((Consumer<BuildCreativeModeTabContentsEvent>)event -> {
+            boolean isSearchTab = CreativeModeTabs.SEARCH.equals(event.getTabKey());
             Registries.ITEMS.getValues().stream()
                 .filter(item -> item instanceof BaseItem || item instanceof BaseBlockItem)
                 .filter(item -> item instanceof BaseItem ? ((BaseItem)item).isInCreativeGroup(event.getTab()) : ((BaseBlockItem)item).isInCreativeGroup(event.getTab()))
-                .forEach(item -> event.accept(item, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY));
+                .forEach(item -> {
+                    if(isSearchTab) event.accept(item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                    else event.accept(item, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
+                });
         });
     }
 
