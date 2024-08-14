@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.17d
+- Fixed `LootTableGenerator` errors with custom enchant functions
+
 ### SuperMartijn642's Core Library 1.1.17c
 - Fixed items not appearing in creative menu search tab
 
