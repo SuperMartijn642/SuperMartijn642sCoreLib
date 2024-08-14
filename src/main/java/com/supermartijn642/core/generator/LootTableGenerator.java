@@ -1,7 +1,9 @@
 package com.supermartijn642.core.generator;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.advancements.critereon.*;
@@ -46,17 +48,18 @@ public abstract class LootTableGenerator extends ResourceGenerator {
 
     @Override
     public void save(){
+        DynamicOps<JsonElement> ops = ResourceGenerator.registryAccess.createSerializationContext(JsonOps.INSTANCE);
         // Loop over all loot tables
         for(LootTableBuilder lootTableBuilder : this.lootTables.values()){
             JsonObject json = new JsonObject();
             // Type
             if(lootTableBuilder.parameters != LootContextParamSets.ALL_PARAMS)
-                json.add("type", LootContextParamSets.CODEC.encodeStart(JsonOps.INSTANCE, lootTableBuilder.parameters).getOrThrow());
+                json.add("type", LootContextParamSets.CODEC.encodeStart(ops, lootTableBuilder.parameters).getOrThrow());
             // Functions
             if(!lootTableBuilder.functions.isEmpty()){
                 JsonArray functionsJson = new JsonArray();
                 for(LootItemFunction function : lootTableBuilder.functions)
-                    functionsJson.add(LootItemFunctions.ROOT_CODEC.encodeStart(JsonOps.INSTANCE, function).getOrThrow());
+                    functionsJson.add(LootItemFunctions.ROOT_CODEC.encodeStart(ops, function).getOrThrow());
                 json.add("functions", functionsJson);
             }
             // Pools
@@ -69,22 +72,22 @@ public abstract class LootTableGenerator extends ResourceGenerator {
                     if(pool.name != null && !pool.name.isEmpty())
                         poolJson.addProperty("name", pool.name);
                     // Rolls
-                    poolJson.add("rolls", NumberProviders.CODEC.encodeStart(JsonOps.INSTANCE, pool.rolls).getOrThrow());
+                    poolJson.add("rolls", NumberProviders.CODEC.encodeStart(ops, pool.rolls).getOrThrow());
                     // Bonus rolls
                     if(!(pool.bonusRolls instanceof ConstantValue) || pool.bonusRolls.getInt(null) != 0)
-                        poolJson.add("bonus_rolls", NumberProviders.CODEC.encodeStart(JsonOps.INSTANCE, pool.bonusRolls).getOrThrow());
+                        poolJson.add("bonus_rolls", NumberProviders.CODEC.encodeStart(ops, pool.bonusRolls).getOrThrow());
                     // Conditions
                     if(!pool.conditions.isEmpty()){
                         JsonArray conditionsJson = new JsonArray();
                         for(LootItemCondition condition : pool.conditions)
-                            conditionsJson.add(LootItemConditions.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, condition).getOrThrow());
+                            conditionsJson.add(LootItemConditions.DIRECT_CODEC.encodeStart(ops, condition).getOrThrow());
                         poolJson.add("conditions", conditionsJson);
                     }
                     // Functions
                     if(!pool.functions.isEmpty()){
                         JsonArray functionsJson = new JsonArray();
                         for(LootItemFunction function : pool.functions)
-                            functionsJson.add(LootItemFunctions.ROOT_CODEC.encodeStart(JsonOps.INSTANCE, function).getOrThrow());
+                            functionsJson.add(LootItemFunctions.ROOT_CODEC.encodeStart(ops, function).getOrThrow());
                         poolJson.add("functions", functionsJson);
                     }
                     // Entries
@@ -92,7 +95,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
                         throw new RuntimeException("Loot table '" + lootTableBuilder.identifier + "' has loot pool without any entries!");
                     JsonArray entriesJson = new JsonArray();
                     for(LootPoolEntryContainer entry : pool.entries)
-                        entriesJson.add(LootPoolEntries.CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow());
+                        entriesJson.add(LootPoolEntries.CODEC.encodeStart(ops, entry).getOrThrow());
                     poolJson.add("entries", entriesJson);
 
                     poolsJson.add(poolJson);
