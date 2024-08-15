@@ -61,8 +61,13 @@ public class CoreLib {
                 .filter(item -> item instanceof BaseItem || item instanceof BaseBlockItem)
                 .filter(item -> item instanceof BaseItem ? ((BaseItem)item).isInCreativeGroup(event.getTab()) : ((BaseBlockItem)item).isInCreativeGroup(event.getTab()))
                 .forEach(item -> {
-                    if(isSearchTab) event.accept(item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-                    else event.accept(item, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
+                    try{
+                        if(isSearchTab) event.accept(item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                        else event.accept(item, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
+                    }catch(IllegalStateException e){
+                        if(!e.getMessage().startsWith("Accidentally adding")) // Ignore adding duplicates errors
+                            throw e;
+                    }
                 });
         });
     }
