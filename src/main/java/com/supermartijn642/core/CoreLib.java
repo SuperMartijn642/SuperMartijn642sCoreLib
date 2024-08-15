@@ -58,7 +58,14 @@ public class CoreLib {
             Registries.ITEMS.getValues().stream()
                 .filter(item -> item instanceof BaseItem || item instanceof BaseBlockItem)
                 .filter(item -> item instanceof BaseItem ? ((BaseItem)item).isInCreativeGroup(event.getTab()) : ((BaseBlockItem)item).isInCreativeGroup(event.getTab()))
-                .forEach(item -> event.accept(item, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY));
+                .forEach(item -> {
+                    try{
+                        event.accept(item, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
+                    }catch(IllegalArgumentException e){
+                        if(!e.getMessage().endsWith(" in the tab's list")) // Ignore adding duplicates errors
+                            throw e;
+                    }
+                });
         });
     }
 
