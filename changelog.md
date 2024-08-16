@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.17f
+- Fixed registry overrides not working
+
 ### SuperMartijn642's Core Library 1.1.17e
 - Fixed `LootTableGenerator` errors with custom enchant functions
 
