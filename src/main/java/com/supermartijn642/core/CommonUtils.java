@@ -2,6 +2,7 @@ package com.supermartijn642.core;
 
 import com.supermartijn642.core.gui.BaseContainer;
 import com.supermartijn642.core.gui.BaseContainerType;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -47,6 +48,15 @@ public class CommonUtils {
     public static Level getLevel(ResourceKey<Level> resourceKey){
         MinecraftServer server = getServer();
         return server == null ? null : server.getLevel(resourceKey);
+    }
+
+    public static RegistryAccess getRegistryAccess(){
+        MinecraftServer server = getServer();
+        if(server == null && getEnvironmentSide().isClient()){
+            Level level = ClientUtils.getWorld();
+            return level == null ? null : level.registryAccess();
+        }
+        return server == null ? null : server.registryAccess();
     }
 
     /**
