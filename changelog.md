@@ -1,3 +1,7 @@
+### SuperMartijn642's Core Library 1.1.17a
+- Added `CommonUtils#getRegistryAccess`
+- Added `CodecHelper`
+
 ### SuperMartijn642's Core Library 1.1.17
 - Added support for custom tag entry types
 - Added a namespace tag entry type
