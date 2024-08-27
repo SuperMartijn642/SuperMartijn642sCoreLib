@@ -5,6 +5,7 @@ import com.supermartijn642.core.gui.BaseContainerType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -40,6 +41,15 @@ public class CommonUtils {
     public static Level getLevel(ResourceKey<Level> resourceKey){
         MinecraftServer server = getServer();
         return server == null ? null : server.getLevel(resourceKey);
+    }
+
+    public static RegistryAccess getRegistryAccess(){
+        MinecraftServer server = getServer();
+        if(server == null && getEnvironmentSide().isClient()){
+            Level level = ClientUtils.getWorld();
+            return level == null ? null : level.registryAccess();
+        }
+        return server == null ? null : server.registryAccess();
     }
 
     /**
