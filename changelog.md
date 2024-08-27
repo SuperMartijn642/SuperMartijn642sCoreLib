@@ -1,3 +1,7 @@
+### SuperMartijn642's Core Library 1.1.17b
+- Added `CommonUtils#getRegistryAccess`
+- Added `CodecHelper`
+
 ### SuperMartijn642's Core Library 1.1.17a
 - Account for changes to Fabric resource loader
 
