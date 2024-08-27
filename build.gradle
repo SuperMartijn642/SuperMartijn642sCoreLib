@@ -101,9 +101,6 @@ tasks.register('sourcesJar', Jar) {
     from sourceSets.main.allSource
 }
 
-// Force the jar to be reobfuscated
-jar.finalizedBy('reobfJar')
-
 publishMods {
     file = jar.archiveFile
     displayName = "${mod_name} ${mod_version} for NeoForge ${minecraft_suffix.substring(2)}"
