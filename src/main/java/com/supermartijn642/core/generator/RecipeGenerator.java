@@ -188,7 +188,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
                 // Conditions
                 if(!recipeBuilder.conditions.isEmpty())
-                    ConditionalRecipeSerializer.wrapRecipeWithForgeConditions(json, recipeBuilder.conditions);
+                    json = ConditionalRecipeSerializer.wrapRecipeWithForgeConditions(json, recipeBuilder.conditions);
 
                 // Save the object to the cache
                 ResourceLocation identifier = recipeBuilder.identifier;
