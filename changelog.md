@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.17b
+- Fixed `RecipeGenerator` not applying resource conditions
+
 ### SuperMartijn642's Core Library 1.1.17a
 - Added `CommonUtils#getRegistryAccess`
 - Added `CodecHelper`
