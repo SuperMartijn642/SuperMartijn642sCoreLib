@@ -10,7 +10,10 @@ import com.supermartijn642.core.extensions.ICriterionInstanceExtension;
 import com.supermartijn642.core.extensions.IngredientExtension;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.advancements.ICriterionInstance;
-import net.minecraft.advancements.critereon.*;
+import net.minecraft.advancements.critereon.EnchantmentPredicate;
+import net.minecraft.advancements.critereon.InventoryChangeTrigger;
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -177,7 +180,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
                 // Conditions
                 if(!recipeBuilder.conditions.isEmpty())
-                    ConditionalRecipeSerializer.wrapRecipe(json, recipeBuilder.conditions);
+                    json = ConditionalRecipeSerializer.wrapRecipe(json, recipeBuilder.conditions);
 
                 // Save the object to the cache
                 ResourceLocation identifier = recipeBuilder.identifier;
