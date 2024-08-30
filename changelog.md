@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.17g
+- Fixed `RecipeGenerator` not applying resource conditions
+
 ### SuperMartijn642's Core Library 1.1.17f
 - Fixed registry overrides not working
 
