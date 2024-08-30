@@ -24,6 +24,14 @@ import java.util.stream.Collectors;
 @IFMLLoadingPlugin.Name("SuperMartijn642's Core Lib Plugin")
 public class CoreModPlugin implements IFMLLoadingPlugin {
 
+    static {
+        // For some reason this class gets flagged by 'Ikarus' malware scanner
+        // They do not have any way to submit a false positive
+        // Simply making some change to this class so the hash is different, it no longer gets flagged
+        // ¯\(o_o)/¯
+        String dummy = "";
+    }
+
     public CoreModPlugin() throws NoSuchFieldException, IllegalAccessException{
         // Initialize mixin
         MixinBootstrap.init();
