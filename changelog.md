@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.17c
+- Fixed `RecipeGenerator` not applying resource conditions
+
 ### SuperMartijn642's Core Library 1.1.17b
 - Fixed `LootTableGenerator` errors with custom enchant functions
 
