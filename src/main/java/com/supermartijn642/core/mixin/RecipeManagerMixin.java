@@ -11,6 +11,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraftforge.common.crafting.conditions.ICondition;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -30,6 +31,9 @@ import java.util.Set;
 public class RecipeManagerMixin {
 
     @Final
+    @Shadow(remap = false)
+    private ICondition.IContext context;
+    @Final
     @Shadow
     private HolderLookup.Provider registries;
 
@@ -48,7 +52,7 @@ public class RecipeManagerMixin {
             if(json != null && json.has("type") && json.get("type").isJsonPrimitive() && json.getAsJsonPrimitive("type").isString()){
                 String type = json.get("type").getAsString();
                 if(RegistryUtil.isValidIdentifier(type) && new ResourceLocation(type).equals(Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE))){
-                    JsonElement recipeJson = ConditionalRecipeSerializer.unwrapRecipe(identifier, json, this.registries);
+                    JsonElement recipeJson = ConditionalRecipeSerializer.unwrapRecipe(identifier, json, this.registries, this.context);
                     if(recipeJson == null){
                         if(removed == null)
                             removed = new HashSet<>();
@@ -72,7 +76,7 @@ public class RecipeManagerMixin {
         if(json != null && json.has("type") && json.get("type").isJsonPrimitive() && json.getAsJsonPrimitive("type").isString()){
             String type = json.get("type").getAsString();
             if(RegistryUtil.isValidIdentifier(type) && new ResourceLocation(type).equals(Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE))){
-                JsonElement recipeJson = ConditionalRecipeSerializer.unwrapRecipe(recipeLocation, json, provider);
+                JsonElement recipeJson = ConditionalRecipeSerializer.unwrapRecipe(recipeLocation, json, provider, ICondition.IContext.EMPTY);
                 if(recipeJson == null)
                     ci.setReturnValue(new RecipeHolder<>(recipeLocation, ConditionalRecipeSerializer.DUMMY_RECIPE));
                 else
