@@ -29,8 +29,8 @@ import java.util.stream.Collectors;
  */
 public final class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> {
 
-    public static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.simple(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy"));
-    public static final DummyRecipe DUMMY_RECIPE = new DummyRecipe();
+    public static final RecipeType<Recipe<?>> DUMMY_RECIPE_TYPE = RecipeType.simple(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy"));
+    public static final Recipe<?> DUMMY_RECIPE = new DummyRecipe();
     public static final ConditionalRecipeSerializer INSTANCE = new ConditionalRecipeSerializer();
 
     public static JsonObject wrapRecipeWithForgeConditions(JsonObject recipe, Collection<ICondition> conditions){
@@ -56,7 +56,7 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
     private ConditionalRecipeSerializer(){
     }
 
-    public static JsonElement unwrapRecipe(ResourceLocation location, JsonObject json, HolderLookup.Provider provider){
+    public static JsonElement unwrapRecipe(ResourceLocation location, JsonObject json, HolderLookup.Provider provider, ICondition.IContext conditionContext){
         if(!json.has("conditions") || !json.get("conditions").isJsonArray())
             throw new RuntimeException("Conditional recipe '" + location + "' must have 'conditions' array!");
         if(!json.has("recipe") || !json.get("recipe").isJsonObject())
@@ -64,16 +64,16 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
 
         // Test all conditions
         JsonArray conditions = json.getAsJsonArray("conditions");
-        DynamicOps<?> ops = RegistryOps.create(JsonOps.INSTANCE, provider);
+        DynamicOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, provider);
         for(JsonElement conditionElement : conditions){
             ICondition condition;
             try{
-                condition = ICondition.CODEC.decode(JsonOps.INSTANCE, conditionElement).getOrThrow().getFirst();
+                condition = ICondition.CODEC.decode(ops, conditionElement).getOrThrow().getFirst();
             }catch(Exception e){
                 throw new RuntimeException("Encountered exception whilst testing conditions for recipe '" + location + "'!", e);
             }
 
-            if(!condition.test(ICondition.IContext.EMPTY, ops))
+            if(!condition.test(conditionContext, ops))
                 return null;
         }
 
