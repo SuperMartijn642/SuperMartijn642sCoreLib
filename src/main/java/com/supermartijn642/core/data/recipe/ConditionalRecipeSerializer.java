@@ -3,6 +3,7 @@ package com.supermartijn642.core.data.recipe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.supermartijn642.core.data.condition.ResourceCondition;
@@ -17,6 +18,7 @@ import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.conditions.ConditionalOps;
 import net.neoforged.neoforge.common.conditions.ICondition;
 
 import java.util.Collection;
@@ -27,7 +29,7 @@ import java.util.stream.Collectors;
  */
 public final class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> {
 
-    public static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.simple(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy"));
+    public static final RecipeType<Recipe<?>> DUMMY_RECIPE_TYPE = RecipeType.simple(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy"));
     public static final Recipe<?> DUMMY_RECIPE = new DummyRecipe();
     public static final ConditionalRecipeSerializer INSTANCE = new ConditionalRecipeSerializer();
 
@@ -54,23 +56,26 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
     private ConditionalRecipeSerializer(){
     }
 
-    public static JsonElement unwrapRecipe(ResourceLocation location, JsonObject json){
+    public static JsonElement unwrapRecipe(ResourceLocation location, JsonObject json, DynamicOps<JsonElement> ops){
         if(!json.has("conditions") || !json.get("conditions").isJsonArray())
             throw new RuntimeException("Conditional recipe '" + location + "' must have 'conditions' array!");
         if(!json.has("recipe") || !json.get("recipe").isJsonObject())
             throw new RuntimeException("Conditional recipe '" + location + "' must have 'recipe' object!");
+
+        // Retrieve condition context
+        ICondition.IContext context = ConditionalOps.retrieveContext().codec().decode(ops, ops.emptyMap()).getOrThrow().getFirst();
 
         // Test all conditions
         JsonArray conditions = json.getAsJsonArray("conditions");
         for(JsonElement conditionElement : conditions){
             ICondition condition;
             try{
-                condition = ICondition.CODEC.decode(JsonOps.INSTANCE, conditionElement).getOrThrow().getFirst();
+                condition = ICondition.CODEC.decode(ops, conditionElement).getOrThrow().getFirst();
             }catch(Exception e){
                 throw new RuntimeException("Encountered exception whilst testing conditions for recipe '" + location + "'!", e);
             }
 
-            if(!condition.test(ICondition.IContext.EMPTY))
+            if(!condition.test(context))
                 return null;
         }
 
