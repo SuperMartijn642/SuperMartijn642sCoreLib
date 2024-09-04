@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.17h
+- Fixed tag-dependent recipe conditions not working
+
 ### SuperMartijn642's Core Library 1.1.17g
 - Fixed `RecipeGenerator` not applying resource conditions
 
