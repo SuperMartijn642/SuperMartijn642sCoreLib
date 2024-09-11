@@ -3,6 +3,8 @@ package com.supermartijn642.core.registry;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.util.Holder;
 import com.supermartijn642.core.util.Pair;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleType;
@@ -74,6 +76,7 @@ public class RegistryOverrideHandlers {
     public static final BiConsumer<Object,Object> ATTRIBUTES = overrideFields(Attributes.class, Attribute.class);
     public static final BiConsumer<Object,Object> STAT_TYPES = overrideFields(Stats.class, StatType.class);
     public static final BiConsumer<Object,Object> DATA_COMPONENT_TYPES = overrideFields(DataComponents.class, DataComponentType.class);
+    public static final BiConsumer<Object,Object> TRIGGER_TYPES = overrideFields(CriteriaTriggers.class, CriterionTrigger.class);
 
     private static BiConsumer<Object,Object> overrideFields(Class<?> clazz, Class<?> fieldType){
         REQUESTED_FIELDS.add(Pair.of(clazz, fieldType));

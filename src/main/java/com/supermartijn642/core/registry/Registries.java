@@ -7,10 +7,12 @@ import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
 import com.supermartijn642.core.extensions.CoreLibMappedRegistry;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
+import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -85,6 +87,7 @@ public final class Registries {
     public static final Registry<ResourceConditionSerializer<?>> RESOURCE_CONDITION_SERIALIZERS = new ResourceConditionRegistry(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "resource_conditions"), ResourceConditionSerializer.class);
     public static final Registry<CustomTagEntrySerializer<?>> CUSTOM_TAG_ENTRY_SERIALIZERS = new MapBackedRegistry<>(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "custom_tag_entries"), CustomTagEntrySerializer.class);
     public static final Registry<DataComponentType<?>> DATA_COMPONENT_TYPES = vanilla(DATA_COMPONENT_TYPE, DataComponentType.class, RegistryOverrideHandlers.DATA_COMPONENT_TYPES);
+    public static final Registry<CriterionTrigger<?>> TRIGGER_TYPES = vanilla(BuiltInRegistries.TRIGGER_TYPES, CriterionTrigger.class, RegistryOverrideHandlers.TRIGGER_TYPES);
 
     static{
         REGISTRATION_ORDER = Lists.newArrayList(
@@ -103,7 +106,8 @@ public final class Registries {
             Registries.ATTRIBUTES,
             Registries.STAT_TYPES,
             Registries.RESOURCE_CONDITION_SERIALIZERS,
-            Registries.CUSTOM_TAG_ENTRY_SERIALIZERS
+            Registries.CUSTOM_TAG_ENTRY_SERIALIZERS,
+            Registries.TRIGGER_TYPES
         );
     }
 
