@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.17e
+- Added registry wrapper for criterion trigger types
+
 ### SuperMartijn642's Core Library 1.1.17d
 - Fixed tag-dependent recipe conditions not working
 
