@@ -5,8 +5,10 @@ import com.mojang.serialization.MapCodec;
 import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
+import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.StatType;
@@ -101,6 +103,7 @@ public final class Registries {
     public static final Registry<MapCodec<? extends ICondition>> RECIPE_CONDITION_SERIALIZERS = forge(ForgeRegistries.CONDITION_SERIALIZERS, ForgeRegistries.Keys.CONDITION_SERIALIZERS.location(), MapCodec.class);
     public static final Registry<CustomTagEntrySerializer<?>> CUSTOM_TAG_ENTRY_SERIALIZERS = new MapBackedRegistry<>(new ResourceLocation("supermartijn642corelib", "custom_tag_entries"), CustomTagEntrySerializer.class);
     public static final Registry<DataComponentType<?>> DATA_COMPONENT_TYPES = vanilla(DATA_COMPONENT_TYPE, DataComponentType.class);
+    public static final Registry<CriterionTrigger<?>> TRIGGER_TYPES = vanilla(BuiltInRegistries.TRIGGER_TYPES, CriterionTrigger.class);
 
     static{
         // Add all registries which don't have a forge registry

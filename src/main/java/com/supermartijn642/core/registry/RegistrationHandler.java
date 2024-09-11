@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
+import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
@@ -479,6 +480,26 @@ public class RegistrationHandler {
 
     public void registerDataComponentTypeCallback(Consumer<Helper<DataComponentType<?>>> callback){
         this.addCallback(Registries.DATA_COMPONENT_TYPES, callback);
+    }
+
+    public void registerTriggerType(String identifier, Supplier<CriterionTrigger<?>> serializer){
+        this.addEntry(Registries.TRIGGER_TYPES, identifier, serializer);
+    }
+
+    public void registerTriggerType(String identifier, CriterionTrigger<?> serializer){
+        this.addEntry(Registries.TRIGGER_TYPES, identifier, () -> serializer);
+    }
+
+    public void registerTriggerTypeOverride(String namespace, String identifier, Supplier<CriterionTrigger<?>> serializer){
+        this.addEntry(Registries.TRIGGER_TYPES, namespace, identifier, serializer);
+    }
+
+    public void registerTriggerTypeOverride(String namespace, String identifier, CriterionTrigger<?> serializer){
+        this.addEntry(Registries.TRIGGER_TYPES, namespace, identifier, () -> serializer);
+    }
+
+    public void registerTriggerTypeCallback(Consumer<Helper<CriterionTrigger<?>>> callback){
+        this.addCallback(Registries.TRIGGER_TYPES, callback);
     }
 
     private <T> void addEntry(Registries.Registry<T> registry, String identifier, Supplier<T> entry){
