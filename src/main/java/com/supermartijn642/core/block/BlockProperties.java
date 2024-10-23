@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.LootTable;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
@@ -45,7 +46,7 @@ public class BlockProperties {
         properties.isRedstoneConductor = sourceProperties.isRedstoneConductor::test;
         properties.isSuffocating = sourceProperties.isSuffocating::test;
         properties.hasDynamicShape = block.hasDynamicShape();
-        properties.lootTable = sourceProperties.drops;
+        properties.lootTable = sourceProperties.drops::get;
         return properties;
     }
 
@@ -67,7 +68,7 @@ public class BlockProperties {
     private boolean hasDynamicShape = false;
     boolean noLootTable = false;
     Supplier<Block> lootTableBlock;
-    ResourceKey<LootTable> lootTable;
+    Function<ResourceKey<Block>,Optional<ResourceKey<LootTable>>> lootTable;
 
     private BlockProperties(){
     }
@@ -182,7 +183,7 @@ public class BlockProperties {
     public BlockProperties lootTable(ResourceKey<LootTable> lootTable){
         this.noLootTable = false;
         this.lootTableBlock = null;
-        this.lootTable = lootTable;
+        this.lootTable = key -> Optional.of(lootTable);
         return this;
     }
 
@@ -220,6 +221,8 @@ public class BlockProperties {
         properties.jumpFactor(this.jumpFactor);
         if(this.noLootTable)
             properties.noLootTable();
+        else if(this.lootTable != null)
+            properties.drops = this.lootTable::apply;
         if(!this.canOcclude)
             properties.noOcclusion();
         if(this.isAir)

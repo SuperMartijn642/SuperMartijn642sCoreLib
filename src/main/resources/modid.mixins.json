@@ -9,8 +9,7 @@
     "MappedRegistryMixin",
     "RecipeManagerMixin",
     "ServerPlayerGameModeMixin",
-    "TagLoaderMixin",
-    "TagManagerMixin"
+    "TagLoaderMixin"
   ],
   "client": [
     "DataGeneratorMixin",

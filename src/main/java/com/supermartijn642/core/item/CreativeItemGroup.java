@@ -49,51 +49,51 @@ public final class CreativeItemGroup extends CreativeModeTab {
     }
 
     public static CreativeModeTab getBuildingBlocks(){
-        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.BUILDING_BLOCKS);
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.BUILDING_BLOCKS).orElseThrow().value();
     }
 
     public static CreativeModeTab getColoredBlocks(){
-        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.COLORED_BLOCKS);
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.COLORED_BLOCKS).orElseThrow().value();
     }
 
     public static CreativeModeTab getNaturalBlocks(){
-        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.NATURAL_BLOCKS);
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.NATURAL_BLOCKS).orElseThrow().value();
     }
 
     public static CreativeModeTab getFunctionalBlocks(){
-        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.FUNCTIONAL_BLOCKS);
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.FUNCTIONAL_BLOCKS).orElseThrow().value();
     }
 
     public static CreativeModeTab getRedstoneBlocks(){
-        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.REDSTONE_BLOCKS);
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.REDSTONE_BLOCKS).orElseThrow().value();
     }
 
     public static CreativeModeTab getToolsAndUtilities(){
-        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.TOOLS_AND_UTILITIES);
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.TOOLS_AND_UTILITIES).orElseThrow().value();
     }
 
     public static CreativeModeTab getCombat(){
-        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.COMBAT);
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.COMBAT).orElseThrow().value();
     }
 
     public static CreativeModeTab getFoodAndDrinks(){
-        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.FOOD_AND_DRINKS);
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.FOOD_AND_DRINKS).orElseThrow().value();
     }
 
     public static CreativeModeTab getIngredients(){
-        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.INGREDIENTS);
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.INGREDIENTS).orElseThrow().value();
     }
 
     public static CreativeModeTab getSpawnEggs(){
-        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.SPAWN_EGGS);
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.SPAWN_EGGS).orElseThrow().value();
     }
 
     public static CreativeModeTab getOperatorUtilities(){
-        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.OP_BLOCKS);
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.OP_BLOCKS).orElseThrow().value();
     }
 
     public static CreativeModeTab getSearch(){
-        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.SEARCH);
+        return BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabs.SEARCH).orElseThrow().value();
     }
 
     private final String modid, identifier;

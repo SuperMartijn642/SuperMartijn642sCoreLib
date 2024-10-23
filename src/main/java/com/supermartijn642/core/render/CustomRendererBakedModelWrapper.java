@@ -2,8 +2,8 @@ package com.supermartijn642.core.render;
 
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
+import net.minecraft.client.renderer.block.model.BakedOverrides;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 /**
  * Created 25/07/2022 by SuperMartijn642
  */
-public final class CustomRendererBakedModelWrapper implements BakedModel, FabricBakedModel {
+public final class CustomRendererBakedModelWrapper implements BakedModel {
 
     public static BakedModel wrap(BakedModel originalModel){
         return new CustomRendererBakedModelWrapper(originalModel);
@@ -69,18 +69,18 @@ public final class CustomRendererBakedModelWrapper implements BakedModel, Fabric
     }
 
     @Override
-    public ItemOverrides getOverrides(){
-        return this.originalModel.getOverrides();
+    public BakedOverrides overrides(){
+        return this.originalModel.overrides();
     }
 
     @Override
     public boolean isVanillaAdapter(){
-        return ((FabricBakedModel)this.originalModel).isVanillaAdapter();
+        return this.originalModel.isVanillaAdapter();
     }
 
     @Override
     public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context){
-        ((FabricBakedModel)this.originalModel).emitBlockQuads(blockView, state, pos, randomSupplier, context);
+        this.originalModel.emitBlockQuads(blockView, state, pos, randomSupplier, context);
     }
 
     @Override

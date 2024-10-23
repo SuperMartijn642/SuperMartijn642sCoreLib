@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.supermartijn642.core.codec.CodecHelper;
 import com.supermartijn642.core.util.Holder;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,7 +45,7 @@ public class ResourceConditions {
         }
 
         @Override
-        public boolean test(@Nullable HolderLookup.Provider registryLookup){
+        public boolean test(@Nullable RegistryOps.RegistryInfoLookup registryLookup){
             return this.condition.test(ResourceConditionContext.EMPTY);
         }
     }

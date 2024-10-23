@@ -25,6 +25,6 @@ public final class BaseBlockEntityType<T extends BlockEntity> extends BlockEntit
     }
 
     private BaseBlockEntityType(BiFunction<BlockPos,BlockState,T> entitySupplier, Set<Block> validBlocks){
-        super(entitySupplier::apply, validBlocks, null);
+        super(entitySupplier::apply, validBlocks);
     }
 }

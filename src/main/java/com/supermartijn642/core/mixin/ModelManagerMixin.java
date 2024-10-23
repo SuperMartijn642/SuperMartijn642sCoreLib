@@ -2,6 +2,7 @@ package com.supermartijn642.core.mixin;
 
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.ClientRegistrationHandler;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.client.resources.model.AtlasSet;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelManager;
@@ -29,7 +30,7 @@ public class ModelManagerMixin {
         ),
         method = "loadModels"
     )
-    private void loadModels(ProfilerFiller profilerFiller, Map<ResourceLocation,AtlasSet.StitchResult> map, ModelBakery modelBakery, CallbackInfoReturnable<ModelManager.ReloadState> ci){
+    private void loadModels(ProfilerFiller profilerFiller, Map<ResourceLocation,AtlasSet.StitchResult> map, ModelBakery modelBakery, Object2IntMap<?> map2, CallbackInfoReturnable<ModelManager.ReloadState> ci){
         // Catch errors here to prevent the model manager from continuously retrying to load models
         try{
             ClientRegistrationHandler.registerModelOverwritesInternal(modelBakery.getBakedTopLevelModels());

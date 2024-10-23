@@ -4,6 +4,8 @@ accessWidener v1 named
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen draggingItem Lnet/minecraft/world/item/ItemStack; # draggingItem
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen isSplittingStack Z # isSplittingStack
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen quickCraftingRemainder I # quickCraftingRemainder
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen SLOT_HIGHLIGHT_BACK_SPRITE Lnet/minecraft/resources/ResourceLocation;
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen SLOT_HIGHLIGHT_FRONT_SPRITE Lnet/minecraft/resources/ResourceLocation;
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackEnd Lnet/minecraft/world/inventory/Slot; # snapbackEnd
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackItem Lnet/minecraft/world/item/ItemStack; # snapbackItem
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackStartX I # snapbackStartX
@@ -15,9 +17,13 @@ accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerSc
 mutable field net/minecraft/world/inventory/AbstractContainerMenu containerId I # containerId
 # BlockBehaviour
 accessible field net/minecraft/world/level/block/state/BlockBehaviour properties Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties; # properties
-extendable method net/minecraft/world/level/block/state/BlockBehaviour getLootTable ()Lnet/minecraft/resources/ResourceKey; # getLootTable
+extendable method net/minecraft/world/level/block/state/BlockBehaviour getDescriptionId ()Ljava/lang/String;
+extendable method net/minecraft/world/level/block/state/BlockBehaviour getLootTable ()Ljava/util/Optional;
+mutable field net/minecraft/world/level/block/state/BlockBehaviour drops Ljava/util/Optional;
+mutable field net/minecraft/world/level/block/state/BlockBehaviour descriptionId Ljava/lang/String;
 # BlockBehaviour$Properties
-accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties drops Lnet/minecraft/resources/ResourceKey; # drops
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties drops Lnet/minecraft/resources/DependantName;
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties descriptionId Lnet/minecraft/resources/DependantName;
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties soundType Lnet/minecraft/world/level/block/SoundType; # soundType
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties hasCollision Z # hasCollision
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties lightEmission Ljava/util/function/ToIntFunction; # lightEmission
@@ -25,6 +31,8 @@ accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties isRedstoneConductor Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate; # isRedstoneConductor
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties isSuffocating Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate; # isSuffocating
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties mapColor Ljava/util/function/Function; # mapColor
+# BlockEntityType
+accessible method net/minecraft/world/level/block/entity/BlockEntityType <init> (Lnet/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier;Ljava/util/Set;)V
 # BlockEntityType$BlockEntitySupplier
 extendable class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
 # CreativeModeTab
@@ -40,7 +48,7 @@ accessible field net/minecraft/client/renderer/GameRenderer renderBuffers Lnet/m
 accessible field net/minecraft/client/gui/GuiGraphics minecraft Lnet/minecraft/client/Minecraft; # minecraft
 accessible field net/minecraft/client/gui/GuiGraphics pose Lcom/mojang/blaze3d/vertex/PoseStack; # pose
 accessible field net/minecraft/client/gui/GuiGraphics bufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource; # bufferSource
-accessible method net/minecraft/client/gui/GuiGraphics renderTooltipInternal (Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;)V # renderTooltipInternal
+accessible method net/minecraft/client/gui/GuiGraphics renderTooltipInternal (Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;Lnet/minecraft/resources/ResourceLocation;)V
 mutable field net/minecraft/client/gui/GuiGraphics minecraft Lnet/minecraft/client/Minecraft; # minecraft
 mutable field net/minecraft/client/gui/GuiGraphics pose Lcom/mojang/blaze3d/vertex/PoseStack; # pose
 mutable field net/minecraft/client/gui/GuiGraphics bufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource; # bufferSource
@@ -65,11 +73,11 @@ accessible class net/minecraft/data/HashCache$ProviderCache
 accessible class net/minecraft/data/HashCache$ProviderCacheBuilder
 # Holder$Reference
 accessible method net/minecraft/core/Holder$Reference bindKey (Lnet/minecraft/resources/ResourceKey;)V # bindKey
-# Ingredient
-accessible field net/minecraft/world/item/crafting/Ingredient values [Lnet/minecraft/world/item/crafting/Ingredient$Value; # values
-accessible method net/minecraft/world/item/crafting/Ingredient fromValues (Ljava/util/stream/Stream;)Lnet/minecraft/world/item/crafting/Ingredient; # fromValues
-# Ingredient$Value
-accessible class net/minecraft/world/item/crafting/Ingredient$Value
+# Item
+accessible field net/minecraft/world/item/Item components Lnet/minecraft/core/component/DataComponentMap;
+extendable method net/minecraft/world/item/Item getDescriptionId ()Ljava/lang/String;
+mutable field net/minecraft/world/item/Item components Lnet/minecraft/core/component/DataComponentMap;
+mutable field net/minecraft/world/item/Item descriptionId Ljava/lang/String;
 # ItemRenderer
 accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V # renderModelLists
 # ItemTransform$Deserializer
@@ -85,7 +93,7 @@ accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
 # Player
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
 # RecipeManager
-accessible method net/minecraft/world/item/crafting/RecipeManager fromJson (Lnet/minecraft/resources/ResourceLocation;Lcom/google/gson/JsonObject;Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/world/item/crafting/RecipeHolder; # fromJson
+accessible method net/minecraft/world/item/crafting/RecipeManager fromJson (Lnet/minecraft/resources/ResourceKey;Lcom/google/gson/JsonObject;Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/world/item/crafting/RecipeHolder;
 # TagEntry
 accessible field net/minecraft/tags/TagEntry CODEC Lcom/mojang/serialization/Codec;
 accessible field net/minecraft/tags/TagEntry id Lnet/minecraft/resources/ResourceLocation;

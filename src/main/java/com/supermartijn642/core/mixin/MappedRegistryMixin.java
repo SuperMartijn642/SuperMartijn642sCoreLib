@@ -71,7 +71,7 @@ public class MappedRegistryMixin implements CoreLibMappedRegistry {
                 this.byId.removeLast();
                 // Create a dummy reference
                 //noinspection unchecked, DataFlowIssue, rawtypes, deprecation
-                Holder.Reference dummy = Holder.Reference.createIntrusive(((MappedRegistry)(Object)this).holderOwner(), oldValue);
+                Holder.Reference dummy = Holder.Reference.createIntrusive((MappedRegistry)(Object)this, oldValue);
                 //noinspection unchecked
                 dummy.bindKey(this.overwrittenReference.key());
                 this.byValue.put(oldValue, dummy);

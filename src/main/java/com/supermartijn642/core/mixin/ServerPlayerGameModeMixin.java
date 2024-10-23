@@ -39,7 +39,7 @@ public class ServerPlayerGameModeMixin {
             if(player.getAbilities().mayBuild || stack.canPlaceOnBlockInAdventureMode(blockInWorld)){
                 BaseItem item = (BaseItem)stack.getItem();
                 InteractionResult result = item.interactWithBlockFirst(stack, player, hand, level, hitResult.getBlockPos(), hitResult.getDirection(), hitResult.getLocation()).getUnderlying();
-                if(result.indicateItemUse())
+                if(result instanceof InteractionResult.Success && ((InteractionResult.Success)result).wasItemInteraction())
                     player.awardStat(Stats.ITEM_USED.get(item));
 
                 if(result != InteractionResult.PASS)

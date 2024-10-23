@@ -103,10 +103,8 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         this.widget.renderBackground(this.widgetRenderContext, offsetMouseX, offsetMouseY);
 
         if(this.drawSlots){
-            for(Slot slot : this.container.slots){
-                ScreenUtils.bindTexture(SLOT_TEXTURE);
-                ScreenUtils.drawTexture(guiGraphics.pose(), slot.x - 1, slot.y - 1, 18, 18);
-            }
+            for(Slot slot : this.container.slots)
+                ScreenUtils.drawTexture(SLOT_TEXTURE, guiGraphics.pose(), slot.x - 1, slot.y - 1, 18, 18);
         }
 
         // Render the widget
@@ -117,11 +115,13 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             if(!slot.isActive())
                 continue;
 
-            this.renderSlot(guiGraphics, slot);
             if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
                 this.hoveredSlot = slot;
-                renderSlotHighlight(guiGraphics, slot.x, slot.y, 0);
+                ScreenUtils.drawTexture(AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE, guiGraphics.pose(), slot.x - 4, slot.y - 4, 24, 24);
             }
+            this.renderSlot(guiGraphics, slot);
+            if(this.hoveredSlot == slot)
+                ScreenUtils.drawTexture(AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE, guiGraphics.pose(), slot.x - 4, slot.y - 4, 24, 24);
         }
 
         // Render the widget's foreground
@@ -175,7 +175,6 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY){
-
     }
 
     @Override

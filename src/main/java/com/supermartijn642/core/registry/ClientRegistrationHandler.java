@@ -56,14 +56,12 @@ public class ClientRegistrationHandler {
     private static boolean haveModelsBeenRegistered = false;
 
     @ApiStatus.Internal
-    @Deprecated
     public static void registerRenderersInternal(){
         haveRenderersBeenRegistered = true;
         REGISTRATION_HELPER_MAP.values().forEach(ClientRegistrationHandler::registerRenderers);
     }
 
     @ApiStatus.Internal
-    @Deprecated
     public static void registerModelOverwritesInternal(Map<ModelResourceLocation,BakedModel> modelRegistry){
         haveModelsBeenRegistered = true;
         REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.registerModelOverwrites(modelRegistry));
@@ -100,7 +98,7 @@ public class ClientRegistrationHandler {
     private final Map<ModelResourceLocation,Supplier<BakedModel>> specialModels = new HashMap<>();
     private final List<Pair<Predicate<ModelResourceLocation>,Function<BakedModel,BakedModel>>> modelOverwrites = new ArrayList<>();
 
-    private final List<Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?>>>> entityRenderers = new ArrayList<>();
+    private final List<Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?,?>>>> entityRenderers = new ArrayList<>();
     private final List<Pair<Supplier<BlockEntityType<?>>,Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?>>>> blockEntityRenderers = new ArrayList<>();
 
     private final Map<ResourceLocation,Set<ResourceLocation>> textureAtlasSprites = new HashMap<>();
@@ -306,24 +304,25 @@ public class ClientRegistrationHandler {
      * Registers the given entity renderer for the given entity type.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, Function<EntityRendererProvider.Context,EntityRenderer<? super T>> entityRenderer){
+    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, Function<EntityRendererProvider.Context,EntityRenderer<? super T,?>> entityRenderer){
         if(haveRenderersBeenRegistered)
             throw new IllegalStateException("Cannot register new renderers after renderer registration has been completed!");
 
-        this.entityRenderers.add(Pair.of((Supplier<EntityType<?>>)(Object)entityType, (Function<EntityRendererProvider.Context,EntityRenderer<?>>)(Object)entityRenderer));
+        //noinspection RedundantCast
+        this.entityRenderers.add(Pair.of((Supplier<EntityType<?>>)(Object)entityType, (Function<EntityRendererProvider.Context,EntityRenderer<?,?>>)(Object)entityRenderer));
     }
 
     /**
      * Registers the given entity renderer for the given entity type.
      */
-    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, Supplier<EntityRenderer<? super T>> entityRenderer){
+    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, Supplier<EntityRenderer<? super T,?>> entityRenderer){
         this.registerEntityRenderer(entityType, context -> entityRenderer.get());
     }
 
     /**
      * Registers the given entity renderer for the given entity type.
      */
-    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, EntityRenderer<? super T> entityRenderer){
+    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, EntityRenderer<? super T,?> entityRenderer){
         this.registerEntityRenderer(entityType, context -> entityRenderer);
     }
 
@@ -569,7 +568,7 @@ public class ClientRegistrationHandler {
     private void registerRenderers(){
         // Entity renderers
         Set<EntityType<?>> entityTypes = new HashSet<>();
-        for(Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?>>> entry : this.entityRenderers){
+        for(Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?,?>>> entry : this.entityRenderers){
             EntityType<?> entityType = entry.left().get();
             if(entityType == null)
                 throw new RuntimeException("Entity renderer registered with null entity type!");

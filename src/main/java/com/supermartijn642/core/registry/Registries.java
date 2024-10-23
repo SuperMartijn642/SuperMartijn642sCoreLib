@@ -1,10 +1,13 @@
 package com.supermartijn642.core.registry;
 
 import com.google.common.collect.Lists;
+import com.supermartijn642.core.block.BaseBlock;
 import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import com.supermartijn642.core.data.condition.ResourceConditions;
 import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
 import com.supermartijn642.core.extensions.CoreLibMappedRegistry;
+import com.supermartijn642.core.item.BaseBlockItem;
+import com.supermartijn642.core.item.BaseItem;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
 import net.minecraft.advancements.CriterionTrigger;
@@ -70,9 +73,25 @@ public final class Registries {
         return IDENTIFIER_TO_REGISTRY.get(identifier);
     }
 
-    public static final Registry<Block> BLOCKS = vanilla(BLOCK, Block.class, RegistryOverrideHandlers.BLOCKS);
+    public static final Registry<Block> BLOCKS = new VanillaRegistryWrapper<>(BLOCK, Block.class, RegistryOverrideHandlers.BLOCKS) {
+        @Override
+        public void register(ResourceLocation identifier, Block object){
+            super.register(identifier, object);
+            if(object instanceof BaseBlock)
+                ((BaseBlock)object).resolveRegistryDependencies();
+        }
+    };
     public static final Registry<Fluid> FLUIDS = vanilla(FLUID, Fluid.class, RegistryOverrideHandlers.FLUIDS);
-    public static final Registry<Item> ITEMS = vanilla(ITEM, Item.class, RegistryOverrideHandlers.ITEMS);
+    public static final Registry<Item> ITEMS = new VanillaRegistryWrapper<>(ITEM, Item.class, RegistryOverrideHandlers.ITEMS) {
+        @Override
+        public void register(ResourceLocation identifier, Item object){
+            super.register(identifier, object);
+            if(object instanceof BaseItem)
+                ((BaseItem)object).resolveRegistryDependencies();
+            if(object instanceof BaseBlockItem)
+                ((BaseBlockItem)object).resolveRegistryDependencies();
+        }
+    };
     public static final Registry<MobEffect> MOB_EFFECTS = vanilla(MOB_EFFECT, MobEffect.class, RegistryOverrideHandlers.MOB_EFFECTS);
     public static final Registry<SoundEvent> SOUND_EVENTS = vanilla(SOUND_EVENT, SoundEvent.class, RegistryOverrideHandlers.SOUND_EVENTS);
     public static final Registry<Potion> POTIONS = vanilla(POTION, Potion.class, RegistryOverrideHandlers.POTIONS);
@@ -199,7 +218,7 @@ public final class Registries {
         }
 
         public T getValue(ResourceLocation identifier){
-            return this.registry.get(identifier);
+            return this.registry.getValue(identifier);
         }
 
         public Set<ResourceLocation> getIdentifiers(){
