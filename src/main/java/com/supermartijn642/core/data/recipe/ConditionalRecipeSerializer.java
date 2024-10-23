@@ -3,9 +3,8 @@ package com.supermartijn642.core.data.recipe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.JsonOps;
-import com.mojang.serialization.MapCodec;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.*;
 import com.supermartijn642.core.data.condition.ResourceCondition;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.core.HolderLookup;
@@ -13,25 +12,66 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.conditions.ConditionalOps;
 import net.neoforged.neoforge.common.conditions.ICondition;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created 26/08/2022 by SuperMartijn642
  */
 public final class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> {
 
-    public static final RecipeType<Recipe<?>> DUMMY_RECIPE_TYPE = RecipeType.simple(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy"));
+    public static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.simple(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy"));
     public static final Recipe<?> DUMMY_RECIPE = new DummyRecipe();
     public static final ConditionalRecipeSerializer INSTANCE = new ConditionalRecipeSerializer();
+
+    private static final MapCodec<Recipe<?>> CODEC = new MapCodec<>() {
+        @Override
+        public <T> Stream<T> keys(DynamicOps<T> ops){
+            return Stream.empty();
+        }
+
+        @Override
+        public <T> DataResult<Recipe<?>> decode(DynamicOps<T> ops, MapLike<T> input){
+            // Convert the input to json
+            JsonObject json = new JsonObject();
+            input.entries()
+                .map(entry -> {
+                    DataResult<String> key = ops.getStringValue(entry.getFirst());
+                    return key.isSuccess() ? Pair.of(key.getOrThrow(), entry.getSecond()) : null;
+                })
+                .filter(Objects::nonNull)
+                .forEach(entry -> json.add(entry.getFirst(), ops.convertTo(JsonOps.INSTANCE, entry.getSecond())));
+            // Unwrap recipe
+            JsonElement recipeJson = unwrapRecipe(null, json, ops);
+            if(recipeJson == null)
+                return DataResult.success(DUMMY_RECIPE);
+            // Convert json to ops type
+            T t = JsonOps.INSTANCE.convertTo(ops, recipeJson);
+            // Decode the actual recipe
+            return Recipe.CODEC.parse(ops, t);
+        }
+
+        @Override
+        public <T> RecordBuilder<T> encode(Recipe<?> input, DynamicOps<T> ops, RecordBuilder<T> prefix){
+            return Recipe.CODEC.encodeStart(ops, input).flatMap(output -> {
+                JsonElement element = ops.convertTo(JsonOps.INSTANCE, output);
+                if(element.isJsonObject()){
+                    RecordBuilder<T> map = ops.mapBuilder();
+                    for(String key : element.getAsJsonObject().keySet())
+                        map.add(key, JsonOps.INSTANCE.convertTo(ops, element.getAsJsonObject().get(key)));
+                    return DataResult.success(map);
+                }
+                return DataResult.error(() -> "Expected object but got " + element + " from recipe codec!");
+            }).getOrThrow();
+        }
+    };
 
     public static JsonObject wrapRecipeWithForgeConditions(JsonObject recipe, Collection<ICondition> conditions){
         JsonObject json = new JsonObject();
@@ -56,7 +96,7 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
     private ConditionalRecipeSerializer(){
     }
 
-    public static JsonElement unwrapRecipe(ResourceLocation location, JsonObject json, DynamicOps<JsonElement> ops){
+    public static <T> JsonElement unwrapRecipe(ResourceLocation location, JsonObject json, DynamicOps<T> ops){
         if(!json.has("conditions") || !json.get("conditions").isJsonArray())
             throw new RuntimeException("Conditional recipe '" + location + "' must have 'conditions' array!");
         if(!json.has("recipe") || !json.get("recipe").isJsonObject())
@@ -70,7 +110,8 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
         for(JsonElement conditionElement : conditions){
             ICondition condition;
             try{
-                condition = ICondition.CODEC.decode(ops, conditionElement).getOrThrow().getFirst();
+                T t = JsonOps.INSTANCE.convertTo(ops, conditionElement);
+                condition = ICondition.CODEC.decode(ops, t).getOrThrow().getFirst();
             }catch(Exception e){
                 throw new RuntimeException("Encountered exception whilst testing conditions for recipe '" + location + "'!", e);
             }
@@ -85,7 +126,7 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
 
     @Override
     public MapCodec<Recipe<?>> codec(){
-        return MapCodec.unit(null);
+        return CODEC;
     }
 
     @Override
@@ -106,28 +147,23 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
         }
 
         @Override
-        public boolean canCraftInDimensions(int i, int j){
-            return false;
+        public RecipeSerializer<DummyRecipe> getSerializer(){
+            return null;
         }
 
         @Override
-        public ItemStack getResultItem(HolderLookup.Provider provider){
-            return ItemStack.EMPTY;
-        }
-
-        @Override
-        public RecipeSerializer<?> getSerializer(){
-            return INSTANCE;
-        }
-
-        @Override
-        public RecipeType<?> getType(){
+        public RecipeType<DummyRecipe> getType(){
             return DUMMY_RECIPE_TYPE;
         }
 
         @Override
-        public boolean isIncomplete(){
-            return true;
+        public PlacementInfo placementInfo(){
+            return PlacementInfo.NOT_PLACEABLE;
+        }
+
+        @Override
+        public RecipeBookCategory recipeBookCategory(){
+            return RecipeBookCategories.CRAFTING_MISC;
         }
     }
 }

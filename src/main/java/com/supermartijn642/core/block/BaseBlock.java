@@ -1,5 +1,6 @@
 package com.supermartijn642.core.block;
 
+import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -7,9 +8,11 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.DependantName;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -22,12 +25,15 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -38,14 +44,38 @@ public class BaseBlock extends Block {
     public static final DataComponentType<CompoundTag> TILE_DATA = DataComponentType.<CompoundTag>builder().persistent(CompoundTag.CODEC).build();
 
     private final boolean saveTileData;
+    private final BlockProperties properties;
+    private final DependantName<Block,Optional<ResourceKey<LootTable>>> vanillaDrops;
+    private boolean resolvedDrops, resolvedRegistryDependencies;
+
+    private BaseBlock(boolean saveTileData, Properties properties, BlockProperties blockProperties){
+        super(removeDescriptionAndDropsFromProperties(properties));
+        this.saveTileData = saveTileData;
+        this.properties = blockProperties;
+        this.vanillaDrops = properties.drops;
+    }
 
     public BaseBlock(boolean saveTileData, Properties properties){
-        super(properties);
-        this.saveTileData = saveTileData;
+        this(saveTileData, properties, null);
     }
 
     public BaseBlock(boolean saveTileData, BlockProperties properties){
-        this(saveTileData, properties.toUnderlying());
+        this(saveTileData, properties.toUnderlying(), properties);
+    }
+
+    private static Properties removeDescriptionAndDropsFromProperties(Properties properties){
+        return properties.overrideDescription("").noLootTable().setId(ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy")));
+    }
+
+    @ApiStatus.Internal
+    public void resolveRegistryDependencies(){
+        if(!this.resolvedDrops)
+            this.getLootTable();
+        if(!this.resolvedRegistryDependencies){
+            ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
+            this.descriptionId = identifier.getNamespace() + ".block." + identifier.getPath();
+            this.resolvedRegistryDependencies = true;
+        }
     }
 
     @Override
@@ -62,6 +92,34 @@ public class BaseBlock extends Block {
         BlockEntity entity = worldIn.getBlockEntity(pos);
         if(entity instanceof BaseBlockEntity)
             ((BaseBlockEntity)entity).readData(tag);
+    }
+
+    @Override
+    public Optional<ResourceKey<LootTable>> getLootTable(){
+        if(!this.resolvedDrops){
+            if(this.properties != null){
+                if(this.properties.noLootTable)
+                    this.drops = Optional.empty();
+                else if(this.properties.lootTable != null){
+                    ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
+                    ResourceKey<Block> key = ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, identifier);
+                    this.drops = this.properties.lootTable.apply(key);
+                }else if(this.properties.lootTableBlock != null){
+                    Block block = this.properties.lootTableBlock.get();
+                    if(block == null){
+                        CoreLib.LOGGER.warn("Received null block from BlockProperties#lootTableFrom's supplier for block '{}'!", Registries.BLOCKS.getIdentifier(this));
+                        this.drops = Optional.empty();
+                    }else
+                        this.drops = block.getLootTable();
+                }
+            }else{
+                ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
+                ResourceKey<Block> key = ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, identifier);
+                this.drops = this.vanillaDrops.get(key);
+            }
+            this.resolvedDrops = true;
+        }
+        return this.drops;
     }
 
     @Override
@@ -111,7 +169,7 @@ public class BaseBlock extends Block {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult){
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult){
         return this.interact(state, level, pos, player, hand, hitResult.getDirection(), hitResult.getLocation()).interactionResult;
     }
 
@@ -148,18 +206,18 @@ public class BaseBlock extends Block {
 
     @Override
     public String getDescriptionId(){
-        ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
-        return identifier.getNamespace() + ".block." + identifier.getPath();
+        this.resolveRegistryDependencies();
+        return super.getDescriptionId();
     }
 
     protected enum InteractionFeedback {
-        PASS(ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION),
-        CONSUME(ItemInteractionResult.CONSUME),
-        SUCCESS(ItemInteractionResult.SUCCESS);
+        PASS(InteractionResult.PASS),
+        CONSUME(InteractionResult.CONSUME),
+        SUCCESS(InteractionResult.SUCCESS);
 
-        private final ItemInteractionResult interactionResult;
+        private final InteractionResult interactionResult;
 
-        InteractionFeedback(ItemInteractionResult interactionResult){
+        InteractionFeedback(InteractionResult interactionResult){
             this.interactionResult = interactionResult;
         }
     }

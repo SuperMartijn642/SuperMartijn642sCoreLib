@@ -4,10 +4,8 @@ import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-
-import java.util.Collections;
+import net.minecraft.tags.TagKey;
 
 /**
  * TODO properly do tags
@@ -30,9 +28,9 @@ public class TagPopulatedResourceCondition implements ResourceCondition {
 
     @Override
     public boolean test(ResourceConditionContext context){
-        ResourceKey<?> registryKey = this.registry.getVanillaRegistry().key();
-        //noinspection unchecked
-        return !context.getUnderlying().getAllTags((ResourceKey<? extends Registry<Object>>)registryKey).getOrDefault(this.tag, Collections.emptySet()).isEmpty();
+        Registry<?> vanillaRegistry = this.registry.getVanillaRegistry();
+        //noinspection unchecked,rawtypes,DataFlowIssue
+        return ((Registry)vanillaRegistry).get(TagKey.create(vanillaRegistry.key(), this.tag)).isPresent();
     }
 
     @Override

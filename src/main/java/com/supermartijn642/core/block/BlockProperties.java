@@ -1,6 +1,5 @@
 package com.supermartijn642.core.block;
 
-import com.supermartijn642.core.mixin.BlockPropertiesAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -14,6 +13,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.neoforged.neoforge.common.util.TriPredicate;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
@@ -46,7 +46,7 @@ public class BlockProperties {
         properties.isRedstoneConductor = sourceProperties.isRedstoneConductor::test;
         properties.isSuffocating = sourceProperties.isSuffocating::test;
         properties.hasDynamicShape = block.hasDynamicShape();
-        properties.lootTableSupplier = sourceProperties.drops != null ? () -> sourceProperties.drops : ((BlockPropertiesAccessor)sourceProperties).getLootTableSupplier();
+        properties.lootTable = sourceProperties.drops::get;
         return properties;
     }
 
@@ -66,8 +66,12 @@ public class BlockProperties {
     private TriPredicate<BlockState,BlockGetter,BlockPos> isRedstoneConductor = BlockBehaviour.BlockStateBase::isCollisionShapeFullBlock;
     private TriPredicate<BlockState,BlockGetter,BlockPos> isSuffocating = (state, level, pos) -> state.blocksMotion() && state.isCollisionShapeFullBlock(level, pos);
     private boolean hasDynamicShape = false;
-    private boolean noLootTable = false;
-    private Supplier<ResourceKey<LootTable>> lootTableSupplier;
+    boolean noLootTable = false;
+    Supplier<Block> lootTableBlock;
+    Function<ResourceKey<Block>,Optional<ResourceKey<LootTable>>> lootTable;
+
+    private BlockProperties(){
+    }
 
     public BlockProperties mapColor(Function<BlockState,MapColor> colorFunction){
         this.mapColor = colorFunction;
@@ -171,13 +175,15 @@ public class BlockProperties {
 
     public BlockProperties noLootTable(){
         this.noLootTable = true;
-        this.lootTableSupplier = null;
+        this.lootTableBlock = null;
+        this.lootTable = null;
         return this;
     }
 
     public BlockProperties lootTable(ResourceKey<LootTable> lootTable){
         this.noLootTable = false;
-        this.lootTableSupplier = () -> lootTable;
+        this.lootTableBlock = null;
+        this.lootTable = key -> Optional.of(lootTable);
         return this;
     }
 
@@ -187,7 +193,8 @@ public class BlockProperties {
 
     public BlockProperties lootTableFrom(Supplier<Block> block){
         this.noLootTable = false;
-        this.lootTableSupplier = block == null ? null : () -> block.get().getLootTable();
+        this.lootTableBlock = block;
+        this.lootTable = null;
         return this;
     }
 
@@ -214,7 +221,8 @@ public class BlockProperties {
         properties.jumpFactor(this.jumpFactor);
         if(this.noLootTable)
             properties.noLootTable();
-        ((BlockPropertiesAccessor)properties).setLootTableSupplier(this.lootTableSupplier);
+        else if(this.lootTable != null)
+            properties.drops = this.lootTable::apply;
         if(!this.canOcclude)
             properties.noOcclusion();
         if(this.isAir)

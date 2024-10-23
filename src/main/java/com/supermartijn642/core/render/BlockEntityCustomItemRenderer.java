@@ -6,12 +6,8 @@ import com.supermartijn642.core.ClientUtils;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.HalfTransparentBlock;
-import net.minecraft.world.level.block.StainedGlassPaneBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.function.BiConsumer;
@@ -56,19 +52,9 @@ public class BlockEntityCustomItemRenderer<T extends BlockEntity> implements Cus
 
         ItemRenderer itemRenderer = ClientUtils.getItemRenderer();
         BakedModel model = itemRenderer.getModel(itemStack, null, null, 0);
-
-        boolean fabulous;
-        if(transformType != ItemDisplayContext.GUI && !transformType.firstPerson() && itemStack.getItem() instanceof BlockItem){
-            Block block = ((BlockItem)itemStack.getItem()).getBlock();
-            fabulous = !(block instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock);
-        }else
-            fabulous = true;
-
-        for(var passModel : model.getRenderPasses(itemStack, fabulous)){
-            for(var renderType : passModel.getRenderTypes(itemStack, fabulous)){
-                VertexConsumer vertexConsumer = fabulous ?
-                    ItemRenderer.getFoilBufferDirect(bufferSource, renderType, true, itemStack.hasFoil()) :
-                    ItemRenderer.getFoilBuffer(bufferSource, renderType, true, itemStack.hasFoil());
+        for(var passModel : model.getRenderPasses(itemStack)){
+            for(var renderType : passModel.getRenderTypes(itemStack)){
+                VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(bufferSource, renderType, true, itemStack.hasFoil());
                 itemRenderer.renderModelLists(passModel, itemStack, combinedLight, combinedOverlay, poseStack, vertexConsumer);
             }
         }

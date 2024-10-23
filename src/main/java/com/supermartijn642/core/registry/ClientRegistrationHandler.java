@@ -1,7 +1,6 @@
 package com.supermartijn642.core.registry;
 
 import com.supermartijn642.core.CoreLib;
-import com.supermartijn642.core.generator.ModelGenerator;
 import com.supermartijn642.core.item.EditableClientItemExtensions;
 import com.supermartijn642.core.render.CustomBlockEntityRenderer;
 import com.supermartijn642.core.render.CustomItemRenderer;
@@ -22,7 +21,6 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
@@ -32,14 +30,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -89,7 +85,7 @@ public class ClientRegistrationHandler {
     private final Map<ModelResourceLocation,Supplier<BakedModel>> specialModels = new HashMap<>();
     private final List<Pair<Supplier<Stream<ModelResourceLocation>>,Function<BakedModel,BakedModel>>> modelOverwrites = new ArrayList<>();
 
-    private final List<Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?>>>> entityRenderers = new ArrayList<>();
+    private final List<Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?,?>>>> entityRenderers = new ArrayList<>();
     private final List<Pair<Supplier<BlockEntityType<?>>,Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?>>>> blockEntityRenderers = new ArrayList<>();
 
     private final Map<ResourceLocation,Set<ResourceLocation>> textureAtlasSprites = new HashMap<>();
@@ -111,6 +107,7 @@ public class ClientRegistrationHandler {
         eventBus.addListener(this::handleModelBakeEvent);
         eventBus.addListener(this::handleRegisterRenderersEvent);
         eventBus.addListener(this::handleRegisterMenuScreensEvent);
+        eventBus.addListener(this::handleRegisterClientExtensionsEvent);
     }
 
     /**
@@ -291,24 +288,25 @@ public class ClientRegistrationHandler {
      * Registers the given entity renderer for the given entity type.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, Function<EntityRendererProvider.Context,EntityRenderer<? super T>> entityRenderer){
+    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, Function<EntityRendererProvider.Context,EntityRenderer<? super T,?>> entityRenderer){
         if(this.passedRegisterRenderers)
             throw new IllegalStateException("Cannot register new renderers after RegisterRenderers has been fired!");
 
-        this.entityRenderers.add(Pair.of((Supplier<EntityType<?>>)(Object)entityType, (Function<EntityRendererProvider.Context,EntityRenderer<?>>)(Object)entityRenderer));
+        //noinspection RedundantCast
+        this.entityRenderers.add(Pair.of((Supplier<EntityType<?>>)(Object)entityType, (Function<EntityRendererProvider.Context,EntityRenderer<?,?>>)(Object)entityRenderer));
     }
 
     /**
      * Registers the given entity renderer for the given entity type.
      */
-    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, Supplier<EntityRenderer<? super T>> entityRenderer){
+    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, Supplier<EntityRenderer<? super T,?>> entityRenderer){
         this.registerEntityRenderer(entityType, context -> entityRenderer.get());
     }
 
     /**
      * Registers the given entity renderer for the given entity type.
      */
-    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, EntityRenderer<? super T> entityRenderer){
+    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, EntityRenderer<? super T,?> entityRenderer){
         this.registerEntityRenderer(entityType, context -> entityRenderer);
     }
 
@@ -381,7 +379,7 @@ public class ClientRegistrationHandler {
     }
 
     /**
-     * Registers the given custom item renderer for the given item. The given item must provide an instance of {@link EditableClientItemExtensions} in its {@link Item#initializeClient(Consumer)} method.
+     * Registers the given custom item renderer for the given item.
      */
     public void registerItemRenderer(Supplier<Item> item, Supplier<BlockEntityWithoutLevelRenderer> itemRenderer){
         if(this.passedRegisterRenderers)
@@ -391,21 +389,21 @@ public class ClientRegistrationHandler {
     }
 
     /**
-     * Registers the given custom item renderer for the given item. The given item must provide an instance of {@link EditableClientItemExtensions} in its {@link Item#initializeClient(Consumer)} method.
+     * Registers the given custom item renderer for the given item.
      */
     public void registerItemRenderer(Supplier<Item> item, BlockEntityWithoutLevelRenderer itemRenderer){
         this.registerItemRenderer(item, () -> itemRenderer);
     }
 
     /**
-     * Registers the given custom item renderer for the given item. The given item must provide an instance of {@link EditableClientItemExtensions} in its {@link Item#initializeClient(Consumer)} method.
+     * Registers the given custom item renderer for the given item.
      */
     public void registerItemRenderer(Item item, Supplier<BlockEntityWithoutLevelRenderer> itemRenderer){
         this.registerItemRenderer(() -> item, itemRenderer);
     }
 
     /**
-     * Registers the given custom item renderer for the given item. The given item must provide an instance of {@link EditableClientItemExtensions} in its {@link Item#initializeClient(Consumer)} method.
+     * Registers the given custom item renderer for the given item.
      */
     public void registerItemRenderer(Item item, BlockEntityWithoutLevelRenderer itemRenderer){
         this.registerItemRenderer(() -> item, () -> itemRenderer);
@@ -473,11 +471,7 @@ public class ClientRegistrationHandler {
 
     /**
      * Registers the given render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderType(ResourceLocation)} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelRenderType(Supplier<Block> block, Supplier<RenderType> renderTypeSupplier){
         if(this.passedRegisterRenderers)
             throw new IllegalStateException("Cannot register new menu screens after the ClientInitialization event has been fired!");
@@ -487,110 +481,70 @@ public class ClientRegistrationHandler {
 
     /**
      * Registers the given render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderType(ResourceLocation)} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelRenderType(Supplier<Block> block, RenderType renderType){
         this.registerBlockModelRenderType(block, renderType);
     }
 
     /**
      * Registers the given render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderType(ResourceLocation)} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelRenderType(Block block, Supplier<RenderType> renderTypeSupplier){
         this.registerBlockModelRenderType(() -> block, renderTypeSupplier);
     }
 
     /**
      * Registers the solid render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeSolid()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelSolidRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::solid);
     }
 
     /**
      * Registers the solid render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeSolid()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelSolidRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::solid);
     }
 
     /**
      * Registers the cutout mipped render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeCutoutMipped()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelCutoutMippedRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::cutoutMipped);
     }
 
     /**
      * Registers the cutout mipped render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeCutoutMipped()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelCutoutMippedRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::cutoutMipped);
     }
 
     /**
      * Registers the cutout render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeCutout()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelCutoutRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::cutout);
     }
 
     /**
      * Registers the cutout render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeCutout()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelCutoutRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::cutout);
     }
 
     /**
      * Registers the translucent render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeTranslucent()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelTranslucentRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::translucent);
     }
 
     /**
      * Registers the translucent render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeTranslucent()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelTranslucentRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::translucent);
     }
@@ -646,7 +600,7 @@ public class ClientRegistrationHandler {
 
         // Entity renderers
         Set<EntityType<?>> entityTypes = new HashSet<>();
-        for(Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?>>> entry : this.entityRenderers){
+        for(Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?,?>>> entry : this.entityRenderers){
             EntityType<?> entityType = entry.left().get();
             if(entityType == null)
                 throw new RuntimeException("Entity renderer registered with null entity type!");
@@ -654,7 +608,7 @@ public class ClientRegistrationHandler {
                 throw new RuntimeException("Duplicate entity renderer for entity type '" + Registries.ENTITY_TYPES.getIdentifier(entityType) + "'!");
 
             entityTypes.add(entityType);
-            //noinspection unchecked,rawtypes,NullableProblems
+            // noinspection unchecked,rawtypes
             e.registerEntityRenderer((EntityType)entityType, (EntityRendererProvider)entry.right()::apply);
         }
 
@@ -670,27 +624,6 @@ public class ClientRegistrationHandler {
             blockEntityTypes.add(blockEntityType);
             //noinspection unchecked,rawtypes,NullableProblems
             e.registerBlockEntityRenderer((BlockEntityType)blockEntityType, (BlockEntityRendererProvider)entry.right()::apply);
-        }
-
-        // Custom item renderers
-        Set<Item> items = new HashSet<>();
-        for(Pair<Supplier<Item>,Supplier<BlockEntityWithoutLevelRenderer>> entry : this.customItemRenderers){
-            Item item = entry.left().get();
-            if(item == null)
-                throw new RuntimeException("Custom item renderer registered with null item!");
-            if(items.contains(item))
-                throw new RuntimeException("Duplicate custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "'!");
-
-            Object renderProperties = IClientItemExtensions.of(item);
-            if(!(renderProperties instanceof EditableClientItemExtensions))
-                throw new RuntimeException("Cannot register custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "' without EditableClientItemExtensions render properties!");
-
-            BlockEntityWithoutLevelRenderer customRenderer = entry.right().get();
-            if(customRenderer == null)
-                throw new RuntimeException("Got null custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "'!");
-
-            items.add(item);
-            ((EditableClientItemExtensions)renderProperties).setCustomRenderer(customRenderer);
         }
 
         // Block render types
@@ -724,6 +657,27 @@ public class ClientRegistrationHandler {
             menuTypes.add(menuType);
             //noinspection rawtypes,unchecked
             e.register((MenuType)menuType, (MenuScreens.ScreenConstructor)entry.right()::apply);
+        }
+    }
+
+    private void handleRegisterClientExtensionsEvent(RegisterClientExtensionsEvent e){
+        // Custom item renderers
+        Set<Item> items = new HashSet<>();
+        for(Pair<Supplier<Item>,Supplier<BlockEntityWithoutLevelRenderer>> entry : this.customItemRenderers){
+            Item item = entry.left().get();
+            if(item == null)
+                throw new RuntimeException("Custom item renderer registered with null item!");
+            if(items.contains(item))
+                throw new RuntimeException("Duplicate custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "'!");
+
+            BlockEntityWithoutLevelRenderer customRenderer = entry.right().get();
+            if(customRenderer == null)
+                throw new RuntimeException("Got null custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "'!");
+
+            items.add(item);
+            EditableClientItemExtensions renderProperties = new EditableClientItemExtensions();
+            renderProperties.setCustomRenderer(customRenderer);
+            e.registerItem(renderProperties, item);
         }
     }
 

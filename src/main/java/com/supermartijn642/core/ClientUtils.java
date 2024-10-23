@@ -44,7 +44,7 @@ public class ClientUtils {
     }
 
     public static float getPartialTicks(){
-        return getMinecraft().getTimer().getGameTimeDeltaPartialTick(true);
+        return getMinecraft().getDeltaTracker().getGameTimeDeltaPartialTick(true);
     }
 
     /**
@@ -59,7 +59,7 @@ public class ClientUtils {
      * @param task task to be queued
      */
     public static void queueTask(Runnable task){
-        getMinecraft().tell(task);
+        getMinecraft().schedule(task);
     }
 
     public static String translate(String translationKey, Object... args){

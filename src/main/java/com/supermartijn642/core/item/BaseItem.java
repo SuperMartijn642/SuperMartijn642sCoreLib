@@ -1,13 +1,16 @@
 package com.supermartijn642.core.item;
 
 import com.supermartijn642.core.registry.Registries;
+import net.minecraft.client.resources.model.MissingBlockModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -18,7 +21,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -29,15 +32,33 @@ import java.util.function.Consumer;
 public class BaseItem extends Item {
 
     private final ItemProperties properties;
+    private boolean resolvedRegistryDependencies;
 
     public BaseItem(Properties properties){
-        super(properties);
+        super(removeDescriptionAndModelFromProperties(properties));
         this.properties = null;
     }
 
     public BaseItem(ItemProperties properties){
-        super(properties.toUnderlying());
+        super(removeDescriptionAndModelFromProperties(properties.toUnderlying()));
         this.properties = properties;
+    }
+
+    private static Properties removeDescriptionAndModelFromProperties(Properties properties){
+        return properties.overrideDescription("").overrideModel(MissingBlockModel.LOCATION).setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy")));
+    }
+
+    @ApiStatus.Internal
+    public void resolveRegistryDependencies(){
+        if(!this.resolvedRegistryDependencies){
+            ResourceLocation identifier = Registries.ITEMS.getIdentifier(this);
+            this.descriptionId = identifier.getNamespace() + ".item." + identifier.getPath();
+            this.components = DataComponentMap.builder().addAll(this.components)
+                .set(DataComponents.ITEM_NAME, Component.translatable(this.descriptionId))
+                .set(DataComponents.ITEM_MODEL, identifier)
+                .build();
+            this.resolvedRegistryDependencies = true;
+        }
     }
 
     /**
@@ -94,7 +115,7 @@ public class BaseItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand){
+    public InteractionResult use(Level level, Player player, InteractionHand hand){
         return this.interact(player.getItemInHand(hand), player, hand, level).toUnderlying(level.isClientSide);
     }
 
@@ -119,54 +140,63 @@ public class BaseItem extends Item {
     }
 
     @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer){
-        consumer.accept(new EditableClientItemExtensions());
+    public String getDescriptionId(){
+        this.resolveRegistryDependencies();
+        return super.getDescriptionId();
     }
 
     @Override
-    protected String getOrCreateDescriptionId(){
-        ResourceLocation identifier = Registries.ITEMS.getIdentifier(this);
-        return identifier.getNamespace() + ".item." + identifier.getPath();
+    public DataComponentMap components(){
+        this.resolveRegistryDependencies();
+        return super.components();
+    }
+
+    @Override
+    public Component getName(ItemStack itemStack){
+        this.resolveRegistryDependencies();
+        return super.getName(itemStack);
     }
 
     public boolean isInCreativeGroup(CreativeModeTab tab){
-        return this.properties != null && (this.properties.groups.contains(tab) || (!this.properties.groups.isEmpty() && tab == CreativeItemGroup.getSearch()));
+        return this.properties != null && this.properties.groups.contains(tab);
     }
 
-    protected static class ItemUseResult {
+    public static class ItemUseResult {
 
         public static ItemUseResult pass(ItemStack stack){
-            return new ItemUseResult(InteractionResult.SUCCESS, stack);
+            return new ItemUseResult(InteractionResult.PASS);
         }
 
         public static ItemUseResult consume(ItemStack stack){
-            return new ItemUseResult(InteractionResult.CONSUME, stack);
+            return new ItemUseResult(InteractionResult.CONSUME.heldItemTransformedTo(stack));
         }
 
         public static ItemUseResult success(ItemStack stack){
-            return new ItemUseResult(InteractionResult.SUCCESS, stack);
+            return new ItemUseResult(InteractionResult.SUCCESS.heldItemTransformedTo(stack));
         }
 
         public static ItemUseResult fail(ItemStack stack){
-            return new ItemUseResult(InteractionResult.FAIL, stack);
+            return new ItemUseResult(InteractionResult.FAIL);
         }
 
         @Deprecated
-        public static ItemUseResult fromUnderlying(InteractionResultHolder<ItemStack> underlying){
-            return new ItemUseResult(underlying.getResult(), underlying.getObject());
+        public static ItemUseResult fromUnderlying(InteractionResult underlying){
+            return new ItemUseResult(underlying);
         }
 
         private final InteractionResult result;
-        private final ItemStack resultingStack;
 
-        private ItemUseResult(InteractionResult result, ItemStack resultingStack){
+        private ItemUseResult(InteractionResult result){
             this.result = result;
-            this.resultingStack = resultingStack;
         }
 
         @Deprecated
-        public InteractionResultHolder<ItemStack> toUnderlying(boolean isClientSide){
-            return new InteractionResultHolder<>(this.result == InteractionResult.SUCCESS ? isClientSide ? InteractionResult.SUCCESS : InteractionResult.CONSUME : this.result, this.resultingStack);
+        public InteractionResult toUnderlying(boolean isClientSide){
+            if(!isClientSide && this.result instanceof InteractionResult.Success
+                && ((InteractionResult.Success)this.result).swingSource() == InteractionResult.SwingSource.CLIENT){
+                return InteractionResult.SUCCESS_SERVER.heldItemTransformedTo(((InteractionResult.Success)this.result).itemContext().heldItemTransformedTo());
+            }
+            return this.result;
         }
     }
 
@@ -177,6 +207,18 @@ public class BaseItem extends Item {
 
         InteractionFeedback(InteractionResult interactionResult){
             this.interactionResult = interactionResult;
+        }
+
+        @Deprecated
+        public static InteractionFeedback fromUnderlying(InteractionResult interactionResult){
+            if(interactionResult instanceof InteractionResult.Success){
+                if(((InteractionResult.Success)interactionResult).swingSource() == InteractionResult.SwingSource.NONE)
+                    return CONSUME;
+                return SUCCESS;
+            }
+            if(interactionResult instanceof InteractionResult.Pass)
+                return PASS;
+            return CONSUME;
         }
 
         @Deprecated

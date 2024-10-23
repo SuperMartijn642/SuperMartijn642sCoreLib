@@ -15,6 +15,7 @@ import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -32,6 +33,7 @@ import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * Created 23/08/2022 by SuperMartijn642
@@ -60,6 +62,10 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         if(ingredients.length == 1)
             return ingredients[0];
         return CompoundIngredient.of(ingredients);
+    }
+
+    private static Ingredient tagIngredient(TagKey<Item> tag){
+        return Ingredient.of(ResourceGenerator.registryAccess.lookupOrThrow(net.minecraft.core.registries.Registries.ITEM).get(tag).<HolderSet<Item>>map(Function.identity()).orElse(HolderSet.empty()));
     }
 
     private final Map<ResourceLocation,RecipeBuilder<?>> recipes = new HashMap<>();
@@ -1061,7 +1067,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * Sets which items the player should have to unlock this recipe in its generated advancement.
          */
         public T unlockedBy(TagKey<Item> tagKey){
-            return this.unlockedBy(InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(tagKey).build()));
+            return this.unlockedBy(InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(ResourceGenerator.registryAccess.lookupOrThrow(net.minecraft.core.registries.Registries.ITEM), tagKey).build()));
         }
 
         /**
@@ -1156,7 +1162,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param itemStacks items to be associated with the key
          */
         public ShapedRecipeBuilder input(char key, ItemStack... itemStacks){
-            return this.input(key, Ingredient.of(itemStacks));
+            return this.input(key, Ingredient.of(Arrays.stream(itemStacks).map(ItemStack::getItem)));
         }
 
         /**
@@ -1165,7 +1171,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param tag tag to be associated with the key
          */
         public ShapedRecipeBuilder input(char key, TagKey<Item> tag){
-            return this.input(key, Ingredient.of(tag));
+            return this.input(key, tagIngredient(tag));
         }
     }
 
@@ -1224,7 +1230,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param count     the number of times to add the ingredient
          */
         public ShapelessRecipeBuilder input(ItemStack itemStack, int count){
-            return this.input(Ingredient.of(itemStack), count);
+            return this.input(Ingredient.of(itemStack.getItem()), count);
         }
 
         /**
@@ -1241,7 +1247,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param count the number of times to add the ingredient
          */
         public ShapelessRecipeBuilder input(TagKey<Item> tag, int count){
-            return this.input(Ingredient.of(tag), count);
+            return this.input(tagIngredient(tag), count);
         }
 
         /**
@@ -1249,7 +1255,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param tag ingredient to be added
          */
         public ShapelessRecipeBuilder input(TagKey<Item> tag){
-            return this.input(Ingredient.of(tag), 1);
+            return this.input(tagIngredient(tag), 1);
         }
 
         /**
@@ -1387,7 +1393,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param itemStacks items to be accepted as input
          */
         public SmeltingRecipeBuilder input(ItemStack... itemStacks){
-            return this.input(Ingredient.of(itemStacks));
+            return this.input(Ingredient.of(Arrays.stream(itemStacks).map(ItemStack::getItem)));
         }
 
         /**
@@ -1395,7 +1401,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param tag item tag to be accepted as input
          */
         public SmeltingRecipeBuilder input(TagKey<Item> tag){
-            return this.input(Ingredient.of(tag));
+            return this.input(tagIngredient(tag));
         }
 
         /**
@@ -1471,7 +1477,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param itemStacks items to be accepted as base
          */
         public SmithingRecipeBuilder base(ItemStack... itemStacks){
-            return this.base(Ingredient.of(itemStacks));
+            return this.base(Ingredient.of(Arrays.stream(itemStacks).map(ItemStack::getItem)));
         }
 
         /**
@@ -1479,7 +1485,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param tag item tag to be accepted as base
          */
         public SmithingRecipeBuilder base(TagKey<Item> tag){
-            return this.base(Ingredient.of(tag));
+            return this.base(tagIngredient(tag));
         }
 
         /**
@@ -1512,7 +1518,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param itemStacks items to be accepted as addition
          */
         public SmithingRecipeBuilder addition(ItemStack... itemStacks){
-            return this.addition(Ingredient.of(itemStacks));
+            return this.addition(Ingredient.of(Arrays.stream(itemStacks).map(ItemStack::getItem)));
         }
 
         /**
@@ -1520,7 +1526,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param tag item tag to be accepted as addition
          */
         public SmithingRecipeBuilder addition(TagKey<Item> tag){
-            return this.addition(Ingredient.of(tag));
+            return this.addition(tagIngredient(tag));
         }
     }
 
@@ -1562,7 +1568,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param itemStacks items to be accepted as input
          */
         public StoneCuttingRecipeBuilder input(ItemStack... itemStacks){
-            return this.input(Ingredient.of(itemStacks));
+            return this.input(Ingredient.of(Arrays.stream(itemStacks).map(ItemStack::getItem)));
         }
 
         /**
@@ -1570,7 +1576,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
          * @param tag item tag to be accepted as input
          */
         public StoneCuttingRecipeBuilder input(TagKey<Item> tag){
-            return this.input(Ingredient.of(tag));
+            return this.input(tagIngredient(tag));
         }
     }
 
@@ -1618,7 +1624,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private void createAdvancement(String namespace, String identifier, RecipeBuilder<?> recipe){
             AdvancementBuilder builder = this.advancement(namespace, identifier)
                 .parent(net.minecraft.data.recipes.RecipeBuilder.ROOT_RECIPE_ADVANCEMENT)
-                .criterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(recipe.identifier))
+                .criterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE, recipe.identifier)))
                 .icon(recipe.output, recipe.outputComponents)
                 .dontShowToast()
                 .dontAnnounceToChat()

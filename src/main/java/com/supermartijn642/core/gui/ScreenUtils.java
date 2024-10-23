@@ -2,7 +2,8 @@ package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.supermartijn642.core.ClientUtils;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -12,9 +13,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.network.chat.Component;
@@ -178,55 +179,47 @@ public class ScreenUtils {
     }
 
     public static void drawScreenBackground(PoseStack poseStack, float x, float y, float width, float height){
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        bindTexture(SCREEN_BACKGROUND);
         // corners
-        drawTexture(poseStack, x, y, 4, 4, 0, 0, 4 / 9f, 4 / 9f);
-        drawTexture(poseStack, x + width - 4, y, 4, 4, 5 / 9f, 0, 4 / 9f, 4 / 9f);
-        drawTexture(poseStack, x + width - 4, y + height - 4, 4, 4, 5 / 9f, 5 / 9f, 4 / 9f, 4 / 9f);
-        drawTexture(poseStack, x, y + height - 4, 4, 4, 0, 5 / 9f, 4 / 9f, 4 / 9f);
+        drawTexture(SCREEN_BACKGROUND, poseStack, x, y, 4, 4, 0, 0, 4 / 9f, 4 / 9f);
+        drawTexture(SCREEN_BACKGROUND, poseStack, x + width - 4, y, 4, 4, 5 / 9f, 0, 4 / 9f, 4 / 9f);
+        drawTexture(SCREEN_BACKGROUND, poseStack, x + width - 4, y + height - 4, 4, 4, 5 / 9f, 5 / 9f, 4 / 9f, 4 / 9f);
+        drawTexture(SCREEN_BACKGROUND, poseStack, x, y + height - 4, 4, 4, 0, 5 / 9f, 4 / 9f, 4 / 9f);
         // edges
-        drawTexture(poseStack, x + 4, y, width - 8, 4, 4 / 9f, 0, 1 / 9f, 4 / 9f);
-        drawTexture(poseStack, x + 4, y + height - 4, width - 8, 4, 4 / 9f, 5 / 9f, 1 / 9f, 4 / 9f);
-        drawTexture(poseStack, x, y + 4, 4, height - 8, 0, 4 / 9f, 4 / 9f, 1 / 9f);
-        drawTexture(poseStack, x + width - 4, y + 4, 4, height - 8, 5 / 9f, 4 / 9f, 4 / 9f, 1 / 9f);
+        drawTexture(SCREEN_BACKGROUND, poseStack, x + 4, y, width - 8, 4, 4 / 9f, 0, 1 / 9f, 4 / 9f);
+        drawTexture(SCREEN_BACKGROUND, poseStack, x + 4, y + height - 4, width - 8, 4, 4 / 9f, 5 / 9f, 1 / 9f, 4 / 9f);
+        drawTexture(SCREEN_BACKGROUND, poseStack, x, y + 4, 4, height - 8, 0, 4 / 9f, 4 / 9f, 1 / 9f);
+        drawTexture(SCREEN_BACKGROUND, poseStack, x + width - 4, y + 4, 4, height - 8, 5 / 9f, 4 / 9f, 4 / 9f, 1 / 9f);
         // center
-        drawTexture(poseStack, x + 4, y + 4, width - 8, height - 8, 4 / 9f, 4 / 9f, 1 / 9f, 1 / 9f);
+        drawTexture(SCREEN_BACKGROUND, poseStack, x + 4, y + 4, width - 8, height - 8, 4 / 9f, 4 / 9f, 1 / 9f, 1 / 9f);
     }
 
     public static void drawButtonBackground(PoseStack poseStack, float x, float y, float width, float height, float yOffset){
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        bindTexture(BUTTON_BACKGROUND);
         // corners
-        drawTexture(poseStack, x, y, 2, 2, 0, yOffset, 2 / 5f, 2 / 15f);
-        drawTexture(poseStack, x + width - 2, y, 2, 2, 3 / 5f, yOffset, 2 / 5f, 2 / 15f);
-        drawTexture(poseStack, x + width - 2, y + height - 2, 2, 2, 3 / 5f, yOffset + 3 / 15f, 2 / 5f, 2 / 15f);
-        drawTexture(poseStack, x, y + height - 2, 2, 2, 0, yOffset + 3 / 15f, 2 / 5f, 2 / 15f);
+        drawTexture(BUTTON_BACKGROUND, poseStack, x, y, 2, 2, 0, yOffset, 2 / 5f, 2 / 15f);
+        drawTexture(BUTTON_BACKGROUND, poseStack, x + width - 2, y, 2, 2, 3 / 5f, yOffset, 2 / 5f, 2 / 15f);
+        drawTexture(BUTTON_BACKGROUND, poseStack, x + width - 2, y + height - 2, 2, 2, 3 / 5f, yOffset + 3 / 15f, 2 / 5f, 2 / 15f);
+        drawTexture(BUTTON_BACKGROUND, poseStack, x, y + height - 2, 2, 2, 0, yOffset + 3 / 15f, 2 / 5f, 2 / 15f);
         // edges
-        drawTexture(poseStack, x + 2, y, width - 4, 2, 2 / 5f, yOffset, 1 / 5f, 2 / 15f);
-        drawTexture(poseStack, x + 2, y + height - 2, width - 4, 2, 2 / 5f, yOffset + 3 / 15f, 1 / 5f, 2 / 15f);
-        drawTexture(poseStack, x, y + 2, 2, height - 4, 0, yOffset + 2 / 15f, 2 / 5f, 1 / 15f);
-        drawTexture(poseStack, x + width - 2, y + 2, 2, height - 4, 3 / 5f, yOffset + 2 / 15f, 2 / 5f, 1 / 15f);
+        drawTexture(BUTTON_BACKGROUND, poseStack, x + 2, y, width - 4, 2, 2 / 5f, yOffset, 1 / 5f, 2 / 15f);
+        drawTexture(BUTTON_BACKGROUND, poseStack, x + 2, y + height - 2, width - 4, 2, 2 / 5f, yOffset + 3 / 15f, 1 / 5f, 2 / 15f);
+        drawTexture(BUTTON_BACKGROUND, poseStack, x, y + 2, 2, height - 4, 0, yOffset + 2 / 15f, 2 / 5f, 1 / 15f);
+        drawTexture(BUTTON_BACKGROUND, poseStack, x + width - 2, y + 2, 2, height - 4, 3 / 5f, yOffset + 2 / 15f, 2 / 5f, 1 / 15f);
         // center
-        drawTexture(poseStack, x + 2, y + 2, width - 4, height - 4, 2 / 5f, yOffset + 2 / 15f, 1 / 5f, 1 / 15f);
+        drawTexture(BUTTON_BACKGROUND, poseStack, x + 2, y + 2, width - 4, height - 4, 2 / 5f, yOffset + 2 / 15f, 1 / 5f, 1 / 15f);
     }
 
-    public static void drawTexture(PoseStack poseStack, float x, float y, float width, float height){
-        drawTexture(poseStack, x, y, width, height, 0, 0, 1, 1);
+    public static void drawTexture(ResourceLocation texture, PoseStack poseStack, float x, float y, float width, float height){
+        drawTexture(texture, poseStack, x, y, width, height, 0, 0, 1, 1);
     }
 
-    public static void drawTexture(PoseStack poseStack, float x, float y, float width, float height, float tx, float ty, float twidth, float theight){
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-
+    public static void drawTexture(ResourceLocation texture, PoseStack poseStack, float x, float y, float width, float height, float tx, float ty, float twidth, float theight){
         Matrix4f matrix = poseStack.last().pose();
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder buffer = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
+        VertexConsumer buffer = bufferSource.getBuffer(RenderType.guiTextured(texture));
         buffer.addVertex(matrix, x, y + height, 0).setUv(tx, ty + theight);
         buffer.addVertex(matrix, x + width, y + height, 0).setUv(tx + twidth, ty + theight);
         buffer.addVertex(matrix, x + width, y, 0).setUv(tx + twidth, ty);
         buffer.addVertex(matrix, x, y, 0).setUv(tx, ty);
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 
     public static void fillRect(PoseStack poseStack, float x, float y, float width, float height, int color){
@@ -238,20 +231,13 @@ public class ScreenUtils {
     }
 
     public static void fillRect(PoseStack poseStack, float x, float y, float width, float height, float red, float green, float blue, float alpha){
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-
         Matrix4f matrix = poseStack.last().pose();
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
+        VertexConsumer buffer = bufferSource.getBuffer(RenderType.gui());
         buffer.addVertex(matrix, x, y + height, 0).setColor(red, green, blue, alpha);
         buffer.addVertex(matrix, x + width, y + height, 0).setColor(red, green, blue, alpha);
         buffer.addVertex(matrix, x + width, y, 0).setColor(red, green, blue, alpha);
         buffer.addVertex(matrix, x, y, 0).setColor(red, green, blue, alpha);
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
-
-        RenderSystem.disableBlend();
     }
 
     public static void bindTexture(ResourceLocation location){
@@ -283,7 +269,7 @@ public class ScreenUtils {
     }
 
     /**
-     * Copied from {@link GuiGraphics#renderTooltipInternal(Font, List, int, int, ClientTooltipPositioner)}.
+     * Copied from {@link GuiGraphics#renderTooltipInternal(Font, List, int, int, ClientTooltipPositioner, ResourceLocation)}.
      */
     private static void drawTooltipInternal(PoseStack poseStack, Font fontRenderer, List<ClientTooltipComponent> components, int x, int y){
         if(components.isEmpty())
@@ -292,7 +278,7 @@ public class ScreenUtils {
         GUI_GRAPHICS.minecraft = ClientUtils.getMinecraft();
         GUI_GRAPHICS.pose = poseStack;
         GUI_GRAPHICS.bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
-        GUI_GRAPHICS.renderTooltipInternal(fontRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE);
+        GUI_GRAPHICS.renderTooltipInternal(fontRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE, null);
         GUI_GRAPHICS.bufferSource.endBatch();
     }
 
@@ -315,7 +301,7 @@ public class ScreenUtils {
                 Lighting.setupForFlatItems();
             RenderSystem.disableDepthTest();
 
-            MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();;
+            MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
             ClientUtils.getItemRenderer().render(stack, ItemDisplayContext.GUI, false, poseStack, bufferSource, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, model);
             bufferSource.endBatch();
 

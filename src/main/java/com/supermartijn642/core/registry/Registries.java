@@ -2,8 +2,11 @@ package com.supermartijn642.core.registry;
 
 import com.google.common.collect.Lists;
 import com.mojang.serialization.MapCodec;
+import com.supermartijn642.core.block.BaseBlock;
 import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
 import com.supermartijn642.core.extensions.CoreLibMappedRegistry;
+import com.supermartijn642.core.item.BaseBlockItem;
+import com.supermartijn642.core.item.BaseItem;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
 import net.minecraft.advancements.CriterionTrigger;
@@ -33,6 +36,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 import static net.minecraft.core.registries.BuiltInRegistries.*;
 
@@ -74,9 +78,25 @@ public final class Registries {
         return IDENTIFIER_TO_REGISTRY.get(identifier);
     }
 
-    public static final Registry<Block> BLOCKS = vanilla(BLOCK, Block.class);
+    public static final Registry<Block> BLOCKS = new VanillaRegistryWrapper<>(BLOCK, Block.class, null) {
+        @Override
+        public void register(ResourceLocation identifier, Block object){
+            super.register(identifier, object);
+            if(object instanceof BaseBlock)
+                ((BaseBlock)object).resolveRegistryDependencies();
+        }
+    };
     public static final Registry<Fluid> FLUIDS = vanilla(FLUID, Fluid.class);
-    public static final Registry<Item> ITEMS = vanilla(ITEM, Item.class);
+    public static final Registry<Item> ITEMS = new VanillaRegistryWrapper<>(ITEM, Item.class, null) {
+        @Override
+        public void register(ResourceLocation identifier, Item object){
+            super.register(identifier, object);
+            if(object instanceof BaseItem)
+                ((BaseItem)object).resolveRegistryDependencies();
+            if(object instanceof BaseBlockItem)
+                ((BaseBlockItem)object).resolveRegistryDependencies();
+        }
+    };
     public static final Registry<MobEffect> MOB_EFFECTS = vanilla(MOB_EFFECT, MobEffect.class);
     public static final Registry<SoundEvent> SOUND_EVENTS = vanilla(SOUND_EVENT, SoundEvent.class);
     public static final Registry<Potion> POTIONS = vanilla(POTION, Potion.class);
@@ -99,7 +119,7 @@ public final class Registries {
     }
 
     private static <T> Registry<T> vanilla(net.minecraft.core.Registry<T> registry, Class<? super T> valueClass){
-        return new VanillaRegistryWrapper<>(registry, valueClass);
+        return new VanillaRegistryWrapper<>(registry, valueClass, null);
     }
 
     public interface Registry<T> {
@@ -133,12 +153,14 @@ public final class Registries {
         private final net.minecraft.core.Registry<T> registry;
         private final ResourceLocation identifier;
         private final Class<T> valueClass;
+        private final BiConsumer<Object,Object> overrideConsumer;
 
-        private VanillaRegistryWrapper(net.minecraft.core.Registry<T> registry, Class<? super T> valueClass){
+        private VanillaRegistryWrapper(net.minecraft.core.Registry<T> registry, Class<? super T> valueClass, BiConsumer<Object,Object> overrideConsumer){
             this.registry = registry;
             this.identifier = registry.key().location();
             //noinspection unchecked
             this.valueClass = (Class<T>)valueClass;
+            this.overrideConsumer = overrideConsumer;
 
             addRegistry(this);
         }
@@ -162,9 +184,9 @@ public final class Registries {
         public void register(ResourceLocation identifier, T object){
             if(this.registry instanceof MappedRegistry<T> && this.registry.containsKey(identifier)){
                 ResourceKey<T> key = ResourceKey.create(this.registry.key(), identifier);
-                ((CoreLibMappedRegistry)this.registry).supermartijn642corelibSetRegisterOverrides(true);
+                ((CoreLibMappedRegistry)this.registry).supermartijn642corelibSetRegisterOverrides(true, this.overrideConsumer);
                 ((MappedRegistry<T>)this.registry).register(key, object, RegistrationInfo.BUILT_IN);
-                ((CoreLibMappedRegistry)this.registry).supermartijn642corelibSetRegisterOverrides(false);
+                ((CoreLibMappedRegistry)this.registry).supermartijn642corelibSetRegisterOverrides(false, null);
                 return;
             }
             net.minecraft.core.Registry.register(this.registry, identifier, object);
@@ -180,7 +202,7 @@ public final class Registries {
         }
 
         public T getValue(ResourceLocation identifier){
-            return this.registry.get(identifier);
+            return this.registry.getValue(identifier);
         }
 
         public Set<ResourceLocation> getIdentifiers(){

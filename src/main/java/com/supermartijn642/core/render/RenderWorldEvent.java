@@ -6,7 +6,7 @@ import net.neoforged.bus.api.Event;
 /**
  * Created 17/11/2021 by SuperMartijn642
  * <p>
- * Fired right after blocks are rendered and the {@link net.neoforged.neoforge.client.event.RenderHighlightEvent.Block} is fired.
+ * Fired right after blocks are rendered and the block highlight is drawn.
  */
 public class RenderWorldEvent extends Event {
 

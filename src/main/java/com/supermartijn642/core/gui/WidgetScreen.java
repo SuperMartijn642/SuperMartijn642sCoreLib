@@ -68,7 +68,6 @@ public class WidgetScreen<T extends Widget> extends Screen {
 
         RenderSystem.getModelViewStack().pushMatrix();
         RenderSystem.getModelViewStack().translate(offsetX, offsetY, 0);
-        RenderSystem.applyModelViewMatrix();
 
         // Update whether the widget is focused
         this.widget.setFocused(mouseX >= 0 && mouseX < this.widget.width() && mouseY >= 0 && mouseY < this.widget.height());
@@ -85,7 +84,6 @@ public class WidgetScreen<T extends Widget> extends Screen {
         this.widget.renderTooltips(this.widgetRenderContext, mouseX, mouseY);
 
         RenderSystem.getModelViewStack().popMatrix();
-        RenderSystem.applyModelViewMatrix();
     }
 
     @Override
