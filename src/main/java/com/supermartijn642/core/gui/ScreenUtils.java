@@ -216,10 +216,17 @@ public class ScreenUtils {
         Matrix4f matrix = poseStack.last().pose();
         MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
         VertexConsumer buffer = bufferSource.getBuffer(RenderType.guiTextured(texture));
-        buffer.addVertex(matrix, x, y + height, 0).setUv(tx, ty + theight);
-        buffer.addVertex(matrix, x + width, y + height, 0).setUv(tx + twidth, ty + theight);
-        buffer.addVertex(matrix, x + width, y, 0).setUv(tx + twidth, ty);
-        buffer.addVertex(matrix, x, y, 0).setUv(tx, ty);
+        buffer.addVertex(matrix, x, y + height, 0).setUv(tx, ty + theight).setColor(-1);
+        buffer.addVertex(matrix, x + width, y + height, 0).setUv(tx + twidth, ty + theight).setColor(-1);
+        buffer.addVertex(matrix, x + width, y, 0).setUv(tx + twidth, ty).setColor(-1);
+        buffer.addVertex(matrix, x, y, 0).setUv(tx, ty).setColor(-1);
+    }
+
+    public static void drawGuiSprite(ResourceLocation texture, PoseStack poseStack, float x, float y, float width, float height){
+        GUI_GRAPHICS.minecraft = ClientUtils.getMinecraft();
+        GUI_GRAPHICS.pose = poseStack;
+        GUI_GRAPHICS.bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
+        GUI_GRAPHICS.blitSprite(RenderType::guiTexturedOverlay, texture, (int)x, (int)y, (int)width, (int)height);
     }
 
     public static void fillRect(PoseStack poseStack, float x, float y, float width, float height, int color){
