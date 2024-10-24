@@ -147,7 +147,7 @@ public class TextFieldWidget extends BaseWidget {
         }
 
         Matrix4f matrix = poseStack.last().pose();
-        RenderSystem.setShaderColor(0.0F, 0.0F, 255.0F, 255.0F); // TODO check if this works
+        RenderSystem.setShaderColor(0, 0, 1, 1);
         RenderSystem.enableColorLogicOp();
         RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
         Tesselator tessellator = Tesselator.getInstance();
@@ -157,6 +157,7 @@ public class TextFieldWidget extends BaseWidget {
         buffer.addVertex(matrix, endX, startY, 0);
         buffer.addVertex(matrix, startX, startY, 0);
         BufferUploader.drawWithShader(buffer.buildOrThrow());
+        RenderSystem.setShaderColor(1, 1, 1, 1);
         RenderSystem.disableColorLogicOp();
     }
 
