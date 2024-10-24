@@ -121,11 +121,11 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
             if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
                 this.hoveredSlot = slot;
-                ScreenUtils.drawTexture(AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE, guiGraphics.pose(), slot.x - 4, slot.y - 4, 24, 24);
+                ScreenUtils.drawGuiSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE, guiGraphics.pose(), slot.x - 4, slot.y - 4, 24, 24);
             }
             this.renderSlot(guiGraphics, slot);
             if(this.hoveredSlot == slot)
-                ScreenUtils.drawTexture(AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE, guiGraphics.pose(), slot.x - 4, slot.y - 4, 24, 24);
+                ScreenUtils.drawGuiSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE, guiGraphics.pose(), slot.x - 4, slot.y - 4, 24, 24);
         }
 
         // Render the widget's foreground
