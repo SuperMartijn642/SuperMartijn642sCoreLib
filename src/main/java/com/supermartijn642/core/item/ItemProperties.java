@@ -100,7 +100,8 @@ public class ItemProperties {
             properties.durability(this.durability);
         properties.craftRemainder(this.craftingRemainingItem);
         properties.rarity(this.rarity);
-        properties.food(this.foodProperties);
+        if(this.foodProperties != null)
+            properties.food(this.foodProperties);
         if(this.isFireResistant)
             properties.fireResistant();
         if(this.components != null)
