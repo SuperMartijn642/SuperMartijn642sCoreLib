@@ -1,7 +1,6 @@
 package com.supermartijn642.core.item;
 
 import com.supermartijn642.core.registry.Registries;
-import net.minecraft.client.resources.model.MissingBlockModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponentMap;
@@ -45,7 +44,9 @@ public class BaseItem extends Item {
     }
 
     private static Properties removeDescriptionAndModelFromProperties(Properties properties){
-        return properties.overrideDescription("").overrideModel(MissingBlockModel.LOCATION).setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy")));
+        return properties.overrideDescription("")
+            .overrideModel(ResourceLocation.withDefaultNamespace("builtin/missing"))
+            .setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy")));
     }
 
     @ApiStatus.Internal
