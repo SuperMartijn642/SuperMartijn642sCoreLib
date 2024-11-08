@@ -70,7 +70,12 @@ public final class Registries {
     @SuppressWarnings("unchecked")
     @Deprecated
     public static <T> Registry<T> fromUnderlying(IForgeRegistry<T> registry){
-        return (Registry<T>)FORGE_REGISTRY_MAP.get(registry.getRegistryName());
+        Registry<?> r = FORGE_REGISTRY_MAP.get(registry.getRegistryName());
+        if(r == null){
+            // Core lib might have a registry for the vanilla registry rather than the forge one, so check by name as well
+            r = IDENTIFIER_TO_REGISTRY.get(registry.getRegistryName());
+        }
+        return (Registry<T>)r;
     }
 
     /**
