@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.17f
+- Fixed data component types not getting registered on Forge 52.0.17 and newer
+
 ### SuperMartijn642's Core Library 1.1.17e
 - Added registry wrapper for criterion trigger types
 
