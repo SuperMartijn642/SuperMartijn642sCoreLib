@@ -11,27 +11,25 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.context.ContextKeySet;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.*;
 import net.minecraft.world.level.storage.loot.functions.EnchantWithLevelsFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.minecraft.world.level.storage.loot.providers.number.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -140,7 +138,11 @@ public abstract class LootTableGenerator extends ResourceGenerator {
      * @param block block to create the loot table for
      */
     protected LootTableBuilder lootTable(Block block){
-        return this.lootTable(block.getLootTable().location());
+        Optional<ResourceKey<LootTable>> lootTable = block.getLootTable();
+        if(lootTable.isPresent())
+            return this.lootTable(lootTable.get().location());
+        ResourceLocation identifier = Registries.BLOCKS.getIdentifier(block);
+        return this.lootTable(identifier.withPrefix("blocks/"));
     }
 
     /**
@@ -169,7 +171,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
         protected final ResourceLocation identifier;
         private final List<LootPoolBuilder> pools = new ArrayList<>();
         private final List<LootItemFunction> functions = new ArrayList<>();
-        private LootContextParamSet parameters = LootContextParamSets.ALL_PARAMS;
+        private ContextKeySet parameters = LootContextParamSets.ALL_PARAMS;
 
         protected LootTableBuilder(ResourceLocation identifier){
             this.identifier = identifier;
@@ -178,7 +180,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
         /**
          * Sets the loot table type to the given parameter set.
          */
-        public LootTableBuilder parameters(LootContextParamSet parameters){
+        public LootTableBuilder parameters(ContextKeySet parameters){
             if(LootContextParamSets.CODEC.encodeStart(JsonOps.INSTANCE, parameters).error().isPresent())
                 throw new IllegalArgumentException("Cannot use unregistered parameter set '" + parameters + "'!");
 

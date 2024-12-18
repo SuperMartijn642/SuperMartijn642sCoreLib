@@ -3,14 +3,13 @@ package com.supermartijn642.core.render;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.supermartijn642.core.ClientUtils;
-import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.ShaderProgram;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4fStack;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * Created 23/07/2022 by SuperMartijn642
@@ -70,10 +69,11 @@ public class RenderStateConfiguration {
         }
 
         public Builder disableShader(){
-            return this.useShader(() -> null);
+            this.shaderState = new RenderStateEntry(RenderSystem::clearShader, null);
+            return this;
         }
 
-        public Builder useShader(Supplier<ShaderInstance> shader){
+        public Builder useShader(ShaderProgram shader){
             this.shaderState = new RenderStateEntry(() -> RenderSystem.setShader(shader), null);
             return this;
         }
@@ -179,12 +179,10 @@ public class RenderStateConfiguration {
             this.layeringState = new RenderStateEntry(() -> {
                 Matrix4fStack matrixStack = RenderSystem.getModelViewStack();
                 matrixStack.pushMatrix();
-                matrixStack.scale(0.99975586F, 0.99975586F, 0.99975586F);
-                RenderSystem.applyModelViewMatrix();
+                RenderSystem.getProjectionType().applyLayeringTransform(matrixStack, 1.0F);
             }, () -> {
                 Matrix4fStack matrixStack = RenderSystem.getModelViewStack();
                 matrixStack.popMatrix();
-                RenderSystem.applyModelViewMatrix();
             });
             return this;
         }

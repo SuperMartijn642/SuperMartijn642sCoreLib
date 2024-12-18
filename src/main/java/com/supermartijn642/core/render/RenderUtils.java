@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.block.BlockShape;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -26,13 +26,12 @@ public class RenderUtils {
         true,
         true,
         RenderStateConfiguration.builder()
-            .useShader(GameRenderer::getRendertypeLinesShader)
+            .useShader(CoreShaders.RENDERTYPE_LINES)
             .useDefaultLineWidth()
             .useTranslucentTransparency()
             .useViewOffsetZLayering()
             .disableCulling()
             .useLessThanOrEqualDepthTest()
-            .disableDepthMask()
             .build()
     );
     private static final RenderConfiguration LINES_NO_DEPTH = RenderConfiguration.create(
@@ -44,13 +43,12 @@ public class RenderUtils {
         true,
         true,
         RenderStateConfiguration.builder()
-            .useShader(GameRenderer::getRendertypeLinesShader)
+            .useShader(CoreShaders.RENDERTYPE_LINES)
             .useDefaultLineWidth()
             .useTranslucentTransparency()
             .useViewOffsetZLayering()
             .disableCulling()
             .disableDepthTest()
-            .disableDepthMask()
             .build()
     );
     private static final RenderConfiguration QUADS = RenderConfiguration.create(
@@ -62,8 +60,9 @@ public class RenderUtils {
         false,
         true,
         RenderStateConfiguration.builder()
-            .useShader(GameRenderer::getPositionColorShader)
+            .useShader(CoreShaders.POSITION_COLOR)
             .useTranslucentTransparency()
+            .disableTexture()
             .disableCulling()
             .useLessThanOrEqualDepthTest()
             .disableDepthMask()
@@ -78,8 +77,9 @@ public class RenderUtils {
         false,
         true,
         RenderStateConfiguration.builder()
-            .useShader(GameRenderer::getPositionColorShader)
+            .useShader(CoreShaders.POSITION_COLOR)
             .useTranslucentTransparency()
+            .disableTexture()
             .disableCulling()
             .disableDepthTest()
             .disableDepthMask()

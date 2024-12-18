@@ -6,6 +6,7 @@ import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.MutableWidgetRenderContext;
 import com.supermartijn642.core.gui.widget.Widget;
+import com.supermartijn642.core.render.RenderUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -66,9 +67,9 @@ public class WidgetScreen<T extends Widget> extends Screen {
         mouseX -= offsetX;
         mouseY -= offsetY;
 
+        RenderUtils.getMainBufferSource().endLastBatch();
         RenderSystem.getModelViewStack().pushMatrix();
         RenderSystem.getModelViewStack().translate(offsetX, offsetY, 0);
-        RenderSystem.applyModelViewMatrix();
 
         // Update whether the widget is focused
         this.widget.setFocused(mouseX >= 0 && mouseX < this.widget.width() && mouseY >= 0 && mouseY < this.widget.height());
@@ -84,8 +85,8 @@ public class WidgetScreen<T extends Widget> extends Screen {
         // Render the widget's tooltips
         this.widget.renderTooltips(this.widgetRenderContext, mouseX, mouseY);
 
+        RenderUtils.getMainBufferSource().endLastBatch();
         RenderSystem.getModelViewStack().popMatrix();
-        RenderSystem.applyModelViewMatrix();
     }
 
     @Override

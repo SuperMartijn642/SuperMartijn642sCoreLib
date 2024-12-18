@@ -33,7 +33,7 @@ public class TagEntryAdapter extends TagEntry {
         CustomTagEntry.TagEntryResolutionContext<T> context = new CustomTagEntry.TagEntryResolutionContext<T>() {
             @Override
             public T getElement(ResourceLocation identifier){
-                return lookup.element(identifier);
+                return lookup.element(identifier, false);
             }
 
             @Override
@@ -44,7 +44,7 @@ public class TagEntryAdapter extends TagEntry {
             @Override
             public Collection<T> getAllElements(){
                 //noinspection unchecked
-                return (Collection<T>)TagEntryAdapter.this.registry.holders().collect(Collectors.toList());
+                return (Collection<T>)TagEntryAdapter.this.registry.stream().collect(Collectors.toList());
             }
 
             @Override

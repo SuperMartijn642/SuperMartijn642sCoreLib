@@ -1,7 +1,6 @@
 package com.supermartijn642.core.registry;
 
 import com.supermartijn642.core.CoreLib;
-import com.supermartijn642.core.generator.ModelGenerator;
 import com.supermartijn642.core.item.EditableClientItemExtensions;
 import com.supermartijn642.core.render.CustomBlockEntityRenderer;
 import com.supermartijn642.core.render.CustomItemRenderer;
@@ -22,7 +21,6 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
@@ -32,10 +30,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ModelEvent;
-import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;
@@ -56,6 +52,11 @@ public class ClientRegistrationHandler {
      * Contains one registration helper per modid
      */
     private static final Map<String,ClientRegistrationHandler> REGISTRATION_HELPER_MAP = new HashMap<>();
+
+    @ApiStatus.Internal
+    public static void registerSpecialModels(Set<ModelResourceLocation> models){
+        REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.handleModelRegistryEvent(models::addAll));
+    }
 
     /**
      * Get a registration handler for a given modid. This will always return one unique registration handler per modid.
@@ -87,7 +88,7 @@ public class ClientRegistrationHandler {
     private final Map<ModelResourceLocation,Supplier<BakedModel>> specialModels = new HashMap<>();
     private final List<Pair<Supplier<Stream<ModelResourceLocation>>,Function<BakedModel,BakedModel>>> modelOverwrites = new ArrayList<>();
 
-    private final List<Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?>>>> entityRenderers = new ArrayList<>();
+    private final List<Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?,?>>>> entityRenderers = new ArrayList<>();
     private final List<Pair<Supplier<BlockEntityType<?>>,Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?>>>> blockEntityRenderers = new ArrayList<>();
 
     private final Map<ResourceLocation,Set<ResourceLocation>> textureAtlasSprites = new HashMap<>();
@@ -120,7 +121,7 @@ public class ClientRegistrationHandler {
         if(this.specialModels.containsKey(identifier))
             throw new RuntimeException("Overlapping special model and model location '" + identifier + "'!");
 
-        this.models.add(new ModelResourceLocation(identifier, ""));
+        this.models.add(new ModelResourceLocation(identifier, "standalone"));
     }
 
     /**
@@ -287,24 +288,25 @@ public class ClientRegistrationHandler {
      * Registers the given entity renderer for the given entity type.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, Function<EntityRendererProvider.Context,EntityRenderer<? super T>> entityRenderer){
+    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, Function<EntityRendererProvider.Context,EntityRenderer<? super T,?>> entityRenderer){
         if(this.passedRegisterRenderers)
             throw new IllegalStateException("Cannot register new renderers after RegisterRenderers has been fired!");
 
-        this.entityRenderers.add(Pair.of((Supplier<EntityType<?>>)(Object)entityType, (Function<EntityRendererProvider.Context,EntityRenderer<?>>)(Object)entityRenderer));
+        //noinspection RedundantCast
+        this.entityRenderers.add(Pair.of((Supplier<EntityType<?>>)(Object)entityType, (Function<EntityRendererProvider.Context,EntityRenderer<?,?>>)(Object)entityRenderer));
     }
 
     /**
      * Registers the given entity renderer for the given entity type.
      */
-    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, Supplier<EntityRenderer<? super T>> entityRenderer){
+    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, Supplier<EntityRenderer<? super T,?>> entityRenderer){
         this.registerEntityRenderer(entityType, context -> entityRenderer.get());
     }
 
     /**
      * Registers the given entity renderer for the given entity type.
      */
-    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, EntityRenderer<? super T> entityRenderer){
+    public <T extends Entity> void registerEntityRenderer(Supplier<EntityType<T>> entityType, EntityRenderer<? super T,?> entityRenderer){
         this.registerEntityRenderer(entityType, context -> entityRenderer);
     }
 
@@ -469,11 +471,7 @@ public class ClientRegistrationHandler {
 
     /**
      * Registers the given render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderType(ResourceLocation)} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelRenderType(Supplier<Block> block, Supplier<RenderType> renderTypeSupplier){
         if(this.passedRegisterRenderers)
             throw new IllegalStateException("Cannot register new menu screens after the ClientInitialization event has been fired!");
@@ -483,120 +481,72 @@ public class ClientRegistrationHandler {
 
     /**
      * Registers the given render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderType(ResourceLocation)} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelRenderType(Supplier<Block> block, RenderType renderType){
         this.registerBlockModelRenderType(block, renderType);
     }
 
     /**
      * Registers the given render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderType(ResourceLocation)} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelRenderType(Block block, Supplier<RenderType> renderTypeSupplier){
         this.registerBlockModelRenderType(() -> block, renderTypeSupplier);
     }
 
     /**
      * Registers the solid render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeSolid()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelSolidRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::solid);
     }
 
     /**
      * Registers the solid render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeSolid()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelSolidRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::solid);
     }
 
     /**
      * Registers the cutout mipped render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeCutoutMipped()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelCutoutMippedRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::cutoutMipped);
     }
 
     /**
      * Registers the cutout mipped render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeCutoutMipped()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelCutoutMippedRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::cutoutMipped);
     }
 
     /**
      * Registers the cutout render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeCutout()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelCutoutRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::cutout);
     }
 
     /**
      * Registers the cutout render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeCutout()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelCutoutRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::cutout);
     }
 
     /**
      * Registers the translucent render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeTranslucent()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelTranslucentRenderType(Supplier<Block> block){
         this.registerBlockModelRenderType(block, RenderType::translucent);
     }
 
     /**
      * Registers the translucent render type to be used when rendering the given block.
-     * @deprecated use {@link ModelGenerator.ModelBuilder#renderTypeTranslucent()} to set the render type when generating the model
-     * or use {@link BakedModel#getRenderTypes(BlockState, RandomSource, ModelData)} to give the render types directly.
      */
-    @SuppressWarnings("JavadocReference")
-    @Deprecated
     public void registerBlockModelTranslucentRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::translucent);
-    }
-
-    private void handleModelRegistryEvent(ModelEvent.RegisterAdditional e){
-        this.passedModelRegistry = true;
-
-        // Additional models
-        for(ModelResourceLocation model : this.models)
-            e.register(model);
     }
 
     private void handleModelBakeEvent(ModelEvent.ModifyBakingResult e){
@@ -642,7 +592,7 @@ public class ClientRegistrationHandler {
 
         // Entity renderers
         Set<EntityType<?>> entityTypes = new HashSet<>();
-        for(Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?>>> entry : this.entityRenderers){
+        for(Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?,?>>> entry : this.entityRenderers){
             EntityType<?> entityType = entry.left().get();
             if(entityType == null)
                 throw new RuntimeException("Entity renderer registered with null entity type!");
@@ -719,6 +669,13 @@ public class ClientRegistrationHandler {
             //noinspection removal
             ItemBlockRenderTypes.setRenderLayer(block, renderType);
         }
+    }
+
+    private void handleModelRegistryEvent(Consumer<Collection<ModelResourceLocation>> out){
+        this.passedModelRegistry = true;
+
+        // Additional models
+        out.accept(this.models);
     }
 
     private void addSprites(ResourceLocation atlas, Consumer<ResourceLocation> spriteConsumer){

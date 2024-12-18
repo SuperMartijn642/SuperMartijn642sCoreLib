@@ -6,8 +6,7 @@ import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-
-import java.util.Collections;
+import net.minecraft.tags.TagKey;
 
 /**
  * TODO properly do tags
@@ -32,7 +31,7 @@ public class TagPopulatedResourceCondition implements ResourceCondition {
     public boolean test(ResourceConditionContext context){
         ResourceKey<?> registryKey = this.registry.hasForgeRegistry() ? this.registry.getForgeRegistry().getRegistryKey() : this.registry.getVanillaRegistry().key();
         //noinspection unchecked
-        return !context.getUnderlying().getAllTags((ResourceKey<? extends Registry<Object>>)registryKey).getOrDefault(this.tag, Collections.emptySet()).isEmpty();
+        return !context.getUnderlying().getTag(TagKey.create((ResourceKey<? extends Registry<Object>>)registryKey, this.tag)).isEmpty();
     }
 
     @Override

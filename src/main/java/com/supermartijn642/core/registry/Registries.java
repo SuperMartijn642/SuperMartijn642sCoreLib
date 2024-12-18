@@ -210,7 +210,7 @@ public final class Registries {
         }
 
         public T getValue(ResourceLocation identifier){
-            return this.registry.get(identifier);
+            return this.registry.getValue(identifier);
         }
 
         public Set<ResourceLocation> getIdentifiers(){
