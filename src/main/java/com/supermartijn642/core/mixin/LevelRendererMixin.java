@@ -21,7 +21,7 @@ public class LevelRendererMixin {
     private static final PoseStack POSE_STACK = new PoseStack();
 
     @Inject(
-        method = "lambda$addParticlesPass$5(Lnet/minecraft/client/renderer/FogParameters;Lcom/mojang/blaze3d/resource/ResourceHandle;Lcom/mojang/blaze3d/resource/ResourceHandle;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V",
+        method = "lambda$addParticlesPass$5(Lnet/minecraft/client/renderer/FogParameters;Lcom/mojang/blaze3d/resource/ResourceHandle;Lcom/mojang/blaze3d/resource/ResourceHandle;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V",
         at = @At("TAIL")
     )
     private void renderLevel(CallbackInfo ci){

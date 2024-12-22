@@ -2,7 +2,7 @@ plugins {
     id "eclipse"
     id "idea"
     id "java-library"
-    id "net.neoforged.gradle.userdev" version "7.0.165"
+    id "net.neoforged.gradle.userdev" version "7.0.171"
     id "me.modmuss50.mod-publish-plugin" version "0.5.2"
 }
 
@@ -71,15 +71,15 @@ runs {
     }
 
     server {
-        programArgument "-nogui"
+        argument "-nogui"
     }
 
-    data {
+    clientData {
         //noinspection GroovyAssignabilityCheck
-        programArguments "--mod", mod_id
-        programArguments "--all"
-        programArguments "--output", file("src/generated/resources/").getAbsolutePath()
-        programArguments "--existing", file("src/main/resources").getAbsolutePath()
+        arguments "--mod", mod_id
+        arguments "--all"
+        arguments "--output", file("src/generated/resources/").getAbsolutePath()
+        arguments "--existing", file("src/main/resources").getAbsolutePath()
     }
 }
 

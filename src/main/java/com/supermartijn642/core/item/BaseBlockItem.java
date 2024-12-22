@@ -47,7 +47,6 @@ public class BaseBlockItem extends BlockItem {
 
     private static Properties removeDescriptionAndModelFromProperties(Properties properties){
         return properties.overrideDescription("")
-            .overrideModel(ResourceLocation.withDefaultNamespace("builtin/missing"))
             .setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy")));
     }
 

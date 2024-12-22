@@ -17,6 +17,8 @@
     "dev.DataGeneratorMixin",
     "dev.DatagenModLoaderAccessor",
     "LevelRendererMixin",
+    "ModelBakerImplMixin",
+    "ModelBakeryMixin",
     "SpriteSourceListMixin"
   ],
   "server": [],
