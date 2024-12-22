@@ -105,7 +105,6 @@ public class ClientRegistrationHandler {
 
     private ClientRegistrationHandler(String modid){
         this.modid = modid;
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleModelRegistryEvent);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleModelBakeEvent);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleRegisterRenderersEvent);
     }
