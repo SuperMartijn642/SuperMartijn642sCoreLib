@@ -6,6 +6,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.resources.ResourceLocation;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,6 +20,7 @@ import java.util.function.Function;
 @Mixin(ModelBakery.ModelBakerImpl.class)
 public class ModelBakerImplMixin {
 
+    @Final
     @Shadow(aliases = "field_40571")
     private ModelBakery modelBakery;
 
