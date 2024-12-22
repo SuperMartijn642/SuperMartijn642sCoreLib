@@ -16,7 +16,8 @@
     "FabricDataGenHelperMixin",
     "LevelRendererMixin",
     "MinecraftMixin",
-    "ModelManagerMixin",
+    "ModelBakerImplMixin",
+    "ModelBakeryMixin",
     "MultiPlayerGameModeMixin",
     "SpriteSourceListMixin"
   ],

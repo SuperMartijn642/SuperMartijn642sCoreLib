@@ -16,8 +16,8 @@ import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPosition
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
@@ -39,6 +39,7 @@ public class ScreenUtils {
     private static final ResourceLocation BUTTON_BACKGROUND = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "textures/gui/buttons.png");
     private static final ResourceLocation SCREEN_BACKGROUND = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "textures/gui/background.png");
     private static final GuiGraphics GUI_GRAPHICS = new GuiGraphics(ClientUtils.getMinecraft(), null);
+    private static final ItemStackRenderState ITEM_RENDER_STATE = new ItemStackRenderState();
 
     public static final int DEFAULT_TEXT_COLOR = 4210752, ACTIVE_TEXT_COLOR = 14737632, INACTIVE_TEXT_COLOR = 7368816;
 
@@ -297,19 +298,23 @@ public class ScreenUtils {
         if(stack.isEmpty())
             return;
 
+        ClientUtils.getMinecraft().getItemModelResolver().updateForTopItem(ITEM_RENDER_STATE, stack, ItemDisplayContext.GUI, false, level, null, 0);
+
         poseStack.pushPose();
         poseStack.translate(x + 8, y + 8, 150);
         poseStack.mulPose(new Matrix4f().scaling(1.0F, -1.0F, 1.0F));
         poseStack.scale(16, 16, 16);
         try{
-            BakedModel model = ClientUtils.getItemRenderer().getModel(stack, level, null, 0);
-            boolean useFlatLighting = !model.usesBlockLight();
-            if(useFlatLighting)
+            MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
+
+            boolean useFlatLighting = !ITEM_RENDER_STATE.usesBlockLight();
+            if(useFlatLighting){
+                bufferSource.endBatch();
                 Lighting.setupForFlatItems();
+            }
             RenderSystem.disableDepthTest();
 
-            MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
-            ClientUtils.getItemRenderer().render(stack, ItemDisplayContext.GUI, false, poseStack, bufferSource, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, model);
+            ITEM_RENDER_STATE.render(poseStack, bufferSource, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
             bufferSource.endBatch();
 
             RenderSystem.enableDepthTest();
