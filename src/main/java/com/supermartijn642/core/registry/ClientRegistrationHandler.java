@@ -1,24 +1,26 @@
 package com.supermartijn642.core.registry;
 
+import com.mojang.serialization.MapCodec;
 import com.supermartijn642.core.CoreLib;
-import com.supermartijn642.core.item.EditableClientItemExtensions;
 import com.supermartijn642.core.render.CustomBlockEntityRenderer;
 import com.supermartijn642.core.render.CustomItemRenderer;
+import com.supermartijn642.core.util.Holder;
 import com.supermartijn642.core.util.Pair;
 import com.supermartijn642.core.util.TriFunction;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.special.SpecialModelRenderer;
+import net.minecraft.client.renderer.special.SpecialModelRenderers;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -30,8 +32,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraftforge.client.event.CreateSpecialBlockRendererEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;
@@ -41,7 +43,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
@@ -52,10 +53,57 @@ public class ClientRegistrationHandler {
      * Contains one registration helper per modid
      */
     private static final Map<String,ClientRegistrationHandler> REGISTRATION_HELPER_MAP = new HashMap<>();
+    private static boolean haveModelsBeenRegistered = false;
 
     @ApiStatus.Internal
-    public static void registerSpecialModels(Set<ModelResourceLocation> models){
-        REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.handleModelRegistryEvent(models::addAll));
+    public static void applyModelConsumersInternal(Function<ResourceLocation,BakedModel> modelGetter){
+        haveModelsBeenRegistered = true;
+        REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.handleModelConsumers(modelGetter));
+    }
+
+    @ApiStatus.Internal
+    public static Map<ResourceLocation,Function<BakedModel,BakedModel>> gatherModelOverwritesInternal(){
+        return combineModelOverwrites(handler -> handler.modelOverwrites);
+    }
+
+    @ApiStatus.Internal
+    public static Map<ResourceLocation,Function<BakedModel,BakedModel>> gatherBlockModelOverwritesInternal(){
+        return combineModelOverwrites(
+            handler -> handler.blockModelOverwrites.stream()
+                .collect(Collectors.toMap(
+                    p -> Registries.BLOCKS.getIdentifier(p.left().get()),
+                    Pair::right
+                ))
+        );
+    }
+
+    @ApiStatus.Internal
+    public static Map<ResourceLocation,Function<ItemModel,ItemModel>> gatherItemModelOverwritesInternal(){
+        return combineModelOverwrites(
+            handler -> handler.itemModelOverwrites.stream()
+                .collect(Collectors.toMap(
+                    p -> Registries.ITEMS.getIdentifier(p.left().get()),
+                    Pair::right
+                ))
+        );
+    }
+
+    private static <S, T> Map<ResourceLocation,Function<T,T>> combineModelOverwrites(Function<ClientRegistrationHandler,Map<ResourceLocation,Function<T,T>>> overwritesExtractor){
+        haveModelsBeenRegistered = true;
+        Map<ResourceLocation,Function<T,T>> combined = new HashMap<>();
+        REGISTRATION_HELPER_MAP.forEach((modid, handler) -> {
+            overwritesExtractor.apply(handler).forEach((location, overwrite) -> {
+                Function<T,T> encapsulated = model -> {
+                    try{
+                        return overwrite.apply(model);
+                    }catch(Exception e){
+                        throw new RuntimeException("Encountered an error whilst computing model overwrite for mod '" + modid + "'", e);
+                    }
+                };
+                combined.compute(location, (l, f) -> f == null ? encapsulated : f.andThen(encapsulated));
+            });
+        });
+        return combined;
     }
 
     /**
@@ -84,127 +132,86 @@ public class ClientRegistrationHandler {
 
     private final String modid;
 
-    private final Set<ModelResourceLocation> models = new HashSet<>();
-    private final Map<ModelResourceLocation,Supplier<BakedModel>> specialModels = new HashMap<>();
-    private final List<Pair<Supplier<Stream<ModelResourceLocation>>,Function<BakedModel,BakedModel>>> modelOverwrites = new ArrayList<>();
+    private final List<Pair<ResourceLocation,Consumer<BakedModel>>> modelConsumers = new ArrayList<>();
+    private final Map<ResourceLocation,Function<BakedModel,BakedModel>> modelOverwrites = new HashMap<>();
+    private final List<Pair<Supplier<Block>,Function<BakedModel,BakedModel>>> blockModelOverwrites = new ArrayList<>();
+    private final List<Pair<Supplier<Item>,Function<ItemModel,ItemModel>>> itemModelOverwrites = new ArrayList<>();
 
     private final List<Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?,?>>>> entityRenderers = new ArrayList<>();
     private final List<Pair<Supplier<BlockEntityType<?>>,Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?>>>> blockEntityRenderers = new ArrayList<>();
 
     private final Map<ResourceLocation,Set<ResourceLocation>> textureAtlasSprites = new HashMap<>();
 
-    private final List<Pair<Supplier<Item>,Supplier<BlockEntityWithoutLevelRenderer>>> customItemRenderers = new ArrayList<>();
+    private final List<Pair<Supplier<Block>,Supplier<SpecialModelRenderer.Unbaked>>> blockSpecialRenderers = new ArrayList<>();
 
     private final List<Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>>> containerScreens = new ArrayList<>();
     private final List<Pair<Supplier<Block>,Supplier<RenderType>>> blockRenderTypes = new ArrayList<>();
 
-    private boolean passedModelRegistry;
-    private boolean passedModelBake;
     private boolean passedRegisterRenderers;
     private boolean passedTextureStitch;
 
     private ClientRegistrationHandler(String modid){
         this.modid = modid;
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleModelRegistryEvent);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleModelBakeEvent);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleRegisterRenderersEvent);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleRegisterSpecialBlockModelRenderersEvent);
     }
 
     /**
-     * Registers the given model location to be loaded from a json file.
+     * Causes the model at the given location to be loaded.
+     * @param consumer called whenever the model for the given location is baked
      */
-    public void registerModel(ResourceLocation identifier){
-        if(this.passedModelRegistry)
-            throw new IllegalStateException("Cannot register new models after ModelRegistryEvent has been fired!");
-        if(this.models.contains(identifier))
-            throw new RuntimeException("Duplicate model location '" + identifier + "'!");
-        if(this.specialModels.containsKey(identifier))
-            throw new RuntimeException("Overlapping special model and model location '" + identifier + "'!");
-
-        this.models.add(new ModelResourceLocation(identifier, "standalone"));
+    public void registerModelConsumer(ResourceLocation location, Consumer<BakedModel> consumer){
+        if(haveModelsBeenRegistered)
+            throw new IllegalStateException("Cannot register new model consumer after model registry has been completed!");
+        this.modelConsumers.add(Pair.of(location, consumer));
     }
 
     /**
-     * Registers the given model location to be loaded from a json file.
+     * Causes the model at the given location to be loaded.
+     * @param consumer called whenever the model for the given location is baked
      */
-    public void registerModel(String namespace, String identifier){
+    public void registerModelConsumer(String namespace, String identifier, Consumer<BakedModel> consumer){
         if(!RegistryUtil.isValidNamespace(namespace))
             throw new IllegalArgumentException("Namespace '" + namespace + "' must only contain characters [a-z0-9_.-]!");
         if(!RegistryUtil.isValidPath(identifier))
             throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-        this.registerModel(ResourceLocation.fromNamespaceAndPath(namespace, identifier));
+        this.registerModelConsumer(ResourceLocation.fromNamespaceAndPath(namespace, identifier), consumer);
     }
 
     /**
-     * Registers the given model location to be loaded from a json file.
+     * Causes the model at the given location to be loaded.
+     * @param consumer called whenever the model for the given location is baked
      */
-    public void registerModel(String identifier){
-        this.registerModel(this.modid, identifier);
-    }
-
-    /**
-     * Registers the given baked model under the given identifier. The identifier must not already contain a model.
-     */
-    public void registerSpecialModel(String identifier, Supplier<BakedModel> model){
-        if(this.passedModelBake)
-            throw new IllegalStateException("Cannot register new special models after ModelBakeEvent has been fired!");
-        if(!RegistryUtil.isValidPath(identifier))
-            throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
-
-        ModelResourceLocation fullIdentifier = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(this.modid, identifier), "");
-        if(this.specialModels.containsKey(fullIdentifier))
-            throw new RuntimeException("Duplicate special model entry '" + fullIdentifier + "'!");
-
-        this.specialModels.put(fullIdentifier, model);
-    }
-
-    /**
-     * Registers the given baked model under the given identifier. The identifier must not already contain a model.
-     */
-    public void registerSpecialModel(String identifier, BakedModel model){
-        this.registerSpecialModel(identifier, () -> model);
+    public void registerModelConsumer(String identifier, Consumer<BakedModel> consumer){
+        this.registerModelConsumer(this.modid, identifier, consumer);
     }
 
     /**
      * Registers an overwrite for an already present baked model.
      */
-    public void registerModelOverwrite(ModelResourceLocation identifier, Function<BakedModel,BakedModel> modelOverwrite){
-        if(this.passedModelBake)
-            throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
-        if(this.specialModels.containsKey(identifier))
-            throw new RuntimeException("Overlapping special model and model overwrite '" + identifier + "'!");
+    public void registerModelOverwrite(ResourceLocation location, Function<BakedModel,BakedModel> modelOverwrite){
+        if(haveModelsBeenRegistered)
+            throw new IllegalStateException("Cannot register new model overwrites after model baking has completed!");
 
-        this.modelOverwrites.add(Pair.of(() -> Stream.of(identifier), modelOverwrite));
-    }
-
-    /**
-     * Registers an overwrite for an already present baked model.
-     */
-    public void registerModelOverwrite(String namespace, String identifier, String variant, Function<BakedModel,BakedModel> modelOverwrite){
-        if(!RegistryUtil.isValidNamespace(namespace))
-            throw new IllegalArgumentException("Namespace '" + namespace + "' must only contain characters [a-z0-9_.-]!");
-        if(!RegistryUtil.isValidPath(identifier))
-            throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
-        if(!RegistryUtil.isValidPath(variant))
-            throw new IllegalArgumentException("Variant '" + variant + "' must only contain characters [a-z0-9_./-]!");
-
-        ModelResourceLocation fullIdentifier = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(namespace, identifier), variant);
-        this.registerModelOverwrite(fullIdentifier, modelOverwrite);
+        this.modelOverwrites.compute(location, (l, f) -> {
+            if(f == null)
+                return modelOverwrite;
+            return f.andThen(modelOverwrite);
+        });
     }
 
     /**
      * Registers an overwrite for an already present baked model.
      */
     public void registerModelOverwrite(String namespace, String identifier, Function<BakedModel,BakedModel> modelOverwrite){
-        this.registerModelOverwrite(namespace, identifier, "", modelOverwrite);
-    }
+        if(!RegistryUtil.isValidNamespace(namespace))
+            throw new IllegalArgumentException("Namespace '" + namespace + "' must only contain characters [a-z0-9_.-]!");
+        if(!RegistryUtil.isValidPath(identifier))
+            throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-    /**
-     * Registers an overwrite for an already present baked model.
-     */
-    public void registerModelOverwrite(String namespace, String identifier, String variant, Supplier<BakedModel> modelOverwrite){
-        this.registerModelOverwrite(namespace, identifier, variant, model -> modelOverwrite.get());
+        ResourceLocation fullIdentifier = ResourceLocation.fromNamespaceAndPath(namespace, identifier);
+        this.registerModelOverwrite(fullIdentifier, modelOverwrite);
     }
 
     /**
@@ -212,13 +219,6 @@ public class ClientRegistrationHandler {
      */
     public void registerModelOverwrite(String namespace, String identifier, Supplier<BakedModel> modelOverwrite){
         this.registerModelOverwrite(namespace, identifier, model -> modelOverwrite.get());
-    }
-
-    /**
-     * Registers an overwrite for an already present baked model.
-     */
-    public void registerModelOverwrite(String namespace, String identifier, String variant, BakedModel modelOverwrite){
-        this.registerModelOverwrite(namespace, identifier, variant, model -> modelOverwrite);
     }
 
     /**
@@ -232,15 +232,10 @@ public class ClientRegistrationHandler {
      * Registers an overwrite for all models for the given block, including the block's item model.
      */
     public void registerBlockModelOverwrite(Supplier<Block> block, Function<BakedModel,BakedModel> modelOverwrite){
-        if(this.passedModelBake)
+        if(haveModelsBeenRegistered)
             throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
 
-        this.modelOverwrites.add(Pair.of(
-            () -> block.get().getStateDefinition().getPossibleStates().stream()
-                .map(BlockModelShaper::stateToModelLocation),
-            modelOverwrite)
-        );
-        this.registerItemModelOverwrite(() -> block.get().asItem(), modelOverwrite);
+        this.blockModelOverwrites.add(Pair.of(block, modelOverwrite));
     }
 
     /**
@@ -260,27 +255,24 @@ public class ClientRegistrationHandler {
     /**
      * Registers an overwrite for the given item's model.
      */
-    public void registerItemModelOverwrite(Supplier<Item> item, Function<BakedModel,BakedModel> modelOverwrite){
-        if(this.passedModelBake)
+    public void registerItemModelOverwrite(Supplier<Item> item, Function<ItemModel,ItemModel> modelOverwrite){
+        if(haveModelsBeenRegistered)
             throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
 
-        this.modelOverwrites.add(Pair.of(
-            () -> Stream.of(new ModelResourceLocation(Registries.ITEMS.getIdentifier(item.get()), "inventory")),
-            modelOverwrite
-        ));
+        this.itemModelOverwrites.add(Pair.of(item, modelOverwrite));
     }
 
     /**
      * Registers an overwrite for the given item's model.
      */
-    public void registerItemModelOverwrite(Supplier<Item> item, Supplier<BakedModel> modelOverwrite){
+    public void registerItemModelOverwrite(Supplier<Item> item, Supplier<ItemModel> modelOverwrite){
         this.registerItemModelOverwrite(item, model -> modelOverwrite.get());
     }
 
     /**
      * Registers an overwrite for the given item's model.
      */
-    public void registerItemModelOverwrite(Supplier<Item> item, BakedModel modelOverwrite){
+    public void registerItemModelOverwrite(Supplier<Item> item, ItemModel modelOverwrite){
         this.registerItemModelOverwrite(item, model -> modelOverwrite);
     }
 
@@ -379,62 +371,55 @@ public class ClientRegistrationHandler {
     }
 
     /**
-     * Registers the given custom item renderer for the given item. The given item must provide an instance of {@link EditableClientItemExtensions} in its {@link Item#initializeClient(Consumer)} method.
+     * Registers the given special model renderer.
      */
-    public void registerItemRenderer(Supplier<Item> item, Supplier<BlockEntityWithoutLevelRenderer> itemRenderer){
-        if(this.passedRegisterRenderers)
-            throw new IllegalStateException("Cannot register new renderers after item RegistryEvent has been fired!");
-
-        this.customItemRenderers.add(Pair.of(item, itemRenderer));
+    public void registerSpecialModelRenderer(String identifier, MapCodec<SpecialModelRenderer.Unbaked> codec){
+        SpecialModelRenderers.ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath(this.modid, identifier), codec);
     }
 
     /**
-     * Registers the given custom item renderer for the given item. The given item must provide an instance of {@link EditableClientItemExtensions} in its {@link Item#initializeClient(Consumer)} method.
+     * Registers the given special model renderer.
      */
-    public void registerItemRenderer(Supplier<Item> item, BlockEntityWithoutLevelRenderer itemRenderer){
-        this.registerItemRenderer(item, () -> itemRenderer);
+    public void registerBlockSpecialModelRenderer(Supplier<Block> block, Supplier<SpecialModelRenderer.Unbaked> renderer){
+        this.blockSpecialRenderers.add(Pair.of(block, renderer));
     }
 
     /**
-     * Registers the given custom item renderer for the given item. The given item must provide an instance of {@link EditableClientItemExtensions} in its {@link Item#initializeClient(Consumer)} method.
+     * Registers the given special model renderer.
      */
-    public void registerItemRenderer(Item item, Supplier<BlockEntityWithoutLevelRenderer> itemRenderer){
-        this.registerItemRenderer(() -> item, itemRenderer);
+    public void registerBlockSpecialModelRenderer(Block block, SpecialModelRenderer.Unbaked renderer){
+        this.registerBlockSpecialModelRenderer(() -> block, () -> renderer);
     }
 
     /**
-     * Registers the given custom item renderer for the given item. The given item must provide an instance of {@link EditableClientItemExtensions} in its {@link Item#initializeClient(Consumer)} method.
+     * Registers the given custom item renderer.
      */
-    public void registerItemRenderer(Item item, BlockEntityWithoutLevelRenderer itemRenderer){
-        this.registerItemRenderer(() -> item, () -> itemRenderer);
-    }
+    public void registerCustomItemRenderer(String identifier, Supplier<CustomItemRenderer> itemRenderer){
+        Holder<MapCodec<SpecialModelRenderer.Unbaked>> holder = new Holder<>();
+        MapCodec<SpecialModelRenderer.Unbaked> codec = MapCodec.unit(new SpecialModelRenderer.Unbaked() {
+            SpecialModelRenderer<?> renderer = null;
 
-    /**
-     * Registers the given custom item renderer for the given item.
-     */
-    public void registerCustomItemRenderer(Supplier<Item> item, Supplier<CustomItemRenderer> itemRenderer){
-        this.registerItemRenderer(item, () -> CustomItemRenderer.of(itemRenderer.get()));
-    }
+            @Override
+            public SpecialModelRenderer<?> bake(EntityModelSet entityModelSet){
+                if(this.renderer == null)
+                    this.renderer = CustomItemRenderer.toSpecialModelRenderer(itemRenderer.get());
+                return this.renderer;
+            }
 
-    /**
-     * Registers the given custom item renderer for the given item.
-     */
-    public void registerCustomItemRenderer(Supplier<Item> item, CustomItemRenderer itemRenderer){
-        this.registerItemRenderer(item, () -> CustomItemRenderer.of(itemRenderer));
-    }
-
-    /**
-     * Registers the given custom item renderer for the given item.
-     */
-    public void registerCustomItemRenderer(Item item, Supplier<CustomItemRenderer> itemRenderer){
-        this.registerItemRenderer(() -> item, () -> CustomItemRenderer.of(itemRenderer.get()));
+            @Override
+            public MapCodec<? extends SpecialModelRenderer.Unbaked> type(){
+                return holder.get();
+            }
+        });
+        holder.set(codec);
+        this.registerSpecialModelRenderer(identifier, codec);
     }
 
     /**
      * Registers the given custom item renderer for the given item.
      */
-    public void registerCustomItemRenderer(Item item, CustomItemRenderer itemRenderer){
-        this.registerItemRenderer(() -> item, () -> CustomItemRenderer.of(itemRenderer));
+    public void registerCustomItemRenderer(String identifier, CustomItemRenderer itemRenderer){
+        this.registerCustomItemRenderer(identifier, () -> itemRenderer);
     }
 
     /**
@@ -549,44 +534,6 @@ public class ClientRegistrationHandler {
         this.registerBlockModelRenderType(block, RenderType::translucent);
     }
 
-    private void handleModelBakeEvent(ModelEvent.ModifyBakingResult e){
-        this.passedModelBake = true;
-
-        // Special models
-        for(Map.Entry<ModelResourceLocation,Supplier<BakedModel>> entry : this.specialModels.entrySet()){
-            ModelResourceLocation identifier = entry.getKey();
-            if(e.getModels().containsKey(identifier))
-                throw new RuntimeException("Special model '" + identifier + "' is trying to overwrite another model!");
-
-            BakedModel model = entry.getValue().get();
-            if(model == null)
-                throw new RuntimeException("Got null object for special model '" + entry.getKey() + "'!");
-
-            e.getModels().put(entry.getKey(), model);
-        }
-
-        // Model overwrites
-        for(Pair<Supplier<Stream<ModelResourceLocation>>,Function<BakedModel,BakedModel>> pair : this.modelOverwrites){
-            // Get all the identifiers which should be replaced
-            List<ModelResourceLocation> modelIdentifiers;
-            try(Stream<ModelResourceLocation> stream = pair.left().get()){
-                modelIdentifiers = stream.collect(Collectors.toList());
-            }
-
-            for(ModelResourceLocation identifier : modelIdentifiers){
-                if(!e.getModels().containsKey(identifier))
-                    throw new RuntimeException("No model registered for model overwrite '" + identifier + "'!");
-
-                BakedModel model = e.getModels().get(identifier);
-                model = pair.right().apply(model);
-                if(model == null)
-                    throw new RuntimeException("Model overwrite for '" + identifier + "' returned a null model!");
-
-                e.getModels().put(identifier, model);
-            }
-        }
-    }
-
     private void handleRegisterRenderersEvent(EntityRenderersEvent.RegisterRenderers e){
         this.passedRegisterRenderers = true;
 
@@ -600,7 +547,7 @@ public class ClientRegistrationHandler {
                 throw new RuntimeException("Duplicate entity renderer for entity type '" + Registries.ENTITY_TYPES.getIdentifier(entityType) + "'!");
 
             entityTypes.add(entityType);
-            //noinspection unchecked,rawtypes,NullableProblems
+            // noinspection unchecked,rawtypes
             e.registerEntityRenderer((EntityType)entityType, (EntityRendererProvider)entry.right()::apply);
         }
 
@@ -614,29 +561,8 @@ public class ClientRegistrationHandler {
                 throw new RuntimeException("Duplicate block entity renderer for block entity type '" + Registries.BLOCK_ENTITY_TYPES.getIdentifier(blockEntityType) + "'!");
 
             blockEntityTypes.add(blockEntityType);
-            //noinspection unchecked,rawtypes,NullableProblems
+            // noinspection unchecked,rawtypes
             e.registerBlockEntityRenderer((BlockEntityType)blockEntityType, (BlockEntityRendererProvider)entry.right()::apply);
-        }
-
-        // Custom item renderers
-        Set<Item> items = new HashSet<>();
-        for(Pair<Supplier<Item>,Supplier<BlockEntityWithoutLevelRenderer>> entry : this.customItemRenderers){
-            Item item = entry.left().get();
-            if(item == null)
-                throw new RuntimeException("Custom item renderer registered with null item!");
-            if(items.contains(item))
-                throw new RuntimeException("Duplicate custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "'!");
-
-            Object renderProperties = item.getRenderPropertiesInternal();
-            if(!(renderProperties instanceof EditableClientItemExtensions))
-                throw new RuntimeException("Cannot register custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "' without EditableClientItemExtensions render properties!");
-
-            BlockEntityWithoutLevelRenderer customRenderer = entry.right().get();
-            if(customRenderer == null)
-                throw new RuntimeException("Got null custom item renderer for item '" + Registries.ITEMS.getIdentifier(item) + "'!");
-
-            items.add(item);
-            ((EditableClientItemExtensions)renderProperties).setCustomRenderer(customRenderer);
         }
 
         // Container Screens
@@ -666,16 +592,39 @@ public class ClientRegistrationHandler {
                 throw new RuntimeException("Got null render type for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
 
             blocks.add(block);
-            //noinspection removal
+            //noinspection deprecation
             ItemBlockRenderTypes.setRenderLayer(block, renderType);
         }
     }
 
-    private void handleModelRegistryEvent(Consumer<Collection<ModelResourceLocation>> out){
-        this.passedModelRegistry = true;
+    private void handleRegisterSpecialBlockModelRenderersEvent(CreateSpecialBlockRendererEvent e){
+        // Block special renderers
+        Set<Block> blocks = new HashSet<>();
+        for(Pair<Supplier<Block>,Supplier<SpecialModelRenderer.Unbaked>> entry : this.blockSpecialRenderers){
+            Block block = entry.left().get();
+            if(block == null)
+                throw new RuntimeException("Special model renderer registered for null block!");
+            if(blocks.contains(block))
+                throw new RuntimeException("Duplicate special model renderer for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
 
-        // Additional models
-        out.accept(this.models);
+            SpecialModelRenderer.Unbaked renderer = entry.right().get();
+            if(renderer == null)
+                throw new RuntimeException("Got null special model renderer for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
+
+            blocks.add(block);
+            e.register(block, renderer);
+        }
+    }
+
+    private void handleModelConsumers(Function<ResourceLocation,BakedModel> modelGetter){
+        // Model callbacks
+        for(Pair<ResourceLocation,Consumer<BakedModel>> entry : this.modelConsumers){
+            try{
+                entry.right().accept(modelGetter.apply(entry.left()));
+            }catch(Exception e){
+                CoreLib.LOGGER.error("Encountered an exception whilst applying a model consumer for mod '{}'!", this.modid, e);
+            }
+        }
     }
 
     private void addSprites(ResourceLocation atlas, Consumer<ResourceLocation> spriteConsumer){

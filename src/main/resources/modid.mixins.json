@@ -6,16 +6,17 @@
   "refmap": "${mod_id}.mixins.refmap.json",
   "plugin": "${mod_package}.${mixin_package}.${mixin_plugin}",
   "mixins": [
-    "dev.DataGeneratorConfigMixin",
-    "dev.DataGeneratorMixin",
-    "dev.DatagenModLoaderAccessor",
     "GameDataMixin",
     "RecipeManagerMixin",
     "TagLoaderMixin"
   ],
   "client": [
+    "dev.DataGeneratorConfigMixin",
+    "dev.DataGeneratorMixin",
+    "dev.DatagenModLoaderAccessor",
     "LevelRendererMixin",
-    "ModelDiscoveryMixin",
+    "ModelBakerImplMixin",
+    "ModelBakeryMixin",
     "SpriteSourceListMixin"
   ],
   "server": [],

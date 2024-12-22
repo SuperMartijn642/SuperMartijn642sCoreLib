@@ -28,7 +28,6 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -146,10 +145,10 @@ public class BaseBlock extends Block {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader world, BlockPos pos, Player player){
-        ItemStack stack = super.getCloneItemStack(state, target, world, pos, player);
+    protected ItemStack getCloneItemStack(LevelReader world, BlockPos pos, BlockState state, boolean includeData){
+        ItemStack stack = super.getCloneItemStack(world, pos, state, includeData);
 
-        if(!this.saveTileData)
+        if(!includeData || !this.saveTileData)
             return stack;
 
         BlockEntity entity = world.getBlockEntity(pos);

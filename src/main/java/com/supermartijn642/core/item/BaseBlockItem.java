@@ -22,7 +22,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -48,7 +47,6 @@ public class BaseBlockItem extends BlockItem {
 
     private static Properties removeDescriptionAndModelFromProperties(Properties properties){
         return properties.overrideDescription("")
-            .overrideModel(ResourceLocation.withDefaultNamespace("builtin/missing"))
             .setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy")));
     }
 
@@ -141,11 +139,6 @@ public class BaseBlockItem extends BlockItem {
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean isSelected){
         this.inventoryUpdate(stack, level, entity, slot, isSelected);
-    }
-
-    @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer){
-        consumer.accept(new EditableClientItemExtensions());
     }
 
     @Override

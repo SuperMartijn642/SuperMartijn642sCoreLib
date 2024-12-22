@@ -14,7 +14,6 @@ import java.util.Set;
 public class CoreLibMixinPlugin implements IMixinConfigPlugin {
 
     private static final boolean isDevEnvironment = !FMLEnvironment.production;
-    private static final boolean isClient = FMLEnvironment.dist.isClient();
 
     private String mixinDevPackage;
 
@@ -30,7 +29,7 @@ public class CoreLibMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName){
-        return (isDevEnvironment && isClient) || !mixinClassName.startsWith(this.mixinDevPackage);
+        return isDevEnvironment || !mixinClassName.startsWith(this.mixinDevPackage);
     }
 
     @Override

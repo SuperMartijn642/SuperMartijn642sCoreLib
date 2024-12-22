@@ -20,7 +20,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -46,7 +45,6 @@ public class BaseItem extends Item {
 
     private static Properties removeDescriptionAndModelFromProperties(Properties properties){
         return properties.overrideDescription("")
-            .overrideModel(ResourceLocation.withDefaultNamespace("builtin/missing"))
             .setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy")));
     }
 
@@ -139,11 +137,6 @@ public class BaseItem extends Item {
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean isSelected){
         this.inventoryUpdate(stack, level, entity, slot, isSelected);
-    }
-
-    @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer){
-        consumer.accept(new EditableClientItemExtensions());
     }
 
     @Override
