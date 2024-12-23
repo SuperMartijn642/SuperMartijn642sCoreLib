@@ -82,24 +82,14 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
     }
 
     protected ModelBuilder emptyModel(){
-        return new ModelBuilder() {
-            @Override
-            protected ItemModel.Unbaked toItemModel(){
-                return new EmptyModel.Unbaked();
-            }
-        };
+        return ModelBuilder.of(new EmptyModel.Unbaked());
     }
 
     /**
      * @param baseModel model used for transformations, particle texture, and gui lighting
      */
     protected ModelBuilder specialModel(SpecialModelRenderer.Unbaked specialModel, ResourceLocation baseModel){
-        return new ModelBuilder() {
-            @Override
-            protected ItemModel.Unbaked toItemModel(){
-                return new SpecialModelWrapper.Unbaked(baseModel, specialModel);
-            }
-        };
+        return ModelBuilder.of(new SpecialModelWrapper.Unbaked(baseModel, specialModel));
     }
 
     @Override
@@ -127,6 +117,10 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
             return this;
         }
 
+        public ItemInfoBuilder model(ItemModel.Unbaked model){
+            return this.model(ModelBuilder.of(model));
+        }
+
         private ClientItem toClientItem(){
             ItemModel.Unbaked model = this.model == null ? new EmptyModel.Unbaked() : this.model.toItemModel();
             return new ClientItem(model, new ClientItem.Properties(this.handAnimationOnSwap));
@@ -135,7 +129,19 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
 
     protected static abstract class ModelBuilder {
 
-        protected abstract ItemModel.Unbaked toItemModel();
+        private ModelBuilder(){
+        }
+
+        abstract ItemModel.Unbaked toItemModel();
+
+        private static ModelBuilder of(ItemModel.Unbaked model){
+            return new ModelBuilder() {
+                @Override
+                ItemModel.Unbaked toItemModel(){
+                    return model;
+                }
+            };
+        }
     }
 
     protected static class ModelModelBuilder extends ModelBuilder {
@@ -195,6 +201,10 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
         public CompositeModelBuilder addModel(ModelBuilder model){
             this.models.add(model);
             return this;
+        }
+
+        public CompositeModelBuilder addModel(ItemModel.Unbaked model){
+            return this.addModel(ModelBuilder.of(model));
         }
     }
 }
