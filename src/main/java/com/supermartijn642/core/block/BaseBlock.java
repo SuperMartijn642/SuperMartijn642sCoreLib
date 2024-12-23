@@ -148,7 +148,7 @@ public class BaseBlock extends Block {
     protected ItemStack getCloneItemStack(LevelReader world, BlockPos pos, BlockState state, boolean includeData){
         ItemStack stack = super.getCloneItemStack(world, pos, state, includeData);
 
-        if(!includeData || !this.saveTileData)
+        if(!this.saveTileData)
             return stack;
 
         BlockEntity entity = world.getBlockEntity(pos);
