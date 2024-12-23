@@ -140,7 +140,7 @@ public class ClientRegistrationHandler {
 
     private final Map<ResourceLocation,Set<ResourceLocation>> textureAtlasSprites = new HashMap<>();
 
-    private final List<Pair<ResourceLocation,MapCodec<SpecialModelRenderer.Unbaked>>> specialModelRenderers = new ArrayList<>();
+    private final List<Pair<ResourceLocation,MapCodec<? extends SpecialModelRenderer.Unbaked>>> specialModelRenderers = new ArrayList<>();
     private final List<Pair<Supplier<Block>,Supplier<SpecialModelRenderer.Unbaked>>> blockSpecialRenderers = new ArrayList<>();
 
     private final List<Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>>> containerScreens = new ArrayList<>();
@@ -378,7 +378,7 @@ public class ClientRegistrationHandler {
     /**
      * Registers the given special model renderer.
      */
-    public void registerSpecialModelRenderer(String identifier, MapCodec<SpecialModelRenderer.Unbaked> codec){
+    public void registerSpecialModelRenderer(String identifier, MapCodec<? extends SpecialModelRenderer.Unbaked> codec){
         this.specialModelRenderers.add(Pair.of(ResourceLocation.fromNamespaceAndPath(this.modid, identifier), codec));
     }
 
@@ -539,7 +539,7 @@ public class ClientRegistrationHandler {
         this.registerBlockModelRenderType(block, RenderType::translucent);
     }
 
-    public void registerItemModelType(String identifier, MapCodec<ItemModel.Unbaked> codec){
+    public void registerItemModelType(String identifier, MapCodec<? extends ItemModel.Unbaked> codec){
         this.itemModelTypes.add(Pair.of(ResourceLocation.fromNamespaceAndPath(this.modid, identifier), codec));
     }
 
