@@ -374,7 +374,7 @@ public class ClientRegistrationHandler {
     /**
      * Registers the given special model renderer.
      */
-    public void registerSpecialModelRenderer(String identifier, MapCodec<SpecialModelRenderer.Unbaked> codec){
+    public void registerSpecialModelRenderer(String identifier, MapCodec<? extends SpecialModelRenderer.Unbaked> codec){
         SpecialModelRenderers.ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath(this.modid, identifier), codec);
     }
 
@@ -535,7 +535,7 @@ public class ClientRegistrationHandler {
         this.registerBlockModelRenderType(block, RenderType::translucent);
     }
 
-    public void registerItemModelType(String identifier, MapCodec<ItemModel.Unbaked> codec){
+    public void registerItemModelType(String identifier, MapCodec<? extends ItemModel.Unbaked> codec){
         ItemModels.ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath(this.modid, identifier), codec);
     }
 
