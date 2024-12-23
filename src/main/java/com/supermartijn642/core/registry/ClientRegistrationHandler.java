@@ -33,10 +33,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoadingContext;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.event.RegisterSpecialBlockModelRendererEvent;
-import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
+import net.neoforged.neoforge.client.event.*;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -149,6 +146,8 @@ public class ClientRegistrationHandler {
     private final List<Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>>> containerScreens = new ArrayList<>();
     private final List<Pair<Supplier<Block>,Supplier<RenderType>>> blockRenderTypes = new ArrayList<>();
 
+    private final List<Pair<ResourceLocation,MapCodec<? extends ItemModel.Unbaked>>> itemModelTypes = new ArrayList<>();
+
     private boolean passedRegisterRenderers;
     private boolean passedTextureStitch;
 
@@ -159,6 +158,7 @@ public class ClientRegistrationHandler {
         eventBus.addListener(this::handleRegisterMenuScreensEvent);
         eventBus.addListener(this::handleRegisterSpecialModelRenderersEvent);
         eventBus.addListener(this::handleRegisterSpecialBlockModelRenderersEvent);
+        eventBus.addListener(this::handleRegisterItemModelsEvent);
     }
 
     /**
@@ -539,6 +539,10 @@ public class ClientRegistrationHandler {
         this.registerBlockModelRenderType(block, RenderType::translucent);
     }
 
+    public void registerItemModelType(String identifier, MapCodec<ItemModel.Unbaked> codec){
+        this.itemModelTypes.add(Pair.of(ResourceLocation.fromNamespaceAndPath(this.modid, identifier), codec));
+    }
+
     private void handleRegisterRenderersEvent(EntityRenderersEvent.RegisterRenderers e){
         this.passedRegisterRenderers = true;
 
@@ -637,6 +641,11 @@ public class ClientRegistrationHandler {
                 CoreLib.LOGGER.error("Encountered an exception whilst applying a model consumer for mod '{}'!", this.modid, e);
             }
         }
+    }
+
+    private void handleRegisterItemModelsEvent(RegisterItemModelsEvent e){
+        // Item model types
+        this.itemModelTypes.forEach(p -> e.register(p.left(), p.right()));
     }
 
     private void addSprites(ResourceLocation atlas, Consumer<ResourceLocation> spriteConsumer){
