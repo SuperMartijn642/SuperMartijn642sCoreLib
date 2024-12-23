@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.item.ItemModels;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.special.SpecialModelRenderers;
 import net.minecraft.client.resources.model.BakedModel;
@@ -532,6 +533,10 @@ public class ClientRegistrationHandler {
      */
     public void registerBlockModelTranslucentRenderType(Block block){
         this.registerBlockModelRenderType(block, RenderType::translucent);
+    }
+
+    public void registerItemModelType(String identifier, MapCodec<ItemModel.Unbaked> codec){
+        ItemModels.ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath(this.modid, identifier), codec);
     }
 
     private void handleRegisterRenderersEvent(EntityRenderersEvent.RegisterRenderers e){
