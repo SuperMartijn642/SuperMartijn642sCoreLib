@@ -20,7 +20,10 @@ public class LevelRendererMixin {
     private static final PoseStack POSE_STACK = new PoseStack();
 
     @Inject(
-        method = "method_62213(Lnet/minecraft/client/renderer/FogParameters;Lcom/mojang/blaze3d/resource/ResourceHandle;Lcom/mojang/blaze3d/resource/ResourceHandle;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V",
+        method = { // For some reason this method has one fewer parameters outside of dev
+            "method_62213(Lnet/minecraft/client/renderer/FogParameters;Lcom/mojang/blaze3d/resource/ResourceHandle;Lcom/mojang/blaze3d/resource/ResourceHandle;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V",
+            "method_62213(Lnet/minecraft/client/renderer/FogParameters;Lcom/mojang/blaze3d/resource/ResourceHandle;Lcom/mojang/blaze3d/resource/ResourceHandle;Lnet/minecraft/client/Camera;F)V"
+        },
         at = @At("TAIL")
     )
     private void renderLevel(CallbackInfo ci){
