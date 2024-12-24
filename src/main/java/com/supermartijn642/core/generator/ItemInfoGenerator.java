@@ -134,11 +134,16 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
 
         abstract ItemModel.Unbaked toItemModel();
 
-        private static ModelBuilder of(ItemModel.Unbaked model){
+        private static ModelBuilder of(Object model){
+            // TODO temporary fix to prevent ItemModel.Unbaked class from being loaded when this class is
+            // Referencing the constructor for this class like 'handler.addGenerator(PackedUpItemInfoGenerator::new)' makes it load the class
+            // Ideally, rework GeneratorRegistrationHandler, so the generator classes aren't loaded at all unless actually running datagen
+            if(!(model instanceof ItemModel.Unbaked))
+                throw new IllegalArgumentException("Model must be an instance of " + ItemModel.Unbaked.class.getName());
             return new ModelBuilder() {
                 @Override
                 ItemModel.Unbaked toItemModel(){
-                    return model;
+                    return (ItemModel.Unbaked)model;
                 }
             };
         }
