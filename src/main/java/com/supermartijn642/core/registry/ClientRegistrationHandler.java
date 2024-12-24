@@ -35,6 +35,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.client.event.CreateSpecialBlockRendererEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;
@@ -154,7 +155,7 @@ public class ClientRegistrationHandler {
     private ClientRegistrationHandler(String modid){
         this.modid = modid;
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleRegisterRenderersEvent);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleRegisterSpecialBlockModelRenderersEvent);
+        MinecraftForge.EVENT_BUS.addListener(this::handleRegisterSpecialBlockModelRenderersEvent);
     }
 
     /**
