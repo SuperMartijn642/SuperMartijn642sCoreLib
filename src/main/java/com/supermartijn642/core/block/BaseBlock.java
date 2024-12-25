@@ -41,6 +41,7 @@ import java.util.function.Consumer;
  */
 public class BaseBlock extends Block {
 
+    private static final ThreadLocal<DependantName<Block,Optional<ResourceKey<LootTable>>>> LAST_REMOVED_DROPS = new ThreadLocal<>();
     public static final DataComponentType<CompoundTag> TILE_DATA = DataComponentType.<CompoundTag>builder().persistent(CompoundTag.CODEC).build();
 
     private final boolean saveTileData;
@@ -52,7 +53,8 @@ public class BaseBlock extends Block {
         super(removeDescriptionAndDropsFromProperties(properties));
         this.saveTileData = saveTileData;
         this.properties = blockProperties;
-        this.vanillaDrops = properties.drops;
+        this.vanillaDrops = LAST_REMOVED_DROPS.get();
+        LAST_REMOVED_DROPS.remove();
     }
 
     public BaseBlock(boolean saveTileData, Properties properties){
@@ -64,6 +66,7 @@ public class BaseBlock extends Block {
     }
 
     private static Properties removeDescriptionAndDropsFromProperties(Properties properties){
+        LAST_REMOVED_DROPS.set(properties.drops);
         return properties.overrideDescription("").noLootTable().setId(ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy")));
     }
 
@@ -111,7 +114,11 @@ public class BaseBlock extends Block {
                         this.drops = Optional.empty();
                     }else
                         this.drops = block.getLootTable();
-                }
+                }else
+                    this.drops = Optional.of(ResourceKey.create(
+                        net.minecraft.core.registries.Registries.LOOT_TABLE,
+                        Registries.BLOCKS.getIdentifier(this).withPrefix("blocks/"))
+                    );
             }else{
                 ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
                 ResourceKey<Block> key = ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, identifier);
