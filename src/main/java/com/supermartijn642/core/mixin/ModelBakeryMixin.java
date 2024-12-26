@@ -36,7 +36,7 @@ public class ModelBakeryMixin implements CoreLibModelBakery {
     public Function<BakedModel,BakedModel> supermartijn642corelibGetModelOverwrite(ResourceLocation location){
         if(this.modelOverwrites == null)
             return null;
-        this.modelOverwrites.remove(location);
+        this.missingOverwriteModels.remove(location);
         return this.modelOverwrites.get(location);
     }
 
