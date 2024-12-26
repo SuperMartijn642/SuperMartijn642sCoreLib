@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.17c
+- Fixed `BaseBlock` not dropping anything when using default drops
+
 ### SuperMartijn642's Core Library 1.1.17b
 - Fixed mixin error on client
 
