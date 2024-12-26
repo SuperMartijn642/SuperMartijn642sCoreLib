@@ -45,6 +45,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
@@ -65,8 +66,16 @@ public class ClientRegistrationHandler {
     }
 
     @ApiStatus.Internal
-    public static void applyModelConsumersInternal(Function<ResourceLocation,BakedModel> modelGetter){
+    public static Set<ResourceLocation> getModelConsumerLocations(){
         haveModelsBeenRegistered = true;
+        return REGISTRATION_HELPER_MAP.values()
+            .stream()
+            .flatMap(ClientRegistrationHandler::modelConsumerLocations)
+            .collect(Collectors.toSet());
+    }
+
+    @ApiStatus.Internal
+    public static void applyModelConsumersInternal(Function<ResourceLocation,BakedModel> modelGetter){
         REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.handleModelConsumers(modelGetter));
     }
 
@@ -620,6 +629,10 @@ public class ClientRegistrationHandler {
             blocks.add(block);
             BlockRenderLayerMap.INSTANCE.putBlock(block, renderType);
         }
+    }
+
+    private Stream<ResourceLocation> modelConsumerLocations(){
+        return this.modelConsumers.stream().map(Pair::left);
     }
 
     private void handleModelConsumers(Function<ResourceLocation,BakedModel> modelGetter){

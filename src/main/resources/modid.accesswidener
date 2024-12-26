@@ -89,6 +89,9 @@ accessible field net/minecraft/client/Minecraft resourcePackRepository Lnet/mine
 # ModelBakery$ModelBakerImpl
 accessible method net/minecraft/client/resources/model/ModelBakery$ModelBakerImpl <init> (Lnet/minecraft/client/resources/model/ModelBakery;Lnet/minecraft/client/resources/model/ModelBakery$TextureGetter;Lnet/minecraft/client/resources/model/ModelDebugName;)V
 accessible class net/minecraft/client/resources/model/ModelBakery$ModelBakerImpl
+# ModelDiscovery$ResolverImpl
+accessible method net/minecraft/client/resources/model/ModelDiscovery$ResolverImpl <init> (Lnet/minecraft/client/resources/model/ModelDiscovery;)V
+accessible class net/minecraft/client/resources/model/ModelDiscovery$ResolverImpl
 # ModelManager$ReloadState
 accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
 # Player
