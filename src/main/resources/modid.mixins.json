@@ -19,6 +19,7 @@
     "LevelRendererMixin",
     "ModelBakerImplMixin",
     "ModelBakeryMixin",
+    "ModelManagerMixin",
     "SpriteSourceListMixin"
   ],
   "server": [],
