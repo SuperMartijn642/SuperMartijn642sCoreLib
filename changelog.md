@@ -1,3 +1,7 @@
+### SuperMartijn642's Core Library 1.1.17c
+- Fixed models from model consumer not getting loaded
+- Fixed model overwrites not getting applied
+
 ### SuperMartijn642's Core Library 1.1.17b
 - Fixed `BaseBlock` not dropping anything when using default drops
 
