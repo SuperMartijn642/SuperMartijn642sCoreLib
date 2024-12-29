@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.18
+- Fixed `TextFieldWidget` allowing one more character than the max length
+
 ### SuperMartijn642's Core Library 1.1.17b
 - Fixed `BaseBlock` not dropping anything when using default drops
 
