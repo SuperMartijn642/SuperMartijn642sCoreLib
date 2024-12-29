@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.18
+- Fixed `TextFieldWidget` allowing one more character than the max length
+
 ### SuperMartijn642's Core Library 1.1.17f
 - Fixed data component types not getting registered on Forge 52.0.17 and newer
 
