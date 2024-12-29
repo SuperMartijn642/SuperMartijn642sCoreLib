@@ -198,7 +198,7 @@ public class TextFieldWidget extends BaseWidget {
 
         text = SharedConstants.filterText(text);
         if(text.length() + this.text.length() - this.getSelectedText().length() > this.maxLength)
-            text = text.substring(0, this.maxLength - this.text.length() + this.getSelectedText().length() + 1);
+            text = text.substring(0, this.maxLength - this.text.length() + this.getSelectedText().length());
 
         int min = Math.min(this.cursorPosition, this.selectionPos);
         int max = Math.max(this.cursorPosition, this.selectionPos);
