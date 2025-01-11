@@ -60,6 +60,8 @@ accessible class net/minecraft/tags/Tag$OptionalTagEntry
 # Tag$TagEntry
 accessible field net/minecraft/tags/Tag$TagEntry id Lnet/minecraft/resources/ResourceLocation;
 accessible class net/minecraft/tags/Tag$TagEntry
+#
+accessible method net/minecraft/world/item/context/UseOnContext <init> (Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/phys/BlockHitResult;)V
 
 # Append the generated entries
 # generated
