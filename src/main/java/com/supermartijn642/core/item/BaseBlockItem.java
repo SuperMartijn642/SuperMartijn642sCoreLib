@@ -69,7 +69,7 @@ public class BaseBlockItem extends BlockItem {
      * @return whether the player's interaction should be consumed or passed on
      */
     public InteractionFeedback interactWithBlock(ItemStack stack, Player player, InteractionHand hand, Level level, BlockPos hitPos, Direction hitSide, Vec3 hitLocation){
-        return InteractionFeedback.fromUnderlying(super.useOn(new UseOnContext(player, hand, new BlockHitResult(hitLocation, hitSide, hitPos, false))));
+        return InteractionFeedback.fromUnderlying(super.useOn(new UseOnContext(level, player, hand, stack, new BlockHitResult(hitLocation, hitSide, hitPos, false))));
     }
 
     /**
