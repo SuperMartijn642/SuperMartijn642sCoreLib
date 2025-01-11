@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.18b
+- Fixed `BaseBlockItem#useOn` ignoring some parameters leading to issues when interacting with other mods
+
 ### SuperMartijn642's Core Library 1.1.18a
 - Increased minimum NeoForge version to 21.4.35-beta
 
