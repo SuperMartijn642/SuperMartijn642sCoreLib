@@ -1,3 +1,7 @@
+### SuperMartijn642's Core Library 1.1.18a
+- Fixed `BaseBlockItem#useOn` ignoring some parameters leading to issues when interacting with other mods
+- Added ModMenu library badge integration
+
 ### SuperMartijn642's Core Library 1.1.18
 - Fixed `TextFieldWidget` allowing one more character than the max length
 
