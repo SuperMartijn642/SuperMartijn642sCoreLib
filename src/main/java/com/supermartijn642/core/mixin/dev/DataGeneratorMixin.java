@@ -1,6 +1,7 @@
 package com.supermartijn642.core.mixin.dev;
 
 import com.google.common.base.Stopwatch;
+import com.supermartijn642.core.extensions.DataGeneratorConfigExtension;
 import com.supermartijn642.core.extensions.DataGeneratorExtension;
 import com.supermartijn642.core.generator.ResourceCache;
 import com.supermartijn642.core.generator.ResourceGenerator;
@@ -23,6 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.lang.reflect.Field;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -78,10 +80,20 @@ public class DataGeneratorMixin implements DataGeneratorExtension {
                 // Get the output folder
                 Path outputFolder = dataGenerator.rootOutputFolder;
                 // Create a ResourceCache instance
-                if(this.resourceCache == null)
-                    this.resourceCache = ResourceCache.wrap(DatagenModLoaderAccessor.getExistingFileHelper(), hashCache, outputFolder);
+                if(this.resourceCache == null){
+                    // Get the path for manually created files
+                    List<Path> paths = ((DataGeneratorConfigExtension)dataGeneratorConfig).supermartijn642corelibGetExistingPaths();
+                    Path manualPath = paths.isEmpty() ? null : paths.getFirst();
+                    this.resourceCache = ResourceCache.wrap(
+                        hashCache,
+                        ((DataGeneratorConfigExtension)dataGeneratorConfig).supermartijn642corelibGetClientResources(),
+                        ((DataGeneratorConfigExtension)dataGeneratorConfig).supermartijn642corelibGetServerResources(),
+                        outputFolder,
+                        manualPath
+                    );
+                }
                 ((ResourceCache.HashCacheWrapper)this.resourceCache).allowWrites(false);
-                handler.registerProviders(dataGenerator, DatagenModLoaderAccessor.getExistingFileHelper(), this.resourceCache);
+                handler.registerProviders(dataGenerator, this.resourceCache);
                 // Add the new providers to the hash cache
                 for(String provider : this.allProviderIds){
                     Path cachePath = hashCache.getProviderCachePath(provider);

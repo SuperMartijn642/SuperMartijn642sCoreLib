@@ -15,7 +15,6 @@
   "client": [
     "dev.DataGeneratorConfigMixin",
     "dev.DataGeneratorMixin",
-    "dev.DatagenModLoaderAccessor",
     "LevelRendererMixin",
     "ModelBakerImplMixin",
     "ModelBakeryMixin",

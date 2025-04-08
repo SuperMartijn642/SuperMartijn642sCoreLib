@@ -10,12 +10,13 @@ import com.supermartijn642.core.generator.aggregator.ResourceAggregator;
 import com.supermartijn642.core.util.Pair;
 import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.Resource;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -98,8 +99,8 @@ public abstract class ResourceCache {
     public abstract Optional<InputStream> getExistingResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension);
 
     @ApiStatus.Internal
-    public static ResourceCache wrap(ExistingFileHelper existingFileHelper, HashCache hashCache, Path outputDirectory){
-        return new HashCacheWrapper(existingFileHelper, hashCache, outputDirectory);
+    public static ResourceCache wrap(HashCache hashCache, ResourceManager clientResources, ResourceManager serverResources, Path outputDirectory, Path manualDirectory){
+        return new HashCacheWrapper(outputDirectory, manualDirectory, hashCache, clientResources, serverResources);
     }
 
     @ApiStatus.Internal
@@ -110,18 +111,21 @@ public abstract class ResourceCache {
         private final Map<Path,Pair<ResourceAggregator<Object,Object>,Object>> aggregatedResources = new HashMap<>();
         private final Set<Path> toBeGenerated = new HashSet<>();
 
-        private final ExistingFileHelper existingFileHelper;
         private final Path outputDirectory;
+        private final Path manualDirectory;
         private final HashCache cache;
+        private final ResourceManager clientResources, serverResources;
         private boolean allowWrites = true;
         private int writes = 0;
 
-        private HashCacheWrapper(ExistingFileHelper existingFileHelper, HashCache cache, Path outputFolder){
+        HashCacheWrapper(Path outputFolder, Path manualFolder, HashCache hashCache, ResourceManager clientResources, ResourceManager serverResources){
             if(outputFolder == null)
                 throw new IllegalArgumentException("Output directory must not be null!");
             this.outputDirectory = outputFolder;
-            this.existingFileHelper = existingFileHelper;
-            this.cache = cache;
+            this.manualDirectory = manualFolder;
+            this.cache = hashCache;
+            this.clientResources = clientResources;
+            this.serverResources = serverResources;
         }
 
         public void readHashCache(){
@@ -147,9 +151,13 @@ public abstract class ResourceCache {
                 .anyMatch(this.outputDirectory.resolve(path)::equals);
         }
 
+        private boolean existsInManualFiles(Path path){
+            return this.manualDirectory != null && Files.exists(this.manualDirectory.resolve(path));
+        }
+
         private boolean existsInLoadedResources(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             ResourceLocation location = ResourceLocation.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension);
-            return this.existingFileHelper.exists(location, resourceType == ResourceType.DATA ? PackType.SERVER_DATA : PackType.CLIENT_RESOURCES);
+            return (resourceType == ResourceType.ASSET ? this.clientResources.getResource(location) : this.serverResources.getResource(location)).isPresent();
         }
 
         private Path constructPath(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
@@ -160,26 +168,25 @@ public abstract class ResourceCache {
         public boolean doesResourceExist(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             Path path = this.constructPath(resourceType, namespace, directory, fileName, extension);
             return this.existsInGeneratedFiles(path)
+                || this.existsInManualFiles(path)
                 || this.existsInLoadedResources(resourceType, namespace, directory, fileName, extension);
         }
 
         @Override
         public void trackToBeGeneratedResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             this.toBeGenerated.add(this.constructPath(resourceType, namespace, directory, fileName, extension));
-            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension);
-            this.existingFileHelper.trackGenerated(location, resourceType == ResourceType.DATA ? PackType.SERVER_DATA : PackType.CLIENT_RESOURCES, extension, directory);
         }
 
         @Override
         public Optional<InputStream> getExistingResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
-            try{
-                Resource resource = this.existingFileHelper.getResource(ResourceLocation.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension), resourceType == ResourceType.DATA ? PackType.SERVER_DATA : PackType.CLIENT_RESOURCES);
-                return Optional.of(resource.open());
-            }catch(FileNotFoundException | NoSuchElementException e){
-                return Optional.empty();
-            }catch(IOException e){
-                throw new RuntimeException(e);
-            }
+            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension);
+            return (resourceType == ResourceType.ASSET ? this.clientResources.getResource(location) : this.serverResources.getResource(location))
+                .map(resource -> {
+                    try{
+                        return resource.open();
+                    }catch(IOException ignore){}
+                    return null;
+                });
         }
 
         public void saveResource(ResourceType resourceType, byte[] data, String namespace, String directory, String fileName, String extension){
@@ -196,6 +203,8 @@ public abstract class ResourceCache {
                 .map(Map.Entry::getKey)
                 .anyMatch(fullPath::equals))
                 throw new RuntimeException("Duplicate file '" + path + "'!");
+            if(this.existsInManualFiles(path))
+                throw new RuntimeException("File '" + path + "' clashes with a manually created file!");
 
             // Skip writing if the present file matches the one to be written
             HashCode hashCode = Hashing.sha1().hashBytes(data);
@@ -232,6 +241,8 @@ public abstract class ResourceCache {
                 .map(Map.Entry::getKey)
                 .anyMatch(fullPath::equals))
                 throw new RuntimeException("Duplicate file '" + path + "'!");
+            if(this.existsInManualFiles(path))
+                throw new RuntimeException("File '" + path + "' clashes with a manually created file!");
 
             // Validate the aggregators match
             Pair<ResourceAggregator<Object,Object>,Object> oldEntry = this.aggregatedResources.get(path);

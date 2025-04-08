@@ -7,14 +7,12 @@ import com.supermartijn642.core.util.Either;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.neoforged.fml.ModLoadingContext;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -52,7 +50,7 @@ public class GeneratorRegistrationHandler {
     }
 
     private final String modid;
-    private final List<Either<Function<ResourceCache,ResourceGenerator>,BiFunction<DataGenerator,ExistingFileHelper,DataProvider>>> generatorsAndProviders = new ArrayList<>();
+    private final List<Either<Function<ResourceCache,ResourceGenerator>,Function<DataGenerator,DataProvider>>> generatorsAndProviders = new ArrayList<>();
 
     private boolean hasEventBeenFired;
 
@@ -95,7 +93,7 @@ public class GeneratorRegistrationHandler {
     /**
      * Adds the given data provider to the list of providers to be run.
      */
-    public void addProvider(BiFunction<DataGenerator,ExistingFileHelper,DataProvider> provider){
+    public void addProvider(Function<DataGenerator,DataProvider> provider){
         if(provider == null)
             throw new IllegalArgumentException("Provider must not be null!");
         if(this.hasEventBeenFired)
@@ -107,21 +105,11 @@ public class GeneratorRegistrationHandler {
     /**
      * Adds the given data provider to the list of providers to be run.
      */
-    public void addProvider(Function<DataGenerator,DataProvider> provider){
-        if(provider == null)
-            throw new IllegalArgumentException("Provider must not be null!");
-
-        this.addProvider((generator, existingFileHelper) -> provider.apply(generator));
-    }
-
-    /**
-     * Adds the given data provider to the list of providers to be run.
-     */
     public void addProvider(Supplier<DataProvider> provider){
         if(provider == null)
             throw new IllegalArgumentException("Provider must not be null!");
 
-        this.addProvider((dataGenerator, existingFileHelper) -> provider.get());
+        this.addProvider(dataGenerator -> provider.get());
     }
 
     /**
@@ -131,11 +119,11 @@ public class GeneratorRegistrationHandler {
         if(provider == null)
             throw new IllegalArgumentException("Provider must not be null!");
 
-        this.addProvider((dataGenerator, existingFileHelper) -> provider);
+        this.addProvider(dataGenerator -> provider);
     }
 
     @ApiStatus.Internal
-    public void registerProviders(DataGenerator dataGenerator, ExistingFileHelper existingFileHelper, ResourceCache cache){
+    public void registerProviders(DataGenerator dataGenerator, ResourceCache cache){
         this.hasEventBeenFired = true;
 
         // Resolve and add all the generators and providers
@@ -143,7 +131,7 @@ public class GeneratorRegistrationHandler {
             .stream()
             .map(either -> either.mapLeft(generator -> generator.apply(cache)))
             .map(either -> either.mapLeft(ResourceGenerator::createDataProvider))
-            .map(either -> either.mapRight(provider -> provider.apply(dataGenerator, existingFileHelper)))
+            .map(either -> either.mapRight(provider -> provider.apply(dataGenerator)))
             .map(either -> either.leftOrElseGet(either::right))
             .forEach(provider -> dataGenerator.addProvider(true, provider));
     }
