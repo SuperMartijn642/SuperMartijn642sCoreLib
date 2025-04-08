@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.18c
+- Account for breaking changes to datagen in NeoForge 21.4.47-beta
+
 ### SuperMartijn642's Core Library 1.1.18b
 - Fixed `BaseBlockItem#useOn` ignoring some parameters leading to issues when interacting with other mods
 
