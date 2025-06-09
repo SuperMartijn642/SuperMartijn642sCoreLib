@@ -17,6 +17,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
@@ -26,7 +27,7 @@ import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModels;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.special.SpecialModelRenderers;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -38,14 +39,15 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
@@ -66,62 +68,24 @@ public class ClientRegistrationHandler {
     }
 
     @ApiStatus.Internal
-    public static Set<ResourceLocation> getModelConsumerLocations(){
+    public static void registerBlockModelConsumerDependenciesInternal(Predicate<ResourceLocation> markModelDependency){
         haveModelsBeenRegistered = true;
-        return REGISTRATION_HELPER_MAP.values()
-            .stream()
-            .flatMap(ClientRegistrationHandler::modelConsumerLocations)
-            .collect(Collectors.toSet());
+        REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.registerBlockModelConsumerDependencies(markModelDependency));
     }
 
     @ApiStatus.Internal
-    public static void applyModelConsumersInternal(Function<ResourceLocation,BakedModel> modelGetter){
-        REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.handleModelConsumers(modelGetter));
+    public static void applyBlockModelConsumersInternal(Function<ResourceLocation,BlockStateModel> modelGetter){
+        REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.handleBlockModelConsumers(modelGetter));
     }
 
     @ApiStatus.Internal
-    public static Map<ResourceLocation,Function<BakedModel,BakedModel>> gatherModelOverwritesInternal(){
-        return combineModelOverwrites(handler -> handler.modelOverwrites);
+    public static void applyBlockModelOverwritesInternal(Map<BlockState,BlockStateModel> models){
+        REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.applyBlockModelOverwrites(models));
     }
 
     @ApiStatus.Internal
-    public static Map<ResourceLocation,Function<BakedModel,BakedModel>> gatherBlockModelOverwritesInternal(){
-        return combineModelOverwrites(
-            handler -> handler.blockModelOverwrites.stream()
-                .collect(Collectors.toMap(
-                    p -> Registries.BLOCKS.getIdentifier(p.left().get()),
-                    Pair::right
-                ))
-        );
-    }
-
-    @ApiStatus.Internal
-    public static Map<ResourceLocation,Function<ItemModel,ItemModel>> gatherItemModelOverwritesInternal(){
-        return combineModelOverwrites(
-            handler -> handler.itemModelOverwrites.stream()
-                .collect(Collectors.toMap(
-                    p -> Registries.ITEMS.getIdentifier(p.left().get()),
-                    Pair::right
-                ))
-        );
-    }
-
-    private static <S, T> Map<ResourceLocation,Function<T,T>> combineModelOverwrites(Function<ClientRegistrationHandler,Map<ResourceLocation,Function<T,T>>> overwritesExtractor){
-        haveModelsBeenRegistered = true;
-        Map<ResourceLocation,Function<T,T>> combined = new HashMap<>();
-        REGISTRATION_HELPER_MAP.forEach((modid, handler) -> {
-            overwritesExtractor.apply(handler).forEach((location, overwrite) -> {
-                Function<T,T> encapsulated = model -> {
-                    try{
-                        return overwrite.apply(model);
-                    }catch(Exception e){
-                        throw new RuntimeException("Encountered an error whilst computing model overwrite for mod '" + modid + "'", e);
-                    }
-                };
-                combined.compute(location, (l, f) -> f == null ? encapsulated : f.andThen(encapsulated));
-            });
-        });
-        return combined;
+    public static void applyItemModelOverwritesInternal(Map<ResourceLocation,ItemModel> models){
+        REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.applyItemModelOverwrites(models));
     }
 
     /**
@@ -151,9 +115,8 @@ public class ClientRegistrationHandler {
 
     private final String modid;
 
-    private final List<Pair<ResourceLocation,Consumer<BakedModel>>> modelConsumers = new ArrayList<>();
-    private final Map<ResourceLocation,Function<BakedModel,BakedModel>> modelOverwrites = new HashMap<>();
-    private final List<Pair<Supplier<Block>,Function<BakedModel,BakedModel>>> blockModelOverwrites = new ArrayList<>();
+    private final List<Pair<ResourceLocation,Consumer<BlockStateModel>>> blockModelConsumers = new ArrayList<>();
+    private final List<Pair<Supplier<Block>,Function<BlockStateModel,BlockStateModel>>> blockModelOverwrites = new ArrayList<>();
     private final List<Pair<Supplier<Item>,Function<ItemModel,ItemModel>>> itemModelOverwrites = new ArrayList<>();
 
     private final List<Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?,?>>>> entityRenderers = new ArrayList<>();
@@ -173,81 +136,40 @@ public class ClientRegistrationHandler {
     }
 
     /**
-     * Causes the model at the given location to be loaded.
+     * Causes the model at the given location to be loaded as a block model.
      * @param consumer called whenever the model for the given location is baked
      */
-    public void registerModelConsumer(ResourceLocation location, Consumer<BakedModel> consumer){
+    public void registerBlockModelConsumer(ResourceLocation location, Consumer<BlockStateModel> consumer){
         if(haveModelsBeenRegistered)
             throw new IllegalStateException("Cannot register new model consumer after model registry has been completed!");
-        this.modelConsumers.add(Pair.of(location, consumer));
+        this.blockModelConsumers.add(Pair.of(location, consumer));
     }
 
     /**
-     * Causes the model at the given location to be loaded.
+     * Causes the model at the given location to be loaded as a block model.
      * @param consumer called whenever the model for the given location is baked
      */
-    public void registerModelConsumer(String namespace, String identifier, Consumer<BakedModel> consumer){
+    public void registerBlockModelConsumer(String namespace, String identifier, Consumer<BlockStateModel> consumer){
         if(!RegistryUtil.isValidNamespace(namespace))
             throw new IllegalArgumentException("Namespace '" + namespace + "' must only contain characters [a-z0-9_.-]!");
         if(!RegistryUtil.isValidPath(identifier))
             throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-        this.registerModelConsumer(ResourceLocation.fromNamespaceAndPath(namespace, identifier), consumer);
+        this.registerBlockModelConsumer(ResourceLocation.fromNamespaceAndPath(namespace, identifier), consumer);
     }
 
     /**
-     * Causes the model at the given location to be loaded.
+     * Causes the model at the given location to be loaded as a block model.
      * @param consumer called whenever the model for the given location is baked
      */
-    public void registerModelConsumer(String identifier, Consumer<BakedModel> consumer){
-        this.registerModelConsumer(this.modid, identifier, consumer);
-    }
-
-    /**
-     * Registers an overwrite for an already present baked model.
-     */
-    public void registerModelOverwrite(ResourceLocation location, Function<BakedModel,BakedModel> modelOverwrite){
-        if(haveModelsBeenRegistered)
-            throw new IllegalStateException("Cannot register new model overwrites after model baking has completed!");
-
-        this.modelOverwrites.compute(location, (l, f) -> {
-            if(f == null)
-                return modelOverwrite;
-            return f.andThen(modelOverwrite);
-        });
-    }
-
-    /**
-     * Registers an overwrite for an already present baked model.
-     */
-    public void registerModelOverwrite(String namespace, String identifier, Function<BakedModel,BakedModel> modelOverwrite){
-        if(!RegistryUtil.isValidNamespace(namespace))
-            throw new IllegalArgumentException("Namespace '" + namespace + "' must only contain characters [a-z0-9_.-]!");
-        if(!RegistryUtil.isValidPath(identifier))
-            throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
-
-        ResourceLocation fullIdentifier = ResourceLocation.fromNamespaceAndPath(namespace, identifier);
-        this.registerModelOverwrite(fullIdentifier, modelOverwrite);
-    }
-
-    /**
-     * Registers an overwrite for an already present baked model.
-     */
-    public void registerModelOverwrite(String namespace, String identifier, Supplier<BakedModel> modelOverwrite){
-        this.registerModelOverwrite(namespace, identifier, model -> modelOverwrite.get());
-    }
-
-    /**
-     * Registers an overwrite for an already present baked model.
-     */
-    public void registerModelOverwrite(String namespace, String identifier, BakedModel modelOverwrite){
-        this.registerModelOverwrite(namespace, identifier, model -> modelOverwrite);
+    public void registerBlockModelConsumer(String identifier, Consumer<BlockStateModel> consumer){
+        this.registerBlockModelConsumer(this.modid, identifier, consumer);
     }
 
     /**
      * Registers an overwrite for all models for the given block, including the block's item model.
      */
-    public void registerBlockModelOverwrite(Supplier<Block> block, Function<BakedModel,BakedModel> modelOverwrite){
+    public void registerBlockModelOverwrite(Supplier<Block> block, Function<BlockStateModel,BlockStateModel> modelOverwrite){
         if(haveModelsBeenRegistered)
             throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
 
@@ -257,14 +179,14 @@ public class ClientRegistrationHandler {
     /**
      * Registers an overwrite for all models for the given block, including the block's item model.
      */
-    public void registerBlockModelOverwrite(Supplier<Block> block, Supplier<BakedModel> modelOverwrite){
+    public void registerBlockModelOverwrite(Supplier<Block> block, Supplier<BlockStateModel> modelOverwrite){
         this.registerBlockModelOverwrite(block, model -> modelOverwrite.get());
     }
 
     /**
      * Registers an overwrite for all models for the given block, including the block's item model.
      */
-    public void registerBlockModelOverwrite(Supplier<Block> block, BakedModel modelOverwrite){
+    public void registerBlockModelOverwrite(Supplier<Block> block, BlockStateModel modelOverwrite){
         this.registerBlockModelOverwrite(block, model -> modelOverwrite);
     }
 
@@ -631,18 +553,79 @@ public class ClientRegistrationHandler {
         }
     }
 
-    private Stream<ResourceLocation> modelConsumerLocations(){
-        return this.modelConsumers.stream().map(Pair::left);
+    private void registerBlockModelConsumerDependencies(Predicate<ResourceLocation> markModelDependency){
+        Set<ResourceLocation> missingModels = null;
+        for(Pair<ResourceLocation,Consumer<BlockStateModel>> consumer : this.blockModelConsumers){
+            ResourceLocation location = consumer.left();
+            if(!markModelDependency.test(location)){
+                if(missingModels == null)
+                    missingModels = new HashSet<>();
+                missingModels.add(location);
+            }
+        }
+        if(missingModels != null)
+            CoreLib.LOGGER.error("Missing models for block model consumers from mod '{}': {}", this.modid, missingModels.stream().map(l -> "'" + l + "'").collect(Collectors.joining(", ")));
     }
 
-    private void handleModelConsumers(Function<ResourceLocation,BakedModel> modelGetter){
+    private void handleBlockModelConsumers(Function<ResourceLocation,BlockStateModel> modelGetter){
         // Model callbacks
-        for(Pair<ResourceLocation,Consumer<BakedModel>> entry : this.modelConsumers){
+        for(Pair<ResourceLocation,Consumer<BlockStateModel>> entry : this.blockModelConsumers){
             try{
                 entry.right().accept(modelGetter.apply(entry.left()));
             }catch(Exception e){
                 CoreLib.LOGGER.error("Encountered an exception whilst applying a model consumer for mod '{}'!", this.modid, e);
             }
+        }
+    }
+
+    private void applyBlockModelOverwrites(Map<BlockState,BlockStateModel> models){
+        for(Pair<Supplier<Block>,Function<BlockStateModel,BlockStateModel>> overwrite : this.blockModelOverwrites){
+            Block block = overwrite.left().get();
+            if(block == null){
+                CoreLib.LOGGER.error("Got 'null' block for block model overwrite from mod '{}'!", this.modid);
+                continue;
+            }
+            for(BlockState state : block.getStateDefinition().getPossibleStates()){
+                BlockStateModel model = models.get(state);
+                if(model == null)
+                    continue;
+                try{
+                    model = overwrite.right().apply(model);
+                }catch(Exception e){
+                    CoreLib.LOGGER.error("Encountered an error while applying block model overwrite from mod '{}' for block state '{}'!", this.modid, state, e);
+                    continue;
+                }
+                if(model == null){
+                    CoreLib.LOGGER.error("Block model overwrite from mod '{}' for block state '{}' returned null!", this.modid, state);
+                    continue;
+                }
+                models.put(state, model);
+            }
+        }
+    }
+
+    private void applyItemModelOverwrites(Map<ResourceLocation,ItemModel> models){
+        for(Pair<Supplier<Item>,Function<ItemModel,ItemModel>> overwrite : this.itemModelOverwrites){
+            Item item = overwrite.left().get();
+            if(item == null){
+                CoreLib.LOGGER.error("Got 'null' item for item model overwrite from mod '{}'!", this.modid);
+                continue;
+            }
+            ResourceLocation modelLocation = item.components().get(DataComponents.ITEM_MODEL);
+            ItemModel model = models.get(modelLocation);
+            if(model == null)
+                continue;
+            try{
+                model = overwrite.right().apply(model);
+            }catch(Exception e){
+                CoreLib.LOGGER.error("Encountered an error while applying item model overwrite from mod '{}' for item '{}'!", this.modid, item, e);
+                continue;
+            }
+            if(model == null){
+                CoreLib.LOGGER.error("Item model overwrite from mod '{}' for item '{}' returned null!", this.modid, item);
+                continue;
+            }
+            models.put(modelLocation, model);
         }
     }
 

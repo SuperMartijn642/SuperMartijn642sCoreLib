@@ -6,7 +6,12 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.supermartijn642.core.registry.Registries;
-import net.minecraft.advancements.critereon.*;
+import net.minecraft.advancements.critereon.DataComponentMatchers;
+import net.minecraft.advancements.critereon.EnchantmentPredicate;
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.core.component.predicates.DataComponentPredicates;
+import net.minecraft.core.component.predicates.EnchantmentsPredicate;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -357,12 +362,14 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param maxLevel    maximum level of the enchantment (inclusive)
          */
         public LootPoolBuilder hasEnchantmentCondition(ResourceKey<Enchantment> enchantment, int minLevel, int maxLevel){
-            return this.condition(() -> MatchTool.toolMatches(ItemPredicate.Builder.item().withSubPredicate(
-                ItemSubPredicates.ENCHANTMENTS,
-                ItemEnchantmentsPredicate.enchantments(List.of(new EnchantmentPredicate(
-                    ResourceGenerator.registryAccess.lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).getOrThrow(enchantment),
-                    MinMaxBounds.Ints.between(minLevel, maxLevel))
-                ))
+            return this.condition(() -> MatchTool.toolMatches(ItemPredicate.Builder.item().withComponents(
+                DataComponentMatchers.Builder.components().partial(
+                    DataComponentPredicates.ENCHANTMENTS,
+                    EnchantmentsPredicate.enchantments(List.of(new EnchantmentPredicate(
+                        ResourceGenerator.registryAccess.lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).getOrThrow(enchantment),
+                        MinMaxBounds.Ints.between(minLevel, maxLevel)
+                    )))
+                ).build()
             )).build());
         }
 
@@ -372,12 +379,14 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param minLevel    minimum level of the enchantment
          */
         public LootPoolBuilder hasEnchantmentCondition(ResourceKey<Enchantment> enchantment, int minLevel){
-            return this.condition(MatchTool.toolMatches(ItemPredicate.Builder.item().withSubPredicate(
-                ItemSubPredicates.ENCHANTMENTS,
-                ItemEnchantmentsPredicate.enchantments(List.of(new EnchantmentPredicate(
-                    ResourceGenerator.registryAccess.lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).getOrThrow(enchantment),
-                    MinMaxBounds.Ints.atLeast(minLevel))
-                ))
+            return this.condition(() -> MatchTool.toolMatches(ItemPredicate.Builder.item().withComponents(
+                DataComponentMatchers.Builder.components().partial(
+                    DataComponentPredicates.ENCHANTMENTS,
+                    EnchantmentsPredicate.enchantments(List.of(new EnchantmentPredicate(
+                        ResourceGenerator.registryAccess.lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).getOrThrow(enchantment),
+                        MinMaxBounds.Ints.atLeast(minLevel)
+                    )))
+                ).build()
             )).build());
         }
 

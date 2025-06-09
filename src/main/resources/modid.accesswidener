@@ -87,11 +87,10 @@ accessible class net/minecraft/client/renderer/block/model/ItemTransform$Deseria
 accessible field net/minecraft/client/Minecraft options Lnet/minecraft/client/Options; # options
 accessible field net/minecraft/client/Minecraft resourcePackRepository Lnet/minecraft/server/packs/repository/PackRepository; # resourcePackRepository
 # ModelBakery$ModelBakerImpl
-accessible method net/minecraft/client/resources/model/ModelBakery$ModelBakerImpl <init> (Lnet/minecraft/client/resources/model/ModelBakery;Lnet/minecraft/client/resources/model/ModelBakery$TextureGetter;Lnet/minecraft/client/resources/model/ModelDebugName;)V
 accessible class net/minecraft/client/resources/model/ModelBakery$ModelBakerImpl
-# ModelDiscovery$ResolverImpl
-accessible method net/minecraft/client/resources/model/ModelDiscovery$ResolverImpl <init> (Lnet/minecraft/client/resources/model/ModelDiscovery;)V
-accessible class net/minecraft/client/resources/model/ModelDiscovery$ResolverImpl
+# ModelDiscovery
+accessible field net/minecraft/client/resources/model/ModelDiscovery modelWrappers Lit/unimi/dsi/fastutil/objects/Object2ObjectMap;
+accessible field net/minecraft/client/resources/model/ModelDiscovery resolver Lnet/minecraft/client/resources/model/ResolvableModel$Resolver;
 # ModelManager$ReloadState
 accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
 # Player

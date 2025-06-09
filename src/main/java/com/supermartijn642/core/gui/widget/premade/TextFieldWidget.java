@@ -1,8 +1,7 @@
 package com.supermartijn642.core.gui.widget.premade;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.ScreenUtils;
@@ -10,6 +9,7 @@ import com.supermartijn642.core.gui.widget.BaseWidget;
 import com.supermartijn642.core.gui.widget.WidgetRenderContext;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
@@ -116,7 +116,7 @@ public class TextFieldWidget extends BaseWidget {
 
         if(relativeSelection != relativeCursor){
             int l1 = left + fontRenderer.width(s.substring(0, relativeSelection));
-            this.drawSelectionBox(context.poseStack(), cursorX, top - 1, l1 - 1, top + 1 + fontRenderer.lineHeight);
+            this.drawSelectionBox(context, cursorX, top - 1, l1 - 1, top + 1 + fontRenderer.lineHeight);
         }
     }
 
@@ -125,7 +125,7 @@ public class TextFieldWidget extends BaseWidget {
         ScreenUtils.fillRect(poseStack, this.x + 1, this.y + 1, this.width - 2, this.height - 2, -16777216);
     }
 
-    protected void drawSelectionBox(PoseStack poseStack, int startX, int startY, int endX, int endY){
+    protected void drawSelectionBox(WidgetRenderContext context, int startX, int startY, int endX, int endY){
         if(startX < endX){
             int i = startX;
             startX = endX;
@@ -146,19 +146,12 @@ public class TextFieldWidget extends BaseWidget {
             startX = this.x + this.width;
         }
 
-        Matrix4f matrix = poseStack.last().pose();
-        RenderSystem.setShaderColor(0, 0, 1, 1);
-        RenderSystem.enableColorLogicOp();
-        RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder buffer = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        buffer.addVertex(matrix, startX, endY, 0);
-        buffer.addVertex(matrix, endX, endY, 0);
-        buffer.addVertex(matrix, endX, startY, 0);
-        buffer.addVertex(matrix, startX, startY, 0);
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
-        RenderSystem.setShaderColor(1, 1, 1, 1);
-        RenderSystem.disableColorLogicOp();
+        VertexConsumer buffer = context.buffers().getBuffer(RenderType.guiTextHighlight());
+        Matrix4f matrix = context.poseStack().last().pose();
+        buffer.addVertex(matrix, startX, endY, 0).setColor(-16776961);
+        buffer.addVertex(matrix, endX, endY, 0).setColor(-16776961);
+        buffer.addVertex(matrix, endX, startY, 0).setColor(-16776961);
+        buffer.addVertex(matrix, startX, startY, 0).setColor(-16776961);
     }
 
     public void clear(){

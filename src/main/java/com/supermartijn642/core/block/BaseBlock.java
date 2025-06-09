@@ -18,7 +18,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -187,19 +186,13 @@ public class BaseBlock extends Block {
         return InteractionFeedback.PASS;
     }
 
-    @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> information, TooltipFlag flag){
-        this.appendItemInformation(stack, information::add, flag.isAdvanced());
-        super.appendHoverText(stack, context, information, flag);
-    }
-
     /**
      * Adds information to be displayed when hovering over the item corresponding to this block in the inventory.
      * @param stack    the stack being hovered over
      * @param info     consumes the information which should be added
      * @param advanced whether advanced tooltips is enabled
      */
-    protected void appendItemInformation(ItemStack stack, Consumer<Component> info, boolean advanced){
+    public void appendItemInformation(ItemStack stack, Consumer<Component> info, boolean advanced){
     }
 
     /**

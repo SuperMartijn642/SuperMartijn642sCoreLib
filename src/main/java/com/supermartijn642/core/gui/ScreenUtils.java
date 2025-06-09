@@ -249,7 +249,7 @@ public class ScreenUtils {
     }
 
     public static void bindTexture(ResourceLocation location){
-        RenderSystem.setShaderTexture(0, location);
+        RenderSystem.setShaderTexture(0, ClientUtils.getTextureManager().getTexture(location).getTexture());
     }
 
     public static void drawTooltip(PoseStack poseStack, Font fontRenderer, List<Component> text, int x, int y){
@@ -298,7 +298,7 @@ public class ScreenUtils {
         if(stack.isEmpty())
             return;
 
-        ClientUtils.getMinecraft().getItemModelResolver().updateForTopItem(ITEM_RENDER_STATE, stack, ItemDisplayContext.GUI, false, level, null, 0);
+        ClientUtils.getMinecraft().getItemModelResolver().updateForTopItem(ITEM_RENDER_STATE, stack, ItemDisplayContext.GUI, level, null, 0);
 
         poseStack.pushPose();
         poseStack.translate(x + 8, y + 8, 150);
@@ -312,12 +312,10 @@ public class ScreenUtils {
                 bufferSource.endBatch();
                 Lighting.setupForFlatItems();
             }
-            RenderSystem.disableDepthTest();
 
             ITEM_RENDER_STATE.render(poseStack, bufferSource, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
             bufferSource.endBatch();
 
-            RenderSystem.enableDepthTest();
             if(useFlatLighting)
                 Lighting.setupFor3DItems();
         }catch(Throwable throwable){

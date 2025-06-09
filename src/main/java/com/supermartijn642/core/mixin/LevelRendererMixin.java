@@ -28,7 +28,7 @@ public class LevelRendererMixin {
     )
     private void renderLevel(CallbackInfo ci){
         RenderWorldEvent.EVENT.invoker().accept(new RenderWorldEvent(POSE_STACK, ClientUtils.getPartialTicks()));
-        if(!POSE_STACK.clear())
+        if(!POSE_STACK.isEmpty())
             throw new IllegalStateException("Pose stack was not cleared properly during RenderWorldEvent!");
     }
 }
