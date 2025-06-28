@@ -131,6 +131,13 @@ public abstract class AtlasSourceGenerator extends ResourceGenerator {
         return this.atlas(TextureAtlases.getBlocks());
     }
 
+    /**
+     * Gets an atlas builder for the 'gui' atlas. The returned atlas builder may be a new atlas builder or an existing one if requested before by any {@code AtlasSourceGenerator} with the same modid.
+     */
+    protected AtlasBuilder guiAtlas(){
+        return this.atlas(TextureAtlases.getGUI());
+    }
+
     @Override
     public String getName(){
         return this.modName + " Atlas Source Generator";

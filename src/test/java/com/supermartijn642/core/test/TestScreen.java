@@ -1,7 +1,7 @@
 package com.supermartijn642.core.test;
 
 import com.supermartijn642.core.TextComponents;
-import com.supermartijn642.core.gui.ScreenUtils;
+import com.supermartijn642.core.gui.GuiGraphicsHelper;
 import com.supermartijn642.core.gui.widget.BaseWidget;
 import com.supermartijn642.core.gui.widget.WidgetRenderContext;
 import com.supermartijn642.core.gui.widget.premade.TextFieldWidget;
@@ -28,8 +28,8 @@ public class TestScreen extends BaseWidget {
     }
 
     @Override
-    public void renderBackground(WidgetRenderContext context, int mouseX, int mouseY){
-        ScreenUtils.drawScreenBackground(context.poseStack(), this.x, this.y, this.width, this.height);
-        super.renderBackground(context, mouseX, mouseY);
+    public void renderBackground(WidgetRenderContext context, GuiGraphicsHelper graphics, int mouseX, int mouseY){
+        graphics.submitDefaultScreenBackground(this.x, this.y, this.width, this.height);
+        super.renderBackground(context, graphics, mouseX, mouseY);
     }
 }

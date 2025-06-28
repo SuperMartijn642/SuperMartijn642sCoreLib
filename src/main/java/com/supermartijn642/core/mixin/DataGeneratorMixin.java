@@ -101,7 +101,7 @@ public class DataGeneratorMixin implements CoreLibDataGenerator {
         Stopwatch stopwatch = Stopwatch.createUnstarted();
         for(Map.Entry<String,DataProvider> entry : this.providersToRun.entrySet()){
             if(!this.alwaysGenerate && !hashCache.shouldRunInThisVersion(entry.getKey())){
-                LOGGER.debug("Generator {} already run for version {}", entry.getKey(), (Object)this.version.getName());
+                LOGGER.debug("Generator {} already run for version {}", entry.getKey(), this.version.name());
                 return;
             }
             if(entry.getValue() instanceof ResourceGenerator.DataProviderInstance){

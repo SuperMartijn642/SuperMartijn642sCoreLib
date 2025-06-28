@@ -6,6 +6,10 @@ import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
+
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Created 27/07/2022 by SuperMartijn642
@@ -20,6 +24,11 @@ public interface CustomItemRenderer {
             }
 
             @Override
+            public void getExtents(Set<Vector3f> set){
+                customRenderer.getExtents(set::add);
+            }
+
+            @Override
             public @Nullable ItemStack extractArgument(ItemStack stack){
                 return stack;
             }
@@ -30,4 +39,6 @@ public interface CustomItemRenderer {
      * Renders the given item stack.
      */
     void render(ItemStack itemStack, ItemDisplayContext transformType, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay);
+
+    void getExtents(Consumer<Vector3f> extents);
 }

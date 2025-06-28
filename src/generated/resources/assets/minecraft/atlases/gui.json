@@ -1,0 +1,16 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "supermartijn642corelib:gui/buttons"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "supermartijn642corelib:gui/slot"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "supermartijn642corelib:gui/background"
+    }
+  ]
+}

@@ -6,11 +6,6 @@ accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScr
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen quickCraftingRemainder I # quickCraftingRemainder
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen SLOT_HIGHLIGHT_BACK_SPRITE Lnet/minecraft/resources/ResourceLocation;
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen SLOT_HIGHLIGHT_FRONT_SPRITE Lnet/minecraft/resources/ResourceLocation;
-accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackEnd Lnet/minecraft/world/inventory/Slot; # snapbackEnd
-accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackItem Lnet/minecraft/world/item/ItemStack; # snapbackItem
-accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackStartX I # snapbackStartX
-accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackStartY I # snapbackStartY
-accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen snapbackTime J # snapbackTime
 accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderFloatingItem (Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V # renderFloatingItem
 accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderSlot (Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/inventory/Slot;)V # renderSlot
 # AbstractContainerMenu
@@ -45,13 +40,19 @@ accessible field net/minecraft/data/DataGenerator rootOutputFolder Ljava/nio/fil
 # GameRenderer
 accessible field net/minecraft/client/renderer/GameRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
 # GuiGraphics
+accessible field net/minecraft/client/gui/GuiGraphics guiRenderState Lnet/minecraft/client/gui/render/state/GuiRenderState;
 accessible field net/minecraft/client/gui/GuiGraphics minecraft Lnet/minecraft/client/Minecraft; # minecraft
-accessible field net/minecraft/client/gui/GuiGraphics pose Lcom/mojang/blaze3d/vertex/PoseStack; # pose
-accessible field net/minecraft/client/gui/GuiGraphics bufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource; # bufferSource
-accessible method net/minecraft/client/gui/GuiGraphics renderTooltipInternal (Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;Lnet/minecraft/resources/ResourceLocation;)V
+accessible field net/minecraft/client/gui/GuiGraphics scissorStack Lnet/minecraft/client/gui/GuiGraphics$ScissorStack;
+accessible field net/minecraft/client/gui/GuiGraphics sprites Lnet/minecraft/client/gui/GuiSpriteManager;
+accessible method net/minecraft/client/gui/GuiGraphics innerBlit (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/ResourceLocation;IIIIFFFFI)V
+accessible method net/minecraft/client/gui/GuiGraphics renderItemBar (Lnet/minecraft/world/item/ItemStack;II)V
+accessible method net/minecraft/client/gui/GuiGraphics renderItemCooldown (Lnet/minecraft/world/item/ItemStack;II)V
+accessible method net/minecraft/client/gui/GuiGraphics renderItemCount (Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V
+accessible method net/minecraft/client/gui/GuiGraphics setTooltipForNextFrameInternal (Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;Lnet/minecraft/resources/ResourceLocation;Z)V
+accessible method net/minecraft/client/gui/GuiGraphics submitColoredRectangle (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/gui/render/TextureSetup;IIIIILjava/lang/Integer;)V
 mutable field net/minecraft/client/gui/GuiGraphics minecraft Lnet/minecraft/client/Minecraft; # minecraft
-mutable field net/minecraft/client/gui/GuiGraphics pose Lcom/mojang/blaze3d/vertex/PoseStack; # pose
-mutable field net/minecraft/client/gui/GuiGraphics bufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource; # bufferSource
+# GuiGraphics$ScissorStack
+accessible class net/minecraft/client/gui/GuiGraphics$ScissorStack
 # HashCache
 accessible field net/minecraft/data/HashCache cachePaths Ljava/util/Set; # cachePaths
 accessible field net/minecraft/data/HashCache caches Ljava/util/Map; # caches
@@ -104,6 +105,8 @@ accessible field net/minecraft/tags/TagEntry required Z
 accessible field net/minecraft/tags/TagEntry tag Z
 accessible method net/minecraft/tags/TagEntry <init> (Lnet/minecraft/resources/ResourceLocation;ZZ)V
 mutable field net/minecraft/tags/TagEntry CODEC Lcom/mojang/serialization/Codec;
+# TextureAtlasHolder
+accessible field net/minecraft/client/resources/TextureAtlasHolder textureAtlas Lnet/minecraft/client/renderer/texture/TextureAtlas;
 
 # Append the generated entries
 # generated

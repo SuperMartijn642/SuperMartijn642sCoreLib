@@ -7,7 +7,7 @@ import com.supermartijn642.core.render.CustomItemRenderer;
 import com.supermartijn642.core.util.Holder;
 import com.supermartijn642.core.util.Pair;
 import com.supermartijn642.core.util.TriFunction;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.SpecialBlockRendererRegistry;
 import net.fabricmc.loader.api.FabricLoader;
@@ -16,11 +16,11 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ItemModel;
@@ -127,7 +127,7 @@ public class ClientRegistrationHandler {
     private final List<Pair<Supplier<Block>,Supplier<SpecialModelRenderer.Unbaked>>> blockSpecialRenderers = new ArrayList<>();
 
     private final List<Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>>> containerScreens = new ArrayList<>();
-    private final List<Pair<Supplier<Block>,Supplier<RenderType>>> blockRenderTypes = new ArrayList<>();
+    private final List<Pair<Supplier<Block>,Supplier<ChunkSectionLayer>>> blockRenderTypes = new ArrayList<>();
 
     private boolean passedTextureStitch;
 
@@ -395,7 +395,7 @@ public class ClientRegistrationHandler {
     /**
      * Registers the given render type to be used when rendering the given block.
      */
-    public void registerBlockModelRenderType(Supplier<Block> block, Supplier<RenderType> renderTypeSupplier){
+    public void registerBlockModelRenderType(Supplier<Block> block, Supplier<ChunkSectionLayer> renderTypeSupplier){
         if(haveRenderersBeenRegistered)
             throw new IllegalStateException("Cannot register new menu screens after the ClientInitialization event has been fired!");
 
@@ -405,71 +405,78 @@ public class ClientRegistrationHandler {
     /**
      * Registers the given render type to be used when rendering the given block.
      */
-    public void registerBlockModelRenderType(Supplier<Block> block, RenderType renderType){
-        this.registerBlockModelRenderType(block, renderType);
+    public void registerBlockModelRenderType(Supplier<Block> block, ChunkSectionLayer renderType){
+        this.registerBlockModelRenderType(block, () -> renderType);
     }
 
     /**
      * Registers the given render type to be used when rendering the given block.
      */
-    public void registerBlockModelRenderType(Block block, Supplier<RenderType> renderTypeSupplier){
+    public void registerBlockModelRenderType(Block block, Supplier<ChunkSectionLayer> renderTypeSupplier){
         this.registerBlockModelRenderType(() -> block, renderTypeSupplier);
+    }
+
+    /**
+     * Registers the given render type to be used when rendering the given block.
+     */
+    public void registerBlockModelRenderType(Block block, ChunkSectionLayer renderType){
+        this.registerBlockModelRenderType(() -> block, renderType);
     }
 
     /**
      * Registers the solid render type to be used when rendering the given block.
      */
     public void registerBlockModelSolidRenderType(Supplier<Block> block){
-        this.registerBlockModelRenderType(block, RenderType::solid);
+        this.registerBlockModelRenderType(block, ChunkSectionLayer.SOLID);
     }
 
     /**
      * Registers the solid render type to be used when rendering the given block.
      */
     public void registerBlockModelSolidRenderType(Block block){
-        this.registerBlockModelRenderType(block, RenderType::solid);
+        this.registerBlockModelRenderType(block, ChunkSectionLayer.SOLID);
     }
 
     /**
      * Registers the cutout mipped render type to be used when rendering the given block.
      */
     public void registerBlockModelCutoutMippedRenderType(Supplier<Block> block){
-        this.registerBlockModelRenderType(block, RenderType::cutoutMipped);
+        this.registerBlockModelRenderType(block, ChunkSectionLayer.CUTOUT_MIPPED);
     }
 
     /**
      * Registers the cutout mipped render type to be used when rendering the given block.
      */
     public void registerBlockModelCutoutMippedRenderType(Block block){
-        this.registerBlockModelRenderType(block, RenderType::cutoutMipped);
+        this.registerBlockModelRenderType(block, ChunkSectionLayer.CUTOUT_MIPPED);
     }
 
     /**
      * Registers the cutout render type to be used when rendering the given block.
      */
     public void registerBlockModelCutoutRenderType(Supplier<Block> block){
-        this.registerBlockModelRenderType(block, RenderType::cutout);
+        this.registerBlockModelRenderType(block, ChunkSectionLayer.CUTOUT);
     }
 
     /**
      * Registers the cutout render type to be used when rendering the given block.
      */
     public void registerBlockModelCutoutRenderType(Block block){
-        this.registerBlockModelRenderType(block, RenderType::cutout);
+        this.registerBlockModelRenderType(block, ChunkSectionLayer.CUTOUT);
     }
 
     /**
      * Registers the translucent render type to be used when rendering the given block.
      */
     public void registerBlockModelTranslucentRenderType(Supplier<Block> block){
-        this.registerBlockModelRenderType(block, RenderType::translucent);
+        this.registerBlockModelRenderType(block, ChunkSectionLayer.TRANSLUCENT);
     }
 
     /**
      * Registers the translucent render type to be used when rendering the given block.
      */
     public void registerBlockModelTranslucentRenderType(Block block){
-        this.registerBlockModelRenderType(block, RenderType::translucent);
+        this.registerBlockModelRenderType(block, ChunkSectionLayer.TRANSLUCENT);
     }
 
     public void registerItemModelType(String identifier, MapCodec<? extends ItemModel.Unbaked> codec){
@@ -538,18 +545,18 @@ public class ClientRegistrationHandler {
 
         // Block render types
         blocks = new HashSet<>();
-        for(Pair<Supplier<Block>,Supplier<RenderType>> entry : this.blockRenderTypes){
+        for(Pair<Supplier<Block>,Supplier<ChunkSectionLayer>> entry : this.blockRenderTypes){
             Block block = entry.left().get();
             if(block == null)
-                throw new RuntimeException("Block render type registered for null block!");
+                throw new RuntimeException("Block render layer registered for null block!");
             if(blocks.contains(block))
-                throw new RuntimeException("Duplicate render type for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
-            RenderType renderType = entry.right().get();
-            if(renderType == null)
-                throw new RuntimeException("Got null render type for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
+                throw new RuntimeException("Duplicate render layer for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
+            ChunkSectionLayer layer = entry.right().get();
+            if(layer == null)
+                throw new RuntimeException("Got null render layer for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
 
             blocks.add(block);
-            BlockRenderLayerMap.INSTANCE.putBlock(block, renderType);
+            BlockRenderLayerMap.putBlock(block, layer);
         }
     }
 

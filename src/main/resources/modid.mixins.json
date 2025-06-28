@@ -15,6 +15,7 @@
   "client": [
     "DataGeneratorMixin",
     "FabricDataGenHelperMixin",
+    "GuiGraphicsMixin",
     "LevelRendererMixin",
     "MinecraftMixin",
     "ModelBakeryMixin",
