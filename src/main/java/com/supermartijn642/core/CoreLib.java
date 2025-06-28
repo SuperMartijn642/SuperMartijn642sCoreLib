@@ -5,6 +5,7 @@ import com.supermartijn642.core.data.condition.*;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
 import com.supermartijn642.core.data.tag.CustomTagEntries;
 import com.supermartijn642.core.data.tag.entries.NamespaceTagEntry;
+import com.supermartijn642.core.generator.standard.CoreLibAtlasSourceGenerator;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
 import com.supermartijn642.core.item.BaseBlockItem;
 import com.supermartijn642.core.item.BaseItem;
@@ -18,8 +19,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
-import java.util.function.Consumer;
-
 /**
  * Created 7/7/2020 by SuperMartijn642
  */
@@ -29,7 +28,7 @@ public class CoreLib {
     public static final Logger LOGGER = CommonUtils.getLogger("supermartijn642corelib");
 
     public CoreLib(FMLJavaModLoadingContext context){
-        context.getModEventBus().addListener(this::onConstructMod);
+        FMLConstructModEvent.getBus(context.getModBusGroup()).addListener(this::onConstructMod);
         CommonUtils.initialize();
         CustomTagEntries.init();
 
@@ -51,9 +50,11 @@ public class CoreLib {
 
         // Register generator for default tags
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));
+        // Register generator for texture atlas source entries
+        GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibAtlasSourceGenerator("supermartijn642corelib", cache));
 
         // Add all BaseItem instances to their respective creative tabs
-        context.getModEventBus().addListener((Consumer<BuildCreativeModeTabContentsEvent>)event -> {
+        BuildCreativeModeTabContentsEvent.getBus(context.getModBusGroup()).addListener(event -> {
             Registries.ITEMS.getValues().stream()
                 .filter(item -> item instanceof BaseItem || item instanceof BaseBlockItem)
                 .filter(item -> item instanceof BaseItem ? ((BaseItem)item).isInCreativeGroup(event.getTab()) : ((BaseBlockItem)item).isInCreativeGroup(event.getTab()))

@@ -112,7 +112,7 @@ public final class CreativeItemGroup extends CreativeModeTab {
         this.displayItemsGenerator = (flags, output) -> this.applyFiller(output::accept);
 
         //noinspection removal
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<RegisterEvent>)event -> {
+        RegisterEvent.getBus(FMLJavaModLoadingContext.get().getModBusGroup()).addListener(event -> {
             if(event.getRegistryKey() == Registries.CREATIVE_MODE_TAB)
                 event.register(Registries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath(modid, identifier), () -> this);
         });

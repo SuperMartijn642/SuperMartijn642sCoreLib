@@ -1,12 +1,17 @@
 package com.supermartijn642.core.block;
 
+import com.supermartijn642.core.CoreLib;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 /**
  * Created 1/26/2021 by SuperMartijn642
@@ -32,59 +37,51 @@ public abstract class BaseBlockEntity extends BlockEntity {
     }
 
     /**
-     * Writes tile entity data to be saved with the chunk.
-     * The stored data will be read in {@link #readData(CompoundTag)}.
-     * @return a {@link CompoundTag} with the stored data
+     * Writes tile entity data to be saved with the chunk to the given output.
+     * The stored data will be read in {@link #readData(ValueInput)}.
      */
-    protected abstract CompoundTag writeData();
+    protected abstract void writeData(ValueOutput output);
 
     /**
-     * Writes tile entity data to be sent to the client.
-     * The stored data will be read in {@link #readData(CompoundTag)}.
-     * @return a {@link CompoundTag} with the stored client data
+     * Writes tile entity data to be sent to the client to the given output.
+     * The stored data will be read in {@link #readData(ValueInput)}.
      */
-    protected CompoundTag writeClientData(){
-        return this.writeData();
+    protected void writeClientData(ValueOutput output){
+        this.writeData(output);
     }
 
     /**
-     * Writes tile entity data to be stored on item stacks.
-     * The stored data will be read in {@link #readData(CompoundTag)}.
-     * @return a {@link CompoundTag} with the stored item stack data
+     * Writes tile entity data to be stored on item stacks to the given output.
+     * The stored data will be read in {@link #readData(ValueInput)}.
      */
-    protected CompoundTag writeItemStackData(){
-        return this.writeData();
+    protected void writeItemStackData(ValueOutput output){
+        this.writeData(output);
     }
 
     /**
-     * Reads data stored by {@link #writeData()}, {@link #writeClientData()},
-     * and {@link #writeItemStackData()}.
-     * @param tag data to be read
+     * Reads data stored by {@link #writeData(ValueOutput)}, {@link #writeClientData(ValueOutput)},
+     * and {@link #writeItemStackData(ValueOutput)}.
      */
-    protected abstract void readData(CompoundTag tag);
+    protected abstract void readData(ValueInput input);
 
     @Override
-    protected void saveAdditional(CompoundTag compound, HolderLookup.Provider provider){
-        super.saveAdditional(compound, provider);
-        CompoundTag data = this.writeData();
-        if(data != null && !data.isEmpty())
-            compound.put("data", data);
+    protected void saveAdditional(ValueOutput output){
+        super.saveAdditional(output);
+        this.writeData(output.child("data"));
     }
 
     @Override
-    protected void loadAdditional(CompoundTag nbt, HolderLookup.Provider provider){
-        super.loadAdditional(nbt, provider);
-        this.readData(nbt.getCompoundOrEmpty("data"));
+    protected void loadAdditional(ValueInput valueInput){
+        super.loadAdditional(valueInput);
+        this.readData(valueInput.childOrEmpty("data"));
     }
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider provider){
-        CompoundTag tag = new CompoundTag();
-        super.saveAdditional(tag, provider);
-        CompoundTag data = this.writeClientData();
-        if(data != null && !data.isEmpty())
-            tag.put("data", data);
-        return tag;
+        TagValueOutput output = TagValueOutput.createWithContext(new ProblemReporter.ScopedCollector(this.problemPath(), CoreLib.LOGGER), provider);
+        super.saveAdditional(output);
+        this.writeClientData(output.child("data"));
+        return output.buildResult();
     }
 
     @Override
@@ -92,11 +89,9 @@ public abstract class BaseBlockEntity extends BlockEntity {
         if(this.dataChanged){
             this.dataChanged = false;
             return ClientboundBlockEntityDataPacket.create(this, (entity, registryAccess) -> {
-                CompoundTag tag = new CompoundTag();
-                CompoundTag data = ((BaseBlockEntity)entity).writeClientData();
-                if(data != null && !data.isEmpty())
-                    tag.put("data", data);
-                return tag;
+                TagValueOutput output = TagValueOutput.createWithContext(new ProblemReporter.ScopedCollector(this.problemPath(), CoreLib.LOGGER), registryAccess);
+                ((BaseBlockEntity)entity).writeClientData(output.child("data"));
+                return output.buildResult();
             });
         }
         return null;

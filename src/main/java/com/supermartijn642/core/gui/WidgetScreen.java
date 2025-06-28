@@ -1,12 +1,10 @@
 package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.MutableWidgetRenderContext;
 import com.supermartijn642.core.gui.widget.Widget;
-import com.supermartijn642.core.render.RenderUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -60,33 +58,32 @@ public class WidgetScreen<T extends Widget> extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks){
-        this.widgetRenderContext.update(guiGraphics, partialTicks);
+        this.widgetRenderContext.update(guiGraphics, partialTicks, this.font, this.minecraft);
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
 
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
         mouseX -= offsetX;
         mouseY -= offsetY;
 
-        RenderUtils.getMainBufferSource().endLastBatch();
-        RenderSystem.getModelViewStack().pushMatrix();
-        RenderSystem.getModelViewStack().translate(offsetX, offsetY, 0);
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().translate(offsetX, offsetY);
 
         // Update whether the widget is focused
         this.widget.setFocused(mouseX >= 0 && mouseX < this.widget.width() && mouseY >= 0 && mouseY < this.widget.height());
 
+        GuiGraphicsHelper helper = GuiGraphicsHelper.of(guiGraphics);
         // Render the widget background
-        this.widget.renderBackground(this.widgetRenderContext, mouseX, mouseY);
+        this.widget.renderBackground(this.widgetRenderContext, helper, mouseX, mouseY);
         // Render the widget
-        this.widget.render(this.widgetRenderContext, mouseX, mouseY);
+        this.widget.render(this.widgetRenderContext, helper, mouseX, mouseY);
         // Render the widget's foreground
-        this.widget.renderForeground(this.widgetRenderContext, mouseX, mouseY);
+        this.widget.renderForeground(this.widgetRenderContext, helper, mouseX, mouseY);
         // Render the widget's overlay
-        this.widget.renderOverlay(this.widgetRenderContext, mouseX, mouseY);
+        this.widget.renderOverlay(this.widgetRenderContext, helper, mouseX, mouseY);
         // Render the widget's tooltips
-        this.widget.renderTooltips(this.widgetRenderContext, mouseX, mouseY);
+        this.widget.renderTooltips(this.widgetRenderContext, helper, mouseX, mouseY);
 
-        RenderUtils.getMainBufferSource().endLastBatch();
-        RenderSystem.getModelViewStack().popMatrix();
+        guiGraphics.pose().popMatrix();
     }
 
     @Override

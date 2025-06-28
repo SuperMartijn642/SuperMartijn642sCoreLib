@@ -67,7 +67,8 @@ public class RegistrationHandler {
 
     private RegistrationHandler(String modid){
         this.modid = modid;
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::handleRegisterEvent);
+        //noinspection removal
+        RegisterEvent.getBus(FMLJavaModLoadingContext.get().getModBusGroup()).addListener(this::handleRegisterEvent);
     }
 
     public void registerBlock(String identifier, Supplier<Block> block){

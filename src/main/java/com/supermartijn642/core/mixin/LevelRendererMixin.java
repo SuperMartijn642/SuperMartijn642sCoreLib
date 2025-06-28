@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.render.RenderWorldEvent;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,7 +25,7 @@ public class LevelRendererMixin {
         remap = false
     )
     private void renderLevel(CallbackInfo ci){
-        MinecraftForge.EVENT_BUS.post(new RenderWorldEvent(POSE_STACK, ClientUtils.getPartialTicks()));
+        RenderWorldEvent.EVENT_BUS.post(new RenderWorldEvent(POSE_STACK, ClientUtils.getPartialTicks()));
         if(!POSE_STACK.isEmpty())
             throw new IllegalStateException("Pose stack was not cleared properly during RenderWorldEvent!");
     }

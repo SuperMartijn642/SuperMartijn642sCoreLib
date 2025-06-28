@@ -2,8 +2,7 @@ package com.supermartijn642.core.registry;
 
 import com.supermartijn642.core.CoreLib;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.listener.Priority;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import net.minecraftforge.registries.IdMappingEvent;
@@ -133,7 +132,7 @@ public @interface RegistryEntryAcceptor {
             }
 
             // Register event listeners
-            MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, Handler::onIdRemapping);
+            IdMappingEvent.BUS.addListener(Priority.LOWEST, Handler::onIdRemapping);
         }
 
         public static void onRegisterEvent(RegisterEvent e){

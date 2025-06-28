@@ -6,24 +6,16 @@ import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.ContainerWidget;
 import com.supermartijn642.core.gui.widget.MutableWidgetRenderContext;
 import com.supermartijn642.core.gui.widget.Widget;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.ContainerScreenEvent;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.client.event.ForgeEventFactoryClient;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
  */
 public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> extends AbstractContainerScreen<X> {
-
-    private static final ResourceLocation SLOT_TEXTURE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "textures/gui/slot.png");
 
     public static <T extends Widget, X extends BaseContainer> WidgetContainerScreen<T,X> of(T widget, X container, boolean drawSlots, boolean isPauseScreen){
         return new WidgetContainerScreen<>(widget, container, drawSlots, isPauseScreen);
@@ -81,36 +73,38 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks){
-        this.widgetRenderContext.update(guiGraphics, partialTicks);
+        this.widgetRenderContext.update(guiGraphics, partialTicks, this.font, this.minecraft);
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
+        GuiGraphicsHelper helper = GuiGraphicsHelper.of(guiGraphics);
 
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
         int offsetMouseX = mouseX - offsetX;
         int offsetMouseY = mouseY - offsetY;
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(offsetX, offsetY, 0);
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().translate(offsetX, offsetY);
 
         // Update whether the widget is focused
         this.widget.setFocused(offsetMouseX >= 0 && offsetMouseX < this.widget.width() && offsetMouseY >= 0 && offsetMouseY < this.widget.height());
 
         // Render the widget background
-        this.widget.renderBackground(this.widgetRenderContext, offsetMouseX, offsetMouseY);
+        this.widget.renderBackground(this.widgetRenderContext, helper, offsetMouseX, offsetMouseY);
 
         if(this.drawSlots){
             for(Slot slot : this.container.slots)
-                ScreenUtils.drawTexture(SLOT_TEXTURE, guiGraphics.pose(), slot.x - 1, slot.y - 1, 18, 18);
+                helper.submitDefaultSlot(slot.x - 1, slot.y - 1);
         }
 
-        guiGraphics.pose().popPose();
+        guiGraphics.pose().popMatrix();
 
-        MinecraftForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Background(this, guiGraphics, mouseX, mouseY));
+        //noinspection UnstableApiUsage
+        ForgeEventFactoryClient.onContainerRenderBackground(this, guiGraphics, mouseX, mouseY);
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(offsetX, offsetY, 0);
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().translate(offsetX, offsetY);
 
         // Render the widget
-        this.widget.render(this.widgetRenderContext, offsetMouseX, offsetMouseY);
+        this.widget.render(this.widgetRenderContext, helper, offsetMouseX, offsetMouseY);
 
         this.hoveredSlot = null;
         for(Slot slot : this.container.slots){
@@ -119,57 +113,35 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
             if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
                 this.hoveredSlot = slot;
-                ScreenUtils.drawGuiSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE, guiGraphics.pose(), slot.x - 4, slot.y - 4, 24, 24);
+                helper.submitSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE, slot.x - 4, slot.y - 4, 24, 24);
             }
             this.renderSlot(guiGraphics, slot);
             if(this.hoveredSlot == slot)
-                ScreenUtils.drawGuiSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE, guiGraphics.pose(), slot.x - 4, slot.y - 4, 24, 24);
+                helper.submitSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE, slot.x - 4, slot.y - 4, 24, 24);
         }
 
         // Render the widget's foreground
-        this.widget.renderForeground(this.widgetRenderContext, offsetMouseX, offsetMouseY);
+        this.widget.renderForeground(this.widgetRenderContext, helper, offsetMouseX, offsetMouseY);
 
         this.renderTooltip(guiGraphics, offsetMouseX, offsetMouseY);
 
-        MinecraftForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Foreground(this, guiGraphics, mouseX, mouseY));
+        guiGraphics.pose().popMatrix();
 
-        ItemStack cursorStack = this.draggingItem.isEmpty() ? this.menu.getCarried() : this.draggingItem;
-        if(!cursorStack.isEmpty()){
-            int offset = this.draggingItem.isEmpty() ? 8 : 16;
-            String s = null;
-            if(!this.draggingItem.isEmpty() && this.isSplittingStack){
-                cursorStack = cursorStack.copy();
-                cursorStack.setCount(Mth.ceil(cursorStack.getCount() / 2f));
-            }else if(this.isQuickCrafting && this.quickCraftSlots.size() > 1){
-                cursorStack = cursorStack.copy();
-                cursorStack.setCount(this.quickCraftingRemainder);
-                if(cursorStack.isEmpty())
-                    s = ChatFormatting.YELLOW + "0";
-            }
+        //noinspection UnstableApiUsage
+        ForgeEventFactoryClient.onContainerRenderForeground(this, guiGraphics, mouseX, mouseY);
 
-            this.renderFloatingItem(guiGraphics, cursorStack, offsetMouseX - 8, offsetMouseY - offset, s);
-        }
+        this.renderCarriedItem(guiGraphics, mouseX, mouseY);
+        this.renderSnapbackItem(guiGraphics);
 
-        if(!this.snapbackItem.isEmpty()){
-            float f = (float)(Util.getMillis() - this.snapbackTime) / 100.0F;
-            if(f >= 1.0F){
-                f = 1.0F;
-                this.snapbackItem = ItemStack.EMPTY;
-            }
-
-            int j2 = this.snapbackEnd.x - this.snapbackStartX;
-            int k2 = this.snapbackEnd.y - this.snapbackStartY;
-            int j1 = this.snapbackStartX + (int)(j2 * f);
-            int k1 = this.snapbackStartY + (int)(k2 * f);
-            this.renderFloatingItem(guiGraphics, this.snapbackItem, j1, k1, null);
-        }
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().translate(offsetX, offsetY);
 
         // Render the widget's overlay
-        this.widget.renderOverlay(this.widgetRenderContext, offsetMouseX, offsetMouseY);
+        this.widget.renderOverlay(this.widgetRenderContext, helper, offsetMouseX, offsetMouseY);
         // Render the widget's tooltips
-        this.widget.renderTooltips(this.widgetRenderContext, offsetMouseX, offsetMouseY);
+        this.widget.renderTooltips(this.widgetRenderContext, helper, offsetMouseX, offsetMouseY);
 
-        guiGraphics.pose().popPose();
+        guiGraphics.pose().popMatrix();
     }
 
     @Override

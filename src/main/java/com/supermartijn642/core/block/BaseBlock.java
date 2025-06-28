@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.DependantName;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,6 +24,8 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -92,7 +95,7 @@ public class BaseBlock extends Block {
 
         BlockEntity entity = worldIn.getBlockEntity(pos);
         if(entity instanceof BaseBlockEntity)
-            ((BaseBlockEntity)entity).readData(tag);
+            ((BaseBlockEntity)entity).readData(TagValueInput.create(new ProblemReporter.ScopedCollector(entity.problemPath(), CoreLib.LOGGER), worldIn.registryAccess(), tag));
     }
 
     @Override
@@ -138,10 +141,12 @@ public class BaseBlock extends Block {
         if(!(entity instanceof BaseBlockEntity))
             return items;
 
-        CompoundTag entityTag = ((BaseBlockEntity)entity).writeItemStackData();
-        if(entityTag == null || entityTag.isEmpty())
+        TagValueOutput output = TagValueOutput.createWithContext(new ProblemReporter.ScopedCollector(entity.problemPath(), CoreLib.LOGGER), entity.getLevel().registryAccess());
+        ((BaseBlockEntity)entity).writeItemStackData(output);
+        if(output.isEmpty())
             return items;
 
+        CompoundTag entityTag = output.buildResult();
         for(ItemStack stack : items){
             if(stack.getItem() instanceof BlockItem && ((BlockItem)stack.getItem()).getBlock() == this)
                 stack.set(TILE_DATA, entityTag);
@@ -161,10 +166,12 @@ public class BaseBlock extends Block {
         if(!(entity instanceof BaseBlockEntity))
             return stack;
 
-        CompoundTag entityTag = ((BaseBlockEntity)entity).writeItemStackData();
-        if(entityTag == null || entityTag.isEmpty())
+        TagValueOutput output = TagValueOutput.createWithContext(new ProblemReporter.ScopedCollector(entity.problemPath(), CoreLib.LOGGER), world.registryAccess());
+        ((BaseBlockEntity)entity).writeItemStackData(output);
+        if(output.isEmpty())
             return stack;
 
+        CompoundTag entityTag = output.buildResult();
         if(stack.getItem() instanceof BlockItem && ((BlockItem)stack.getItem()).getBlock() == this){
             stack.remove(DataComponents.BLOCK_ENTITY_DATA);
             stack.set(TILE_DATA, entityTag);
