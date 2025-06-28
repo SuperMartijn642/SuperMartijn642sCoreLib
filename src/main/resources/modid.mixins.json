@@ -9,13 +9,13 @@
     "dev.DataGeneratorConfigMixin",
     "dev.DataGeneratorMixin",
     "dev.DatagenModLoaderAccessor",
+    "ItemMixin",
     "GameDataMixin",
     "RecipeManagerMixin",
     "TagLoaderMixin"
   ],
   "client": [
     "LevelRendererMixin",
-    "ModelBakerImplMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",
     "SpriteSourceListMixin"

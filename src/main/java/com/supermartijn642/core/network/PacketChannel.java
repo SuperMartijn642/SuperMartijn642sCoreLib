@@ -37,9 +37,11 @@ public class PacketChannel {
             throw new IllegalArgumentException("Modid '" + modid + "' must only contain characters [a-z0-9_.-]!");
         if(!RegistryUtil.isValidNamespace(channelName))
             throw new IllegalArgumentException("Channel name '" + channelName + "' must only contain characters [a-z0-9_.-]!");
+        //noinspection removal
         String activeMod = ModLoadingContext.get().getActiveNamespace();
         if(activeMod != null && !activeMod.equals("minecraft") && !activeMod.equals("forge")){
             if(!activeMod.equals(modid))
+                //noinspection removal
                 CoreLib.LOGGER.warn("Mod '" + ModLoadingContext.get().getActiveContainer().getModInfo().getDisplayName() + "' is creating a packet channel for different modid '" + modid + "'!");
         }else if(modid.equals("minecraft") || modid.equals("forge"))
             CoreLib.LOGGER.warn("Mod is creating a packet channel for modid '" + modid + "'!");
@@ -57,6 +59,7 @@ public class PacketChannel {
 
     @Deprecated
     public static PacketChannel create(){
+        //noinspection removal
         return create(ModLoadingContext.get().getActiveNamespace(), "main");
     }
 

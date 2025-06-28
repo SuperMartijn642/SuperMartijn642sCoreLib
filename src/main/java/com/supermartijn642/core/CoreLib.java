@@ -28,8 +28,8 @@ public class CoreLib {
 
     public static final Logger LOGGER = CommonUtils.getLogger("supermartijn642corelib");
 
-    public CoreLib(){
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onConstructMod);
+    public CoreLib(FMLJavaModLoadingContext context){
+        context.getModEventBus().addListener(this::onConstructMod);
         CommonUtils.initialize();
         CustomTagEntries.init();
 
@@ -53,7 +53,7 @@ public class CoreLib {
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));
 
         // Add all BaseItem instances to their respective creative tabs
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<BuildCreativeModeTabContentsEvent>)event -> {
+        context.getModEventBus().addListener((Consumer<BuildCreativeModeTabContentsEvent>)event -> {
             Registries.ITEMS.getValues().stream()
                 .filter(item -> item instanceof BaseItem || item instanceof BaseBlockItem)
                 .filter(item -> item instanceof BaseItem ? ((BaseItem)item).isInCreativeGroup(event.getTab()) : ((BaseBlockItem)item).isInCreativeGroup(event.getTab()))

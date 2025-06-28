@@ -36,9 +36,11 @@ public abstract class ResourceGenerator {
     public ResourceGenerator(String modid, ResourceCache cache){
         if(!RegistryUtil.isValidNamespace(modid))
             throw new IllegalArgumentException("Modid '" + modid + "' must only contain characters [a-z0-9_.-]!");
+        //noinspection removal
         String activeMod = ModLoadingContext.get().getActiveNamespace();
         if(activeMod != null && !activeMod.equals("minecraft") && !activeMod.equals("forge")){
             if(!activeMod.equals(modid))
+                //noinspection removal
                 CoreLib.LOGGER.warn("Mod '" + ModLoadingContext.get().getActiveContainer().getModInfo().getDisplayName() + "' is creating a resource generator with different modid '" + modid + "'!");
         }else if(modid.equals("minecraft") || modid.equals("forge"))
             CoreLib.LOGGER.warn("Mod is creating a resource generator with modid '" + modid + "'!");

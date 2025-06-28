@@ -11,7 +11,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public interface CustomBlockEntityRenderer<T extends BlockEntity> {
 
     static <T extends BlockEntity> BlockEntityRenderer<T> of(CustomBlockEntityRenderer<T> customRenderer){
-        return customRenderer::render;
+        return (entity, partialTicks, poseStack, bufferSource, combinedLight, combinedOverlay, cameraOffset) ->
+            customRenderer.render(entity, partialTicks, poseStack, bufferSource, combinedLight, combinedOverlay);
     }
 
     /**

@@ -3,7 +3,6 @@ package com.supermartijn642.core.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -75,7 +74,7 @@ public abstract class BaseBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(CompoundTag nbt, HolderLookup.Provider provider){
         super.loadAdditional(nbt, provider);
-        this.readData(nbt.contains("data", Tag.TAG_COMPOUND) ? nbt.getCompound("data") : new CompoundTag());
+        this.readData(nbt.getCompoundOrEmpty("data"));
     }
 
     @Override

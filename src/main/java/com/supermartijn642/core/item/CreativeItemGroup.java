@@ -111,6 +111,7 @@ public final class CreativeItemGroup extends CreativeModeTab {
         this.background = ResourceLocation.withDefaultNamespace("textures/gui/container/creative_inventory/tab_items.png");
         this.displayItemsGenerator = (flags, output) -> this.applyFiller(output::accept);
 
+        //noinspection removal
         FMLJavaModLoadingContext.get().getModEventBus().addListener((Consumer<RegisterEvent>)event -> {
             if(event.getRegistryKey() == Registries.CREATIVE_MODE_TAB)
                 event.register(Registries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath(modid, identifier), () -> this);
