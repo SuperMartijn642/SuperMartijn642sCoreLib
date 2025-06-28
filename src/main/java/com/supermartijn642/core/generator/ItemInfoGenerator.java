@@ -101,6 +101,7 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
 
         private final ResourceLocation location;
         private boolean handAnimationOnSwap = true;
+        private boolean oversizedInGui = false;
         private ModelBuilder model;
 
         protected ItemInfoBuilder(ResourceLocation location){
@@ -109,6 +110,11 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
 
         public ItemInfoBuilder noHandAnimationOnSwap(){
             this.handAnimationOnSwap = false;
+            return this;
+        }
+
+        public ItemInfoBuilder oversizedInGui(){
+            this.oversizedInGui = true;
             return this;
         }
 
@@ -123,7 +129,7 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
 
         private ClientItem toClientItem(){
             ItemModel.Unbaked model = this.model == null ? new EmptyModel.Unbaked() : this.model.toItemModel();
-            return new ClientItem(model, new ClientItem.Properties(this.handAnimationOnSwap));
+            return new ClientItem(model, new ClientItem.Properties(this.handAnimationOnSwap, this.oversizedInGui));
         }
     }
 

@@ -17,6 +17,7 @@ public class TextureAtlases {
     private static final ResourceLocation SHIELDS = ResourceLocation.parse("textures/atlas/shield_patterns.png");
     private static final ResourceLocation SIGNS = ResourceLocation.parse("textures/atlas/signs.png");
     private static final ResourceLocation CHESTS = ResourceLocation.parse("textures/atlas/chest.png");
+    private static final ResourceLocation GUI = ResourceLocation.parse("textures/atlas/gui.png");
 
     public static ResourceLocation getBlocks(){
         return BLOCKS;
@@ -56,5 +57,9 @@ public class TextureAtlases {
 
     public static ResourceLocation getChests(){
         return CHESTS;
+    }
+
+    public static ResourceLocation getGUI(){
+        return GUI;
     }
 }

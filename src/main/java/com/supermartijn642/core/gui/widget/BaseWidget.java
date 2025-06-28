@@ -1,7 +1,7 @@
 package com.supermartijn642.core.gui.widget;
 
 import com.supermartijn642.core.ClientUtils;
-import com.supermartijn642.core.gui.ScreenUtils;
+import com.supermartijn642.core.gui.GuiGraphicsHelper;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 
@@ -101,7 +101,7 @@ public abstract class BaseWidget implements Widget {
     }
 
     @Override
-    public void renderBackground(WidgetRenderContext context, int mouseX, int mouseY){
+    public void renderBackground(WidgetRenderContext context, GuiGraphicsHelper graphics, int mouseX, int mouseY){
         // Update the focused widget
         if(!this.focused)
             this.focusedWidget = null;
@@ -123,57 +123,57 @@ public abstract class BaseWidget implements Widget {
             Component message = this.getNarrationMessage();
             String s = message == null ? "" : message.getString();
             if(!s.isEmpty()){
-                ClientUtils.getMinecraft().getNarrator().sayNow(s);
+                ClientUtils.getMinecraft().getNarrator().saySystemNow(s);
                 this.nextNarration = Long.MAX_VALUE;
             }
         }
 
         // Render internal widgets' background
-        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.renderBackground(context, mouseX, mouseY));
+        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.renderBackground(context, graphics, mouseX, mouseY));
         if(this.focusedWidget != null)
-            this.focusedWidget.renderBackground(context, mouseX, mouseY);
+            this.focusedWidget.renderBackground(context, graphics, mouseX, mouseY);
     }
 
     @Override
-    public void render(WidgetRenderContext context, int mouseX, int mouseY){
+    public void render(WidgetRenderContext context, GuiGraphicsHelper graphics, int mouseX, int mouseY){
         // Render internal widgets
-        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.render(context, mouseX, mouseY));
+        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.render(context, graphics, mouseX, mouseY));
         if(this.focusedWidget != null)
-            this.focusedWidget.render(context, mouseX, mouseY);
+            this.focusedWidget.render(context, graphics, mouseX, mouseY);
     }
 
     @Override
-    public void renderForeground(WidgetRenderContext context, int mouseX, int mouseY){
+    public void renderForeground(WidgetRenderContext context, GuiGraphicsHelper graphics, int mouseX, int mouseY){
         // Render internal widgets' foreground
-        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.renderForeground(context, mouseX, mouseY));
+        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.renderForeground(context, graphics, mouseX, mouseY));
         if(this.focusedWidget != null)
-            this.focusedWidget.renderForeground(context, mouseX, mouseY);
+            this.focusedWidget.renderForeground(context, graphics, mouseX, mouseY);
     }
 
     @Override
-    public void renderOverlay(WidgetRenderContext context, int mouseX, int mouseY){
+    public void renderOverlay(WidgetRenderContext context, GuiGraphicsHelper graphics, int mouseX, int mouseY){
         // Render internal widgets
-        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.renderOverlay(context, mouseX, mouseY));
+        this.widgets.stream().filter(w -> w != this.focusedWidget).forEach(w -> w.renderOverlay(context, graphics, mouseX, mouseY));
         if(this.focusedWidget != null)
-            this.focusedWidget.renderOverlay(context, mouseX, mouseY);
+            this.focusedWidget.renderOverlay(context, graphics, mouseX, mouseY);
     }
 
     @Override
-    public void renderTooltips(WidgetRenderContext context, int mouseX, int mouseY){
+    public void renderTooltips(WidgetRenderContext context, GuiGraphicsHelper graphics, int mouseX, int mouseY){
         if(this.focused){
             if(this.focusedWidget != null)
-                this.focusedWidget.renderTooltips(context, mouseX, mouseY);
+                this.focusedWidget.renderTooltips(context, graphics, mouseX, mouseY);
             else{
                 // Find a better way to do this, preferably without instantiating an array list unless needed
                 List<Component> tooltips = new ArrayList<>(0);
                 this.getTooltips(tooltips::add);
-                ScreenUtils.drawTooltip(context.poseStack(), tooltips, mouseX, mouseY);
+                graphics.submitTooltip(c -> c.text(tooltips), mouseX, mouseY);
             }
         }
     }
 
     /**
-     * Gathers the tooltips to be rendered in {@link #renderTooltips(WidgetRenderContext, int, int)}. Tooltips will only be shown when this widget is focused.
+     * Gathers the tooltips to be rendered in {@link #renderTooltips(WidgetRenderContext, GuiGraphicsHelper, int, int)}. Tooltips will only be shown when this widget is focused.
      * @param tooltips consumer for tooltips to be rendered
      */
     protected void getTooltips(Consumer<Component> tooltips){

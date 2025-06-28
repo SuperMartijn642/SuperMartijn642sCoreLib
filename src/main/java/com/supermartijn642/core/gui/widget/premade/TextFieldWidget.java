@@ -1,19 +1,16 @@
 package com.supermartijn642.core.gui.widget.premade;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
-import com.supermartijn642.core.gui.ScreenUtils;
+import com.supermartijn642.core.gui.GuiGraphicsHelper;
 import com.supermartijn642.core.gui.widget.BaseWidget;
 import com.supermartijn642.core.gui.widget.WidgetRenderContext;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
-import org.joml.Matrix4f;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -64,14 +61,14 @@ public class TextFieldWidget extends BaseWidget {
     }
 
     @Override
-    public void render(WidgetRenderContext context, int mouseX, int mouseY){
+    public void render(WidgetRenderContext context, GuiGraphicsHelper graphics, int mouseX, int mouseY){
         if(this.drawBackground)
-            this.drawBackground(context.poseStack());
+            this.drawBackground(graphics);
 
         int textColor = this.active ? this.activeTextColor : this.inactiveTextColor;
         int relativeCursor = this.cursorPosition - this.lineScrollOffset;
         int relativeSelection = this.selectionPos - this.lineScrollOffset;
-        Font fontRenderer = ClientUtils.getFontRenderer();
+        Font fontRenderer = context.font();
         String s = fontRenderer.plainSubstrByWidth(this.text.substring(this.lineScrollOffset), this.width - 8);
         boolean cursorInView = relativeCursor >= 0 && relativeCursor <= s.length();
         boolean shouldBlink = this.selected && this.cursorBlinkCounter / 8 % 2 == 0 && cursorInView;
@@ -84,7 +81,7 @@ public class TextFieldWidget extends BaseWidget {
 
         if(!s.isEmpty()){
             String s1 = cursorInView ? s.substring(0, relativeCursor) : s;
-            ScreenUtils.drawString(context.poseStack(), fontRenderer, s1, left, top, textColor);
+            graphics.submitText(s1, left, top, p -> p.color(textColor));
             leftOffset += fontRenderer.width(s1) + 1;
         }
 
@@ -100,32 +97,32 @@ public class TextFieldWidget extends BaseWidget {
 
         // draw text
         if(!s.isEmpty() && cursorInView && relativeCursor < s.length())
-            ScreenUtils.drawString(context.poseStack(), fontRenderer, s.substring(relativeCursor), leftOffset, top, textColor);
+            graphics.submitText(s.substring(relativeCursor), leftOffset, top, p -> p.color(textColor));
 
         // draw suggestion
         if(!this.suggestion.isEmpty() && this.text.isEmpty())
-            ScreenUtils.drawStringWithShadow(context.poseStack(), fontRenderer, fontRenderer.plainSubstrByWidth(this.suggestion, this.width - 8 - fontRenderer.width("...")) + "...", cursorX, top, -8355712);
+            graphics.submitText(this.suggestion, cursorX, top, p -> p.cutoffWithDots(this.width - 8).color(-8355712));
 
         // draw cursor
         if(shouldBlink){
             if(cursorAtEnd)
-                ScreenUtils.fillRect(context.poseStack(), cursorX - 0.5f, top - 1, 1, fontRenderer.lineHeight, -3092272);
+                graphics.submitRectangle(cursorX - 0.5f, top - 1, 1, fontRenderer.lineHeight, p -> p.color(-3092272));
             else
-                ScreenUtils.drawStringWithShadow(context.poseStack(), fontRenderer, "_", cursorX, top, textColor);
+                graphics.submitText("_", cursorX, top, p -> p.color(textColor));
         }
 
         if(relativeSelection != relativeCursor){
             int l1 = left + fontRenderer.width(s.substring(0, relativeSelection));
-            this.drawSelectionBox(context, cursorX, top - 1, l1 - 1, top + 1 + fontRenderer.lineHeight);
+            this.drawSelectionBox(graphics, cursorX, top - 1, l1 - 1, top + 1 + fontRenderer.lineHeight);
         }
     }
 
-    protected void drawBackground(PoseStack poseStack){
-        ScreenUtils.fillRect(poseStack, this.x, this.y, this.width, this.height, this.selected ? -1 : -6250336);
-        ScreenUtils.fillRect(poseStack, this.x + 1, this.y + 1, this.width - 2, this.height - 2, -16777216);
+    protected void drawBackground(GuiGraphicsHelper graphics){
+        graphics.submitRectangle(this.x, this.y, this.width, this.height, p -> p.color(this.selected ? -1 : -6250336));
+        graphics.submitRectangle(this.x + 1, this.y + 1, this.width - 2, this.height - 2, p -> p.color(-16777216));
     }
 
-    protected void drawSelectionBox(WidgetRenderContext context, int startX, int startY, int endX, int endY){
+    protected void drawSelectionBox(GuiGraphicsHelper graphics, int startX, int startY, int endX, int endY){
         if(startX < endX){
             int i = startX;
             startX = endX;
@@ -138,20 +135,13 @@ public class TextFieldWidget extends BaseWidget {
             endY = j;
         }
 
-        if(endX > this.x + this.width){
+        if(endX > this.x + this.width)
             endX = this.x + this.width;
-        }
 
-        if(startX > this.x + this.width){
+        if(startX > this.x + this.width)
             startX = this.x + this.width;
-        }
 
-        VertexConsumer buffer = context.buffers().getBuffer(RenderType.guiTextHighlight());
-        Matrix4f matrix = context.poseStack().last().pose();
-        buffer.addVertex(matrix, startX, endY, 0).setColor(-16776961);
-        buffer.addVertex(matrix, endX, endY, 0).setColor(-16776961);
-        buffer.addVertex(matrix, endX, startY, 0).setColor(-16776961);
-        buffer.addVertex(matrix, startX, startY, 0).setColor(-16776961);
+        graphics.submitRectangle(startX, startY, endX - startX, endY - startY, p -> p.color(-16776961).renderPipeline(RenderPipelines.GUI_TEXT_HIGHLIGHT));
     }
 
     public void clear(){

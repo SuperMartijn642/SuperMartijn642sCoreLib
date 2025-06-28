@@ -1,7 +1,6 @@
 package com.supermartijn642.core.gui.widget.premade;
 
-import com.supermartijn642.core.ClientUtils;
-import com.supermartijn642.core.gui.ScreenUtils;
+import com.supermartijn642.core.gui.GuiGraphicsHelper;
 import com.supermartijn642.core.gui.widget.WidgetRenderContext;
 import net.minecraft.network.chat.Component;
 
@@ -48,8 +47,11 @@ public class ButtonWidget extends AbstractButtonWidget {
     }
 
     @Override
-    public void render(WidgetRenderContext context, int mouseX, int mouseY){
-        ScreenUtils.drawButtonBackground(context.poseStack(), this.x, this.y, this.width, this.height, (this.active ? this.isFocused() ? 5 : 0 : 10) / 15f);
-        ScreenUtils.drawCenteredStringWithShadow(context.poseStack(), ClientUtils.getFontRenderer(), this.text, this.x + this.width / 2f, this.y + this.height / 2f - 5, this.active ? 0xFFFFFFFF : Integer.MAX_VALUE);
+    public void render(WidgetRenderContext context, GuiGraphicsHelper graphics, int mouseX, int mouseY){
+        graphics.submitDefaultButton(
+            this.isActive() ? this.isFocused() ? GuiGraphicsHelper.ButtonState.HIGHLIGHTED : GuiGraphicsHelper.ButtonState.DEFAULT : GuiGraphicsHelper.ButtonState.DISABLED,
+            this.x, this.y, this.width, this.height
+        );
+        graphics.submitText(this.text, this.x + this.width / 2f, this.y + this.height / 2f - 5, p -> p.shadow().centerHorizontally().color(this.active ? 0xFFFFFFFF : Integer.MAX_VALUE));
     }
 }

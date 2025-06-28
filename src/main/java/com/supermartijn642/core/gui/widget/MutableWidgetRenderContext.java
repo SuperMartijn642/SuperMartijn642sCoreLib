@@ -1,9 +1,8 @@
 package com.supermartijn642.core.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.supermartijn642.core.ClientUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.MultiBufferSource;
 
 /**
  * Created 05/06/2023 by SuperMartijn642
@@ -16,35 +15,36 @@ public final class MutableWidgetRenderContext implements WidgetRenderContext {
 
     private GuiGraphics guiGraphics;
     private float partialTicks;
+    private Font font;
+    private Minecraft minecraft;
 
     private MutableWidgetRenderContext(){
     }
 
-    public void update(GuiGraphics guiGraphics, float partialTicks){
+    public void update(GuiGraphics guiGraphics, float partialTicks, Font font, Minecraft minecraft){
         this.guiGraphics = guiGraphics;
         this.partialTicks = partialTicks;
+        this.font = font;
+        this.minecraft = minecraft;
     }
 
-    public void update(GuiGraphics guiGraphics){
-        this.update(guiGraphics, ClientUtils.getPartialTicks());
-    }
-
+    @Override
     public GuiGraphics guiGraphics(){
         return this.guiGraphics;
     }
 
     @Override
-    public PoseStack poseStack(){
-        return this.guiGraphics.pose;
-    }
-
-    @Override
-    public MultiBufferSource.BufferSource buffers(){
-        return this.guiGraphics.bufferSource;
-    }
-
-    @Override
     public float partialTicks(){
         return this.partialTicks;
+    }
+
+    @Override
+    public Font font(){
+        return this.font;
+    }
+
+    @Override
+    public Minecraft minecraft(){
+        return this.minecraft;
     }
 }
