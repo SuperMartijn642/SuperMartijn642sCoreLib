@@ -1,89 +1,88 @@
 package com.supermartijn642.core.render;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.block.BlockShape;
-import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Matrix4f;
+
+import java.util.OptionalDouble;
 
 /**
  * Created 6/12/2021 by SuperMartijn642
  */
 public class RenderUtils {
 
-    private static final RenderConfiguration LINES = RenderConfiguration.create(
-        "supermartijn642corelib",
-        "lines",
-        DefaultVertexFormat.POSITION_COLOR_NORMAL,
-        RenderConfiguration.PrimitiveType.TRIANGLE_LINES,
+    private static final RenderType LINES = RenderType.create(
+        "supermartijn642corelib:lines",
         128,
         true,
         true,
-        RenderStateConfiguration.builder()
-            .useShader(CoreShaders.RENDERTYPE_LINES)
-            .useDefaultLineWidth()
-            .useTranslucentTransparency()
-            .useViewOffsetZLayering()
-            .disableCulling()
-            .useLessThanOrEqualDepthTest()
-            .build()
+        RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
+            .withLocation(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "lines"))
+            .withBlend(BlendFunction.TRANSLUCENT)
+            .withCull(false)
+            .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
+            .build(),
+        RenderType.CompositeState.builder()
+            .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(1)))
+            .setLayeringState(RenderStateShard.VIEW_OFFSET_Z_LAYERING)
+            .createCompositeState(false)
     );
-    private static final RenderConfiguration LINES_NO_DEPTH = RenderConfiguration.create(
-        "supermartijn642corelib",
-        "lines_no_depth",
-        DefaultVertexFormat.POSITION_COLOR_NORMAL,
-        RenderConfiguration.PrimitiveType.TRIANGLE_LINES,
+    private static final RenderType LINES_NO_DEPTH = RenderType.create(
+        "supermartijn642corelib:lines_no_depth",
         128,
         true,
         true,
-        RenderStateConfiguration.builder()
-            .useShader(CoreShaders.RENDERTYPE_LINES)
-            .useDefaultLineWidth()
-            .useTranslucentTransparency()
-            .useViewOffsetZLayering()
-            .disableCulling()
-            .disableDepthTest()
-            .build()
+        RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
+            .withLocation(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "lines_no_depth"))
+            .withBlend(BlendFunction.TRANSLUCENT)
+            .withCull(false)
+            .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+            .build(),
+        RenderType.CompositeState.builder()
+            .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(1)))
+            .setLayeringState(RenderStateShard.VIEW_OFFSET_Z_LAYERING)
+            .createCompositeState(false)
     );
-    private static final RenderConfiguration QUADS = RenderConfiguration.create(
-        "supermartijn642corelib",
-        "quads",
-        DefaultVertexFormat.POSITION_COLOR,
-        RenderConfiguration.PrimitiveType.QUADS,
+    private static final RenderType QUADS = RenderType.create(
+        "supermartijn642corelib:quads",
         256,
         false,
         true,
-        RenderStateConfiguration.builder()
-            .useShader(CoreShaders.POSITION_COLOR)
-            .useTranslucentTransparency()
-            .disableTexture()
-            .disableCulling()
-            .useLessThanOrEqualDepthTest()
-            .disableDepthMask()
-            .build()
+        RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+            .withLocation(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "quads"))
+            .withBlend(BlendFunction.TRANSLUCENT)
+            .withCull(false)
+            .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
+            .withDepthWrite(false)
+            .build(),
+        RenderType.CompositeState.builder().createCompositeState(false)
     );
-    private static final RenderConfiguration QUADS_NO_DEPTH = RenderConfiguration.create(
-        "supermartijn642corelib",
-        "quads_no_depth",
-        DefaultVertexFormat.POSITION_COLOR,
-        RenderConfiguration.PrimitiveType.QUADS,
+    private static final RenderType QUADS_NO_DEPTH = RenderType.create(
+        "supermartijn642corelib:quads_no_depth",
         256,
         false,
         true,
-        RenderStateConfiguration.builder()
-            .useShader(CoreShaders.POSITION_COLOR)
-            .useTranslucentTransparency()
-            .disableTexture()
-            .disableCulling()
-            .disableDepthTest()
-            .disableDepthMask()
-            .build()
+        RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+            .withLocation(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "quads_no_depth"))
+            .withBlend(BlendFunction.TRANSLUCENT)
+            .withCull(false)
+            .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+            .withDepthWrite(false)
+            .build(),
+        RenderType.CompositeState.builder().createCompositeState(false)
     );
 
     /**
@@ -104,9 +103,9 @@ public class RenderUtils {
      * Draws an outline for the given shape
      */
     public static void renderShape(PoseStack poseStack, BlockShape shape, float red, float green, float blue, float alpha, boolean depthTest){
-        RenderConfiguration renderConfiguration = depthTest ? LINES : LINES_NO_DEPTH;
+        RenderType renderType = depthTest ? LINES : LINES_NO_DEPTH;
         MultiBufferSource.BufferSource bufferSource = getMainBufferSource();
-        VertexConsumer builder = renderConfiguration.begin(bufferSource);
+        VertexConsumer builder = bufferSource.getBuffer(renderType);
         PoseStack.Pose pose = poseStack.last();
         Matrix4f matrix = pose.pose();
         shape.forEachEdge((x1, y1, z1, x2, y2, z2) -> {
@@ -115,16 +114,16 @@ public class RenderUtils {
             builder.addVertex(matrix, (float)x1, (float)y1, (float)z1).setColor(red, green, blue, alpha).setNormal(pose, (float)normal.x, (float)normal.y, (float)normal.z);
             builder.addVertex(matrix, (float)x2, (float)y2, (float)z2).setColor(red, green, blue, alpha).setNormal(pose, (float)normal.x, (float)normal.y, (float)normal.z);
         });
-        renderConfiguration.end(bufferSource);
+        bufferSource.endBatch(renderType);
     }
 
     /**
      * Draws the sides of the given shape
      */
     public static void renderShapeSides(PoseStack poseStack, BlockShape shape, float red, float green, float blue, float alpha, boolean depthTest){
-        RenderConfiguration renderConfiguration = depthTest ? QUADS : QUADS_NO_DEPTH;
+        RenderType renderType = depthTest ? QUADS : QUADS_NO_DEPTH;
         MultiBufferSource.BufferSource bufferSource = getMainBufferSource();
-        VertexConsumer builder = renderConfiguration.begin(bufferSource);
+        VertexConsumer builder = bufferSource.getBuffer(renderType);
         Matrix4f matrix = poseStack.last().pose();
         shape.forEachBox(box -> {
             float minX = (float)box.minX, maxX = (float)box.maxX;
@@ -163,7 +162,7 @@ public class RenderUtils {
             builder.addVertex(matrix, maxX, maxY, maxZ).setColor(red, green, blue, alpha);
             builder.addVertex(matrix, maxX, minY, maxZ).setColor(red, green, blue, alpha);
         });
-        renderConfiguration.end(bufferSource);
+        bufferSource.endBatch(renderType);
     }
 
     /**

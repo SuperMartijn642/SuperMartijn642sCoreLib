@@ -7,6 +7,7 @@
   "plugin": "${mod_package}.${mixin_package}.${mixin_plugin}",
   "mixins": [
     "HolderReferenceMixin",
+    "ItemMixin",
     "MappedRegistryMixin",
     "GameDataMixin",
     "RecipeManagerMixin",
@@ -16,7 +17,6 @@
     "dev.DataGeneratorConfigMixin",
     "dev.DataGeneratorMixin",
     "LevelRendererMixin",
-    "ModelBakerImplMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",
     "SpriteSourceListMixin"

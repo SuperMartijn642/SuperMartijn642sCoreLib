@@ -8,21 +8,24 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -105,13 +108,13 @@ public class BaseItem extends Item {
     /**
      * Called once every tick when this item is in an entity's inventory.
      */
-    public void inventoryUpdate(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected){
+    public void inventoryUpdate(ItemStack stack, Level level, Entity entity, @Nullable EquipmentSlot slot){
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> information, TooltipFlag flag){
-        this.appendItemInformation(stack, information::add, flag.isAdvanced());
-        super.appendHoverText(stack, context, information, flag);
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> information, TooltipFlag flag){
+        this.appendItemInformation(stack, information, flag.isAdvanced());
+        super.appendHoverText(stack, context, display, information, flag);
     }
 
     @Override
@@ -135,8 +138,8 @@ public class BaseItem extends Item {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean isSelected){
-        this.inventoryUpdate(stack, level, entity, slot, isSelected);
+    public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot slot){
+        this.inventoryUpdate(stack, level, entity, slot);
     }
 
     @Override

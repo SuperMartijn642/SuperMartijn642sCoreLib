@@ -2,11 +2,8 @@ package com.supermartijn642.core.registry;
 
 import com.supermartijn642.core.CoreLib;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.modscan.ModAnnotation;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.registries.IdMappingEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforgespi.language.ModFileScanData;
 import org.objectweb.asm.Type;
@@ -132,9 +129,6 @@ public @interface RegistryEntryAcceptor {
                     }
                 }
             }
-
-            // Register event listeners
-            NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, Handler::onIdRemapping);
         }
 
         public static void onRegisterEvent(RegisterEvent e){
@@ -149,11 +143,6 @@ public @interface RegistryEntryAcceptor {
                 applyToFields(otherRegistry);
                 applyToMethods(otherRegistry);
             }
-        }
-
-        public static void onIdRemapping(IdMappingEvent e){
-            FIELDS.keySet().forEach(Handler::applyToFields);
-            METHODS.keySet().forEach(Handler::applyToMethods);
         }
 
         private static <T> void applyToFields(Registries.Registry<T> registry){

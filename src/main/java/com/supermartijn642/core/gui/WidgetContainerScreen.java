@@ -1,7 +1,6 @@
 package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.ContainerWidget;
@@ -91,7 +90,6 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(offsetX, offsetY, 0);
-        RenderSystem.disableDepthTest();
 
         // Update whether the widget is focused
         this.widget.setFocused(offsetMouseX >= 0 && offsetMouseX < this.widget.width() && offsetMouseY >= 0 && offsetMouseY < this.widget.height());
@@ -172,7 +170,6 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         this.widget.renderTooltips(this.widgetRenderContext, offsetMouseX, offsetMouseY);
 
         guiGraphics.pose().popPose();
-        RenderSystem.enableDepthTest();
     }
 
     @Override
