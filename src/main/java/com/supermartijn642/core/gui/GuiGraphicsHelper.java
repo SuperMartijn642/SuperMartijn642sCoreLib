@@ -199,8 +199,8 @@ public final class GuiGraphicsHelper {
         this.guiGraphics.innerBlit(
             this.textureProperties.renderPipeline,
             texture,
-            (int)x, (int)y, (int)(x + width), (int)(y + height),
-            this.textureProperties.u, this.textureProperties.v, this.textureProperties.u + this.textureProperties.w, this.textureProperties.v + this.textureProperties.h,
+            (int)x, (int)(x + width), (int)y, (int)(y + height),
+            this.textureProperties.u, this.textureProperties.u + this.textureProperties.w, this.textureProperties.v, this.textureProperties.v + this.textureProperties.h,
             this.textureProperties.color
         );
     }
@@ -247,7 +247,7 @@ public final class GuiGraphicsHelper {
         this.guiGraphics.blitSprite(
             this.textureProperties.renderPipeline,
             sprite.contents().name(),
-            (int)x, (int)y, (int)(x + width), (int)(y + height),
+            (int)x, (int)y, (int)width, (int)height,
             this.textureProperties.color
         );
     }
