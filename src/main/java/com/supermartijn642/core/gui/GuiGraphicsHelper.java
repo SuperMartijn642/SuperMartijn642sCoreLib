@@ -486,7 +486,7 @@ public final class GuiGraphicsHelper {
         }
 
         public TextProperties color(int color){
-            this.color = color;
+            this.color = color | (255 << 24);
             return this;
         }
 
