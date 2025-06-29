@@ -58,7 +58,6 @@ public class WidgetScreen<T extends Widget> extends Screen {
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks){
         this.widgetRenderContext.update(guiGraphics, partialTicks, this.font, this.minecraft);
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
 
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
         mouseX -= offsetX;

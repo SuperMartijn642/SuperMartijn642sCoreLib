@@ -74,7 +74,6 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks){
         this.widgetRenderContext.update(guiGraphics, partialTicks, this.font, this.minecraft);
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
         GuiGraphicsHelper helper = GuiGraphicsHelper.of(guiGraphics);
 
         // Call Architectury's client events
