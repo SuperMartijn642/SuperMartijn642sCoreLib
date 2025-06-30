@@ -15,7 +15,7 @@ import net.minecraftforge.fml.common.Mod;
 /**
  * Created 1/22/2021 by SuperMartijn642
  */
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class TestModClient {
 
     @SubscribeEvent
