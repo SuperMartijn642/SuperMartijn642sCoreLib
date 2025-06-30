@@ -15,7 +15,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.item.TrackingItemStackRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.metadata.gui.GuiMetadataSection;
 import net.minecraft.client.resources.metadata.gui.GuiSpriteScaling;
@@ -416,7 +416,7 @@ public final class GuiGraphicsHelper {
             properties.accept(this.itemProperties);
 
         // Submit the item
-        ItemStackRenderState renderState = new ItemStackRenderState();
+        TrackingItemStackRenderState renderState = new TrackingItemStackRenderState();
         if(!this.itemProperties.allowOversized)
             renderState.setOversizedInGui(false);
         ClientUtils.getMinecraft().getItemModelResolver().updateForTopItem(
