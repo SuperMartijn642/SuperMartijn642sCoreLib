@@ -16,8 +16,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.handling.IPayloadHandler;
 
 import java.util.HashMap;
 import java.util.function.Supplier;
@@ -87,12 +89,13 @@ public class PacketChannel {
     }
 
     private void handleRegistration(RegisterPayloadHandlersEvent event){
+        IPayloadHandler<Payload> payloadHandler = (payload, context) -> {
+            PacketContext packetContext = new PacketContext(context);
+            this.handle(payload.packet, packetContext);
+        };
         event.registrar(this.modid)
             .versioned("1")
-            .commonBidirectional(this.payloadType, this.payloadCodec, (payload, context) -> {
-                PacketContext packetContext = new PacketContext(context);
-                this.handle(payload.packet, packetContext);
-            });
+            .commonBidirectional(this.payloadType, this.payloadCodec, payloadHandler, payloadHandler);
     }
 
     /**
@@ -117,7 +120,7 @@ public class PacketChannel {
      */
     public void sendToServer(BasePacket packet){
         this.checkRegistration(packet);
-        PacketDistributor.sendToServer(new Payload(packet));
+        ClientPacketDistributor.sendToServer(new Payload(packet));
     }
 
     /**
