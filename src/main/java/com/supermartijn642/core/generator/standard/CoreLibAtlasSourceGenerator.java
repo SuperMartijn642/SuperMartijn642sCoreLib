@@ -2,6 +2,7 @@ package com.supermartijn642.core.generator.standard;
 
 import com.supermartijn642.core.generator.AtlasSourceGenerator;
 import com.supermartijn642.core.generator.ResourceCache;
+import com.supermartijn642.core.gui.GuiGraphicsHelper;
 
 /**
  * Created 28/06/2025 by SuperMartijn642
@@ -15,8 +16,10 @@ public class CoreLibAtlasSourceGenerator extends AtlasSourceGenerator {
     @Override
     public void generate(){
         this.guiAtlas()
-            .texture("gui/background")
-            .texture("gui/buttons")
-            .texture("gui/slot");
+            .texture(GuiGraphicsHelper.SCREEN_BACKGROUND_SPRITE)
+            .texture(GuiGraphicsHelper.BUTTON_DEFAULT_SPRITE)
+            .texture(GuiGraphicsHelper.BUTTON_HIGHLIGHTED_SPRITE)
+            .texture(GuiGraphicsHelper.BUTTON_DISABLED_SPRITE)
+            .texture(GuiGraphicsHelper.SLOT_SPRITE);
     }
 }

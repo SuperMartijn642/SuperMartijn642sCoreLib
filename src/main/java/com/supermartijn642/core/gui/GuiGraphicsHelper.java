@@ -54,11 +54,11 @@ public final class GuiGraphicsHelper {
         return helper;
     }
 
-    private static final ResourceLocation SCREEN_BACKGROUND_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/background");
-    private static final ResourceLocation BUTTON_DEFAULT_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/button_default");
-    private static final ResourceLocation BUTTON_HIGHLIGHTED_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/button_highlighted");
-    private static final ResourceLocation BUTTON_DISABLED_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/button_disabled");
-    private static final ResourceLocation SLOT_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/slot");
+    public static final ResourceLocation SCREEN_BACKGROUND_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/background");
+    public static final ResourceLocation BUTTON_DEFAULT_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/button_default");
+    public static final ResourceLocation BUTTON_HIGHLIGHTED_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/button_highlighted");
+    public static final ResourceLocation BUTTON_DISABLED_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/button_disabled");
+    public static final ResourceLocation SLOT_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/slot");
 
     private final GuiGraphics guiGraphics;
     private TextProperties textProperties;
