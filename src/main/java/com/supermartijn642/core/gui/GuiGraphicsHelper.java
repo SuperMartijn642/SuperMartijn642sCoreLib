@@ -10,6 +10,7 @@ import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.gui.render.state.GuiElementRenderState;
 import net.minecraft.client.gui.render.state.GuiItemRenderState;
 import net.minecraft.client.gui.render.state.GuiTextRenderState;
+import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
 import net.minecraft.client.gui.screens.inventory.tooltip.BelowOrAboveWidgetTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
@@ -450,6 +451,10 @@ public final class GuiGraphicsHelper {
 
     public void submitGuiElement(GuiElementRenderState element){
         this.guiGraphics.guiRenderState.submitGuiElement(element);
+    }
+
+    public void submitPictureInPicture(PictureInPictureRenderState element){
+        this.guiGraphics.guiRenderState.submitPicturesInPictureState(element);
     }
 
     public static final class TextProperties {
