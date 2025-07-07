@@ -7,11 +7,14 @@ import com.supermartijn642.core.render.CustomItemRenderer;
 import com.supermartijn642.core.util.Holder;
 import com.supermartijn642.core.util.Pair;
 import com.supermartijn642.core.util.TriFunction;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
+import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -120,6 +123,8 @@ public class ClientRegistrationHandler {
 
     private final List<Pair<ResourceLocation,MapCodec<? extends ItemModel.Unbaked>>> itemModelTypes = new ArrayList<>();
 
+    private final Map<Class<? extends PictureInPictureRenderState>,Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>>> pictureRenderers = new HashMap<>();
+
     private boolean passedRegisterRenderers;
     private boolean passedTextureStitch;
 
@@ -131,6 +136,7 @@ public class ClientRegistrationHandler {
         eventBus.addListener(this::handleRegisterSpecialModelRenderersEvent);
         eventBus.addListener(this::handleRegisterSpecialBlockModelRenderersEvent);
         eventBus.addListener(this::handleRegisterItemModelsEvent);
+        eventBus.addListener(this::handleRegisterPictureInPictureRenderersEvent);
     }
 
     /**
@@ -481,6 +487,16 @@ public class ClientRegistrationHandler {
         this.itemModelTypes.add(Pair.of(ResourceLocation.fromNamespaceAndPath(this.modid, identifier), codec));
     }
 
+    public <T extends PictureInPictureRenderState> void registerPictureInPictureRenderer(Class<T> state, Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<T>> renderer){
+        //noinspection unchecked
+        if(this.pictureRenderers.put(state, (Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>>)(Object)renderer) != null)
+            throw new IllegalStateException("Duplicate picture in picture renderer registration for state class '" + state + "'!");
+    }
+
+    public <T extends PictureInPictureRenderState> void registerPictureInPictureRenderer(Class<T> state, Supplier<PictureInPictureRenderer<T>> renderer){
+        this.registerPictureInPictureRenderer(state, buffers -> renderer.get());
+    }
+
     private void handleRegisterRenderersEvent(EntityRenderersEvent.RegisterRenderers e){
         this.passedRegisterRenderers = true;
 
@@ -660,5 +676,10 @@ public class ClientRegistrationHandler {
             return;
 
         sprites.forEach(spriteConsumer);
+    }
+
+    private void handleRegisterPictureInPictureRenderersEvent(RegisterPictureInPictureRenderersEvent e){
+        //noinspection unchecked
+        this.pictureRenderers.forEach((state, renderer) -> e.register((Class<PictureInPictureRenderState>)state, (Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<PictureInPictureRenderState>>)(Object)renderer));
     }
 }
