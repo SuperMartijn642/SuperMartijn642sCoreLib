@@ -10,12 +10,15 @@ import com.supermartijn642.core.util.TriFunction;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.SpecialBlockRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -481,6 +484,14 @@ public class ClientRegistrationHandler {
 
     public void registerItemModelType(String identifier, MapCodec<? extends ItemModel.Unbaked> codec){
         ItemModels.ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath(this.modid, identifier), codec);
+    }
+
+    public void registerPictureInPictureRenderer(Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>> renderer){
+        SpecialGuiElementRegistry.register(c -> renderer.apply(c.vertexConsumers()));
+    }
+
+    public void registerPictureInPictureRenderer(Supplier<PictureInPictureRenderer<?>> renderer){
+        this.registerPictureInPictureRenderer(buffers -> renderer.get());
     }
 
     private void registerRenderers(){
