@@ -1,6 +1,7 @@
 package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.extensions.GuiGraphicsExtension;
 import net.minecraft.client.gui.Font;
@@ -455,6 +456,10 @@ public final class GuiGraphicsHelper {
 
     public void submitPictureInPicture(PictureInPictureRenderState element){
         this.guiGraphics.guiRenderState.submitPicturesInPictureState(element);
+    }
+
+    public void submitCustomRendering(int x, int y, int width, int height, Consumer<PoseStack> rendering){
+        this.guiGraphics.guiRenderState.submitPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), rendering));
     }
 
     public static final class TextProperties {

@@ -18,6 +18,9 @@
     "main": [
       "${mod_package}.${mod_main_class}"
     ],
+    "client": [
+      "${mod_package}.${mod_client_class}"
+    ],
     "preLaunch": [
       "${mod_package}.${mod_pre_launch_class}"
     ]
