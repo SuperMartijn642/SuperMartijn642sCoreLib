@@ -7,11 +7,13 @@ import com.supermartijn642.core.render.CustomItemRenderer;
 import com.supermartijn642.core.util.Holder;
 import com.supermartijn642.core.util.Pair;
 import com.supermartijn642.core.util.TriFunction;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -37,6 +39,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.event.CreateSpecialBlockRendererEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterPictureInPictureRendererEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;
@@ -122,6 +125,8 @@ public class ClientRegistrationHandler {
     private final List<Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>>> containerScreens = new ArrayList<>();
     private final List<Pair<Supplier<Block>,Supplier<ChunkSectionLayer>>> blockRenderTypes = new ArrayList<>();
 
+    private final List<Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>>> pictureRenderers = new ArrayList<>();
+
     private boolean passedRegisterRenderers;
     private boolean passedTextureStitch;
 
@@ -130,6 +135,7 @@ public class ClientRegistrationHandler {
         //noinspection removal
         EntityRenderersEvent.RegisterRenderers.getBus(FMLJavaModLoadingContext.get().getModBusGroup()).addListener(this::handleRegisterRenderersEvent);
         CreateSpecialBlockRendererEvent.BUS.addListener(this::handleRegisterSpecialBlockModelRenderersEvent);
+        RegisterPictureInPictureRendererEvent.BUS.addListener(this::handleRegisterPictureInPictureRenderersEvent);
     }
 
     /**
@@ -480,6 +486,14 @@ public class ClientRegistrationHandler {
         ItemModels.ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath(this.modid, identifier), codec);
     }
 
+    public void registerPictureInPictureRenderer(Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>> renderer){
+        this.pictureRenderers.add(renderer);
+    }
+
+    public void registerPictureInPictureRenderer(Supplier<PictureInPictureRenderer<?>> renderer){
+        this.registerPictureInPictureRenderer(buffers -> renderer.get());
+    }
+
     private void handleRegisterRenderersEvent(EntityRenderersEvent.RegisterRenderers e){
         this.passedRegisterRenderers = true;
 
@@ -646,5 +660,15 @@ public class ClientRegistrationHandler {
             return;
 
         sprites.forEach(spriteConsumer);
+    }
+
+    private void handleRegisterPictureInPictureRenderersEvent(RegisterPictureInPictureRendererEvent e){
+        Set<Class<?>> stateClasses = new HashSet<>();
+        for(Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>> function : this.pictureRenderers){
+            PictureInPictureRenderer<?> renderer = function.apply(e.getBufferSource());
+            if(!stateClasses.add(renderer.getRenderStateClass()))
+                CoreLib.LOGGER.warn("Found multiple picture in picture renderers from mod '{}' registered for the same state class '{}'!", this.modid, renderer.getRenderStateClass());
+            e.register(renderer);
+        }
     }
 }
