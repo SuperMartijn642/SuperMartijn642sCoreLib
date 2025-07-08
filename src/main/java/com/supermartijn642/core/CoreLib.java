@@ -31,6 +31,8 @@ public class CoreLib {
         FMLConstructModEvent.getBus(context.getModBusGroup()).addListener(this::onConstructMod);
         CommonUtils.initialize();
         CustomTagEntries.init();
+        if(CommonUtils.getEnvironmentSide().isClient())
+            CoreLibClient.init();
 
         // Register conditional recipe type
         RegistrationHandler handler = RegistrationHandler.get("supermartijn642corelib");
