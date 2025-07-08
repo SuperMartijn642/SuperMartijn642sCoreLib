@@ -50,6 +50,7 @@ accessible method net/minecraft/client/gui/GuiGraphics renderItemBar (Lnet/minec
 accessible method net/minecraft/client/gui/GuiGraphics renderItemCooldown (Lnet/minecraft/world/item/ItemStack;II)V
 accessible method net/minecraft/client/gui/GuiGraphics renderItemCount (Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V
 accessible method net/minecraft/client/gui/GuiGraphics setTooltipForNextFrameInternal (Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;Lnet/minecraft/resources/ResourceLocation;Z)V
+accessible method net/minecraft/client/gui/GuiGraphics submitBlit (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lcom/mojang/blaze3d/textures/GpuTextureView;IIIIFFFFI)V
 accessible method net/minecraft/client/gui/GuiGraphics submitColoredRectangle (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/gui/render/TextureSetup;IIIIILjava/lang/Integer;)V
 mutable field net/minecraft/client/gui/GuiGraphics minecraft Lnet/minecraft/client/Minecraft; # minecraft
 # GuiGraphics$ScissorStack
