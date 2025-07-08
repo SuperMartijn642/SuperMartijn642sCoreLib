@@ -1,6 +1,7 @@
 package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.extensions.GuiGraphicsExtension;
@@ -182,7 +183,7 @@ public final class GuiGraphicsHelper {
         this.submitText(Component.literal(text), x, y, null);
     }
 
-    public void submitTexture(ResourceLocation texture, float x, float y, float width, float height, Consumer<TextureProperties> properties){
+    public void submitTexture(GpuTextureView texture, float x, float y, float width, float height, Consumer<TextureProperties> properties){
         // Resolve the properties
         if(this.textureProperties == null)
             this.textureProperties = new TextureProperties();
@@ -198,13 +199,22 @@ public final class GuiGraphicsHelper {
             y -= height / 2f;
 
         // Submit the texture
-        this.guiGraphics.innerBlit(
+        this.guiGraphics.submitBlit(
             this.textureProperties.renderPipeline,
             texture,
-            (int)x, (int)(x + width), (int)y, (int)(y + height),
+            (int)x, (int)y, (int)(x + width), (int)(y + height),
             this.textureProperties.u, this.textureProperties.u + this.textureProperties.w, this.textureProperties.v, this.textureProperties.v + this.textureProperties.h,
             this.textureProperties.color
         );
+    }
+
+    public void submitTexture(GpuTextureView texture, float x, float y, float width, float height){
+        this.submitTexture(texture, x, y, width, height, null);
+    }
+
+    public void submitTexture(ResourceLocation texture, float x, float y, float width, float height, Consumer<TextureProperties> properties){
+        GpuTextureView textureView = this.guiGraphics.minecraft.getTextureManager().getTexture(texture).getTextureView();
+        this.submitTexture(textureView, x, y, width, height, properties);
     }
 
     public void submitTexture(ResourceLocation texture, float x, float y, float width, float height){
