@@ -96,12 +96,7 @@ accessible field net/minecraft/client/resources/model/ModelDiscovery resolver Ln
 # ModelManager$ReloadState
 accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
 # PictureInPictureRenderer
-accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer depthTexture Lcom/mojang/blaze3d/textures/GpuTexture;
-accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer depthTextureView Lcom/mojang/blaze3d/textures/GpuTextureView;
 accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer projectionMatrixBuffer Lnet/minecraft/client/renderer/CachedOrthoProjectionMatrixBuffer;
-accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer texture Lcom/mojang/blaze3d/textures/GpuTexture;
-accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer textureView Lcom/mojang/blaze3d/textures/GpuTextureView;
-accessible method net/minecraft/client/gui/render/pip/PictureInPictureRenderer prepareTexturesAndProjection (ZII)V
 # Player
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
 # RecipeManager
