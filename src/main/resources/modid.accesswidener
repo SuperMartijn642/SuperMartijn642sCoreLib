@@ -40,6 +40,7 @@ accessible field net/minecraft/data/DataGenerator rootOutputFolder Ljava/nio/fil
 # GameRenderer
 accessible field net/minecraft/client/renderer/GameRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
 # GuiGraphics
+accessible field net/minecraft/client/gui/GuiGraphics deferredTooltip Ljava/lang/Runnable;
 accessible field net/minecraft/client/gui/GuiGraphics guiRenderState Lnet/minecraft/client/gui/render/state/GuiRenderState;
 accessible field net/minecraft/client/gui/GuiGraphics minecraft Lnet/minecraft/client/Minecraft; # minecraft
 accessible field net/minecraft/client/gui/GuiGraphics scissorStack Lnet/minecraft/client/gui/GuiGraphics$ScissorStack;
@@ -94,6 +95,13 @@ accessible field net/minecraft/client/resources/model/ModelDiscovery modelWrappe
 accessible field net/minecraft/client/resources/model/ModelDiscovery resolver Lnet/minecraft/client/resources/model/ResolvableModel$Resolver;
 # ModelManager$ReloadState
 accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
+# PictureInPictureRenderer
+accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer depthTexture Lcom/mojang/blaze3d/textures/GpuTexture;
+accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer depthTextureView Lcom/mojang/blaze3d/textures/GpuTextureView;
+accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer projectionMatrixBuffer Lnet/minecraft/client/renderer/CachedOrthoProjectionMatrixBuffer;
+accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer texture Lcom/mojang/blaze3d/textures/GpuTexture;
+accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer textureView Lcom/mojang/blaze3d/textures/GpuTextureView;
+accessible method net/minecraft/client/gui/render/pip/PictureInPictureRenderer prepareTexturesAndProjection (ZII)V
 # Player
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
 # RecipeManager
