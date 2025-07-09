@@ -384,21 +384,16 @@ public final class GuiGraphicsHelper {
             properties.accept(this.tooltipProperties);
 
         // Submit tooltip
-        this.guiGraphics.renderTooltip(
-            this.tooltipProperties.font == null ? ClientUtils.getFontRenderer() : this.tooltipProperties.font,
-            List.copyOf(this.tooltipContent.content),
-            (int)x, (int)y,
-            this.tooltipProperties.positioner,
-            this.tooltipProperties.frame
-        );
-        this.guiGraphics.setTooltipForNextFrameInternal(
-            this.tooltipProperties.font == null ? ClientUtils.getFontRenderer() : this.tooltipProperties.font,
-            List.copyOf(this.tooltipContent.content),
-            (int)x, (int)y,
-            this.tooltipProperties.positioner,
-            this.tooltipProperties.frame,
-            true
-        );
+        Matrix3x2f matrix = new Matrix3x2f(this.guiGraphics.pose());
+        Font font = this.tooltipProperties.font == null ? ClientUtils.getFontRenderer() : this.tooltipProperties.font;
+        List<ClientTooltipComponent> components = List.copyOf(this.tooltipContent.content);
+        ClientTooltipPositioner positioner = this.tooltipProperties.positioner;
+        ResourceLocation frame = this.tooltipProperties.frame;
+        this.guiGraphics.deferredTooltip = () -> {
+            this.guiGraphics.pose().pushMatrix().set(matrix);
+            this.guiGraphics.renderTooltip(font, components, (int)x, (int)y, positioner, frame);
+            this.guiGraphics.pose().popMatrix();
+        };
     }
 
     public void submitTooltipForTopStratum(Consumer<TooltipContent> content, float x, float y){

@@ -167,7 +167,7 @@ public abstract class BaseWidget implements Widget {
                 // Find a better way to do this, preferably without instantiating an array list unless needed
                 List<Component> tooltips = new ArrayList<>(0);
                 this.getTooltips(tooltips::add);
-                graphics.submitTooltip(c -> c.text(tooltips), mouseX, mouseY);
+                graphics.submitTooltipForTopStratum(c -> c.text(tooltips), mouseX, mouseY);
             }
         }
     }
