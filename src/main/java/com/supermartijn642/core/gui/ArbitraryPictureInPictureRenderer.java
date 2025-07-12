@@ -1,9 +1,13 @@
 package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.ProjectionType;
+import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.blaze3d.textures.TextureFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.supermartijn642.core.CoreLib;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
@@ -12,8 +16,12 @@ import net.minecraft.client.gui.render.state.GuiRenderState;
 import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2f;
 
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -22,8 +30,8 @@ import java.util.function.Consumer;
 public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<ArbitraryPictureInPictureRenderer.State> {
 
     private final PoseStack poseStack = new PoseStack();
-    private int lastGuiScale;
-    private int textureWidth = -1, textureHeight = -1;
+    private final List<TextureEntry> textures = new ArrayList<>();
+    private final BitSet inUse = new BitSet();
 
     public ArbitraryPictureInPictureRenderer(MultiBufferSource.BufferSource bufferSource){
         super(bufferSource);
@@ -36,23 +44,36 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
 
     @Override
     public void prepare(State state, GuiRenderState guiRenderState, int guiScale){
-        // Create texture if needed
+        // Calculate required size
         int width = state.width * guiScale;
         int height = state.height * guiScale;
-        if(this.texture == null || guiScale < this.lastGuiScale || width > this.textureWidth || height > this.textureHeight){
-            this.prepareTexturesAndProjection(true, width, height);
-            this.textureWidth = width;
-            this.textureHeight = height;
-            this.lastGuiScale = guiScale;
-            CoreLib.LOGGER.info("Increasing size to {}x{}", this.textureWidth, this.textureHeight);
-        }else{
-            RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(this.texture, 0, this.depthTexture, 1);
-            RenderSystem.setProjectionMatrix(this.projectionMatrixBuffer.getBuffer(this.textureWidth, this.textureHeight), ProjectionType.ORTHOGRAPHIC);
+
+        // Find the smallest texture which fits the required size
+        TextureEntry texture = null;
+        int textureIndex = 0;
+        while((textureIndex = this.inUse.nextClearBit(textureIndex)) < this.textures.size()){
+            TextureEntry entry = this.textures.get(textureIndex);
+            if(entry.width >= width && entry.height >= height){
+                texture = entry;
+                break;
+            }
+            textureIndex++;
         }
 
+        // If no texture was found, create a new texture
+        if(texture == null){
+            texture = this.createTexture(width, height);
+            this.textures.add(texture);
+        }
+        this.inUse.set(textureIndex);
+
+        // Clear texture
+        RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(texture.texture, 0, texture.depthTexture, 1);
+        RenderSystem.setProjectionMatrix(this.projectionMatrixBuffer.getBuffer(texture.width, texture.height), ProjectionType.ORTHOGRAPHIC);
+
         // Render to the texture
-        RenderSystem.outputColorTextureOverride = this.textureView;
-        RenderSystem.outputDepthTextureOverride = this.depthTextureView;
+        RenderSystem.outputColorTextureOverride = texture.textureView;
+        RenderSystem.outputDepthTextureOverride = texture.depthTextureView;
         this.poseStack.pushPose();
         this.poseStack.scale(guiScale, guiScale, -guiScale);
         this.renderToTexture(state, this.poseStack);
@@ -65,21 +86,47 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
         guiRenderState.submitBlitToCurrentLayer(
             new BlitRenderState(
                 RenderPipelines.GUI_TEXTURED_PREMULTIPLIED_ALPHA,
-                TextureSetup.singleTexture(this.textureView),
+                TextureSetup.singleTexture(texture.textureView),
                 state.pose(),
                 state.x0(),
                 state.y0(),
                 state.x1(),
                 state.y1(),
                 0,
-                (float)width / this.textureWidth,
+                (float)width / texture.width,
                 1,
-                1 - (float)height / this.textureHeight,
+                1 - (float)height / texture.height,
                 -1,
                 state.scissorArea(),
                 state.bounds()
             )
         );
+    }
+
+    private TextureEntry createTexture(int width, int height){
+        GpuDevice device = RenderSystem.getDevice();
+        GpuTexture texture = device.createTexture(this::getTextureLabel, 12, TextureFormat.RGBA8, width, height, 1, 1);
+        texture.setTextureFilter(FilterMode.NEAREST, false);
+        GpuTextureView textureView = device.createTextureView(texture);
+        GpuTexture depthTexture = device.createTexture(() -> this.getTextureLabel() + " depth texture", 8, TextureFormat.DEPTH32, width, height, 1, 1);
+        GpuTextureView depthTextureView = device.createTextureView(depthTexture);
+        return new TextureEntry(width, height, texture, textureView, depthTexture, depthTextureView);
+    }
+
+    public void afterFrame(){
+        if(this.textures.isEmpty())
+            return;
+
+        // Discard unused textures
+        int index = this.textures.size() - 1;
+        while((index = this.inUse.previousClearBit(index)) != -1){
+            this.textures.remove(index).close();
+            index--;
+        }
+        this.inUse.clear();
+
+        // Sort the remaining textures by size
+        this.textures.sort(TextureEntry::compareTo);
     }
 
     @Override
@@ -133,6 +180,23 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
         @Override
         public ScreenRectangle bounds(){
             return new ScreenRectangle(this.x, this.y, this.width, this.height);
+        }
+    }
+
+    private record TextureEntry(int width, int height, GpuTexture texture, GpuTextureView textureView,
+                                GpuTexture depthTexture,
+                                GpuTextureView depthTextureView) implements Comparable<TextureEntry> {
+
+        public void close(){
+            this.texture.close();
+            this.textureView.close();
+            this.depthTexture.close();
+            this.depthTextureView.close();
+        }
+
+        @Override
+        public int compareTo(@NotNull ArbitraryPictureInPictureRenderer.TextureEntry o){
+            return Integer.compare(this.width * this.height, o.width * o.height);
         }
     }
 }

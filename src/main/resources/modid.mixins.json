@@ -16,6 +16,7 @@
   ],
   "client": [
     "GuiGraphicsMixin",
+    "GuiRendererMixin",
     "LevelRendererMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",
