@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.18c
+- Fixed vanilla tooltips being offset in `ContainerWidgetScreen`
+
 ### SuperMartijn642's Core Library 1.1.18b
 - Added picture in picture renderer registration through `ClientRegistrationHandler`
 - Added picture in picture state submission in `GuiGraphicsHelper`
