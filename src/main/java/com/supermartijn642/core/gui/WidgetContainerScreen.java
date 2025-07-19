@@ -122,9 +122,9 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         // Render the widget's foreground
         this.widget.renderForeground(this.widgetRenderContext, helper, offsetMouseX, offsetMouseY);
 
-        this.renderTooltip(guiGraphics, offsetMouseX, offsetMouseY);
-
         guiGraphics.pose().popMatrix();
+
+        this.renderTooltip(guiGraphics, mouseX, mouseY);
 
         NeoForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Foreground(this, guiGraphics, mouseX, mouseY));
 
