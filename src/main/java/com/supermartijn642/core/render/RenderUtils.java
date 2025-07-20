@@ -85,6 +85,8 @@ public class RenderUtils {
         RenderType.CompositeState.builder().createCompositeState(false)
     );
 
+    public static final ThreadLocal<MultiBufferSource.BufferSource> GUI_BUFFER_SOURCE_OVERWRITE = new ThreadLocal<>();
+
     /**
      * @return the current interpolated camera position
      */
@@ -96,6 +98,9 @@ public class RenderUtils {
      * @return the current interpolated camera position
      */
     public static MultiBufferSource.BufferSource getMainBufferSource(){
+        MultiBufferSource.BufferSource bufferSource = GUI_BUFFER_SOURCE_OVERWRITE.get();
+        if(bufferSource != null)
+            return bufferSource;
         return ClientUtils.getMinecraft().renderBuffers().bufferSource();
     }
 
