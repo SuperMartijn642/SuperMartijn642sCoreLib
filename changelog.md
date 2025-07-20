@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.18d
+- Fixed custom rendering in guis not showing when Iris is installed
+
 ### SuperMartijn642's Core Library 1.1.18c
 - Fixed vanilla tooltips being offset in `ContainerWidgetScreen`
 
