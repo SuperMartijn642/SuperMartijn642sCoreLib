@@ -5,6 +5,7 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.extensions.GuiGraphicsExtension;
+import com.supermartijn642.core.render.RenderUtils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -17,6 +18,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.BelowOrAboveWidgetTool
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.item.TrackingItemStackRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -41,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -463,8 +466,18 @@ public final class GuiGraphicsHelper {
         this.guiGraphics.guiRenderState.submitPicturesInPictureState(element);
     }
 
-    public void submitCustomRendering(int x, int y, int width, int height, Consumer<PoseStack> rendering){
+    public void submitCustomRendering(int x, int y, int width, int height, BiConsumer<PoseStack,MultiBufferSource.BufferSource> rendering){
         this.guiGraphics.guiRenderState.submitPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), rendering));
+    }
+
+    // TODO remove this when mods require changes anyways
+    @Deprecated
+    public void submitCustomRendering(int x, int y, int width, int height, Consumer<PoseStack> rendering){
+        this.guiGraphics.guiRenderState.submitPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), (poseStack, bufferSource) -> {
+            RenderUtils.GUI_BUFFER_SOURCE_OVERWRITE.set(bufferSource);
+            rendering.accept(poseStack);
+            RenderUtils.GUI_BUFFER_SOURCE_OVERWRITE.remove();
+        }));
     }
 
     public static final class TextProperties {
