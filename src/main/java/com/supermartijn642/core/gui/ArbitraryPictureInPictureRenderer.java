@@ -22,7 +22,7 @@ import org.joml.Matrix3x2f;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * Created 07/07/2025 by SuperMartijn642
@@ -132,7 +132,7 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
     @Override
     protected void renderToTexture(State state, PoseStack poseStack){
         try{
-            state.rendering.accept(poseStack);
+            state.rendering.accept(poseStack, this.bufferSource);
         }catch(Exception e){
             throw new RuntimeException("Encountered an exception whilst rendering picture in picture element!", e);
         }
@@ -153,7 +153,7 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
 
     public record State(int x, int y, int width, int height,
                         Matrix3x2f pose,
-                        Consumer<PoseStack> rendering) implements PictureInPictureRenderState {
+                        BiConsumer<PoseStack,MultiBufferSource.BufferSource> rendering) implements PictureInPictureRenderState {
 
         @Override
         public int x0(){
