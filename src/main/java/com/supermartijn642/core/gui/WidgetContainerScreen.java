@@ -95,13 +95,6 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
                 helper.submitDefaultSlot(slot.x - 1, slot.y - 1);
         }
 
-        guiGraphics.pose().popMatrix();
-
-        NeoForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Background(this, guiGraphics, mouseX, mouseY));
-
-        guiGraphics.pose().pushMatrix();
-        guiGraphics.pose().translate(offsetX, offsetY);
-
         // Render the widget
         this.widget.render(this.widgetRenderContext, helper, offsetMouseX, offsetMouseY);
 
@@ -122,11 +115,11 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         // Render the widget's foreground
         this.widget.renderForeground(this.widgetRenderContext, helper, offsetMouseX, offsetMouseY);
 
+        NeoForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Foreground(this, guiGraphics, mouseX, mouseY));
+
         guiGraphics.pose().popMatrix();
 
         this.renderTooltip(guiGraphics, mouseX, mouseY);
-
-        NeoForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Foreground(this, guiGraphics, mouseX, mouseY));
 
         this.renderCarriedItem(guiGraphics, mouseX, mouseY);
         this.renderSnapbackItem(guiGraphics);
