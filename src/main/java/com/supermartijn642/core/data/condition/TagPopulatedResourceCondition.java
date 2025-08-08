@@ -1,15 +1,11 @@
 package com.supermartijn642.core.data.condition;
 
 import com.google.gson.JsonObject;
-import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
-import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-
-import java.util.Map;
-import java.util.Set;
+import net.minecraft.tags.TagKey;
 
 /**
  * TODO properly do tags
@@ -32,16 +28,9 @@ public class TagPopulatedResourceCondition implements ResourceCondition {
 
     @Override
     public boolean test(ResourceConditionContext context){
-        // Copy implementation from fabric-api until I do tags properly TODO replace
-        //noinspection UnstableApiUsage
-        Map<ResourceKey<?>,Set<ResourceLocation>> allTags = ResourceConditionsImpl.LOADED_TAGS.get();
-
-        if(allTags == null){
-            CoreLib.LOGGER.warn("Can't retrieve deserialized tags. Failing tags_populated resource condition check.");
-            return false;
-        }
-
-        return allTags.get(this.registry.getVanillaRegistry().key()).contains(this.tag);
+        Registry<?> vanillaRegistry = this.registry.getVanillaRegistry();
+        //noinspection unchecked,rawtypes,DataFlowIssue
+        return ((Registry)vanillaRegistry).get(TagKey.create(vanillaRegistry.key(), this.tag)).isPresent();
     }
 
     @Override
