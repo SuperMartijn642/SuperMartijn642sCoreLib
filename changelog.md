@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.18a
+- Fixed `OredictItemPredicate` mixin overwriting ore dictionary key to `null`
+
 ### SuperMartijn642's Core Library 1.1.18
 - Fixed `TextFieldWidget` allowing one more character than the max length
 
