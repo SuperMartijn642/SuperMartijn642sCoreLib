@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.18e
+- Fixed crash with Fabric API 0.131.0+1.21.8 when testing `tag_populated` resource condition
+
 ### SuperMartijn642's Core Library 1.1.18d
 - Fixed custom rendering in guis not showing when Iris is installed
 
