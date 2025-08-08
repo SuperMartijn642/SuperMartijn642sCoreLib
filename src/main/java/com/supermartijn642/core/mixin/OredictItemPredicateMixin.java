@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.extensions.ItemPredicateExtension;
 import net.minecraftforge.advancements.critereon.OredictItemPredicate;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -13,8 +14,9 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(OredictItemPredicate.class)
 public class OredictItemPredicateMixin implements ItemPredicateExtension {
 
+    @Final
     @Shadow(remap = false)
-    private final String ore = null;
+    private String ore;
 
     @Override
     public JsonElement coreLibSerialize(){
