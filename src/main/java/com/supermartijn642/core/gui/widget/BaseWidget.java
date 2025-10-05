@@ -3,6 +3,8 @@ package com.supermartijn642.core.gui.widget;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.gui.GuiGraphicsHelper;
 import net.minecraft.Util;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ public abstract class BaseWidget implements Widget {
     protected final List<Widget> widgets = new ArrayList<>();
     protected Widget focusedWidget = null;
     protected int x, y, width, height;
+    protected boolean dragging = false;
     private boolean focused;
     protected long nextNarration = Long.MAX_VALUE;
 
@@ -105,17 +108,19 @@ public abstract class BaseWidget implements Widget {
         // Update the focused widget
         if(!this.focused)
             this.focusedWidget = null;
-        else if(this.focusedWidget != null && !(mouseX > this.focusedWidget.left() && mouseX < this.focusedWidget.left() + this.focusedWidget.width() && mouseY > this.focusedWidget.top() && mouseY < this.focusedWidget.top() + this.focusedWidget.height())){
-            this.focusedWidget = null;
-            this.nextNarration = Util.getMillis() + 750;
-        }
-        for(Widget widget : this.widgets){
-            if(this.focusedWidget == null && mouseX >= widget.left() && mouseX < widget.left() + widget.width() && mouseY >= widget.top() && mouseY < widget.top() + widget.height()){
-                this.focusedWidget = widget;
-                widget.setFocused(true);
-                this.nextNarration = Long.MAX_VALUE;
-            }else
-                widget.setFocused(widget == this.focusedWidget);
+        else if(!this.dragging){
+            if(this.focusedWidget != null && !(mouseX > this.focusedWidget.left() && mouseX < this.focusedWidget.left() + this.focusedWidget.width() && mouseY > this.focusedWidget.top() && mouseY < this.focusedWidget.top() + this.focusedWidget.height())){
+                this.focusedWidget = null;
+                this.nextNarration = Util.getMillis() + 750;
+            }
+            for(Widget widget : this.widgets){
+                if(this.focusedWidget != widget && mouseX >= widget.left() && mouseX < widget.left() + widget.width() && mouseY >= widget.top() && mouseY < widget.top() + widget.height()){
+                    this.focusedWidget = widget;
+                    widget.setFocused(true);
+                    this.nextNarration = Long.MAX_VALUE;
+                }else
+                    widget.setFocused(widget == this.focusedWidget);
+            }
         }
 
         // Narrate this widget's narration message
@@ -184,23 +189,36 @@ public abstract class BaseWidget implements Widget {
     }
 
     @Override
-    public boolean mousePressed(int mouseX, int mouseY, int button, boolean hasBeenHandled){
+    public boolean mousePressed(int mouseX, int mouseY, MouseButtonInfo info, boolean isDoubleClick, boolean hasBeenHandled){
+        this.dragging = true;
         if(this.focusedWidget != null)
-            hasBeenHandled = this.focusedWidget.mousePressed(mouseX, mouseY, button, hasBeenHandled) || hasBeenHandled;
+            hasBeenHandled = this.focusedWidget.mousePressed(mouseX, mouseY, info, isDoubleClick, hasBeenHandled) || hasBeenHandled;
         for(Widget widget : this.widgets){
             if(widget != this.focusedWidget)
-                hasBeenHandled = widget.mousePressed(mouseX, mouseY, button, hasBeenHandled) || hasBeenHandled;
+                hasBeenHandled = widget.mousePressed(mouseX, mouseY, info, isDoubleClick, hasBeenHandled) || hasBeenHandled;
         }
         return hasBeenHandled;
     }
 
     @Override
-    public boolean mouseReleased(int mouseX, int mouseY, int button, boolean hasBeenHandled){
+    public boolean mouseReleased(int mouseX, int mouseY, MouseButtonInfo info, boolean hasBeenHandled){
+        this.dragging = false;
         if(this.focusedWidget != null)
-            hasBeenHandled = this.focusedWidget.mouseReleased(mouseX, mouseY, button, hasBeenHandled) || hasBeenHandled;
+            hasBeenHandled = this.focusedWidget.mouseReleased(mouseX, mouseY, info, hasBeenHandled) || hasBeenHandled;
         for(Widget widget : this.widgets){
             if(widget != this.focusedWidget)
-                hasBeenHandled = widget.mouseReleased(mouseX, mouseY, button, hasBeenHandled) || hasBeenHandled;
+                hasBeenHandled = widget.mouseReleased(mouseX, mouseY, info, hasBeenHandled) || hasBeenHandled;
+        }
+        return hasBeenHandled;
+    }
+
+    @Override
+    public boolean mouseDragged(int mouseX, int mouseY, MouseButtonInfo info, double deltaX, double deltaY, boolean hasBeenHandled){
+        if(this.focusedWidget != null)
+            hasBeenHandled = this.focusedWidget.mouseDragged(mouseX, mouseY, info, deltaX, deltaY, hasBeenHandled) || hasBeenHandled;
+        for(Widget widget : this.widgets){
+            if(widget != this.focusedWidget)
+                hasBeenHandled = widget.mouseDragged(mouseX, mouseY, info, deltaX, deltaY, hasBeenHandled) || hasBeenHandled;
         }
         return hasBeenHandled;
     }
@@ -217,23 +235,23 @@ public abstract class BaseWidget implements Widget {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, boolean hasBeenHandled){
+    public boolean keyPressed(KeyEvent event, boolean hasBeenHandled){
         if(this.focusedWidget != null)
-            hasBeenHandled = this.focusedWidget.keyPressed(keyCode, hasBeenHandled) || hasBeenHandled;
+            hasBeenHandled = this.focusedWidget.keyPressed(event, hasBeenHandled) || hasBeenHandled;
         for(Widget widget : this.widgets){
             if(widget != this.focusedWidget)
-                hasBeenHandled = widget.keyPressed(keyCode, hasBeenHandled) || hasBeenHandled;
+                hasBeenHandled = widget.keyPressed(event, hasBeenHandled) || hasBeenHandled;
         }
         return hasBeenHandled;
     }
 
     @Override
-    public boolean keyReleased(int keyCode, boolean hasBeenHandled){
+    public boolean keyReleased(KeyEvent event, boolean hasBeenHandled){
         if(this.focusedWidget != null)
-            hasBeenHandled = this.focusedWidget.keyReleased(keyCode, hasBeenHandled) || hasBeenHandled;
+            hasBeenHandled = this.focusedWidget.keyReleased(event, hasBeenHandled) || hasBeenHandled;
         for(Widget widget : this.widgets){
             if(widget != this.focusedWidget)
-                hasBeenHandled = widget.keyReleased(keyCode, hasBeenHandled) || hasBeenHandled;
+                hasBeenHandled = widget.keyReleased(event, hasBeenHandled) || hasBeenHandled;
         }
         return hasBeenHandled;
     }

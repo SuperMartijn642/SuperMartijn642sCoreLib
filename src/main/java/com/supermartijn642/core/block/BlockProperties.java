@@ -207,7 +207,7 @@ public class BlockProperties {
         if(this.mapColor != null)
             properties.mapColor(this.mapColor);
         if(!this.hasCollision)
-            properties.noCollission();
+            properties.noCollision();
         properties.sound(this.soundType);
         properties.lightLevel(this.lightLevel);
         properties.strength(this.explosionResistance);

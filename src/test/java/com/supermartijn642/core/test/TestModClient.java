@@ -5,8 +5,6 @@ import com.supermartijn642.core.block.BlockShape;
 import com.supermartijn642.core.gui.WidgetScreen;
 import com.supermartijn642.core.render.RenderUtils;
 import com.supermartijn642.core.render.RenderWorldEvent;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,25 +20,26 @@ import net.minecraft.world.phys.Vec3;
 public class TestModClient {
 
     static{
-        WorldRenderEvents.BLOCK_OUTLINE.register(TestModClient::onDrawSelection);
+//        WorldRenderEvents.BLOCK_OUTLINE.register(TestModClient::onDrawSelection);
         AttackBlockCallback.EVENT.register(TestModClient::onBlockBreak);
+        RenderWorldEvent.EVENT.register(TestModClient::onRenderWorld);
     }
 
     public static InteractionResult onBlockBreak(Player player, Level world, InteractionHand hand, BlockPos pos, Direction direction){
-        if(world.isClientSide)
+        if(world.isClientSide())
             ClientUtils.displayScreen(WidgetScreen.of(new TestScreen()));
         return InteractionResult.PASS;
     }
 
-    public static boolean onDrawSelection(WorldRenderContext renderContext, WorldRenderContext.BlockOutlineContext outlineContext){
-        Vec3 camera = RenderUtils.getCameraPosition();
-        renderContext.matrixStack().pushPose();
-        renderContext.matrixStack().translate(-camera.x, -camera.y, -camera.z);
-        RenderUtils.renderShape(renderContext.matrixStack(), BlockShape.fullCube(), 1, 1, 0, 0.5f, false);
-        RenderUtils.renderShapeSides(renderContext.matrixStack(), BlockShape.fullCube(), 0, 1, 1, 0.5f, false);
-        renderContext.matrixStack().popPose();
-        return true;
-    }
+//    public static boolean onDrawSelection(WorldRenderContext renderContext, WorldRenderContext.BlockOutlineContext outlineContext){
+//        Vec3 camera = RenderUtils.getCameraPosition();
+//        renderContext.matrixStack().pushPose();
+//        renderContext.matrixStack().translate(-camera.x, -camera.y, -camera.z);
+//        RenderUtils.renderShape(renderContext.matrixStack(), BlockShape.fullCube(), 1, 1, 0, 0.5f, false);
+//        RenderUtils.renderShapeSides(renderContext.matrixStack(), BlockShape.fullCube(), 0, 1, 1, 0.5f, false);
+//        renderContext.matrixStack().popPose();
+//        return true;
+//    }
 
     public static void onRenderWorld(RenderWorldEvent e){
         Vec3 camera = RenderUtils.getCameraPosition();

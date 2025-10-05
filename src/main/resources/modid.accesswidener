@@ -44,7 +44,7 @@ accessible field net/minecraft/client/gui/GuiGraphics deferredTooltip Ljava/lang
 accessible field net/minecraft/client/gui/GuiGraphics guiRenderState Lnet/minecraft/client/gui/render/state/GuiRenderState;
 accessible field net/minecraft/client/gui/GuiGraphics minecraft Lnet/minecraft/client/Minecraft; # minecraft
 accessible field net/minecraft/client/gui/GuiGraphics scissorStack Lnet/minecraft/client/gui/GuiGraphics$ScissorStack;
-accessible field net/minecraft/client/gui/GuiGraphics sprites Lnet/minecraft/client/gui/GuiSpriteManager;
+accessible field net/minecraft/client/gui/GuiGraphics guiSprites Lnet/minecraft/client/renderer/texture/TextureAtlas;
 accessible method net/minecraft/client/gui/GuiGraphics innerBlit (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/ResourceLocation;IIIIFFFFI)V
 accessible method net/minecraft/client/gui/GuiGraphics renderItemBar (Lnet/minecraft/world/item/ItemStack;II)V
 accessible method net/minecraft/client/gui/GuiGraphics renderItemCooldown (Lnet/minecraft/world/item/ItemStack;II)V
@@ -109,8 +109,6 @@ accessible field net/minecraft/tags/TagEntry required Z
 accessible field net/minecraft/tags/TagEntry tag Z
 accessible method net/minecraft/tags/TagEntry <init> (Lnet/minecraft/resources/ResourceLocation;ZZ)V
 mutable field net/minecraft/tags/TagEntry CODEC Lcom/mojang/serialization/Codec;
-# TextureAtlasHolder
-accessible field net/minecraft/client/resources/TextureAtlasHolder textureAtlas Lnet/minecraft/client/renderer/texture/TextureAtlas;
 
 # Append the generated entries
 # generated

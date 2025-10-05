@@ -6,6 +6,9 @@ import com.supermartijn642.core.gui.widget.MutableWidgetRenderContext;
 import com.supermartijn642.core.gui.widget.Widget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -25,6 +28,7 @@ public class WidgetScreen<T extends Widget> extends Screen {
     protected final T widget;
     private boolean initialized = false;
     private boolean isPauseScreen = false;
+    private boolean dragging = false;
 
     public WidgetScreen(T widget, boolean isPauseScreen){
         super(TextComponents.empty().get());
@@ -67,7 +71,8 @@ public class WidgetScreen<T extends Widget> extends Screen {
         guiGraphics.pose().translate(offsetX, offsetY);
 
         // Update whether the widget is focused
-        this.widget.setFocused(mouseX >= 0 && mouseX < this.widget.width() && mouseY >= 0 && mouseY < this.widget.height());
+        if(!this.dragging)
+            this.widget.setFocused(mouseX >= 0 && mouseX < this.widget.width() && mouseY >= 0 && mouseY < this.widget.height());
 
         GuiGraphicsHelper helper = GuiGraphicsHelper.of(guiGraphics);
         // Render the widget background
@@ -85,19 +90,29 @@ public class WidgetScreen<T extends Widget> extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button){
+    public boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick){
+        this.dragging = true;
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
-        return this.widget.mousePressed((int)mouseX, (int)mouseY, button, false) || super.mouseClicked(mouseX, mouseY, button);
+        int mouseX = (int)event.x() - offsetX;
+        int mouseY = (int)event.y() - offsetY;
+        return this.widget.mousePressed(mouseX, mouseY, event.buttonInfo(), isDoubleClick, false) || super.mouseClicked(event, isDoubleClick);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button){
+    public boolean mouseReleased(MouseButtonEvent event){
+        this.dragging = false;
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
-        return this.widget.mouseReleased((int)mouseX, (int)mouseY, button, false) || super.mouseReleased(mouseX, mouseY, button);
+        int mouseX = (int)event.x() - offsetX;
+        int mouseY = (int)event.y() - offsetY;
+        return this.widget.mouseReleased(mouseX, mouseY, event.buttonInfo(), false) || super.mouseReleased(event);
+    }
+
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY){
+        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
+        int mouseX = (int)event.x() - offsetX;
+        int mouseY = (int)event.y() - offsetY;
+        return this.widget.mouseDragged(mouseX, mouseY, event.buttonInfo(), deltaX, deltaY, false) || super.mouseDragged(event, deltaX, deltaY);
     }
 
     @Override
@@ -109,26 +124,26 @@ public class WidgetScreen<T extends Widget> extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers){
-        if(this.widget.keyPressed(keyCode, false))
+    public boolean keyPressed(KeyEvent event){
+        if(this.widget.keyPressed(event, false))
             return true;
 
-        if(ClientUtils.getMinecraft().options.keyInventory.matches(keyCode, scanCode)){
+        if(ClientUtils.getMinecraft().options.keyInventory.matches(event)){
             this.onClose();
             return true;
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers){
-        return this.widget.keyReleased(keyCode, false) || super.keyReleased(keyCode, scanCode, modifiers);
+    public boolean keyReleased(KeyEvent event){
+        return this.widget.keyReleased(event, false) || super.keyReleased(event);
     }
 
     @Override
-    public boolean charTyped(char character, int modifiers){
-        return this.widget.charTyped(character, false) || super.charTyped(character, modifiers);
+    public boolean charTyped(CharacterEvent event){
+        return this.widget.charTyped((char)event.codepoint(), false) || super.charTyped(event);
     }
 
     @Override

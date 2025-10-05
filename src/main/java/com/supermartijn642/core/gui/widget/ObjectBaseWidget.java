@@ -2,6 +2,8 @@ package com.supermartijn642.core.gui.widget;
 
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.gui.GuiGraphicsHelper;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
@@ -233,37 +235,57 @@ public abstract class ObjectBaseWidget<T> extends BaseWidget {
     }
 
     @Override
-    public final boolean mousePressed(int mouseX, int mouseY, int button, boolean hasBeenHandled){
-        return this.validateObjectOrClose() && this.mousePressed(mouseX, mouseY, button, hasBeenHandled, this.object);
+    public final boolean mousePressed(int mouseX, int mouseY, MouseButtonInfo info, boolean isDoubleClick, boolean hasBeenHandled){
+        return this.validateObjectOrClose() && this.mousePressed(mouseX, mouseY, info, isDoubleClick, hasBeenHandled, this.object);
     }
 
     /**
      * Called when a mouse button is pressed down.
      * @param mouseX         x-position of the mouse
      * @param mouseY         y-position of the mouse
-     * @param button         the button which is pressed down
+     * @param info           the button which is pressed down
+     * @param isDoubleClick  whether the even is a double click
      * @param hasBeenHandled whether the mouse press has already been handled
      * @return whether this widget has handled the mouse press
      */
-    protected boolean mousePressed(int mouseX, int mouseY, int button, boolean hasBeenHandled, T object){
-        return super.mousePressed(mouseX, mouseY, button, hasBeenHandled);
+    protected boolean mousePressed(int mouseX, int mouseY, MouseButtonInfo info, boolean isDoubleClick, boolean hasBeenHandled, T object){
+        return super.mousePressed(mouseX, mouseY, info, isDoubleClick, hasBeenHandled);
     }
 
     @Override
-    public final boolean mouseReleased(int mouseX, int mouseY, int button, boolean hasBeenHandled){
-        return this.validateObjectOrClose() && this.mouseReleased(mouseX, mouseY, button, hasBeenHandled, this.object);
+    public final boolean mouseReleased(int mouseX, int mouseY, MouseButtonInfo info, boolean hasBeenHandled){
+        return this.validateObjectOrClose() && this.mouseReleased(mouseX, mouseY, info, hasBeenHandled, this.object);
     }
 
     /**
      * Called when a mouse button is released.
      * @param mouseX         x-position of the mouse
      * @param mouseY         y-position of the mouse
-     * @param button         the button which is pressed down
-     * @param hasBeenHandled whether the mouse press has already been handled
+     * @param info           the button which is released
+     * @param hasBeenHandled whether the mouse release has already been handled
      * @return whether this widget has handled the mouse release
      */
-    protected boolean mouseReleased(int mouseX, int mouseY, int button, boolean hasBeenHandled, T object){
-        return super.mouseReleased(mouseX, mouseY, button, hasBeenHandled);
+    protected boolean mouseReleased(int mouseX, int mouseY, MouseButtonInfo info, boolean hasBeenHandled, T object){
+        return super.mouseReleased(mouseX, mouseY, info, hasBeenHandled);
+    }
+
+    @Override
+    public final boolean mouseDragged(int mouseX, int mouseY, MouseButtonInfo info, double deltaX, double deltaY, boolean hasBeenHandled){
+        return this.validateObjectOrClose() && this.mouseDragged(mouseX, mouseY, info, deltaX, deltaY, hasBeenHandled, this.object);
+    }
+
+    /**
+     * Called whilst a mouse button is pressed and the mouse position is moved.
+     * @param mouseX         x-position of the mouse
+     * @param mouseY         y-position of the mouse
+     * @param info           the button which is pressed down
+     * @param deltaX         horizontal movement since the mouse button was pressed
+     * @param deltaY         vertical movement since the mouse button was pressed
+     * @param hasBeenHandled whether the mouse drag has already been handled
+     * @return whether this widget has handled the mouse drag
+     */
+    protected boolean mouseDragged(int mouseX, int mouseY, MouseButtonInfo info, double deltaX, double deltaY, boolean hasBeenHandled, T object){
+        return super.mouseDragged(mouseX, mouseY, info, deltaX, deltaY, hasBeenHandled);
     }
 
     @Override
@@ -276,7 +298,7 @@ public abstract class ObjectBaseWidget<T> extends BaseWidget {
      * @param mouseX         x-position of the mouse
      * @param mouseY         y-position of the mouse
      * @param scrollAmount   the amount the mouse wheel was scrolled by
-     * @param hasBeenHandled whether the mouse press has already been handled
+     * @param hasBeenHandled whether the mouse scroll has already been handled
      * @return whether this widget has handled the mouse scroll
      */
     protected boolean mouseScrolled(int mouseX, int mouseY, double scrollAmount, boolean hasBeenHandled, T object){
@@ -284,31 +306,31 @@ public abstract class ObjectBaseWidget<T> extends BaseWidget {
     }
 
     @Override
-    public final boolean keyPressed(int keyCode, boolean hasBeenHandled){
-        return this.validateObjectOrClose() && this.keyPressed(keyCode, hasBeenHandled, this.object);
+    public final boolean keyPressed(KeyEvent event, boolean hasBeenHandled){
+        return this.validateObjectOrClose() && this.keyPressed(event, hasBeenHandled, this.object);
     }
 
     /**
      * Called when a key is pressed down.
-     * @param keyCode code of the key which was pressed
+     * @param event data on the key which was pressed
      * @return whether this widget has handled the key press
      */
-    protected boolean keyPressed(int keyCode, boolean hasBeenHandled, T object){
-        return super.keyPressed(keyCode, hasBeenHandled);
+    protected boolean keyPressed(KeyEvent event, boolean hasBeenHandled, T object){
+        return super.keyPressed(event, hasBeenHandled);
     }
 
     @Override
-    public final boolean keyReleased(int keyCode, boolean hasBeenHandled){
-        return this.validateObjectOrClose() && this.keyReleased(keyCode, hasBeenHandled, this.object);
+    public final boolean keyReleased(KeyEvent event, boolean hasBeenHandled){
+        return this.validateObjectOrClose() && this.keyReleased(event, hasBeenHandled, this.object);
     }
 
     /**
      * Called when a key is released.
-     * @param keyCode code of the key which was released
+     * @param event data on the key which was pressed
      * @return whether this widget has handled the key release
      */
-    protected boolean keyReleased(int keyCode, boolean hasBeenHandled, T object){
-        return super.keyReleased(keyCode, hasBeenHandled);
+    protected boolean keyReleased(KeyEvent event, boolean hasBeenHandled, T object){
+        return super.keyReleased(event, hasBeenHandled);
     }
 
     @Override
@@ -317,7 +339,7 @@ public abstract class ObjectBaseWidget<T> extends BaseWidget {
     }
 
     /**
-     * Called when a character is typed. May be called in addition to {@link #keyPressed(int, boolean)}.
+     * Called when a character is typed. May be called in addition to {@link #keyReleased(KeyEvent, boolean, Object)}.
      * @param character the character which was typed
      * @return whether this widget has handled the character
      */
