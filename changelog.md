@@ -1,3 +1,7 @@
+### SuperMartijn642's Core Library 1.1.18b
+- Fixed `Widget` screens using horizontal instead of vertical scrolling
+- Fixed crash when mods bake models outside vanilla model baker
+
 ### SuperMartijn642's Core Library 1.1.18a
 - Fixed `BaseBlockItem#useOn` ignoring some parameters leading to issues when interacting with other mods
 - Added ModMenu library badge integration
