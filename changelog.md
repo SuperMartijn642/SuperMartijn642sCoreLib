@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.18d
+- Fixed `Widget` screens using horizontal instead of vertical scrolling
+
 ### SuperMartijn642's Core Library 1.1.18c
 - Account for breaking changes to datagen in NeoForge 21.4.47-beta
 
