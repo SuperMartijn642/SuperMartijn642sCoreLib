@@ -162,7 +162,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount){
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        return this.widget.mouseScrolled((int)mouseX - offsetX, (int)mouseY - offsetY, horizontalAmount, false) || super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+        return this.widget.mouseScrolled((int)mouseX - offsetX, (int)mouseY - offsetY, verticalAmount, false) || super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     @Override
