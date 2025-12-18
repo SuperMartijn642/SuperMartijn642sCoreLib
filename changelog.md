@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.18e
+- Fixed `Widget` screens using horizontal instead of vertical scrolling
+
 ### SuperMartijn642's Core Library 1.1.18d
 - Fixed custom rendering in guis not showing when Iris is installed
 
