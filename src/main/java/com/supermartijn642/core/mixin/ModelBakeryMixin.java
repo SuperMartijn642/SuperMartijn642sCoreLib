@@ -124,7 +124,7 @@ public class ModelBakeryMixin implements CoreLibModelBakery {
             // Clear overwrites
             if(!this.missingOverwriteModels.isEmpty())
                 CoreLib.LOGGER.error("Missing models for model overwrites: {}", this.missingOverwriteModels.stream().map(l -> "'" + l + "'").collect(Collectors.joining(", ")));
-            this.modelOverwrites = Map.of();
+            this.modelOverwrites = null;
             this.missingOverwriteModels = null;
         }catch(Exception e){
             CoreLib.LOGGER.error("Encountered an error while applying model overwrites!", e);
