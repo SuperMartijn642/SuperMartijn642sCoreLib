@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.18f
+- Fixed `Widget` screens using horizontal instead of vertical scrolling
+
 ### SuperMartijn642's Core Library 1.1.18e
 - Fixed crash with Fabric API 0.131.0+1.21.8 when testing `tag_populated` resource condition
 
