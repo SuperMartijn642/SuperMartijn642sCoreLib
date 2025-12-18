@@ -120,7 +120,7 @@ public class WidgetScreen<T extends Widget> extends Screen {
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
         mouseX -= offsetX;
         mouseY -= offsetY;
-        return this.widget.mouseScrolled((int)mouseX, (int)mouseY, horizontalAmount, false) || super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+        return this.widget.mouseScrolled((int)mouseX, (int)mouseY, verticalAmount, false) || super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     @Override

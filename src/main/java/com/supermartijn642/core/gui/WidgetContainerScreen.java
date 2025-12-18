@@ -180,7 +180,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
         mouseX -= offsetX;
         mouseY -= offsetY;
-        return this.widget.mouseScrolled((int)mouseX, (int)mouseY, horizontalAmount, false) || super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+        return this.widget.mouseScrolled((int)mouseX, (int)mouseY, verticalAmount, false) || super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     @Override
