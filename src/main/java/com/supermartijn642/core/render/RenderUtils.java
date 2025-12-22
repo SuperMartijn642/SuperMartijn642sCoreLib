@@ -7,10 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.block.BlockShape;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -238,5 +235,68 @@ public class RenderUtils {
      */
     public static void renderBoxSides(PoseStack poseStack, AABB box, float red, float green, float blue, boolean depthTest){
         renderShapeSides(poseStack, BlockShape.create(box), red, green, blue, 1, depthTest);
+    }
+
+    /**
+     * Draws an outline for the given shape
+     */
+    public static void submitShape(OrderedSubmitNodeCollector output, PoseStack poseStack, BlockShape shape, float red, float green, float blue, float alpha, boolean depthTest){
+        RenderType renderType = depthTest ? LINES : LINES_NO_DEPTH;
+        output.submitCustomGeometry(poseStack, renderType, (pose, vertexConsumer) -> {
+            Matrix4f matrix = pose.pose();
+            shape.forEachEdge((x1, y1, z1, x2, y2, z2) -> {
+                Vec3 normal = new Vec3(x2 - x1, y2 - y1, z2 - z1);
+                normal.normalize();
+                vertexConsumer.addVertex(matrix, (float)x1, (float)y1, (float)z1).setColor(red, green, blue, alpha).setNormal(pose, (float)normal.x, (float)normal.y, (float)normal.z);
+                vertexConsumer.addVertex(matrix, (float)x2, (float)y2, (float)z2).setColor(red, green, blue, alpha).setNormal(pose, (float)normal.x, (float)normal.y, (float)normal.z);
+            });
+        });
+    }
+
+    /**
+     * Draws an outline for the given shape
+     */
+    public static void submitShapeSides(OrderedSubmitNodeCollector output, PoseStack poseStack, BlockShape shape, float red, float green, float blue, float alpha, boolean depthTest){
+        RenderType renderType = depthTest ? QUADS : QUADS_NO_DEPTH;
+        output.submitCustomGeometry(poseStack, renderType, (pose, vertexConsumer) -> {
+            Matrix4f matrix = pose.pose();
+            shape.forEachBox(box -> {
+                float minX = (float)box.minX, maxX = (float)box.maxX;
+                float minY = (float)box.minY, maxY = (float)box.maxY;
+                float minZ = (float)box.minZ, maxZ = (float)box.maxZ;
+
+                vertexConsumer.addVertex(matrix, minX, minY, minZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, minX, maxY, minZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, maxX, maxY, minZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, maxX, minY, minZ).setColor(red, green, blue, alpha);
+
+                vertexConsumer.addVertex(matrix, minX, minY, maxZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, maxX, minY, maxZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, maxX, maxY, maxZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, minX, maxY, maxZ).setColor(red, green, blue, alpha);
+
+
+                vertexConsumer.addVertex(matrix, minX, minY, minZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, maxX, minY, minZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, maxX, minY, maxZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, minX, minY, maxZ).setColor(red, green, blue, alpha);
+
+                vertexConsumer.addVertex(matrix, minX, maxY, minZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, minX, maxY, maxZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, maxX, maxY, maxZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, maxX, maxY, minZ).setColor(red, green, blue, alpha);
+
+
+                vertexConsumer.addVertex(matrix, minX, minY, minZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, minX, minY, maxZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, minX, maxY, maxZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, minX, maxY, minZ).setColor(red, green, blue, alpha);
+
+                vertexConsumer.addVertex(matrix, maxX, minY, minZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, maxX, maxY, minZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, maxX, maxY, maxZ).setColor(red, green, blue, alpha);
+                vertexConsumer.addVertex(matrix, maxX, minY, maxZ).setColor(red, green, blue, alpha);
+            });
+        });
     }
 }
