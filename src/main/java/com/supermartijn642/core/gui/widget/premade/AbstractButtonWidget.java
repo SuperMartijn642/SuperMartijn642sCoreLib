@@ -2,6 +2,7 @@ package com.supermartijn642.core.gui.widget.premade;
 
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.gui.widget.BaseWidget;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 
@@ -31,7 +32,7 @@ public abstract class AbstractButtonWidget extends BaseWidget {
     }
 
     @Override
-    public boolean mousePressed(int mouseX, int mouseY, int button, boolean hasBeenHandled){
+    public boolean mousePressed(int mouseX, int mouseY, MouseButtonInfo info, boolean isDoubleClick, boolean hasBeenHandled){
         if(!hasBeenHandled && mouseX >= this.x && mouseX < this.x + this.width && mouseY >= this.y && mouseY < this.y + this.height){
             this.onPress();
             return true;

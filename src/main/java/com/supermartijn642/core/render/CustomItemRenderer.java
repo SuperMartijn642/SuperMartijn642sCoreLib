@@ -2,6 +2,7 @@ package com.supermartijn642.core.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -14,13 +15,15 @@ import java.util.function.Consumer;
 /**
  * Created 27/07/2022 by SuperMartijn642
  */
-public interface CustomItemRenderer {
+public interface CustomItemRenderer<S> {
 
-    static SpecialModelRenderer<?> toSpecialModelRenderer(CustomItemRenderer customRenderer){
-        return new SpecialModelRenderer<ItemStack>() {
+    static <T> SpecialModelRenderer<?> toSpecialModelRenderer(CustomItemRenderer<T> customRenderer){
+        MutableCustomItemRendererContext context = new MutableCustomItemRendererContext();
+        return new SpecialModelRenderer<T>() {
             @Override
-            public void render(@Nullable ItemStack stack, ItemDisplayContext transformType, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay, boolean hasFoil){
-                customRenderer.render(stack, transformType, poseStack, bufferSource, combinedLight, combinedOverlay);
+            public void submit(T state, ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector output, int combinedLight, int combinedOverlay, boolean hasFoil, int k){
+                context.set(displayContext, poseStack, combinedLight, combinedOverlay);
+                customRenderer.submit(output, state, hasFoil, context);
             }
 
             @Override
@@ -29,11 +32,16 @@ public interface CustomItemRenderer {
             }
 
             @Override
-            public @Nullable ItemStack extractArgument(ItemStack stack){
-                return stack;
+            public @Nullable T extractArgument(ItemStack stack){
+                return customRenderer.extractState(stack);
             }
         };
     }
+
+    @Nullable
+    S extractState(ItemStack stack);
+
+    void submit(SubmitNodeCollector output, S state, boolean hasFoil, RenderContext context);
 
     /**
      * Renders the given item stack.
@@ -41,4 +49,14 @@ public interface CustomItemRenderer {
     void render(ItemStack itemStack, ItemDisplayContext transformType, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay);
 
     void getExtents(Consumer<Vector3f> extents);
+
+    interface RenderContext {
+        ItemDisplayContext displayContext();
+
+        PoseStack poseStack();
+
+        int packedLight();
+
+        int packedBreakingOverlay();
+    }
 }

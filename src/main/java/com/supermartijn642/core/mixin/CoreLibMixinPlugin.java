@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public class CoreLibMixinPlugin implements IMixinConfigPlugin {
 
-    private static final boolean isDevEnvironment = !FMLEnvironment.production;
+    private static final boolean isDevEnvironment = !FMLEnvironment.isProduction();
 
     private String mixinDevPackage;
 

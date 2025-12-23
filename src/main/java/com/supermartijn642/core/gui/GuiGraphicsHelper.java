@@ -1,6 +1,7 @@
 package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
@@ -96,6 +97,13 @@ public final class GuiGraphicsHelper {
 
     public boolean isPointInScissor(float x, float y){
         return this.guiGraphics.containsPointInScissor((int)x, (int)y);
+    }
+
+    /**
+     * @see com.mojang.blaze3d.platform.cursor.CursorTypes
+     */
+    public void requestCursor(CursorType cursorType){
+        this.guiGraphics.requestCursor(cursorType);
     }
 
     public void submitText(FormattedText text, float x, float y, Consumer<TextProperties> properties){
@@ -226,10 +234,10 @@ public final class GuiGraphicsHelper {
 
     public void submitSprite(TextureAtlasSprite sprite, float x, float y, float width, float height, Consumer<TextureProperties> properties){
         //noinspection resource
-        GuiSpriteScaling scaling = sprite.contents().metadata().getSection(GuiMetadataSection.TYPE).orElse(GuiMetadataSection.DEFAULT).scaling();
+        GuiSpriteScaling scaling = sprite.contents().getAdditionalMetadata(GuiMetadataSection.TYPE).orElse(GuiMetadataSection.DEFAULT).scaling();
 
         // Handle stretch scaling
-        if(scaling instanceof GuiSpriteScaling.Stretch || !sprite.atlasLocation().equals(this.guiGraphics.sprites.textureAtlas.location())){
+        if(scaling instanceof GuiSpriteScaling.Stretch || !sprite.atlasLocation().equals(this.guiGraphics.guiSprites.location())){
             if(properties == null)
                 properties = p -> {};
             this.submitTexture(
@@ -272,7 +280,7 @@ public final class GuiGraphicsHelper {
     }
 
     public void submitSprite(ResourceLocation sprite, float x, float y, float width, float height, Consumer<TextureProperties> properties){
-        this.submitSprite(this.guiGraphics.sprites.getSprite(sprite), x, y, width, height, properties);
+        this.submitSprite(this.guiGraphics.guiSprites.getSprite(sprite), x, y, width, height, properties);
     }
 
     public void submitSprite(ResourceLocation sprite, float x, float y, float width, float height){

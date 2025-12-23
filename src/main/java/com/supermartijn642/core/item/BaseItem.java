@@ -119,7 +119,7 @@ public class BaseItem extends Item {
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand){
-        return this.interact(player.getItemInHand(hand), player, hand, level).toUnderlying(level.isClientSide);
+        return this.interact(player.getItemInHand(hand), player, hand, level).toUnderlying(level.isClientSide());
     }
 
     @Override
@@ -161,7 +161,7 @@ public class BaseItem extends Item {
     }
 
     public boolean isInCreativeGroup(CreativeModeTab tab){
-        return this.properties != null && this.properties.groups.contains(tab);
+        return this.properties != null && (this.properties.groups.contains(tab) || (!this.properties.groups.isEmpty() && tab == CreativeItemGroup.getSearch()));
     }
 
     public static class ItemUseResult {

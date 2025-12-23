@@ -59,7 +59,8 @@ public class CommonUtils {
      * @return which environment the game is running in.
      */
     public static CoreSide getEnvironmentSide(){
-        return CoreSide.fromUnderlying(FMLEnvironment.dist);
+        //noinspection deprecation
+        return CoreSide.fromUnderlying(FMLEnvironment.getDist());
     }
 
     /**

@@ -1,12 +1,14 @@
 package com.supermartijn642.core.gui.widget.premade;
 
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.GuiGraphicsHelper;
 import com.supermartijn642.core.gui.widget.BaseWidget;
 import com.supermartijn642.core.gui.widget.WidgetRenderContext;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -115,6 +117,10 @@ public class TextFieldWidget extends BaseWidget {
             int l1 = left + fontRenderer.width(s.substring(0, relativeSelection));
             this.drawSelectionBox(graphics, cursorX, top - 1, l1 - 1, top + 1 + fontRenderer.lineHeight);
         }
+
+        // Request I-beam cursor
+        if(this.isHovered(mouseX, mouseY) && this.active && this.isFocused())
+            graphics.requestCursor(CursorTypes.IBEAM);
     }
 
     protected void drawBackground(GuiGraphicsHelper graphics){
@@ -196,26 +202,46 @@ public class TextFieldWidget extends BaseWidget {
         }
     }
 
-    protected void removeAtCursor(boolean left){
+    protected void removeAtCursor(boolean left, boolean wholeWord){
         if(this.text.isEmpty())
             return;
 
-        String oldText = text;
+        if(this.cursorPosition == this.selectionPos){
+            if(wholeWord)
+                this.selectionPos = this.getEndOfWord(this.cursorPosition, left);
+            else if(left && this.cursorPosition > 0)
+                this.selectionPos = this.cursorPosition - 1;
+            else if(!left && this.cursorPosition < this.text.length())
+                this.selectionPos = this.cursorPosition + 1;
+        }
+
+        String oldText = this.text;
         if(this.cursorPosition != this.selectionPos){
             this.text = this.text.substring(0, Math.min(this.cursorPosition, this.selectionPos)) + this.text.substring(Math.max(this.cursorPosition, this.selectionPos));
             this.cursorPosition = this.selectionPos = Math.min(this.cursorPosition, this.selectionPos);
-        }else if(left && this.cursorPosition > 0){
-            this.text = this.text.substring(0, this.cursorPosition - 1) + this.text.substring(this.cursorPosition);
-            this.cursorPosition -= 1;
-            this.selectionPos -= 1;
-        }else if(!left && this.cursorPosition < this.text.length())
-            this.text = this.text.substring(0, this.cursorPosition) + this.text.substring(this.cursorPosition + 1);
+        }
 
         this.moveLineOffsetToCursor();
 
         this.cursorBlinkCounter = 1;
 
         this.onTextChanged(oldText, this.text);
+    }
+
+    protected int getEndOfWord(int fromIndex, boolean left){
+        int index = Math.clamp(fromIndex, 0, this.text.length());
+        if(left){
+            while(index > 0 && this.text.charAt(index - 1) == ' ')
+                index--;
+            while(index > 0 && this.text.charAt(index) != ' ')
+                index--;
+        }else{
+            while(index < this.text.length() && this.text.charAt(index) == ' ')
+                index++;
+            while(index < this.text.length() && this.text.charAt(index) != ' ')
+                index++;
+        }
+        return index;
     }
 
     protected void moveLineOffsetToCursor(){
@@ -225,6 +251,15 @@ public class TextFieldWidget extends BaseWidget {
         int max = Math.max(this.cursorPosition - 1, 0) + fontRenderer.plainSubstrByWidth(this.text.substring(Math.max(this.cursorPosition - 1, 0)), availableWidth).length();
         max = max - fontRenderer.plainSubstrByWidth(new StringBuilder(this.text.substring(0, max)).reverse().toString(), availableWidth).length();
         this.lineScrollOffset = Math.min(Math.max(this.lineScrollOffset, min), max);
+    }
+
+    /**
+     * Get the text offset index for the given mouse position.
+     */
+    protected int getMousePositionIndex(int mouseX, int mouseY){
+        int offset = Mth.floor(mouseX) - this.x - 4;
+        String s = ClientUtils.getFontRenderer().plainSubstrByWidth(this.text.substring(this.lineScrollOffset), Math.min(offset, this.width - 8));
+        return s.length() + this.lineScrollOffset;
     }
 
     public String getSelectedText(){
@@ -271,44 +306,47 @@ public class TextFieldWidget extends BaseWidget {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, boolean hasBeenHandled){
+    public boolean keyPressed(KeyEvent event, boolean hasBeenHandled){
         if(hasBeenHandled || !this.canWrite() || !this.selected)
             return false;
 
-        boolean shift = Screen.hasShiftDown();
-        if(keyCode == 256){
+        boolean shift = event.hasShiftDown();
+        if(event.isEscape()){
             this.setSelected(false);
-        }else if(Screen.isSelectAll(keyCode)){
+        }else if(event.isSelectAll()){
             this.lineScrollOffset = 0;
             this.cursorPosition = this.text.length();
             this.selectionPos = 0;
-        }else if(Screen.isCopy(keyCode)){
+        }else if(event.isCopy()){
             ClientUtils.getMinecraft().keyboardHandler.setClipboard(this.getSelectedText());
-        }else if(Screen.isPaste(keyCode)){
+        }else if(event.isPaste()){
             this.addTextAtCursor(ClientUtils.getMinecraft().keyboardHandler.getClipboard());
-        }else if(Screen.isCut(keyCode)){
+        }else if(event.isCut()){
             ClientUtils.getMinecraft().keyboardHandler.setClipboard(this.getSelectedText());
             this.addTextAtCursor("");
         }else{
-            switch(keyCode){
+            switch(event.key()){
                 case 259: // backspace
-                    this.removeAtCursor(true);
+                    this.removeAtCursor(true, event.hasControlDown());
                     break;
                 case 260: // insert
-                case 264: // ?
-                case 265: // ?
+                case 264: // down
+                case 265: // up
                 case 266: // page up
                 case 267: // page down
                 default:
                     return true;
                 case 261: // delete
-                    this.removeAtCursor(false);
+                    this.removeAtCursor(false, event.hasControlDown());
                     break;
                 case 262: // right
                     if(!shift && this.cursorPosition != this.selectionPos)
                         this.cursorPosition = this.selectionPos = Math.max(this.cursorPosition, this.selectionPos);
                     else if(this.cursorPosition < this.text.length()){
-                        this.cursorPosition = this.cursorPosition + 1;
+                        if(event.hasControlDown())
+                            this.cursorPosition = this.getEndOfWord(this.cursorPosition, false);
+                        else
+                            this.cursorPosition = this.cursorPosition + 1;
                         if(!shift)
                             this.selectionPos = this.cursorPosition;
                     }
@@ -318,18 +356,25 @@ public class TextFieldWidget extends BaseWidget {
                     if(!shift && this.cursorPosition != this.selectionPos)
                         this.cursorPosition = this.selectionPos = Math.min(this.cursorPosition, this.selectionPos);
                     else if(this.cursorPosition > 0){
-                        this.cursorPosition = this.cursorPosition - 1;
+                        if(event.hasControlDown())
+                            this.cursorPosition = this.getEndOfWord(this.cursorPosition, true);
+                        else
+                            this.cursorPosition = this.cursorPosition - 1;
                         if(!shift)
                             this.selectionPos = this.cursorPosition;
                     }
                     this.moveLineOffsetToCursor();
                     break;
                 case 268: // home
-                    this.cursorPosition = this.selectionPos = 0;
+                    this.cursorPosition = 0;
+                    if(!shift)
+                        this.selectionPos = this.cursorPosition;
                     this.moveLineOffsetToCursor();
                     break;
                 case 269: // end
-                    this.cursorPosition = this.selectionPos = this.text.length();
+                    this.cursorPosition = this.text.length();
+                    if(!shift)
+                        this.selectionPos = this.cursorPosition;
                     this.moveLineOffsetToCursor();
                     break;
             }
@@ -356,25 +401,39 @@ public class TextFieldWidget extends BaseWidget {
     }
 
     @Override
-    public boolean mousePressed(int mouseX, int mouseY, int button, boolean hasBeenHandled){
+    public boolean mousePressed(int mouseX, int mouseY, MouseButtonInfo info, boolean isDoubleClick, boolean hasBeenHandled){
         if(!hasBeenHandled && this.active && this.isHovered(mouseX, mouseY)){
             this.setSelected(true);
-            if(button == 1)
+            if(info.button() == 1) // Right-click
                 this.clear();
-            else{
-                int offset = Mth.floor(mouseX) - this.x - 4;
-
-                Font font = ClientUtils.getFontRenderer();
-                String s = font.plainSubstrByWidth(this.text.substring(this.lineScrollOffset), Math.min(offset, this.width - 8));
-                this.cursorPosition = s.length() + this.lineScrollOffset;
-                if(!Screen.hasShiftDown())
-                    this.selectionPos = this.cursorPosition;
+            else if(info.button() == 0){ // Left-click
+                if(isDoubleClick){
+                    int from = this.cursorPosition > 0 && this.text.charAt(this.cursorPosition - 1) != ' ' ?
+                        this.getEndOfWord(this.cursorPosition, true) : this.cursorPosition;
+                    int to = this.cursorPosition < this.text.length() && this.text.charAt(this.cursorPosition) != ' ' ?
+                        this.getEndOfWord(this.cursorPosition, true) : this.cursorPosition;
+                    this.selectionPos = from;
+                    this.cursorPosition = to;
+                }else{
+                    this.cursorPosition = this.getMousePositionIndex(mouseX, mouseY);
+                    if(!info.hasShiftDown())
+                        this.selectionPos = this.cursorPosition;
+                }
             }
             return true;
         }else
             this.setSelected(false);
 
         return false;
+    }
+
+    @Override
+    public boolean mouseDragged(int mouseX, int mouseY, MouseButtonInfo info, double deltaX, double deltaY, boolean hasBeenHandled){
+        if(!hasBeenHandled && this.active && this.isFocused() && info.button() == 0){
+            this.setSelected(true);
+            this.cursorPosition = this.getMousePositionIndex(mouseX, mouseY);
+        }
+        return super.mouseDragged(mouseX, mouseY, info, deltaX, deltaY, hasBeenHandled);
     }
 
     private boolean isHovered(int mouseX, int mouseY){
