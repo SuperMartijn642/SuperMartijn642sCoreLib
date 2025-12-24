@@ -20,7 +20,7 @@ public class LevelRendererMixin {
     private static final PoseStack POSE_STACK = new PoseStack();
 
     @Inject(
-        method = "lambda$addParticlesPass$3(Lcom/mojang/blaze3d/buffers/GpuBufferSlice;Lcom/mojang/blaze3d/resource/ResourceHandle;Lcom/mojang/blaze3d/resource/ResourceHandle;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;)V",
+        method = "lambda$addParticlesPass$2(Lcom/mojang/blaze3d/buffers/GpuBufferSlice;Lcom/mojang/blaze3d/resource/ResourceHandle;Lcom/mojang/blaze3d/resource/ResourceHandle;)V",
         at = @At("TAIL"),
         remap = false
     )

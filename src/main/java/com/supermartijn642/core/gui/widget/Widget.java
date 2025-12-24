@@ -1,6 +1,8 @@
 package com.supermartijn642.core.gui.widget;
 
 import com.supermartijn642.core.gui.GuiGraphicsHelper;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -85,48 +87,61 @@ public interface Widget {
      * Called when a mouse button is pressed down.
      * @param mouseX         x-position of the mouse
      * @param mouseY         y-position of the mouse
-     * @param button         the button which is pressed down
+     * @param info           the button which is pressed down
+     * @param isDoubleClick  whether the even is a double click
      * @param hasBeenHandled whether the mouse press has already been handled
      * @return whether this widget has handled the mouse press
      */
-    boolean mousePressed(int mouseX, int mouseY, int button, boolean hasBeenHandled);
+    boolean mousePressed(int mouseX, int mouseY, MouseButtonInfo info, boolean isDoubleClick, boolean hasBeenHandled);
 
     /**
      * Called when a mouse button is released.
      * @param mouseX         x-position of the mouse
      * @param mouseY         y-position of the mouse
-     * @param button         the button which is pressed down
-     * @param hasBeenHandled whether the mouse press has already been handled
+     * @param info           the button which is released
+     * @param hasBeenHandled whether the mouse release has already been handled
      * @return whether this widget has handled the mouse release
      */
-    boolean mouseReleased(int mouseX, int mouseY, int button, boolean hasBeenHandled);
+    boolean mouseReleased(int mouseX, int mouseY, MouseButtonInfo info, boolean hasBeenHandled);
+
+    /**
+     * Called whilst a mouse button is pressed and the mouse position is moved.
+     * @param mouseX         x-position of the mouse
+     * @param mouseY         y-position of the mouse
+     * @param info           the button which is pressed down
+     * @param deltaX         horizontal movement since the mouse button was pressed
+     * @param deltaY         vertical movement since the mouse button was pressed
+     * @param hasBeenHandled whether the mouse drag has already been handled
+     * @return whether this widget has handled the mouse drag
+     */
+    boolean mouseDragged(int mouseX, int mouseY, MouseButtonInfo info, double deltaX, double deltaY, boolean hasBeenHandled);
 
     /**
      * Called when the mouse wheel is scrolled.
      * @param mouseX         x-position of the mouse
      * @param mouseY         y-position of the mouse
      * @param scrollAmount   the amount the mouse wheel was scrolled by
-     * @param hasBeenHandled whether the mouse press has already been handled
+     * @param hasBeenHandled whether the mouse scroll has already been handled
      * @return whether this widget has handled the mouse scroll
      */
     boolean mouseScrolled(int mouseX, int mouseY, double scrollAmount, boolean hasBeenHandled);
 
     /**
      * Called when a key is pressed down.
-     * @param keyCode code of the key which was pressed
+     * @param event data on the key which was pressed
      * @return whether this widget has handled the key press
      */
-    boolean keyPressed(int keyCode, boolean hasBeenHandled);
+    boolean keyPressed(KeyEvent event, boolean hasBeenHandled);
 
     /**
      * Called when a key is released.
-     * @param keyCode code of the key which was released
+     * @param event data on the key which was pressed
      * @return whether this widget has handled the key release
      */
-    boolean keyReleased(int keyCode, boolean hasBeenHandled);
+    boolean keyReleased(KeyEvent event, boolean hasBeenHandled);
 
     /**
-     * Called when a character is typed. May be called in addition to {@link #keyPressed(int, boolean)}.
+     * Called when a character is typed. May be called in addition to {@link #keyReleased(KeyEvent, boolean)}.
      * @param character the character which was typed
      * @return whether this widget has handled the character
      */

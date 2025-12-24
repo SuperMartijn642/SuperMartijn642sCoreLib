@@ -11,7 +11,6 @@ import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
@@ -116,7 +115,7 @@ public class ClientRegistrationHandler {
     private final List<Pair<Supplier<Item>,Function<ItemModel,ItemModel>>> itemModelOverwrites = new ArrayList<>();
 
     private final List<Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?,?>>>> entityRenderers = new ArrayList<>();
-    private final List<Pair<Supplier<BlockEntityType<?>>,Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?>>>> blockEntityRenderers = new ArrayList<>();
+    private final List<Pair<Supplier<BlockEntityType<?>>,Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?,?>>>> blockEntityRenderers = new ArrayList<>();
 
     private final Map<ResourceLocation,Set<ResourceLocation>> textureAtlasSprites = new HashMap<>();
 
@@ -247,38 +246,40 @@ public class ClientRegistrationHandler {
      * Registers the given block entity renderer for the given block entity type.
      */
     @SuppressWarnings("unchecked")
-    public <T extends BlockEntity> void registerBlockEntityRenderer(Supplier<BlockEntityType<T>> entityType, Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<? super T>> blockEntityRenderer){
+    public <T extends BlockEntity> void registerBlockEntityRenderer(Supplier<BlockEntityType<T>> entityType, Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<? super T,?>> blockEntityRenderer){
         if(this.passedRegisterRenderers)
             throw new IllegalStateException("Cannot register new renderers after RegisterRenderers has been fired!");
 
-        this.blockEntityRenderers.add(Pair.of((Supplier<BlockEntityType<?>>)(Object)entityType, (Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?>>)(Object)blockEntityRenderer));
+        // Compiler is not happy without the (Object) cast ¯\(o_o)/¯
+        //noinspection RedundantCast
+        this.blockEntityRenderers.add(Pair.of((Supplier<BlockEntityType<?>>)(Object)entityType, (Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?,?>>)(Object)blockEntityRenderer));
     }
 
     /**
      * Registers the given block entity renderer for the given block entity type.
      */
-    public <T extends BlockEntity> void registerBlockEntityRenderer(Supplier<BlockEntityType<T>> entityType, Supplier<BlockEntityRenderer<? super T>> blockEntityRenderer){
+    public <T extends BlockEntity> void registerBlockEntityRenderer(Supplier<BlockEntityType<T>> entityType, Supplier<BlockEntityRenderer<? super T,?>> blockEntityRenderer){
         this.registerBlockEntityRenderer(entityType, context -> blockEntityRenderer.get());
     }
 
     /**
      * Registers the given block entity renderer for the given block entity type.
      */
-    public <T extends BlockEntity> void registerBlockEntityRenderer(Supplier<BlockEntityType<T>> entityType, BlockEntityRenderer<? super T> blockEntityRenderer){
+    public <T extends BlockEntity> void registerBlockEntityRenderer(Supplier<BlockEntityType<T>> entityType, BlockEntityRenderer<? super T,?> blockEntityRenderer){
         this.registerBlockEntityRenderer(entityType, context -> blockEntityRenderer);
     }
 
     /**
      * Registers the given block entity renderer for the given block entity type.
      */
-    public <T extends BlockEntity> void registerCustomBlockEntityRenderer(Supplier<BlockEntityType<T>> entityType, Supplier<CustomBlockEntityRenderer<? super T>> blockEntityRenderer){
+    public <T extends BlockEntity> void registerCustomBlockEntityRenderer(Supplier<BlockEntityType<T>> entityType, Supplier<CustomBlockEntityRenderer<? super T,?>> blockEntityRenderer){
         this.registerBlockEntityRenderer(entityType, context -> CustomBlockEntityRenderer.of(blockEntityRenderer.get()));
     }
 
     /**
      * Registers the given block entity renderer for the given block entity type.
      */
-    public <T extends BlockEntity> void registerCustomBlockEntityRenderer(Supplier<BlockEntityType<T>> entityType, CustomBlockEntityRenderer<? super T> blockEntityRenderer){
+    public <T extends BlockEntity> void registerCustomBlockEntityRenderer(Supplier<BlockEntityType<T>> entityType, CustomBlockEntityRenderer<? super T,?> blockEntityRenderer){
         this.registerBlockEntityRenderer(entityType, context -> CustomBlockEntityRenderer.of(blockEntityRenderer));
     }
 
@@ -341,7 +342,7 @@ public class ClientRegistrationHandler {
             SpecialModelRenderer<?> renderer = null;
 
             @Override
-            public SpecialModelRenderer<?> bake(EntityModelSet entityModelSet){
+            public SpecialModelRenderer<?> bake(SpecialModelRenderer.BakingContext context){
                 if(this.renderer == null)
                     this.renderer = CustomItemRenderer.toSpecialModelRenderer(itemRenderer.get());
                 return this.renderer;
@@ -513,7 +514,7 @@ public class ClientRegistrationHandler {
 
         // Entity renderers
         Set<BlockEntityType<?>> blockEntityTypes = new HashSet<>();
-        for(Pair<Supplier<BlockEntityType<?>>,Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?>>> entry : this.blockEntityRenderers){
+        for(Pair<Supplier<BlockEntityType<?>>,Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?,?>>> entry : this.blockEntityRenderers){
             BlockEntityType<?> blockEntityType = entry.left().get();
             if(blockEntityType == null)
                 throw new RuntimeException("Block entity renderer registered with null block entity type!");

@@ -150,7 +150,7 @@ public class PacketChannel {
      * @param packet packet to be sent
      */
     public void sendToDimension(Level world, BasePacket packet){
-        if(world.isClientSide)
+        if(world.isClientSide())
             throw new IllegalStateException("This must only be called server-side!");
         this.sendToDimension(world.dimension(), packet);
     }
@@ -161,7 +161,7 @@ public class PacketChannel {
      * @param packet packet to be sent
      */
     public void sendToAllTrackingEntity(Entity entity, BasePacket packet){
-        if(entity.level().isClientSide)
+        if(entity.level().isClientSide())
             throw new IllegalStateException("This must only be called server-side!");
         this.checkRegistration(packet);
         this.channel.send(new InternalPacket().setPacket(packet), PacketDistributor.TRACKING_ENTITY.with(entity));
@@ -189,7 +189,7 @@ public class PacketChannel {
      * @param packet packet to be sent
      */
     public void sendToAllNear(Level world, double x, double y, double z, double radius, BasePacket packet){
-        if(world.isClientSide)
+        if(world.isClientSide())
             throw new IllegalStateException("This must only be called server-side!");
         this.sendToAllNear(world.dimension(), x, y, z, radius, packet);
     }
@@ -199,7 +199,7 @@ public class PacketChannel {
      * @param packet packet to be sent
      */
     public void sendToAllNear(Level world, BlockPos pos, double radius, BasePacket packet){
-        if(world.isClientSide)
+        if(world.isClientSide())
             throw new IllegalStateException("This must only be called server-side!");
         this.sendToAllNear(world.dimension(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, radius, packet);
     }

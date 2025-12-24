@@ -119,7 +119,7 @@ public class BaseItem extends Item {
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand){
-        return this.interact(player.getItemInHand(hand), player, hand, level).toUnderlying(level.isClientSide);
+        return this.interact(player.getItemInHand(hand), player, hand, level).toUnderlying(level.isClientSide());
     }
 
     @Override

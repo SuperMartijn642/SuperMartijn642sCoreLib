@@ -1,5 +1,6 @@
 package com.supermartijn642.core.block;
 
+import com.supermartijn642.core.util.TriPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -11,7 +12,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraftforge.common.util.TriPredicate;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -207,7 +207,7 @@ public class BlockProperties {
         if(this.mapColor != null)
             properties.mapColor(this.mapColor);
         if(!this.hasCollision)
-            properties.noCollission();
+            properties.noCollision();
         properties.sound(this.soundType);
         properties.lightLevel(this.lightLevel);
         properties.strength(this.explosionResistance);
