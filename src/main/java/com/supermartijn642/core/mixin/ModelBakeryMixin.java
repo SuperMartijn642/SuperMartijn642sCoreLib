@@ -60,9 +60,11 @@ public class ModelBakeryMixin {
         method = "bakeModels",
         at = @At(
             value = "INVOKE",
-            target = "Ljava/util/concurrent/CompletableFuture;thenCombine(Ljava/util/concurrent/CompletionStage;Ljava/util/function/BiFunction;)Ljava/util/concurrent/CompletableFuture;",
+            target = "Ljava/util/Map;forEach(Ljava/util/function/BiConsumer;)V",
             shift = At.Shift.BEFORE
-        )
+        ),
+        require = 1,
+        allow = 1
     )
     private void bakeModelsTail(SpriteGetter spriteGetter, Executor executor, CallbackInfoReturnable<ModelBakery.BakingResult> ci, @Local(ordinal = 0) LocalRef<CompletableFuture<Map<BlockState,BlockStateModel>>> blockModels, @Local(ordinal = 1) LocalRef<CompletableFuture<Map<ResourceLocation,ItemModel>>> itemModels){
         // Catch errors here to prevent the model manager from continuously retrying to load models
