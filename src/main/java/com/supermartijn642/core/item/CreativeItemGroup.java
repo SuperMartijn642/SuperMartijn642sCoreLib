@@ -4,7 +4,7 @@ import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
@@ -99,7 +99,7 @@ public final class CreativeItemGroup extends CreativeModeTab {
     }
 
     private final String modid, identifier;
-    private final ResourceLocation background;
+    private final Identifier background;
     private Consumer<Consumer<ItemStack>> filler;
     private Comparator<ItemStack> sorter;
     private List<ItemStack> sortedDisplayItems;
@@ -108,12 +108,12 @@ public final class CreativeItemGroup extends CreativeModeTab {
         super(CreativeModeTab.builder(Row.TOP, 0).icon(icon).title(TextComponents.translation(translationKey).get()));
         this.modid = modid;
         this.identifier = identifier;
-        this.background = ResourceLocation.withDefaultNamespace("textures/gui/container/creative_inventory/tab_items.png");
+        this.background = Identifier.withDefaultNamespace("textures/gui/container/creative_inventory/tab_items.png");
         this.displayItemsGenerator = (flags, output) -> this.applyFiller(output::accept);
 
         ModLoadingContext.get().getActiveContainer().getEventBus().addListener((Consumer<RegisterEvent>)event -> {
             if(event.getRegistryKey() == Registries.CREATIVE_MODE_TAB)
-                event.register(Registries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath(modid, identifier), () -> this);
+                event.register(Registries.CREATIVE_MODE_TAB, Identifier.fromNamespaceAndPath(modid, identifier), () -> this);
         });
     }
 
@@ -162,7 +162,7 @@ public final class CreativeItemGroup extends CreativeModeTab {
     }
 
     @Override
-    public ResourceLocation getBackgroundTexture(){
+    public Identifier getBackgroundTexture(){
         return this.background;
     }
 }

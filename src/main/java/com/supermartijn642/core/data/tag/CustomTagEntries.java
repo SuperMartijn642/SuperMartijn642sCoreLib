@@ -7,7 +7,7 @@ import com.mojang.serialization.Codec;
 import com.supermartijn642.core.codec.CodecHelper;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagEntry;
 
 import java.util.function.Function;
@@ -40,7 +40,7 @@ public class CustomTagEntries {
                     String typeString = json.get("type").getAsString();
                     if(!RegistryUtil.isValidIdentifier(typeString))
                         throw new JsonParseException("Invalid identifier '" + typeString + "'!");
-                    ResourceLocation type = ResourceLocation.parse(typeString);
+                    Identifier type = Identifier.parse(typeString);
                     if(!Registries.CUSTOM_TAG_ENTRY_SERIALIZERS.hasIdentifier(type))
                         throw new JsonParseException("Unknown custom tag entry serializer '" + typeString + "'!");
                     CustomTagEntrySerializer<?> serializer = Registries.CUSTOM_TAG_ENTRY_SERIALIZERS.getValue(type);

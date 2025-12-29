@@ -12,7 +12,7 @@ import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.renderer.item.*;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.level.ItemLike;
 
@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public abstract class ItemInfoGenerator extends ResourceGenerator {
 
-    private final Map<ResourceLocation,ItemInfoBuilder> infos = new HashMap<>();
+    private final Map<Identifier,ItemInfoBuilder> infos = new HashMap<>();
 
     public ItemInfoGenerator(String modid, ResourceCache cache){
         super(modid, cache);
@@ -40,17 +40,17 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
             // Serialize to json
             JsonObject json = ClientItem.CODEC.encodeStart(ops, builder.toClientItem()).getOrThrow().getAsJsonObject();
             // Save the object to the cache
-            ResourceLocation identifier = builder.location;
+            Identifier identifier = builder.location;
             this.cache.saveJsonResource(ResourceType.ASSET, json, identifier.getNamespace(), "items", identifier.getPath());
         }
     }
 
-    protected ItemInfoBuilder info(ResourceLocation item){
+    protected ItemInfoBuilder info(Identifier item){
         return this.infos.computeIfAbsent(item, ItemInfoBuilder::new);
     }
 
     protected ItemInfoBuilder info(String namespace, String identifier){
-        return this.info(ResourceLocation.fromNamespaceAndPath(namespace, identifier));
+        return this.info(Identifier.fromNamespaceAndPath(namespace, identifier));
     }
 
     protected ItemInfoBuilder info(String identifier){
@@ -65,12 +65,12 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
         return this.info(item).model(this.model(model));
     }
 
-    protected ModelModelBuilder model(ResourceLocation location){
+    protected ModelModelBuilder model(Identifier location){
         return new ModelModelBuilder(location);
     }
 
     protected ModelModelBuilder model(String namespace, String path){
-        return this.model(ResourceLocation.fromNamespaceAndPath(namespace, path));
+        return this.model(Identifier.fromNamespaceAndPath(namespace, path));
     }
 
     protected ModelModelBuilder model(String location){
@@ -88,7 +88,7 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
     /**
      * @param baseModel model used for transformations, particle texture, and gui lighting
      */
-    protected ModelBuilder specialModel(SpecialModelRenderer.Unbaked specialModel, ResourceLocation baseModel){
+    protected ModelBuilder specialModel(SpecialModelRenderer.Unbaked specialModel, Identifier baseModel){
         return ModelBuilder.of(new SpecialModelWrapper.Unbaked(baseModel, specialModel));
     }
 
@@ -99,12 +99,13 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
 
     protected static class ItemInfoBuilder {
 
-        private final ResourceLocation location;
+        private final Identifier location;
         private boolean handAnimationOnSwap = true;
         private boolean oversizedInGui = false;
+        private float swapAnimationScale = 1;
         private ModelBuilder model;
 
-        protected ItemInfoBuilder(ResourceLocation location){
+        protected ItemInfoBuilder(Identifier location){
             this.location = location;
         }
 
@@ -115,6 +116,11 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
 
         public ItemInfoBuilder oversizedInGui(){
             this.oversizedInGui = true;
+            return this;
+        }
+
+        public ItemInfoBuilder swapAnimationScale(float scale){
+            this.swapAnimationScale = scale;
             return this;
         }
 
@@ -129,7 +135,7 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
 
         private ClientItem toClientItem(){
             ItemModel.Unbaked model = this.model == null ? new EmptyModel.Unbaked() : this.model.toItemModel();
-            return new ClientItem(model, new ClientItem.Properties(this.handAnimationOnSwap, this.oversizedInGui));
+            return new ClientItem(model, new ClientItem.Properties(this.handAnimationOnSwap, this.oversizedInGui, this.swapAnimationScale));
         }
     }
 
@@ -157,10 +163,10 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
 
     protected static class ModelModelBuilder extends ModelBuilder {
 
-        private final ResourceLocation model;
+        private final Identifier model;
         private final List<ItemTintSource> tintSources = new ArrayList<>();
 
-        protected ModelModelBuilder(ResourceLocation model){
+        protected ModelModelBuilder(Identifier model){
             this.model = model;
         }
 

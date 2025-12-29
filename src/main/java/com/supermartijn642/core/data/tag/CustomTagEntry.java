@@ -1,6 +1,6 @@
 package com.supermartijn642.core.data.tag;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagEntry;
 
 import java.util.Collection;
@@ -18,19 +18,19 @@ public interface CustomTagEntry {
 
     <T> Collection<T> resolve(TagEntryResolutionContext<T> context);
 
-    default Collection<ResourceLocation> getTagDependencies(){
+    default Collection<Identifier> getTagDependencies(){
         return Collections.emptyList();
     }
 
     CustomTagEntrySerializer<?> getSerializer();
 
     interface TagEntryResolutionContext<T> {
-        T getElement(ResourceLocation identifier);
+        T getElement(Identifier identifier);
 
-        Collection<T> getTag(ResourceLocation identifier);
+        Collection<T> getTag(Identifier identifier);
 
         Collection<T> getAllElements();
 
-        Set<ResourceLocation> getAllIdentifiers();
+        Set<Identifier> getAllIdentifiers();
     }
 }

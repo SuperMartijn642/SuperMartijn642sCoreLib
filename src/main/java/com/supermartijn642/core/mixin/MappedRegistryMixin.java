@@ -7,8 +7,8 @@ import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -31,7 +31,7 @@ public class MappedRegistryMixin implements CoreLibMappedRegistry {
     @Shadow
     private Reference2IntMap<Object> toId;
     @Shadow
-    private Map<ResourceLocation,Holder.Reference<?>> byLocation;
+    private Map<Identifier,Holder.Reference<?>> byLocation;
     @Shadow
     private Map<Object,Holder.Reference<?>> byValue;
     @Unique
@@ -49,7 +49,7 @@ public class MappedRegistryMixin implements CoreLibMappedRegistry {
     )
     private void registerMappingHead(ResourceKey<?> key, Object object, RegistrationInfo registrationInfo, CallbackInfoReturnable<Holder.Reference<?>> ci){
         if(this.registeringOverrides)
-            this.overwrittenReference = this.byLocation.remove(key.location());
+            this.overwrittenReference = this.byLocation.remove(key.identifier());
     }
 
     @Inject(
@@ -59,7 +59,7 @@ public class MappedRegistryMixin implements CoreLibMappedRegistry {
     private void registerMappingTail(ResourceKey<?> key, Object object, RegistrationInfo registrationInfo, CallbackInfoReturnable<Holder.Reference<?>> ci){
         if(this.registeringOverrides){
             // Redirect the old reference to the new reference's values
-            Holder.Reference<?> newReference = this.byLocation.get(key.location());
+            Holder.Reference<?> newReference = this.byLocation.get(key.identifier());
             if(newReference != null && newReference != this.overwrittenReference)
                 ((CoreLibHolderReference)this.overwrittenReference).supermartijn642corelibOverride(key, object);
             // Remove the old object

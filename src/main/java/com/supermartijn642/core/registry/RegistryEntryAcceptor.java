@@ -1,7 +1,7 @@
 package com.supermartijn642.core.registry;
 
 import com.supermartijn642.core.CoreLib;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.modscan.ModAnnotation;
 import net.neoforged.neoforge.registries.RegisterEvent;
@@ -58,8 +58,8 @@ public @interface RegistryEntryAcceptor {
 
         private static final Type TYPE = Type.getType(RegistryEntryAcceptor.class);
 
-        private static final Map<Registries.Registry<?>,Map<ResourceLocation,Set<Field>>> FIELDS = new HashMap<>();
-        private static final Map<Registries.Registry<?>,Map<ResourceLocation,Set<Method>>> METHODS = new HashMap<>();
+        private static final Map<Registries.Registry<?>,Map<Identifier,Set<Field>>> FIELDS = new HashMap<>();
+        private static final Map<Registries.Registry<?>,Map<Identifier,Set<Method>>> METHODS = new HashMap<>();
 
         public static void gatherAnnotatedFields(){
             for(ModFileScanData scanData : ModList.get().getAllScanData()){
@@ -100,7 +100,7 @@ public @interface RegistryEntryAcceptor {
 
                             // Add the field
                             FIELDS.computeIfAbsent(registry.registry, o -> new HashMap<>())
-                                .computeIfAbsent(ResourceLocation.fromNamespaceAndPath(namespace, identifier), o -> new HashSet<>())
+                                .computeIfAbsent(Identifier.fromNamespaceAndPath(namespace, identifier), o -> new HashSet<>())
                                 .add(field);
                         }else if(annotationData.targetType().equals(ElementType.METHOD)){
                             Method method = clazz.getDeclaredMethod(annotationData.memberName());
@@ -120,7 +120,7 @@ public @interface RegistryEntryAcceptor {
 
                             // Add the method
                             METHODS.computeIfAbsent(registry.registry, o -> new HashMap<>())
-                                .computeIfAbsent(ResourceLocation.fromNamespaceAndPath(namespace, identifier), o -> new HashSet<>())
+                                .computeIfAbsent(Identifier.fromNamespaceAndPath(namespace, identifier), o -> new HashSet<>())
                                 .add(method);
                         }else
                             throw new RuntimeException("@RegistryEntryAcceptor only supports field and method targets!");
@@ -149,7 +149,7 @@ public @interface RegistryEntryAcceptor {
             if(registry == null || !FIELDS.containsKey(registry))
                 return;
 
-            for(Map.Entry<ResourceLocation,Set<Field>> entry : FIELDS.get(registry).entrySet()){
+            for(Map.Entry<Identifier,Set<Field>> entry : FIELDS.get(registry).entrySet()){
                 // Skip if no value is registered with the identifier
                 if(!registry.hasIdentifier(entry.getKey())){
                     CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getRegistryIdentifier() + "' for @RegistryEntryAcceptor!");
@@ -179,7 +179,7 @@ public @interface RegistryEntryAcceptor {
             if(registry == null || !METHODS.containsKey(registry))
                 return;
 
-            for(Map.Entry<ResourceLocation,Set<Method>> entry : METHODS.get(registry).entrySet()){
+            for(Map.Entry<Identifier,Set<Method>> entry : METHODS.get(registry).entrySet()){
                 // Skip if no value is registered with the identifier
                 if(!registry.hasIdentifier(entry.getKey())){
                     CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getRegistryIdentifier() + "' for @RegistryEntryAcceptor!");

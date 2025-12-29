@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
 import com.supermartijn642.core.generator.aggregator.ResourceAggregator;
 import com.supermartijn642.core.util.Pair;
 import net.minecraft.data.HashCache;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -156,7 +156,7 @@ public abstract class ResourceCache {
         }
 
         private boolean existsInLoadedResources(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
-            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension);
+            Identifier location = Identifier.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension);
             return (resourceType == ResourceType.ASSET ? this.clientResources.getResource(location) : this.serverResources.getResource(location)).isPresent();
         }
 
@@ -179,7 +179,7 @@ public abstract class ResourceCache {
 
         @Override
         public Optional<InputStream> getExistingResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
-            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension);
+            Identifier location = Identifier.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension);
             return (resourceType == ResourceType.ASSET ? this.clientResources.getResource(location) : this.serverResources.getResource(location))
                 .map(resource -> {
                     try{

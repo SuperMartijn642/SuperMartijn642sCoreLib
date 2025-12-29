@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 
 /**
@@ -16,9 +16,9 @@ public class TagPopulatedResourceCondition implements ResourceCondition {
     public static final Serializer SERIALIZER = new Serializer();
 
     private final Registries.Registry<?> registry;
-    private final ResourceLocation tag;
+    private final Identifier tag;
 
-    public TagPopulatedResourceCondition(Registries.Registry<?> registry, ResourceLocation tag){
+    public TagPopulatedResourceCondition(Registries.Registry<?> registry, Identifier tag){
         if(!registry.hasVanillaRegistry())
             throw new IllegalArgumentException("Registry '" + registry.getRegistryIdentifier() + "' is not supported!");
 
@@ -57,11 +57,11 @@ public class TagPopulatedResourceCondition implements ResourceCondition {
             if(!RegistryUtil.isValidIdentifier(json.get("tag").getAsString()))
                 throw new RuntimeException("Value for 'tag' must be a valid identifier!");
 
-            Registries.Registry<?> registry = Registries.getRegistry(ResourceLocation.parse(json.get("registry").getAsString()));
+            Registries.Registry<?> registry = Registries.getRegistry(Identifier.parse(json.get("registry").getAsString()));
             if(registry == null)
                 throw new RuntimeException("Could not find a registry with identifier '" + json.get("registry").getAsString() + "'!");
 
-            ResourceLocation tag = ResourceLocation.parse(json.get("tag").getAsString());
+            Identifier tag = Identifier.parse(json.get("tag").getAsString());
             return new TagPopulatedResourceCondition(registry, tag);
         }
     }

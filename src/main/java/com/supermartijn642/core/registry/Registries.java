@@ -15,8 +15,8 @@ import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.StatType;
 import net.minecraft.world.effect.MobEffect;
@@ -45,7 +45,7 @@ import static net.minecraft.core.registries.BuiltInRegistries.*;
  */
 public final class Registries {
 
-    static final Map<ResourceLocation,Registry<?>> IDENTIFIER_TO_REGISTRY = new HashMap<>();
+    static final Map<Identifier,Registry<?>> IDENTIFIER_TO_REGISTRY = new HashMap<>();
     static final Map<net.minecraft.core.Registry<?>,Registry<?>> VANILLA_REGISTRY_MAP = new HashMap<>();
     /**
      * Each entry is a registry which has a vanilla registry and a list of registries which do not have a vanilla registry.
@@ -74,13 +74,13 @@ public final class Registries {
      * @param identifier identifier of the registry
      * @return the registry registered under the given identifier or {@code null} if no registry is registered
      */
-    public static Registry<?> getRegistry(ResourceLocation identifier){
+    public static Registry<?> getRegistry(Identifier identifier){
         return IDENTIFIER_TO_REGISTRY.get(identifier);
     }
 
     public static final Registry<Block> BLOCKS = new VanillaRegistryWrapper<>(BLOCK, Block.class, null) {
         @Override
-        public void register(ResourceLocation identifier, Block object){
+        public void register(Identifier identifier, Block object){
             super.register(identifier, object);
             if(object instanceof BaseBlock)
                 ((BaseBlock)object).resolveRegistryDependencies();
@@ -89,7 +89,7 @@ public final class Registries {
     public static final Registry<Fluid> FLUIDS = vanilla(FLUID, Fluid.class);
     public static final Registry<Item> ITEMS = new VanillaRegistryWrapper<>(ITEM, Item.class, null) {
         @Override
-        public void register(ResourceLocation identifier, Item object){
+        public void register(Identifier identifier, Item object){
             super.register(identifier, object);
             if(object instanceof BaseItem)
                 ((BaseItem)object).resolveRegistryDependencies();
@@ -109,7 +109,7 @@ public final class Registries {
     public static final Registry<Attribute> ATTRIBUTES = vanilla(ATTRIBUTE, Attribute.class);
     public static final Registry<StatType<?>> STAT_TYPES = vanilla(STAT_TYPE, StatType.class);
     public static final Registry<MapCodec<? extends ICondition>> RECIPE_CONDITION_SERIALIZERS = vanilla(NeoForgeRegistries.CONDITION_SERIALIZERS, MapCodec.class);
-    public static final Registry<CustomTagEntrySerializer<?>> CUSTOM_TAG_ENTRY_SERIALIZERS = new MapBackedRegistry<>(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "custom_tag_entries"), CustomTagEntrySerializer.class);
+    public static final Registry<CustomTagEntrySerializer<?>> CUSTOM_TAG_ENTRY_SERIALIZERS = new MapBackedRegistry<>(Identifier.fromNamespaceAndPath("supermartijn642corelib", "custom_tag_entries"), CustomTagEntrySerializer.class);
     public static final Registry<DataComponentType<?>> DATA_COMPONENT_TYPES = vanilla(DATA_COMPONENT_TYPE, DataComponentType.class);
     public static final Registry<CriterionTrigger<?>> TRIGGER_TYPES = vanilla(BuiltInRegistries.TRIGGER_TYPES, CriterionTrigger.class);
 
@@ -124,26 +124,26 @@ public final class Registries {
 
     public interface Registry<T> {
 
-        ResourceLocation getRegistryIdentifier();
+        Identifier getRegistryIdentifier();
 
         @Nullable
         net.minecraft.core.Registry<T> getVanillaRegistry();
 
         boolean hasVanillaRegistry();
 
-        void register(ResourceLocation identifier, T object);
+        void register(Identifier identifier, T object);
 
-        ResourceLocation getIdentifier(T object);
+        Identifier getIdentifier(T object);
 
-        boolean hasIdentifier(ResourceLocation identifier);
+        boolean hasIdentifier(Identifier identifier);
 
-        T getValue(ResourceLocation identifier);
+        T getValue(Identifier identifier);
 
-        Set<ResourceLocation> getIdentifiers();
+        Set<Identifier> getIdentifiers();
 
         Collection<T> getValues();
 
-        Set<Pair<ResourceLocation,T>> getEntries();
+        Set<Pair<Identifier,T>> getEntries();
 
         Class<T> getValueClass();
     }
@@ -151,13 +151,13 @@ public final class Registries {
     private static class VanillaRegistryWrapper<T> implements Registry<T> {
 
         private final net.minecraft.core.Registry<T> registry;
-        private final ResourceLocation identifier;
+        private final Identifier identifier;
         private final Class<T> valueClass;
         private final BiConsumer<Object,Object> overrideConsumer;
 
         private VanillaRegistryWrapper(net.minecraft.core.Registry<T> registry, Class<? super T> valueClass, BiConsumer<Object,Object> overrideConsumer){
             this.registry = registry;
-            this.identifier = registry.key().location();
+            this.identifier = registry.key().identifier();
             //noinspection unchecked
             this.valueClass = (Class<T>)valueClass;
             this.overrideConsumer = overrideConsumer;
@@ -166,7 +166,7 @@ public final class Registries {
         }
 
         @Override
-        public ResourceLocation getRegistryIdentifier(){
+        public Identifier getRegistryIdentifier(){
             return this.identifier;
         }
 
@@ -181,7 +181,7 @@ public final class Registries {
             return true;
         }
 
-        public void register(ResourceLocation identifier, T object){
+        public void register(Identifier identifier, T object){
             if(this.registry instanceof MappedRegistry<T> && this.registry.containsKey(identifier)){
                 ResourceKey<T> key = ResourceKey.create(this.registry.key(), identifier);
                 ((CoreLibMappedRegistry)this.registry).supermartijn642corelibSetRegisterOverrides(true, this.overrideConsumer);
@@ -192,20 +192,20 @@ public final class Registries {
             net.minecraft.core.Registry.register(this.registry, identifier, object);
         }
 
-        public ResourceLocation getIdentifier(T object){
+        public Identifier getIdentifier(T object){
             return this.registry.getKey(object);
         }
 
         @Override
-        public boolean hasIdentifier(ResourceLocation identifier){
+        public boolean hasIdentifier(Identifier identifier){
             return this.registry.containsKey(identifier);
         }
 
-        public T getValue(ResourceLocation identifier){
+        public T getValue(Identifier identifier){
             return this.registry.getValue(identifier);
         }
 
-        public Set<ResourceLocation> getIdentifiers(){
+        public Set<Identifier> getIdentifiers(){
             return this.registry.keySet();
         }
 
@@ -213,8 +213,8 @@ public final class Registries {
             return MappedSetView.map(this.registry.entrySet(), Map.Entry::getValue);
         }
 
-        public Set<Pair<ResourceLocation,T>> getEntries(){
-            return MappedSetView.map(this.registry.entrySet(), entry -> Pair.of(entry.getKey().location(), entry.getValue()));
+        public Set<Pair<Identifier,T>> getEntries(){
+            return MappedSetView.map(this.registry.entrySet(), entry -> Pair.of(entry.getKey().identifier(), entry.getValue()));
         }
 
         public Class<T> getValueClass(){
@@ -231,20 +231,20 @@ public final class Registries {
 
     private static class MapBackedRegistry<T> implements Registry<T> {
 
-        private final ResourceLocation identifier;
-        private final Map<ResourceLocation,T> identifierToObject = new HashMap<>();
-        private final Map<T,ResourceLocation> objectToIdentifier = new HashMap<>();
-        private final Set<Pair<ResourceLocation,T>> entries = new HashSet<>();
+        private final Identifier identifier;
+        private final Map<Identifier,T> identifierToObject = new HashMap<>();
+        private final Map<T,Identifier> objectToIdentifier = new HashMap<>();
+        private final Set<Pair<Identifier,T>> entries = new HashSet<>();
         private final Class<T> valueClass;
 
-        private MapBackedRegistry(ResourceLocation identifier, Class<? super T> valueClass){
+        private MapBackedRegistry(Identifier identifier, Class<? super T> valueClass){
             this.identifier = identifier;
             //noinspection unchecked
             this.valueClass = (Class<T>)valueClass;
         }
 
         @Override
-        public ResourceLocation getRegistryIdentifier(){
+        public Identifier getRegistryIdentifier(){
             return this.identifier;
         }
 
@@ -260,7 +260,7 @@ public final class Registries {
         }
 
         @Override
-        public void register(ResourceLocation identifier, T object){
+        public void register(Identifier identifier, T object){
             if(this.identifierToObject.containsKey(identifier))
                 throw new RuntimeException("Duplicate registry for identifier '" + identifier + "'!");
             if(this.objectToIdentifier.containsKey(object))
@@ -272,22 +272,22 @@ public final class Registries {
         }
 
         @Override
-        public ResourceLocation getIdentifier(T object){
+        public Identifier getIdentifier(T object){
             return this.objectToIdentifier.get(object);
         }
 
         @Override
-        public boolean hasIdentifier(ResourceLocation identifier){
+        public boolean hasIdentifier(Identifier identifier){
             return this.identifierToObject.containsKey(identifier);
         }
 
         @Override
-        public T getValue(ResourceLocation identifier){
+        public T getValue(Identifier identifier){
             return this.identifierToObject.get(identifier);
         }
 
         @Override
-        public Set<ResourceLocation> getIdentifiers(){
+        public Set<Identifier> getIdentifiers(){
             return Collections.unmodifiableSet(this.identifierToObject.keySet());
         }
 
@@ -297,7 +297,7 @@ public final class Registries {
         }
 
         @Override
-        public Set<Pair<ResourceLocation,T>> getEntries(){
+        public Set<Pair<Identifier,T>> getEntries(){
             return Collections.unmodifiableSet(this.entries);
         }
 

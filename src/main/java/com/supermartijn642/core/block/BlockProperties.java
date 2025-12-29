@@ -3,8 +3,8 @@ package com.supermartijn642.core.block;
 import com.supermartijn642.core.util.TriPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -187,7 +187,7 @@ public class BlockProperties {
         return this;
     }
 
-    public BlockProperties lootTable(ResourceLocation lootTable){
+    public BlockProperties lootTable(Identifier lootTable){
         return this.lootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTable));
     }
 

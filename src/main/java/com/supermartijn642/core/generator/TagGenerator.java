@@ -9,7 +9,7 @@ import com.supermartijn642.core.data.tag.CustomTagEntry;
 import com.supermartijn642.core.generator.aggregator.ResourceAggregator;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagKey;
@@ -76,7 +76,7 @@ public abstract class TagGenerator extends ResourceGenerator {
         }
     };
 
-    private final Map<Registries.Registry<?>,Map<ResourceLocation,TagBuilder<?>>> tags = new HashMap<>();
+    private final Map<Registries.Registry<?>,Map<Identifier,TagBuilder<?>>> tags = new HashMap<>();
 
     public TagGenerator(String modid, ResourceCache cache){
         super(modid, cache);
@@ -85,7 +85,7 @@ public abstract class TagGenerator extends ResourceGenerator {
     @Override
     public void save(){
         // Loop over all registries
-        for(Map.Entry<Registries.Registry<?>,Map<ResourceLocation,TagBuilder<?>>> registryEntry : this.tags.entrySet()){
+        for(Map.Entry<Registries.Registry<?>,Map<Identifier,TagBuilder<?>>> registryEntry : this.tags.entrySet()){
             String directoryName = getTagDirectoryName(registryEntry.getKey());
             // Loop over all tags
             for(TagBuilder<?> tag : registryEntry.getValue().values()){
@@ -93,7 +93,7 @@ public abstract class TagGenerator extends ResourceGenerator {
                 for(TagEntry entry : tag.entries){
                     if(!entry.isTag() || !entry.isRequired())
                         continue;
-                    ResourceLocation reference = entry.getId();
+                    Identifier reference = entry.getId();
                     if(registryEntry.getValue().containsKey(reference))
                         continue;
                     if(this.cache.doesResourceExist(ResourceType.DATA, reference.getNamespace(), directoryName, reference.getPath(), ".json"))
@@ -102,7 +102,7 @@ public abstract class TagGenerator extends ResourceGenerator {
                     throw new RuntimeException("Could not find tag reference '" + reference + "' in '" + tag.identifier + "'!");
                 }
                 // Save the object to the cache
-                ResourceLocation identifier = tag.identifier;
+                Identifier identifier = tag.identifier;
                 this.cache.saveResource(ResourceType.DATA, AGGREGATOR, tag, identifier.getNamespace(), directoryName, identifier.getPath(), ".json");
             }
         }
@@ -116,7 +116,7 @@ public abstract class TagGenerator extends ResourceGenerator {
      * Gets a tag builder for the given identifier. The returned tag builder may be a new tag builder or an existing one if requested before.
      * @param identifier resource location of the tag
      */
-    protected <T> TagBuilder<T> tag(Registries.Registry<T> registry, ResourceLocation identifier){
+    protected <T> TagBuilder<T> tag(Registries.Registry<T> registry, Identifier identifier){
         this.cache.trackToBeGeneratedResource(ResourceType.DATA, identifier.getNamespace(), getTagDirectoryName(registry), identifier.getPath(), ".json");
         //noinspection unchecked
         return (TagBuilder<T>)this.tags.computeIfAbsent(registry, o -> new HashMap<>()).computeIfAbsent(identifier, identifier1 -> new TagBuilder<>(registry, identifier1));
@@ -136,7 +136,7 @@ public abstract class TagGenerator extends ResourceGenerator {
      * @param identifier path of the tag's identifier
      */
     protected <T> TagBuilder<T> tag(Registries.Registry<T> registry, String namespace, String identifier){
-        return this.tag(registry, ResourceLocation.fromNamespaceAndPath(namespace, identifier));
+        return this.tag(registry, Identifier.fromNamespaceAndPath(namespace, identifier));
     }
 
     /**
@@ -151,7 +151,7 @@ public abstract class TagGenerator extends ResourceGenerator {
      * Gets a tag builder for the given identifier. The returned tag builder may be a new tag builder or an existing one if requested before.
      * @param identifier resource location of the tag
      */
-    protected TagBuilder<Block> blockTag(ResourceLocation identifier){
+    protected TagBuilder<Block> blockTag(Identifier identifier){
         return this.tag(Registries.BLOCKS, identifier);
     }
 
@@ -184,7 +184,7 @@ public abstract class TagGenerator extends ResourceGenerator {
      * Gets a tag builder for the given identifier. The returned tag builder may be a new tag builder or an existing one if requested before.
      * @param identifier resource location of the tag
      */
-    protected TagBuilder<Item> itemTag(ResourceLocation identifier){
+    protected TagBuilder<Item> itemTag(Identifier identifier){
         return this.tag(Registries.ITEMS, identifier);
     }
 
@@ -217,7 +217,7 @@ public abstract class TagGenerator extends ResourceGenerator {
      * Gets a tag builder for the given identifier. The returned tag builder may be a new tag builder or an existing one if requested before.
      * @param identifier resource location of the tag
      */
-    protected TagBuilder<EntityType<?>> entityTag(ResourceLocation identifier){
+    protected TagBuilder<EntityType<?>> entityTag(Identifier identifier){
         return this.tag(Registries.ENTITY_TYPES, identifier);
     }
 
@@ -303,12 +303,12 @@ public abstract class TagGenerator extends ResourceGenerator {
     protected static class TagBuilder<T> {
 
         private final Registries.Registry<T> registry;
-        protected final ResourceLocation identifier;
+        protected final Identifier identifier;
         private final Set<TagEntry> entries = new HashSet<>();
         private final Set<TagEntry> remove = new HashSet<>();
         private boolean replace;
 
-        protected TagBuilder(Registries.Registry<T> registry, ResourceLocation identifier){
+        protected TagBuilder(Registries.Registry<T> registry, Identifier identifier){
             this.registry = registry;
             this.identifier = identifier;
         }
@@ -342,7 +342,7 @@ public abstract class TagGenerator extends ResourceGenerator {
          * Adds an entry to this tag.
          * @param entry entry to be added
          */
-        public TagBuilder<T> add(ResourceLocation entry){
+        public TagBuilder<T> add(Identifier entry){
             if(!this.registry.hasIdentifier(entry))
                 throw new RuntimeException("Could not find any object registered under '" + entry + "'!");
 
@@ -361,7 +361,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!RegistryUtil.isValidPath(identifier))
                 throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-            this.add(ResourceLocation.fromNamespaceAndPath(namespace, identifier));
+            this.add(Identifier.fromNamespaceAndPath(namespace, identifier));
             return this;
         }
 
@@ -373,7 +373,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!RegistryUtil.isValidIdentifier(entry))
                 throw new IllegalArgumentException("Entry identifier '" + entry + "' contains invalid characters!");
 
-            this.add(ResourceLocation.parse(entry));
+            this.add(Identifier.parse(entry));
             return this;
         }
 
@@ -390,7 +390,7 @@ public abstract class TagGenerator extends ResourceGenerator {
          * Adds an optional entry to this tag. The entry can be absent when the tag is loaded without an error being thrown.
          * @param entry entry to be added
          */
-        public TagBuilder<T> addOptional(ResourceLocation entry){
+        public TagBuilder<T> addOptional(Identifier entry){
             this.entries.add(new TagEntry(entry, false, false));
             return this;
         }
@@ -406,7 +406,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!RegistryUtil.isValidPath(identifier))
                 throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-            this.addOptional(ResourceLocation.fromNamespaceAndPath(namespace, identifier));
+            this.addOptional(Identifier.fromNamespaceAndPath(namespace, identifier));
             return this;
         }
 
@@ -418,7 +418,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!RegistryUtil.isValidIdentifier(entry))
                 throw new IllegalArgumentException("Identifier '" + entry + "' contains invalid characters!");
 
-            this.addOptional(ResourceLocation.parse(entry));
+            this.addOptional(Identifier.parse(entry));
             return this;
         }
 
@@ -434,7 +434,7 @@ public abstract class TagGenerator extends ResourceGenerator {
         /**
          * Adds a reference to the given tag.
          */
-        public TagBuilder<T> addReference(ResourceLocation tag){
+        public TagBuilder<T> addReference(Identifier tag){
             if(this.identifier.equals(tag))
                 throw new IllegalArgumentException("Cannot add self reference to tag '" + tag + "'!");
 
@@ -458,7 +458,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!RegistryUtil.isValidPath(identifier))
                 throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-            this.entries.add(new TagEntry(ResourceLocation.fromNamespaceAndPath(namespace, identifier), true, true));
+            this.entries.add(new TagEntry(Identifier.fromNamespaceAndPath(namespace, identifier), true, true));
             return this;
         }
 
@@ -469,14 +469,14 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!RegistryUtil.isValidIdentifier(tag))
                 throw new IllegalArgumentException("Tag identifier '" + tag + "' contains invalid characters!");
 
-            this.entries.add(new TagEntry(ResourceLocation.parse(tag), true, true));
+            this.entries.add(new TagEntry(Identifier.parse(tag), true, true));
             return this;
         }
 
         /**
          * Adds an optional reference to the given tag.
          */
-        public TagBuilder<T> addOptionalReference(ResourceLocation tag){
+        public TagBuilder<T> addOptionalReference(Identifier tag){
             if(this.identifier.equals(tag))
                 throw new IllegalArgumentException("Cannot add self reference to tag '" + tag + "'!");
 
@@ -500,7 +500,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!RegistryUtil.isValidPath(identifier))
                 throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-            this.addOptionalReference(ResourceLocation.fromNamespaceAndPath(namespace, identifier));
+            this.addOptionalReference(Identifier.fromNamespaceAndPath(namespace, identifier));
             return this;
         }
 
@@ -511,7 +511,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!RegistryUtil.isValidIdentifier(tag))
                 throw new IllegalArgumentException("Tag identifier '" + tag + "' contains invalid characters!");
 
-            this.addOptionalReference(ResourceLocation.parse(tag));
+            this.addOptionalReference(Identifier.parse(tag));
             return this;
         }
 
@@ -528,7 +528,7 @@ public abstract class TagGenerator extends ResourceGenerator {
          * Adds an entry to be removed from the tag files lower in the datapack order. Has no effect if {@link #replace(boolean)} is set to {@code true}.
          * @param entry entry to be removed
          */
-        public TagBuilder<T> remove(ResourceLocation entry){
+        public TagBuilder<T> remove(Identifier entry){
             if(!this.registry.hasIdentifier(entry))
                 throw new RuntimeException("Could not find any object registered under '" + entry + "'!");
 
@@ -547,7 +547,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!RegistryUtil.isValidPath(identifier))
                 throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-            this.remove(ResourceLocation.fromNamespaceAndPath(namespace, identifier));
+            this.remove(Identifier.fromNamespaceAndPath(namespace, identifier));
             return this;
         }
 
@@ -559,7 +559,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!RegistryUtil.isValidIdentifier(entry))
                 throw new IllegalArgumentException("Entry identifier '" + entry + "' contains invalid characters!");
 
-            this.remove(ResourceLocation.parse(entry));
+            this.remove(Identifier.parse(entry));
             return this;
         }
 
@@ -575,7 +575,7 @@ public abstract class TagGenerator extends ResourceGenerator {
          * Adds an entry to be removed from the tag files lower in the datapack order. Has no effect if {@link #replace(boolean)} is set to {@code true}.
          * @param entry entry to be removed
          */
-        public TagBuilder<T> removeOptional(ResourceLocation entry){
+        public TagBuilder<T> removeOptional(Identifier entry){
             this.remove.add(new TagEntry(entry, false, false));
             return this;
         }
@@ -591,7 +591,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!RegistryUtil.isValidPath(identifier))
                 throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-            this.removeOptional(ResourceLocation.fromNamespaceAndPath(namespace, identifier));
+            this.removeOptional(Identifier.fromNamespaceAndPath(namespace, identifier));
             return this;
         }
 
@@ -603,7 +603,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             if(!RegistryUtil.isValidIdentifier(entry))
                 throw new IllegalArgumentException("Identifier '" + entry + "' contains invalid characters!");
 
-            this.removeOptional(ResourceLocation.parse(entry));
+            this.removeOptional(Identifier.parse(entry));
             return this;
         }
 

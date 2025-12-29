@@ -6,15 +6,15 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.supermartijn642.core.registry.Registries;
-import net.minecraft.advancements.critereon.DataComponentMatchers;
-import net.minecraft.advancements.critereon.EnchantmentPredicate;
-import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.criterion.DataComponentMatchers;
+import net.minecraft.advancements.criterion.EnchantmentPredicate;
+import net.minecraft.advancements.criterion.ItemPredicate;
+import net.minecraft.advancements.criterion.MinMaxBounds;
 import net.minecraft.core.component.predicates.DataComponentPredicates;
 import net.minecraft.core.component.predicates.EnchantmentsPredicate;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.context.ContextKeySet;
 import net.minecraft.world.item.Item;
@@ -43,7 +43,7 @@ import java.util.function.Supplier;
  */
 public abstract class LootTableGenerator extends ResourceGenerator {
 
-    private final Map<ResourceLocation,LootTableBuilder> lootTables = new HashMap<>();
+    private final Map<Identifier,LootTableBuilder> lootTables = new HashMap<>();
 
     public LootTableGenerator(String modid, ResourceCache cache){
         super(modid, cache);
@@ -115,7 +115,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
             }
 
             // Save the object to the cache
-            ResourceLocation identifier = lootTableBuilder.identifier;
+            Identifier identifier = lootTableBuilder.identifier;
             this.cache.saveJsonResource(ResourceType.DATA, json, identifier.getNamespace(), "loot_table", identifier.getPath());
         }
     }
@@ -124,7 +124,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
      * Gets a loot table builder for the given identifier. The returned loot table builder may be a new loot table builder or an existing one if requested before.
      * @param identifier resource location of the loot table
      */
-    protected LootTableBuilder lootTable(ResourceLocation identifier){
+    protected LootTableBuilder lootTable(Identifier identifier){
         this.cache.trackToBeGeneratedResource(ResourceType.DATA, identifier.getNamespace(), "loot_table", identifier.getPath(), ".json");
         return this.lootTables.computeIfAbsent(identifier, LootTableBuilder::new);
     }
@@ -135,7 +135,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
      * @param path      path of the loot table
      */
     protected LootTableBuilder lootTable(String namespace, String path){
-        return this.lootTable(ResourceLocation.fromNamespaceAndPath(namespace, path));
+        return this.lootTable(Identifier.fromNamespaceAndPath(namespace, path));
     }
 
     /**
@@ -145,8 +145,8 @@ public abstract class LootTableGenerator extends ResourceGenerator {
     protected LootTableBuilder lootTable(Block block){
         Optional<ResourceKey<LootTable>> lootTable = block.getLootTable();
         if(lootTable.isPresent())
-            return this.lootTable(lootTable.get().location());
-        ResourceLocation identifier = Registries.BLOCKS.getIdentifier(block);
+            return this.lootTable(lootTable.get().identifier());
+        Identifier identifier = Registries.BLOCKS.getIdentifier(block);
         return this.lootTable(identifier.withPrefix("blocks/"));
     }
 
@@ -173,12 +173,12 @@ public abstract class LootTableGenerator extends ResourceGenerator {
 
     public static class LootTableBuilder {
 
-        protected final ResourceLocation identifier;
+        protected final Identifier identifier;
         private final List<LootPoolBuilder> pools = new ArrayList<>();
         private final List<LootItemFunction> functions = new ArrayList<>();
         private ContextKeySet parameters = LootContextParamSets.ALL_PARAMS;
 
-        protected LootTableBuilder(ResourceLocation identifier){
+        protected LootTableBuilder(Identifier identifier){
             this.identifier = identifier;
         }
 
@@ -489,7 +489,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * Adds an item entry to this loot pool.
          * @param item item to be added as an entry
          */
-        public LootPoolBuilder itemEntry(ResourceLocation item){
+        public LootPoolBuilder itemEntry(Identifier item){
             if(!Registries.ITEMS.hasIdentifier(item))
                 throw new IllegalArgumentException("Could not find any item registered under '" + item + "'!");
 
@@ -502,7 +502,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param identifier path of the item to be added as an entry
          */
         public LootPoolBuilder itemEntry(String namespace, String identifier){
-            return this.itemEntry(ResourceLocation.fromNamespaceAndPath(namespace, identifier));
+            return this.itemEntry(Identifier.fromNamespaceAndPath(namespace, identifier));
         }
 
         /**
@@ -554,7 +554,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param tag    tag to be added as an entry
          * @param weight weight of the entry
          */
-        public LootPoolBuilder tagEntry(ResourceLocation tag, int weight){
+        public LootPoolBuilder tagEntry(Identifier tag, int weight){
             return this.tagEntry(TagKey.create(Registries.ITEMS.getVanillaRegistry().key(), tag), weight);
         }
 
@@ -562,7 +562,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * Adds a tag entry to this loot pool.
          * @param tag tag to be added as an entry
          */
-        public LootPoolBuilder tagEntry(ResourceLocation tag){
+        public LootPoolBuilder tagEntry(Identifier tag){
             return this.tagEntry(TagKey.create(Registries.ITEMS.getVanillaRegistry().key(), tag));
         }
 
@@ -573,7 +573,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param weight    weight of the entry
          */
         public LootPoolBuilder tagEntry(String namespace, String path, int weight){
-            return this.tagEntry(ResourceLocation.fromNamespaceAndPath(namespace, path), weight);
+            return this.tagEntry(Identifier.fromNamespaceAndPath(namespace, path), weight);
         }
 
         /**
@@ -582,7 +582,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param path      path of the tag to be added as an entry
          */
         public LootPoolBuilder tagEntry(String namespace, String path){
-            return this.tagEntry(ResourceLocation.fromNamespaceAndPath(namespace, path));
+            return this.tagEntry(Identifier.fromNamespaceAndPath(namespace, path));
         }
 
         /**
@@ -590,7 +590,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param lootTable loot table to be added as an entry
          * @param weight    weight of the entry
          */
-        public LootPoolBuilder lootTableEntry(ResourceLocation lootTable, int weight){
+        public LootPoolBuilder lootTableEntry(Identifier lootTable, int weight){
             return this.entry(NestedLootTable.lootTableReference(ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, lootTable)), weight);
         }
 
@@ -598,7 +598,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * Adds a loot table entry to this loot pool.
          * @param lootTable loot table to be added as an entry
          */
-        public LootPoolBuilder lootTableEntry(ResourceLocation lootTable){
+        public LootPoolBuilder lootTableEntry(Identifier lootTable){
             return this.lootTableEntry(lootTable, 1);
         }
 
@@ -609,7 +609,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param weight    weight of the entry
          */
         public LootPoolBuilder lootTableEntry(String namespace, String path, int weight){
-            return this.lootTableEntry(ResourceLocation.fromNamespaceAndPath(namespace, path), weight);
+            return this.lootTableEntry(Identifier.fromNamespaceAndPath(namespace, path), weight);
         }
 
         /**
@@ -618,7 +618,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param path      path of the loot table to be added as an entry
          */
         public LootPoolBuilder lootTableEntry(String namespace, String path){
-            return this.lootTableEntry(ResourceLocation.fromNamespaceAndPath(namespace, path));
+            return this.lootTableEntry(Identifier.fromNamespaceAndPath(namespace, path));
         }
 
         /**
