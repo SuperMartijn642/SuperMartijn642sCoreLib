@@ -32,6 +32,19 @@ public class PacketContext {
         return this.context.getDirection().getOriginationSide() == LogicalSide.CLIENT ? CoreSide.CLIENT : CoreSide.SERVER;
     }
 
+    /**
+     * @return the local player on the client, the player entity corresponding to the client that sent the packet on the server
+     */
+    public PlayerEntity getPlayer(){
+        if(this.getHandlingSide().isClient())
+            return ClientUtils.getPlayer();
+        return this.context.getSender();
+    }
+
+    /**
+     * @deprecated Use {@link #getPlayer()}.
+     */
+    @Deprecated
     public PlayerEntity getSendingPlayer(){
         return this.context.getSender();
     }
