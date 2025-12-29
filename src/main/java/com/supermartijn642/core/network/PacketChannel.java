@@ -2,22 +2,28 @@ package com.supermartijn642.core.network;
 
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.RegistryUtil;
-import io.netty.util.collection.IntObjectHashMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadHandler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -39,9 +45,9 @@ public class PacketChannel {
         String activeMod = ModLoadingContext.get().getActiveNamespace();
         if(activeMod != null && !activeMod.equals("minecraft") && !activeMod.equals("forge")){
             if(!activeMod.equals(modid))
-                CoreLib.LOGGER.warn("Mod '" + ModLoadingContext.get().getActiveContainer().getModInfo().getDisplayName() + "' is creating a packet channel for different modid '" + modid + "'!");
+                CoreLib.LOGGER.warn("Mod '{}' is creating a packet channel for different modid '{}'!", ModLoadingContext.get().getActiveContainer().getModInfo().getDisplayName(), modid);
         }else if(modid.equals("minecraft") || modid.equals("forge"))
-            CoreLib.LOGGER.warn("Mod is creating a packet channel for modid '" + modid + "'!");
+            CoreLib.LOGGER.warn("Mod is creating a packet channel for modid '{}'!", modid);
 
         return new PacketChannel(modid, channelName);
     }
@@ -60,27 +66,44 @@ public class PacketChannel {
     }
 
     private final String modid, name;
-    private final ResourceLocation identifier;
+    private final ResourceLocation channelName;
 
-    private int index = 0;
-    private final HashMap<Class<? extends BasePacket>,Integer> packet_to_index = new HashMap<>();
-    private final IntObjectHashMap<Supplier<? extends BasePacket>> index_to_packet = new IntObjectHashMap<>();
-    /**
-     * Whether a packet should be handled on the main thread or off thread
-     */
-    private final HashMap<Class<? extends BasePacket>,Boolean> packet_to_queued = new HashMap<>();
+    private final List<PacketProperties<?>> packetsByIndex = new ArrayList<>();
+    private final Map<Class<? extends BasePacket>,PacketProperties<?>> packetsByClass = new HashMap<>();
 
     private PacketChannel(String modid, String name){
         this.modid = modid;
         this.name = name;
-        this.identifier = new ResourceLocation(modid, name);
+        this.channelName = new ResourceLocation(modid, name);
+
         ModLoadingContext.get().getActiveContainer().getEventBus().addListener(this::handleRegistration);
     }
 
     private void handleRegistration(RegisterPayloadHandlerEvent event){
+        IPayloadHandler<Payload> payloadHandler = (payload, context) -> {
+            PacketContext packetContext = new PacketContext(context);
+            this.handle(payload.packet, packetContext, context.flow() == PacketFlow.CLIENTBOUND ? PacketDirection.SERVER_TO_CLIENT : PacketDirection.CLIENT_TO_SERVER);
+        };
         event.registrar(this.modid)
             .versioned("1")
-            .common(this.identifier, buffer -> InternalPacket.read(this, buffer), InternalPacket::handle);
+            .common(this.channelName, buffer -> new Payload(this.read(buffer)), payloadHandler);
+    }
+
+    /**
+     * Registers a packet for this channel
+     * @param packetClass    class of the packet
+     * @param packetSupplier supplier for new packet instances
+     * @param direction      direction that the packet is allowed to be sent
+     * @param shouldBeQueued whether the packet should be handled on the main thread
+     */
+    public <T extends BasePacket> void registerMessage(Class<T> packetClass, Supplier<T> packetSupplier, PacketDirection direction, boolean shouldBeQueued){
+        if(this.packetsByClass.containsKey(packetClass))
+            throw new IllegalArgumentException("Class '" + packetClass + "' has already been registered!");
+
+        int index = this.packetsByIndex.size();
+        PacketProperties<T> properties = new PacketProperties<>(index, packetClass, packetSupplier, direction, shouldBeQueued);
+        this.packetsByIndex.add(properties);
+        this.packetsByClass.put(packetClass, properties);
     }
 
     /**
@@ -88,15 +111,11 @@ public class PacketChannel {
      * @param packetClass    class of the packet
      * @param packetSupplier supplier for new packet instances
      * @param shouldBeQueued whether the packet should be handled on the main thread
+     * @deprecated Use {@link #registerMessage(Class, Supplier, PacketDirection, boolean)}.
      */
+    @Deprecated
     public <T extends BasePacket> void registerMessage(Class<T> packetClass, Supplier<T> packetSupplier, boolean shouldBeQueued){
-        if(this.packet_to_index.containsKey(packetClass))
-            throw new IllegalArgumentException("Class '" + packetClass + "' has already been registered!");
-
-        int index = this.index++;
-        this.packet_to_index.put(packetClass, index);
-        this.index_to_packet.put(index, packetSupplier);
-        this.packet_to_queued.put(packetClass, shouldBeQueued);
+        this.registerMessage(packetClass, packetSupplier, PacketDirection.BOTH_WAYS, shouldBeQueued);
     }
 
     /**
@@ -104,8 +123,25 @@ public class PacketChannel {
      * @param packet packet to be sent
      */
     public void sendToServer(BasePacket packet){
-        this.checkRegistration(packet);
-        PacketDistributor.SERVER.noArg().send(new InternalPacket(this).setPacket(packet));
+        this.checkRegistration(packet, PacketDirection.CLIENT_TO_SERVER);
+        PacketDistributor.SERVER.noArg().send(new Payload(packet));
+    }
+
+    /**
+     * Sends the given {@code packet} to the server. Must only be used client-side.
+     * @param connection connection to send the packet along
+     * @param packet     packet to be sent
+     */
+    public void sendToClient(Connection connection, BasePacket packet){
+        this.checkRegistration(packet, PacketDirection.SERVER_TO_CLIENT);
+        if(connection.getReceiving() == PacketFlow.CLIENTBOUND)
+            throw new IllegalArgumentException("This must only be called server-side!");
+        if(connection.getPacketListener() instanceof ServerConfigurationPacketListenerImpl listener)
+            listener.send(new Payload(packet));
+        else if(connection.getPacketListener() instanceof ServerGamePacketListenerImpl listener)
+            PacketDistributor.PLAYER.with(listener.player).send(new Payload(packet));
+        else
+            throw new IllegalArgumentException("Cannot send packet during the current network stage!");
     }
 
     /**
@@ -116,8 +152,8 @@ public class PacketChannel {
     public void sendToPlayer(Player player, BasePacket packet){
         if(!(player instanceof ServerPlayer))
             throw new IllegalStateException("This must only be called server-side!");
-        this.checkRegistration(packet);
-        PacketDistributor.PLAYER.with(((ServerPlayer)player)).send(new InternalPacket(this).setPacket(packet));
+        this.checkRegistration(packet, PacketDirection.SERVER_TO_CLIENT);
+        PacketDistributor.PLAYER.with((ServerPlayer)player).send(new Payload(packet));
     }
 
     /**
@@ -125,8 +161,8 @@ public class PacketChannel {
      * @param packet packet to be sent
      */
     public void sendToAllPlayers(BasePacket packet){
-        this.checkRegistration(packet);
-        PacketDistributor.ALL.noArg().send(new InternalPacket(this).setPacket(packet));
+        this.checkRegistration(packet, PacketDirection.SERVER_TO_CLIENT);
+        PacketDistributor.ALL.noArg().send(new Payload(packet));
     }
 
     /**
@@ -135,8 +171,8 @@ public class PacketChannel {
      * @param packet    packet to be sent
      */
     public void sendToDimension(ResourceKey<Level> dimension, BasePacket packet){
-        this.checkRegistration(packet);
-        PacketDistributor.DIMENSION.with(dimension).send(new InternalPacket(this).setPacket(packet));
+        this.checkRegistration(packet, PacketDirection.SERVER_TO_CLIENT);
+        PacketDistributor.DIMENSION.with(dimension).send(new Payload(packet));
     }
 
     /**
@@ -158,8 +194,8 @@ public class PacketChannel {
     public void sendToAllTrackingEntity(Entity entity, BasePacket packet){
         if(entity.level().isClientSide)
             throw new IllegalStateException("This must only be called server-side!");
-        this.checkRegistration(packet);
-        PacketDistributor.TRACKING_ENTITY.with(entity).send(new InternalPacket(this).setPacket(packet));
+        this.checkRegistration(packet, PacketDirection.SERVER_TO_CLIENT);
+        PacketDistributor.TRACKING_ENTITY.with(entity).send(new Payload(packet));
     }
 
     /**
@@ -167,8 +203,8 @@ public class PacketChannel {
      * @param packet packet to be sent
      */
     public void sendToAllNear(ResourceKey<Level> world, double x, double y, double z, double radius, BasePacket packet){
-        this.checkRegistration(packet);
-        PacketDistributor.NEAR.with(new PacketDistributor.TargetPoint(x, y, z, radius, world)).send(new InternalPacket(this).setPacket(packet));
+        this.checkRegistration(packet, PacketDirection.SERVER_TO_CLIENT);
+        PacketDistributor.NEAR.with(new PacketDistributor.TargetPoint(x, y, z, radius, world)).send(new Payload(packet));
     }
 
     /**
@@ -199,69 +235,91 @@ public class PacketChannel {
         this.sendToAllNear(world.dimension(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, radius, packet);
     }
 
-    private void checkRegistration(BasePacket packet){
-        if(!this.packet_to_index.containsKey(packet.getClass()))
+    private void checkRegistration(BasePacket packet, PacketDirection direction){
+        PacketProperties<?> properties = this.packetsByClass.get(packet.getClass());
+        if(properties == null)
             throw new IllegalArgumentException("Tried to send unregistered packet '" + packet.getClass() + "' on channel '" + this.modid + ":" + this.name + "'!");
+        if(properties.direction != PacketDirection.BOTH_WAYS && properties.direction != direction)
+            throw new IllegalArgumentException("Tried to send packet '" + packet.getClass() + "' on channel '" + this.modid + ":" + this.name + "' in invalid direction '" + direction + "'!");
     }
 
-    private void write(BasePacket packet, FriendlyByteBuf buffer){
+    void write(BasePacket packet, FriendlyByteBuf buffer){
         // assume the packet has already been checked for registration here
-        int index = this.packet_to_index.get(packet.getClass());
+        int index = this.packetsByClass.get(packet.getClass()).index;
         buffer.writeInt(index);
-        packet.write(buffer);
+        try{
+            packet.write(buffer);
+        }catch(Exception e){
+            throw new RuntimeException("Encountered an exception whilst writing packet of class '" + packet.getClass().getName() + "' for channel '" + this.modid + ":" + this.name + "'!", e);
+        }
     }
 
-    private BasePacket read(FriendlyByteBuf buffer){
+    BasePacket read(FriendlyByteBuf buffer){
         int index = buffer.readInt();
-        if(!this.index_to_packet.containsKey(index))
+        if(this.packetsByIndex.size() < index)
             throw new RuntimeException("Received an unregistered packet with index '" + index + "' on channel '" + this.modid + ":" + this.name + "'!");
 
-        BasePacket packet = this.index_to_packet.get(index).get();
-        packet.read(buffer);
+        PacketProperties<?> properties = this.packetsByIndex.get(index);
+        BasePacket packet = properties.supplier().get();
+        try{
+            packet.read(buffer);
+        }catch(Exception e){
+            throw new RuntimeException("Encountered an exception whilst reading packet of class '" + packet.getClass().getName() + "' for channel '" + this.modid + ":" + this.name + "'!", e);
+        }
         return packet;
     }
 
-    private void handle(BasePacket packet, IPayloadContext contextSupplier){
-        PacketContext context = new PacketContext(contextSupplier);
-        if(packet.verify(context)){
-            if(this.packet_to_queued.get(packet.getClass()))
-                context.queueTask(() -> packet.handle(context));
-            else
-                packet.handle(context);
+    void handle(BasePacket packet, PacketContext context, PacketDirection direction){
+        PacketProperties<?> properties = this.packetsByClass.get(packet.getClass());
+        if(properties.direction != PacketDirection.BOTH_WAYS && properties.direction != direction)
+            throw new RuntimeException("Received packet of class '" + properties.clazz + "' on channel '" + this.modid + ":" + this.name + "' for invalid direction '" + (direction == PacketDirection.CLIENT_TO_SERVER ? PacketDirection.SERVER_TO_CLIENT : PacketDirection.CLIENT_TO_SERVER) + "'!");
+
+        // Verify packet
+        try{
+            boolean verify = packet.verify(context);
+            if(!verify)
+                return;
+        }catch(Exception e){
+            throw new RuntimeException("Encountered an exception whilst verifying packet of class '" + packet.getClass().getName() + "' for channel '" + this.modid + ":" + this.name + "'!", e);
         }
+        // Handle packet
+        Runnable handle = () -> {
+            try{
+                packet.handle(context);
+            }catch(Exception e){
+                throw new RuntimeException("Encountered an exception whilst processing packet of class '" + packet.getClass().getName() + "' for channel '" + this.modid + ":" + this.name + "'!", e);
+            }
+        };
+        if(properties.shouldBeQueued)
+            context.queueTask(handle);
+        else
+            handle.run();
     }
 
-    private static class InternalPacket implements CustomPacketPayload {
+    /**
+     * @param clazz          the packet's class
+     * @param supplier       supplied to create new packet instances
+     * @param direction      direction that the packet is allowed to be sent
+     * @param shouldBeQueued whether the packet should be handled on the main thread or off thread
+     */
+    private record PacketProperties<T extends BasePacket>(int index, Class<T> clazz, Supplier<T> supplier, PacketDirection direction, boolean shouldBeQueued) {
+    }
 
-        public static InternalPacket read(PacketChannel channel, FriendlyByteBuf buffer){
-            return new InternalPacket(channel).setPacket(channel.read(buffer));
-        }
+    class Payload implements CustomPacketPayload {
+        private final BasePacket packet;
 
-        public static void handle(InternalPacket packet, IPayloadContext context){
-            packet.channel.handle(packet.packet, context);
-        }
-
-        private final PacketChannel channel;
-        private BasePacket packet;
-
-        public InternalPacket(PacketChannel channel){
-            this.channel = channel;
-        }
-
-        public InternalPacket setPacket(BasePacket packet){
+        private Payload(BasePacket packet){
             this.packet = packet;
-            return this;
         }
 
         @Override
         public void write(FriendlyByteBuf buffer){
-            this.channel.write(this.packet, buffer);
+            PacketChannel.this.write(this.packet, buffer);
         }
 
         @Override
         public ResourceLocation id(){
-            return this.channel.identifier;
+            return PacketChannel.this.channelName;
         }
     }
-
 }
