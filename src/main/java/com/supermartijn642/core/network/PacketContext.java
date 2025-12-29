@@ -2,6 +2,8 @@ package com.supermartijn642.core.network;
 
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.CoreSide;
+import net.minecraft.network.Connection;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.network.CustomPayloadEvent;
@@ -31,6 +33,20 @@ public class PacketContext {
         return this.context.isServerSide() ? CoreSide.CLIENT : CoreSide.SERVER;
     }
 
+    /**
+     * @return the local player on the client, the player entity corresponding to the client that sent the packet on the server
+     */
+    public Player getPlayer(){
+        if(this.context.isClientSide())
+            return ClientUtils.getPlayer();
+        Connection connection = this.context.getConnection();
+        return connection.getPacketListener() instanceof ServerGamePacketListenerImpl listener ? listener.getPlayer() : null;
+    }
+
+    /**
+     * @deprecated Use {@link #getPlayer()}.
+     */
+    @Deprecated
     public Player getSendingPlayer(){
         return this.context.getSender();
     }
