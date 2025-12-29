@@ -98,8 +98,8 @@ public class RenderUtils {
         shape.forEachEdge((x1, y1, z1, x2, y2, z2) -> {
             Vec3 normal = new Vec3(x2 - x1, y2 - y1, z2 - z1);
             normal.normalize();
-            builder.addVertex(matrix, (float)x1, (float)y1, (float)z1).setColor(red, green, blue, alpha).setNormal(pose, (float)normal.x, (float)normal.y, (float)normal.z);
-            builder.addVertex(matrix, (float)x2, (float)y2, (float)z2).setColor(red, green, blue, alpha).setNormal(pose, (float)normal.x, (float)normal.y, (float)normal.z);
+            builder.addVertex(matrix, (float)x1, (float)y1, (float)z1).setColor(red, green, blue, alpha).setNormal(pose, (float)normal.x, (float)normal.y, (float)normal.z).setLineWidth(1);
+            builder.addVertex(matrix, (float)x2, (float)y2, (float)z2).setColor(red, green, blue, alpha).setNormal(pose, (float)normal.x, (float)normal.y, (float)normal.z).setLineWidth(1);
         });
         bufferSource.endBatch(renderType);
     }
@@ -232,8 +232,8 @@ public class RenderUtils {
             shape.forEachEdge((x1, y1, z1, x2, y2, z2) -> {
                 Vec3 normal = new Vec3(x2 - x1, y2 - y1, z2 - z1);
                 normal.normalize();
-                vertexConsumer.addVertex(matrix, (float)x1, (float)y1, (float)z1).setColor(red, green, blue, alpha).setNormal(pose, (float)normal.x, (float)normal.y, (float)normal.z);
-                vertexConsumer.addVertex(matrix, (float)x2, (float)y2, (float)z2).setColor(red, green, blue, alpha).setNormal(pose, (float)normal.x, (float)normal.y, (float)normal.z);
+                vertexConsumer.addVertex(matrix, (float)x1, (float)y1, (float)z1).setColor(red, green, blue, alpha).setNormal(pose, (float)normal.x, (float)normal.y, (float)normal.z).setLineWidth(1);
+                vertexConsumer.addVertex(matrix, (float)x2, (float)y2, (float)z2).setColor(red, green, blue, alpha).setNormal(pose, (float)normal.x, (float)normal.y, (float)normal.z).setLineWidth(1);
             });
         });
     }
