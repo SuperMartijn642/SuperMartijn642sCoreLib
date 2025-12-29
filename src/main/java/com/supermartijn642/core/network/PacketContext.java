@@ -31,6 +31,17 @@ public class PacketContext {
         return this.context.flow().isServerbound() ? CoreSide.CLIENT : CoreSide.SERVER;
     }
 
+    /**
+     * @return the local player on the client, the player entity corresponding to the client that sent the packet on the server
+     */
+    public Player getPlayer(){
+        return this.context.player();
+    }
+
+    /**
+     * @deprecated Use {@link #getPlayer()}.
+     */
+    @Deprecated
     public Player getSendingPlayer(){
         return this.context.player();
     }
