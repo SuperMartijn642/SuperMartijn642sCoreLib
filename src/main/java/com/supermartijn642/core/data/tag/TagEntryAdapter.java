@@ -1,7 +1,7 @@
 package com.supermartijn642.core.data.tag;
 
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagEntry;
 
 import java.util.Collection;
@@ -14,12 +14,12 @@ import java.util.stream.Collectors;
  */
 public class TagEntryAdapter extends TagEntry {
 
-    final ResourceLocation identifier;
+    final Identifier identifier;
     final CustomTagEntry customEntry;
     private Registry<?> registry;
 
-    TagEntryAdapter(ResourceLocation identifier, CustomTagEntry customEntry){
-        super(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy"), false, false);
+    TagEntryAdapter(Identifier identifier, CustomTagEntry customEntry){
+        super(Identifier.fromNamespaceAndPath("supermartijn642corelib", "dummy"), false, false);
         this.identifier = identifier;
         this.customEntry = customEntry;
     }
@@ -32,12 +32,12 @@ public class TagEntryAdapter extends TagEntry {
     public <T> boolean build(Lookup<T> lookup, Consumer<T> entryConsumer){
         CustomTagEntry.TagEntryResolutionContext<T> context = new CustomTagEntry.TagEntryResolutionContext<T>() {
             @Override
-            public T getElement(ResourceLocation identifier){
+            public T getElement(Identifier identifier){
                 return lookup.element(identifier, false);
             }
 
             @Override
-            public Collection<T> getTag(ResourceLocation identifier){
+            public Collection<T> getTag(Identifier identifier){
                 return lookup.tag(identifier);
             }
 
@@ -48,7 +48,7 @@ public class TagEntryAdapter extends TagEntry {
             }
 
             @Override
-            public Set<ResourceLocation> getAllIdentifiers(){
+            public Set<Identifier> getAllIdentifiers(){
                 return TagEntryAdapter.this.registry.keySet();
             }
         };
@@ -59,8 +59,8 @@ public class TagEntryAdapter extends TagEntry {
     }
 
     @Override
-    public void visitOptionalDependencies(Consumer<ResourceLocation> consumer){
-        Collection<ResourceLocation> dependencies = this.customEntry.getTagDependencies();
+    public void visitOptionalDependencies(Consumer<Identifier> consumer){
+        Collection<Identifier> dependencies = this.customEntry.getTagDependencies();
         if(dependencies != null)
             dependencies.forEach(consumer);
     }

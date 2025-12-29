@@ -4,8 +4,8 @@ import com.supermartijn642.core.data.tag.TagEntryAdapter;
 import com.supermartijn642.core.extensions.TagLoaderExtension;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagLoader;
 import org.spongepowered.asm.mixin.Mixin;
@@ -63,7 +63,7 @@ public class TagLoaderMixin implements TagLoaderExtension {
         method = "build(Ljava/util/Map;)Ljava/util/Map;",
         at = @At("HEAD")
     )
-    private void build(Map<ResourceLocation,List<TagLoader.EntryWithSource>> tags, CallbackInfoReturnable<Map<?,?>> ci){
+    private void build(Map<Identifier,List<TagLoader.EntryWithSource>> tags, CallbackInfoReturnable<Map<?,?>> ci){
         for(List<TagLoader.EntryWithSource> tag : tags.values()){
             for(TagLoader.EntryWithSource entry : tag){
                 if(entry.entry() instanceof TagEntryAdapter)

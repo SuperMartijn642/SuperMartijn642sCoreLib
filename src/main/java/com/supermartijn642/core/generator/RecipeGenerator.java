@@ -14,14 +14,14 @@ import com.supermartijn642.core.util.Pair;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.advancements.criterion.InventoryChangeTrigger;
+import net.minecraft.advancements.criterion.ItemPredicate;
+import net.minecraft.advancements.criterion.RecipeUnlockedTrigger;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -56,7 +56,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         TAB_TO_CATEGORY.put(CreativeModeTabs.SEARCH, RecipeCategory.MISC);
     }
 
-    private final Map<ResourceLocation,RecipeBuilder<?>> recipes = new HashMap<>();
+    private final Map<Identifier,RecipeBuilder<?>> recipes = new HashMap<>();
     private final Advancements advancements;
 
     public RecipeGenerator(String modid, ResourceCache cache){
@@ -186,7 +186,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                     json = ConditionalRecipeSerializer.wrapRecipeWithForgeConditions(json, recipeBuilder.conditions);
 
                 // Save the object to the cache
-                ResourceLocation identifier = recipeBuilder.identifier;
+                Identifier identifier = recipeBuilder.identifier;
                 this.cache.saveJsonResource(ResourceType.DATA, json, identifier.getNamespace(), "recipe", identifier.getPath() + subRecipe.getKey());
             }
         }
@@ -244,7 +244,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         return new JsonPrimitive("#" + entry.tag.toString());
     }
 
-    protected <T extends RecipeBuilder<T>> T recipe(ResourceLocation recipeLocation, T builder){
+    protected <T extends RecipeBuilder<T>> T recipe(Identifier recipeLocation, T builder){
         if(this.recipes.containsKey(recipeLocation))
             throw new RuntimeException("Duplicate recipe '" + recipeLocation + "' of types '" + this.recipes.get(recipeLocation).getClass().getName() + "' and '" + builder.getClass().getName() + "'!");
 
@@ -260,7 +260,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param components     data components of the recipe result
      * @param amount         count of the recipe result
      */
-    protected ShapedRecipeBuilder shaped(ResourceLocation recipeLocation, ItemLike output, DataComponentPatch components, int amount){
+    protected ShapedRecipeBuilder shaped(Identifier recipeLocation, ItemLike output, DataComponentPatch components, int amount){
         return this.recipe(recipeLocation, new ShapedRecipeBuilder(recipeLocation, output, components, amount));
     }
 
@@ -273,7 +273,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param amount     count of the recipe result
      */
     protected ShapedRecipeBuilder shaped(String namespace, String identifier, ItemLike output, DataComponentPatch components, int amount){
-        return this.shaped(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output, components, amount);
+        return this.shaped(Identifier.fromNamespaceAndPath(namespace, identifier), output, components, amount);
     }
 
     /**
@@ -294,7 +294,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param amount     count of the recipe result
      */
     protected ShapedRecipeBuilder shaped(ItemLike output, DataComponentPatch components, int amount){
-        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output.asItem());
+        Identifier identifier = Registries.ITEMS.getIdentifier(output.asItem());
         return this.recipe(identifier, new ShapedRecipeBuilder(identifier, output, components, amount));
     }
 
@@ -304,7 +304,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param output         recipe result
      * @param amount         count of the recipe result
      */
-    protected ShapedRecipeBuilder shaped(ResourceLocation recipeLocation, ItemLike output, int amount){
+    protected ShapedRecipeBuilder shaped(Identifier recipeLocation, ItemLike output, int amount){
         return this.shaped(recipeLocation, output, null, amount);
     }
 
@@ -316,7 +316,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param amount     count of the recipe result
      */
     protected ShapedRecipeBuilder shaped(String namespace, String identifier, ItemLike output, int amount){
-        return this.shaped(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output, null, amount);
+        return this.shaped(Identifier.fromNamespaceAndPath(namespace, identifier), output, null, amount);
     }
 
     /**
@@ -343,7 +343,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
-    protected ShapedRecipeBuilder shaped(ResourceLocation recipeLocation, ItemLike output){
+    protected ShapedRecipeBuilder shaped(Identifier recipeLocation, ItemLike output){
         return this.shaped(recipeLocation, output, null, 1);
     }
 
@@ -354,7 +354,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param output     recipe result
      */
     protected ShapedRecipeBuilder shaped(String namespace, String identifier, ItemLike output){
-        return this.shaped(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output, null, 1);
+        return this.shaped(Identifier.fromNamespaceAndPath(namespace, identifier), output, null, 1);
     }
 
     /**
@@ -379,7 +379,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
-    protected ShapedRecipeBuilder shaped(ResourceLocation recipeLocation, ItemStack output){
+    protected ShapedRecipeBuilder shaped(Identifier recipeLocation, ItemStack output){
         return this.shaped(recipeLocation, output.getItem(), output.getComponentsPatch(), output.getCount());
     }
 
@@ -390,7 +390,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param output     recipe result
      */
     protected ShapedRecipeBuilder shaped(String namespace, String identifier, ItemStack output){
-        return this.shaped(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output.getItem(), output.getComponentsPatch(), output.getCount());
+        return this.shaped(Identifier.fromNamespaceAndPath(namespace, identifier), output.getItem(), output.getComponentsPatch(), output.getCount());
     }
 
     /**
@@ -417,7 +417,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param components     data components of the recipe result
      * @param amount         count of the recipe result
      */
-    protected ShapelessRecipeBuilder shapeless(ResourceLocation recipeLocation, ItemLike output, DataComponentPatch components, int amount){
+    protected ShapelessRecipeBuilder shapeless(Identifier recipeLocation, ItemLike output, DataComponentPatch components, int amount){
         return this.recipe(recipeLocation, new ShapelessRecipeBuilder(recipeLocation, output, components, amount));
     }
 
@@ -430,7 +430,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param amount     count of the recipe result
      */
     protected ShapelessRecipeBuilder shapeless(String namespace, String identifier, ItemLike output, DataComponentPatch components, int amount){
-        return this.shapeless(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output, components, amount);
+        return this.shapeless(Identifier.fromNamespaceAndPath(namespace, identifier), output, components, amount);
     }
 
     /**
@@ -451,7 +451,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param amount     count of the recipe result
      */
     protected ShapelessRecipeBuilder shapeless(ItemLike output, DataComponentPatch components, int amount){
-        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output.asItem());
+        Identifier identifier = Registries.ITEMS.getIdentifier(output.asItem());
         return this.shapeless(identifier, output, components, amount);
     }
 
@@ -461,7 +461,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param output         recipe result
      * @param amount         count of the recipe result
      */
-    protected ShapelessRecipeBuilder shapeless(ResourceLocation recipeLocation, ItemLike output, int amount){
+    protected ShapelessRecipeBuilder shapeless(Identifier recipeLocation, ItemLike output, int amount){
         return this.shapeless(recipeLocation, output, null, amount);
     }
 
@@ -473,7 +473,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param amount     count of the recipe result
      */
     protected ShapelessRecipeBuilder shapeless(String namespace, String identifier, ItemLike output, int amount){
-        return this.shapeless(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output, null, amount);
+        return this.shapeless(Identifier.fromNamespaceAndPath(namespace, identifier), output, null, amount);
     }
 
     /**
@@ -500,7 +500,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
-    protected ShapelessRecipeBuilder shapeless(ResourceLocation recipeLocation, ItemLike output){
+    protected ShapelessRecipeBuilder shapeless(Identifier recipeLocation, ItemLike output){
         return this.shapeless(recipeLocation, output, null, 1);
     }
 
@@ -511,7 +511,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param output     recipe result
      */
     protected ShapelessRecipeBuilder shapeless(String namespace, String identifier, ItemLike output){
-        return this.shapeless(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output, null, 1);
+        return this.shapeless(Identifier.fromNamespaceAndPath(namespace, identifier), output, null, 1);
     }
 
     /**
@@ -536,7 +536,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
-    protected ShapelessRecipeBuilder shapeless(ResourceLocation recipeLocation, ItemStack output){
+    protected ShapelessRecipeBuilder shapeless(Identifier recipeLocation, ItemStack output){
         return this.shapeless(recipeLocation, output.getItem(), output.getComponentsPatch(), output.getCount());
     }
 
@@ -547,7 +547,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param output     recipe result
      */
     protected ShapelessRecipeBuilder shapeless(String namespace, String identifier, ItemStack output){
-        return this.shapeless(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output.getItem(), output.getComponentsPatch(), output.getCount());
+        return this.shapeless(Identifier.fromNamespaceAndPath(namespace, identifier), output.getItem(), output.getComponentsPatch(), output.getCount());
     }
 
     /**
@@ -574,7 +574,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param components     data components of the recipe result
      * @param amount         count of the recipe result
      */
-    protected SmeltingRecipeBuilder smelting(ResourceLocation recipeLocation, ItemLike output, DataComponentPatch components, int amount){
+    protected SmeltingRecipeBuilder smelting(Identifier recipeLocation, ItemLike output, DataComponentPatch components, int amount){
         return this.recipe(recipeLocation, new SmeltingRecipeBuilder(recipeLocation, output, components, amount)).includeSmelting();
     }
 
@@ -587,7 +587,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param amount     count of the recipe result
      */
     protected SmeltingRecipeBuilder smelting(String namespace, String identifier, ItemLike output, DataComponentPatch components, int amount){
-        return this.smelting(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output, components, amount);
+        return this.smelting(Identifier.fromNamespaceAndPath(namespace, identifier), output, components, amount);
     }
 
     /**
@@ -608,7 +608,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param amount     count of the recipe result
      */
     protected SmeltingRecipeBuilder smelting(ItemLike output, DataComponentPatch components, int amount){
-        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output.asItem());
+        Identifier identifier = Registries.ITEMS.getIdentifier(output.asItem());
         return this.smelting(identifier, output, components, amount);
     }
 
@@ -618,7 +618,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param output         recipe result
      * @param amount         count of the recipe result
      */
-    protected SmeltingRecipeBuilder smelting(ResourceLocation recipeLocation, ItemLike output, int amount){
+    protected SmeltingRecipeBuilder smelting(Identifier recipeLocation, ItemLike output, int amount){
         return this.smelting(recipeLocation, output, null, amount);
     }
 
@@ -630,7 +630,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param amount     count of the recipe result
      */
     protected SmeltingRecipeBuilder smelting(String namespace, String identifier, ItemLike output, int amount){
-        return this.smelting(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output, null, amount);
+        return this.smelting(Identifier.fromNamespaceAndPath(namespace, identifier), output, null, amount);
     }
 
     /**
@@ -657,7 +657,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
-    protected SmeltingRecipeBuilder smelting(ResourceLocation recipeLocation, ItemLike output){
+    protected SmeltingRecipeBuilder smelting(Identifier recipeLocation, ItemLike output){
         return this.smelting(recipeLocation, output, null, 1);
     }
 
@@ -668,7 +668,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param output     recipe result
      */
     protected SmeltingRecipeBuilder smelting(String namespace, String identifier, ItemLike output){
-        return this.smelting(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output, null, 1);
+        return this.smelting(Identifier.fromNamespaceAndPath(namespace, identifier), output, null, 1);
     }
 
     /**
@@ -693,7 +693,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
-    protected SmeltingRecipeBuilder smelting(ResourceLocation recipeLocation, ItemStack output){
+    protected SmeltingRecipeBuilder smelting(Identifier recipeLocation, ItemStack output){
         return this.smelting(recipeLocation, output.getItem(), output.getComponentsPatch(), output.getCount());
     }
 
@@ -704,7 +704,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param output     recipe result
      */
     protected SmeltingRecipeBuilder smelting(String namespace, String identifier, ItemStack output){
-        return this.smelting(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output.getItem(), output.getComponentsPatch(), output.getCount());
+        return this.smelting(Identifier.fromNamespaceAndPath(namespace, identifier), output.getItem(), output.getComponentsPatch(), output.getCount());
     }
 
     /**
@@ -731,7 +731,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param components     data components of the recipe result
      * @param amount         count of the recipe result
      */
-    protected SmithingRecipeBuilder smithing(ResourceLocation recipeLocation, ItemLike output, DataComponentPatch components, int amount){
+    protected SmithingRecipeBuilder smithing(Identifier recipeLocation, ItemLike output, DataComponentPatch components, int amount){
         return this.recipe(recipeLocation, new SmithingRecipeBuilder(recipeLocation, output, components, amount));
     }
 
@@ -744,7 +744,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param amount     count of the recipe result
      */
     protected SmithingRecipeBuilder smithing(String namespace, String identifier, ItemLike output, DataComponentPatch components, int amount){
-        return this.smithing(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output, components, amount);
+        return this.smithing(Identifier.fromNamespaceAndPath(namespace, identifier), output, components, amount);
     }
 
     /**
@@ -765,7 +765,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param amount     count of the recipe result
      */
     protected SmithingRecipeBuilder smithing(ItemLike output, DataComponentPatch components, int amount){
-        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output.asItem());
+        Identifier identifier = Registries.ITEMS.getIdentifier(output.asItem());
         return this.smithing(identifier, output, components, amount);
     }
 
@@ -775,7 +775,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param output         recipe result
      * @param amount         count of the recipe result
      */
-    protected SmithingRecipeBuilder smithing(ResourceLocation recipeLocation, ItemLike output, int amount){
+    protected SmithingRecipeBuilder smithing(Identifier recipeLocation, ItemLike output, int amount){
         return this.smithing(recipeLocation, output, null, amount);
     }
 
@@ -787,7 +787,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param amount     count of the recipe result
      */
     protected SmithingRecipeBuilder smithing(String namespace, String identifier, ItemLike output, int amount){
-        return this.smithing(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output, null, amount);
+        return this.smithing(Identifier.fromNamespaceAndPath(namespace, identifier), output, null, amount);
     }
 
     /**
@@ -814,7 +814,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
-    protected SmithingRecipeBuilder smithing(ResourceLocation recipeLocation, ItemLike output){
+    protected SmithingRecipeBuilder smithing(Identifier recipeLocation, ItemLike output){
         return this.smithing(recipeLocation, output, null, 1);
     }
 
@@ -825,7 +825,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param output     recipe result
      */
     protected SmithingRecipeBuilder smithing(String namespace, String identifier, ItemLike output){
-        return this.smithing(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output, null, 1);
+        return this.smithing(Identifier.fromNamespaceAndPath(namespace, identifier), output, null, 1);
     }
 
     /**
@@ -850,7 +850,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
-    protected SmithingRecipeBuilder smithing(ResourceLocation recipeLocation, ItemStack output){
+    protected SmithingRecipeBuilder smithing(Identifier recipeLocation, ItemStack output){
         return this.smithing(recipeLocation, output.getItem(), output.getComponentsPatch(), output.getCount());
     }
 
@@ -861,7 +861,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param output     recipe result
      */
     protected SmithingRecipeBuilder smithing(String namespace, String identifier, ItemStack output){
-        return this.smithing(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output.getItem(), output.getComponentsPatch(), output.getCount());
+        return this.smithing(Identifier.fromNamespaceAndPath(namespace, identifier), output.getItem(), output.getComponentsPatch(), output.getCount());
     }
 
     /**
@@ -887,7 +887,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param output         recipe result
      * @param amount         count of the recipe result
      */
-    protected StoneCuttingRecipeBuilder stoneCutting(ResourceLocation recipeLocation, ItemLike output, int amount){
+    protected StoneCuttingRecipeBuilder stoneCutting(Identifier recipeLocation, ItemLike output, int amount){
         return this.recipe(recipeLocation, new StoneCuttingRecipeBuilder(recipeLocation, output, amount));
     }
 
@@ -899,7 +899,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param amount     count of the recipe result
      */
     protected StoneCuttingRecipeBuilder stoneCutting(String namespace, String identifier, ItemLike output, int amount){
-        return this.stoneCutting(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output, amount);
+        return this.stoneCutting(Identifier.fromNamespaceAndPath(namespace, identifier), output, amount);
     }
 
     /**
@@ -918,7 +918,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param amount count of the recipe result
      */
     protected StoneCuttingRecipeBuilder stoneCutting(ItemLike output, int amount){
-        ResourceLocation identifier = Registries.ITEMS.getIdentifier(output.asItem());
+        Identifier identifier = Registries.ITEMS.getIdentifier(output.asItem());
         return this.stoneCutting(identifier, output, amount);
     }
 
@@ -927,7 +927,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param recipeLocation location of the recipe
      * @param output         recipe result
      */
-    protected StoneCuttingRecipeBuilder stoneCutting(ResourceLocation recipeLocation, ItemLike output){
+    protected StoneCuttingRecipeBuilder stoneCutting(Identifier recipeLocation, ItemLike output){
         return this.stoneCutting(recipeLocation, output, 1);
     }
 
@@ -938,7 +938,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
      * @param output     recipe result
      */
     protected StoneCuttingRecipeBuilder stoneCutting(String namespace, String identifier, ItemLike output){
-        return this.stoneCutting(ResourceLocation.fromNamespaceAndPath(namespace, identifier), output, 1);
+        return this.stoneCutting(Identifier.fromNamespaceAndPath(namespace, identifier), output, 1);
     }
 
     /**
@@ -965,7 +965,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
     public static abstract class RecipeBuilder<T extends RecipeBuilder<T>> {
 
-        protected final ResourceLocation identifier;
+        protected final Identifier identifier;
         private final List<ICondition> conditions = new ArrayList<>();
         private final ItemLike output;
         private final DataComponentPatch outputComponents;
@@ -975,7 +975,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private boolean hasAdvancement = true;
         private final List<Pair<CriterionTrigger<?>,CriterionTriggerInstance>> unlockedBy = new ArrayList<>();
 
-        protected RecipeBuilder(ResourceLocation identifier, RecipeSerializer<?> serializer, ItemLike output, DataComponentPatch outputComponents, int outputCount){
+        protected RecipeBuilder(Identifier identifier, RecipeSerializer<?> serializer, ItemLike output, DataComponentPatch outputComponents, int outputCount){
             this.identifier = identifier;
             this.output = output;
             this.outputComponents = outputComponents;
@@ -1092,7 +1092,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private final List<String> pattern = new ArrayList<>();
         private final Map<Character,RecipeInput> inputs = new HashMap<>();
 
-        private ShapedRecipeBuilder(ResourceLocation identifier, ItemLike output, DataComponentPatch outputComponents, int outputCount){
+        private ShapedRecipeBuilder(Identifier identifier, ItemLike output, DataComponentPatch outputComponents, int outputCount){
             super(identifier, RecipeSerializer.SHAPED_RECIPE, output, outputComponents, outputCount);
         }
 
@@ -1168,7 +1168,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
         private final List<RecipeInput> inputs = new ArrayList<>();
 
-        private ShapelessRecipeBuilder(ResourceLocation identifier, ItemLike output, DataComponentPatch outputComponents, int outputCount){
+        private ShapelessRecipeBuilder(Identifier identifier, ItemLike output, DataComponentPatch outputComponents, int outputCount){
             super(identifier, RecipeSerializer.SHAPELESS_RECIPE, output, outputComponents, outputCount);
         }
 
@@ -1265,7 +1265,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private int experience;
         private int duration = 200;
 
-        private SmeltingRecipeBuilder(ResourceLocation identifier, ItemLike output, DataComponentPatch outputComponents, int count){
+        private SmeltingRecipeBuilder(Identifier identifier, ItemLike output, DataComponentPatch outputComponents, int count){
             super(identifier, RecipeSerializer.SMELTING_RECIPE, output, outputComponents, count);
         }
 
@@ -1397,7 +1397,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
         private RecipeInput base, addition;
 
-        private SmithingRecipeBuilder(ResourceLocation identifier, ItemLike output, DataComponentPatch outputComponents, int outputCount){
+        private SmithingRecipeBuilder(Identifier identifier, ItemLike output, DataComponentPatch outputComponents, int outputCount){
             super(identifier, RecipeSerializer.SMITHING_TRANSFORM, output, outputComponents, outputCount);
         }
 
@@ -1464,7 +1464,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
 
         private RecipeInput input;
 
-        private StoneCuttingRecipeBuilder(ResourceLocation identifier, ItemLike output, int outputCount){
+        private StoneCuttingRecipeBuilder(Identifier identifier, ItemLike output, int outputCount){
             super(identifier, RecipeSerializer.STONECUTTER, output, null, outputCount);
         }
 
@@ -1518,7 +1518,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
                         if(key != null){
                             category = TAB_TO_CATEGORY.containsKey(key) ?
                                 TAB_TO_CATEGORY.get(key).getFolderName() :
-                                key.location().getPath();
+                                key.identifier().getPath();
                         }
                     }
                 }
@@ -1577,7 +1577,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
             return of(Arrays.stream(stacks).map(ItemStack::getItem).toArray(ItemLike[]::new));
         }
 
-        static RecipeInput of(ResourceLocation tag){
+        static RecipeInput of(Identifier tag){
             return new RecipeInput(List.of(new Entry(null, tag)));
         }
 
@@ -1585,7 +1585,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
             return of(tag.location());
         }
 
-        private record Entry(ItemLike item, ResourceLocation tag) {
+        private record Entry(ItemLike item, Identifier tag) {
         }
     }
 }

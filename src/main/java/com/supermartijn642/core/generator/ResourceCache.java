@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
 import com.supermartijn642.core.generator.aggregator.ResourceAggregator;
 import com.supermartijn642.core.util.Pair;
 import net.minecraft.data.HashCache;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -148,7 +148,7 @@ public abstract class ResourceCache {
         }
 
         private boolean existsInLoadedResources(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
-            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension);
+            Identifier location = Identifier.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension);
             return this.existingFileHelper.exists(location, resourceType == ResourceType.DATA ? PackType.SERVER_DATA : PackType.CLIENT_RESOURCES);
         }
 
@@ -166,14 +166,14 @@ public abstract class ResourceCache {
         @Override
         public void trackToBeGeneratedResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             this.toBeGenerated.add(this.constructPath(resourceType, namespace, directory, fileName, extension));
-            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension);
+            Identifier location = Identifier.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension);
             this.existingFileHelper.trackGenerated(location, resourceType == ResourceType.DATA ? PackType.SERVER_DATA : PackType.CLIENT_RESOURCES, extension, directory);
         }
 
         @Override
         public Optional<InputStream> getExistingResource(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
             try{
-                Resource resource = this.existingFileHelper.getResource(ResourceLocation.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension), resourceType == ResourceType.DATA ? PackType.SERVER_DATA : PackType.CLIENT_RESOURCES);
+                Resource resource = this.existingFileHelper.getResource(Identifier.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension), resourceType == ResourceType.DATA ? PackType.SERVER_DATA : PackType.CLIENT_RESOURCES);
                 return Optional.of(resource.open());
             }catch(FileNotFoundException | NoSuchElementException e){
                 return Optional.empty();

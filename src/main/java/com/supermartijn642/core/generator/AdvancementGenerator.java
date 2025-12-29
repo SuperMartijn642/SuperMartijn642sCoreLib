@@ -15,11 +15,11 @@ import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.advancements.critereon.InventoryChangeTrigger;
+import net.minecraft.advancements.criterion.InventoryChangeTrigger;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.RecipeBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.crafting.conditions.ICondition;
@@ -31,7 +31,7 @@ import java.util.*;
  */
 public abstract class AdvancementGenerator extends ResourceGenerator {
 
-    private final Map<ResourceLocation,AdvancementBuilder> advancements = new HashMap<>();
+    private final Map<Identifier,AdvancementBuilder> advancements = new HashMap<>();
 
     public AdvancementGenerator(String modid, ResourceCache cache){
         super(modid, cache);
@@ -67,7 +67,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             }
             // Parent
             if(advancementBuilder.parent != null){
-                ResourceLocation parent = advancementBuilder.parent;
+                Identifier parent = advancementBuilder.parent;
                 if(!this.advancements.containsKey(parent) && !this.cache.doesResourceExist(ResourceType.DATA, parent.getNamespace(), "advancement", parent.getPath(), ".json"))
                     throw new RuntimeException("Could not find parent '" + parent + "' for advancement '" + advancementBuilder.identifier + "'!");
                 json.addProperty("parent", parent.toString());
@@ -133,7 +133,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             // Recipe rewards
             if(!advancementBuilder.rewardRecipes.isEmpty()){
                 JsonArray recipesJson = new JsonArray();
-                for(ResourceLocation rewardRecipe : advancementBuilder.rewardRecipes){
+                for(Identifier rewardRecipe : advancementBuilder.rewardRecipes){
                     if(!this.cache.doesResourceExist(ResourceType.DATA, rewardRecipe.getNamespace(), "recipe", rewardRecipe.getPath(), ".json"))
                         throw new RuntimeException("Could not find reward recipe '" + rewardRecipe + "' for advancement '" + advancementBuilder.identifier + "'!");
 
@@ -144,7 +144,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
             // Loot table rewards
             if(!advancementBuilder.rewardLootTables.isEmpty()){
                 JsonArray lootTablesJson = new JsonArray();
-                for(ResourceLocation rewardLootTable : advancementBuilder.rewardLootTables){
+                for(Identifier rewardLootTable : advancementBuilder.rewardLootTables){
                     if(!this.cache.doesResourceExist(ResourceType.DATA, rewardLootTable.getNamespace(), "loot_tables", rewardLootTable.getPath(), ".json"))
                         throw new RuntimeException("Could not find reward loot table '" + rewardLootTable + "' for advancement '" + advancementBuilder.identifier + "'!");
 
@@ -159,7 +159,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
                 json.add("rewards", rewardsJson);
 
             // Save the object to the cache
-            ResourceLocation identifier = advancementBuilder.identifier;
+            Identifier identifier = advancementBuilder.identifier;
             this.cache.saveJsonResource(ResourceType.DATA, json, identifier.getNamespace(), "advancement", identifier.getPath());
         }
     }
@@ -168,7 +168,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
      * Creates a new advancement builder for the given identifier.
      * @param identifier location of the advancement
      */
-    public AdvancementBuilder advancement(ResourceLocation identifier){
+    public AdvancementBuilder advancement(Identifier identifier){
         if(this.advancements.containsKey(identifier))
             throw new RuntimeException("Duplicate advancement with identifier '" + identifier + "'!");
 
@@ -182,7 +182,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
      * @param path      path of the advancement
      */
     public AdvancementBuilder advancement(String namespace, String path){
-        return this.advancement(ResourceLocation.fromNamespaceAndPath(namespace, path));
+        return this.advancement(Identifier.fromNamespaceAndPath(namespace, path));
     }
 
     /**
@@ -201,25 +201,25 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
     protected static class AdvancementBuilder {
 
         protected final String modid;
-        protected final ResourceLocation identifier;
+        protected final Identifier identifier;
         private final List<ICondition> conditions = new ArrayList<>();
         private final Map<String,Pair<CriterionTrigger<?>,CriterionTriggerInstance>> criteria = new LinkedHashMap<>();
         private final List<String[]> requirements = new ArrayList<>();
-        private final List<ResourceLocation> rewardLootTables = new ArrayList<>();
-        private final List<ResourceLocation> rewardRecipes = new ArrayList<>();
-        private ResourceLocation parent;
+        private final List<Identifier> rewardLootTables = new ArrayList<>();
+        private final List<Identifier> rewardRecipes = new ArrayList<>();
+        private Identifier parent;
         private Item icon;
         private DataComponentPatch iconComponents;
         private String titleKey;
         private String descriptionKey;
         private AdvancementType frame = AdvancementType.TASK;
-        private ResourceLocation background;
+        private Identifier background;
         private boolean showToast = true;
         private boolean announceToChat = true;
         private boolean hidden;
         private int rewardExperience;
 
-        public AdvancementBuilder(String modid, ResourceLocation identifier){
+        public AdvancementBuilder(String modid, Identifier identifier){
             this.modid = modid;
             this.identifier = identifier;
             this.titleKey = identifier.getNamespace() + ".advancement." + identifier.getPath() + ".title";
@@ -266,7 +266,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
          * Sets the parent advancement for this advancement.
          * @param advancement location of the parent advancement
          */
-        public AdvancementBuilder parent(ResourceLocation advancement){
+        public AdvancementBuilder parent(Identifier advancement){
             if(this.identifier.equals(advancement))
                 throw new IllegalArgumentException("Advancement '" + this.identifier + "' cannot have itself as parent!");
 
@@ -280,7 +280,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
          * @param path      path of the parent advancement
          */
         public AdvancementBuilder parent(String namespace, String path){
-            return this.parent(ResourceLocation.fromNamespaceAndPath(namespace, path));
+            return this.parent(Identifier.fromNamespaceAndPath(namespace, path));
         }
 
         /**
@@ -314,7 +314,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
          * Sets the icon for this advancement.
          * @param item identifier of the item to use as icon
          */
-        public AdvancementBuilder icon(ResourceLocation item){
+        public AdvancementBuilder icon(Identifier item){
             if(!Registries.ITEMS.hasIdentifier(item))
                 throw new IllegalArgumentException("Could not find any item registered under '" + item + "'!");
 
@@ -327,7 +327,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
          * @param identifier path of the item to use as icon
          */
         public AdvancementBuilder icon(String namespace, String identifier){
-            return this.icon(ResourceLocation.fromNamespaceAndPath(namespace, identifier));
+            return this.icon(Identifier.fromNamespaceAndPath(namespace, identifier));
         }
 
         /**
@@ -388,7 +388,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
          * Sets the background texture for this advancement. Only has effect if this advancement has no parent.
          * @param texture location of the background texture
          */
-        public AdvancementBuilder background(ResourceLocation texture){
+        public AdvancementBuilder background(Identifier texture){
             this.background = texture;
             return this;
         }
@@ -399,7 +399,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
          * @param path      path of the background texture
          */
         public AdvancementBuilder background(String namespace, String path){
-            return this.background(ResourceLocation.fromNamespaceAndPath(namespace, path));
+            return this.background(Identifier.fromNamespaceAndPath(namespace, path));
         }
 
         /**
@@ -523,7 +523,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
          * Adds a loot table to be awarded when the advancement is obtained.
          * @param lootTable location of the loot table
          */
-        public AdvancementBuilder rewardLootTable(ResourceLocation lootTable){
+        public AdvancementBuilder rewardLootTable(Identifier lootTable){
             this.rewardLootTables.add(lootTable);
             return this;
         }
@@ -534,14 +534,14 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
          * @param path      path of the loot table
          */
         public AdvancementBuilder rewardLootTable(String namespace, String path){
-            return this.rewardLootTable(ResourceLocation.fromNamespaceAndPath(namespace, path));
+            return this.rewardLootTable(Identifier.fromNamespaceAndPath(namespace, path));
         }
 
         /**
          * Adds a recipe to be awarded when the advancement is obtained.
          * @param recipe location of the recipe
          */
-        public AdvancementBuilder rewardRecipe(ResourceLocation recipe){
+        public AdvancementBuilder rewardRecipe(Identifier recipe){
             if(this.rewardRecipes.contains(recipe))
                 throw new RuntimeException("Duplicate recipe reward '" + recipe + "' for advancement '" + this.identifier + "'!");
 
@@ -555,7 +555,7 @@ public abstract class AdvancementGenerator extends ResourceGenerator {
          * @param path      path of the recipe
          */
         public AdvancementBuilder rewardRecipe(String namespace, String path){
-            return this.rewardRecipe(ResourceLocation.fromNamespaceAndPath(namespace, path));
+            return this.rewardRecipe(Identifier.fromNamespaceAndPath(namespace, path));
         }
     }
 }

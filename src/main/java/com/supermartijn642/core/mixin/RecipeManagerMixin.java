@@ -1,7 +1,7 @@
 package com.supermartijn642.core.mixin;
 
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.crafting.Recipe;
@@ -31,9 +31,9 @@ public class RecipeManagerMixin {
         ),
         locals = LocalCapture.CAPTURE_FAILHARD
     )
-    private void prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller, CallbackInfoReturnable<?> ci, SortedMap<ResourceLocation,Recipe<?>> map){
+    private void prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller, CallbackInfoReturnable<?> ci, SortedMap<Identifier,Recipe<?>> map){
         // Filter out dummy recipes
-        List<ResourceLocation> remove = new ArrayList<>();
+        List<Identifier> remove = new ArrayList<>();
         map.forEach((location, recipe) -> {
             if(recipe == ConditionalRecipeSerializer.DUMMY_RECIPE)
                 remove.add(location);

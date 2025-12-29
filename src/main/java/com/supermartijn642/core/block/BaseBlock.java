@@ -9,8 +9,8 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.DependantName;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -68,7 +68,7 @@ public class BaseBlock extends Block {
 
     private static Properties removeDescriptionAndDropsFromProperties(Properties properties){
         LAST_REMOVED_DROPS.set(properties.drops);
-        return properties.overrideDescription("").noLootTable().setId(ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy")));
+        return properties.overrideDescription("").noLootTable().setId(ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, Identifier.fromNamespaceAndPath("supermartijn642corelib", "dummy")));
     }
 
     @ApiStatus.Internal
@@ -76,7 +76,7 @@ public class BaseBlock extends Block {
         if(!this.resolvedDrops)
             this.getLootTable();
         if(!this.resolvedRegistryDependencies){
-            ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
+            Identifier identifier = Registries.BLOCKS.getIdentifier(this);
             this.descriptionId = identifier.getNamespace() + ".block." + identifier.getPath();
             this.resolvedRegistryDependencies = true;
         }
@@ -105,7 +105,7 @@ public class BaseBlock extends Block {
                 if(this.properties.noLootTable)
                     this.drops = Optional.empty();
                 else if(this.properties.lootTable != null){
-                    ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
+                    Identifier identifier = Registries.BLOCKS.getIdentifier(this);
                     ResourceKey<Block> key = ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, identifier);
                     this.drops = this.properties.lootTable.apply(key);
                 }else if(this.properties.lootTableBlock != null){
@@ -121,7 +121,7 @@ public class BaseBlock extends Block {
                         Registries.BLOCKS.getIdentifier(this).withPrefix("blocks/"))
                     );
             }else{
-                ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
+                Identifier identifier = Registries.BLOCKS.getIdentifier(this);
                 ResourceKey<Block> key = ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, identifier);
                 this.drops = this.vanillaDrops.get(key);
             }

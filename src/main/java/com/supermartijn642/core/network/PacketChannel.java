@@ -8,8 +8,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
@@ -71,7 +71,7 @@ public class PacketChannel {
     }
 
     private final String modid, name;
-    private final ResourceLocation channelName;
+    private final Identifier channelName;
     private final CustomPacketPayload.Type<Payload> payloadType;
     private final Channel<CustomPacketPayload> channel;
 
@@ -81,14 +81,14 @@ public class PacketChannel {
     private PacketChannel(String modid, String name){
         this.modid = modid;
         this.name = name;
-        this.channelName = ResourceLocation.fromNamespaceAndPath(modid, name);
+        this.channelName = Identifier.fromNamespaceAndPath(modid, name);
         this.payloadType = new CustomPacketPayload.Type<>(this.channelName);
 
         StreamCodec<FriendlyByteBuf,Payload> payloadCodec = StreamCodec.of(
             (buffer, payload) -> this.write(payload.packet, buffer),
             buffer -> new Payload(this.read(buffer))
         );
-        this.channel = ChannelBuilder.named(ResourceLocation.fromNamespaceAndPath(modid, name))
+        this.channel = ChannelBuilder.named(Identifier.fromNamespaceAndPath(modid, name))
             .networkProtocolVersion(1)
             .acceptedVersions((status, version) -> version == 1)
             .payloadChannel()

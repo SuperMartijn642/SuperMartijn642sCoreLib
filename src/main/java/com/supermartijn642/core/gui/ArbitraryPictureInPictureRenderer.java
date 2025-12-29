@@ -86,7 +86,7 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
         guiRenderState.submitBlitToCurrentLayer(
             new BlitRenderState(
                 RenderPipelines.GUI_TEXTURED_PREMULTIPLIED_ALPHA,
-                TextureSetup.singleTexture(texture.textureView),
+                TextureSetup.singleTexture(texture.textureView, RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST)),
                 state.pose(),
                 state.x0(),
                 state.y0(),
@@ -106,7 +106,6 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
     private TextureEntry createTexture(int width, int height){
         GpuDevice device = RenderSystem.getDevice();
         GpuTexture texture = device.createTexture(this::getTextureLabel, 12, TextureFormat.RGBA8, width, height, 1, 1);
-        texture.setTextureFilter(FilterMode.NEAREST, false);
         GpuTextureView textureView = device.createTextureView(texture);
         GpuTexture depthTexture = device.createTexture(() -> this.getTextureLabel() + " depth texture", 8, TextureFormat.DEPTH32, width, height, 1, 1);
         GpuTextureView depthTextureView = device.createTextureView(depthTexture);
@@ -141,6 +140,14 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
     @Override
     protected String getTextureLabel(){
         return "SuperMartijn642's Core Library custom picture in picture rendering";
+    }
+
+    @Override
+    public void close(){
+        super.close();
+        this.textures.forEach(TextureEntry::close);
+        this.textures.clear();
+        this.inUse.clear();
     }
 
     public record State(int x, int y, int width, int height,

@@ -12,7 +12,7 @@ import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ResolvedModel;
 import net.minecraft.client.resources.model.SpriteGetter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,7 +34,7 @@ public class ModelBakeryMixin {
 
     @Final
     @Shadow
-    private Map<ResourceLocation,ResolvedModel> resolvedModels;
+    private Map<Identifier,ResolvedModel> resolvedModels;
 
     @Inject(
         method = "bakeModels",
@@ -49,7 +49,7 @@ public class ModelBakeryMixin {
         // Catch errors here to prevent the model manager from continuously retrying to load models
         try{
             // Apply block model consumers
-            Function<ResourceLocation,BlockStateModel> modelGetter = location -> new SingleVariant(SimpleModelWrapper.bake(modelBaker, location, BlockModelRotation.X0_Y0));
+            Function<Identifier,BlockStateModel> modelGetter = location -> new SingleVariant(SimpleModelWrapper.bake(modelBaker, location, BlockModelRotation.IDENTITY));
             ClientRegistrationHandler.applyBlockModelConsumersInternal(modelGetter);
         }catch(Exception e){
             CoreLib.LOGGER.error("Encountered an error while applying model consumers!", e);
@@ -66,7 +66,7 @@ public class ModelBakeryMixin {
         require = 1,
         allow = 1
     )
-    private void bakeModelsTail(SpriteGetter spriteGetter, Executor executor, CallbackInfoReturnable<ModelBakery.BakingResult> ci, @Local(ordinal = 0) LocalRef<CompletableFuture<Map<BlockState,BlockStateModel>>> blockModels, @Local(ordinal = 1) LocalRef<CompletableFuture<Map<ResourceLocation,ItemModel>>> itemModels){
+    private void bakeModelsTail(SpriteGetter spriteGetter, Executor executor, CallbackInfoReturnable<ModelBakery.BakingResult> ci, @Local(ordinal = 0) LocalRef<CompletableFuture<Map<BlockState,BlockStateModel>>> blockModels, @Local(ordinal = 1) LocalRef<CompletableFuture<Map<Identifier,ItemModel>>> itemModels){
         // Catch errors here to prevent the model manager from continuously retrying to load models
         try{
             // Apply block model overwrites

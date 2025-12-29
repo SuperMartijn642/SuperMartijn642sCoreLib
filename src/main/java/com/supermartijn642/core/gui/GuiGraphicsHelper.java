@@ -2,6 +2,7 @@ package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.cursor.CursorType;
+import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
@@ -22,6 +23,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPosition
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.item.TrackingItemStackRenderState;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.metadata.gui.GuiMetadataSection;
 import net.minecraft.client.resources.metadata.gui.GuiSpriteScaling;
@@ -29,7 +31,7 @@ import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
@@ -61,11 +63,11 @@ public final class GuiGraphicsHelper {
         return helper;
     }
 
-    public static final ResourceLocation SCREEN_BACKGROUND_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/background");
-    public static final ResourceLocation BUTTON_DEFAULT_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/button_default");
-    public static final ResourceLocation BUTTON_HIGHLIGHTED_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/button_highlighted");
-    public static final ResourceLocation BUTTON_DISABLED_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/button_disabled");
-    public static final ResourceLocation SLOT_SPRITE = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "gui/slot");
+    public static final Identifier SCREEN_BACKGROUND_SPRITE = Identifier.fromNamespaceAndPath("supermartijn642corelib", "gui/background");
+    public static final Identifier BUTTON_DEFAULT_SPRITE = Identifier.fromNamespaceAndPath("supermartijn642corelib", "gui/button_default");
+    public static final Identifier BUTTON_HIGHLIGHTED_SPRITE = Identifier.fromNamespaceAndPath("supermartijn642corelib", "gui/button_highlighted");
+    public static final Identifier BUTTON_DISABLED_SPRITE = Identifier.fromNamespaceAndPath("supermartijn642corelib", "gui/button_disabled");
+    public static final Identifier SLOT_SPRITE = Identifier.fromNamespaceAndPath("supermartijn642corelib", "gui/slot");
 
     private final GuiGraphics guiGraphics;
     private TextProperties textProperties;
@@ -145,6 +147,7 @@ public final class GuiGraphicsHelper {
                     this.textProperties.color,
                     this.textProperties.backgroundColor,
                     this.textProperties.shadow,
+                    true,
                     scissor
                 ));
             }
@@ -178,6 +181,7 @@ public final class GuiGraphicsHelper {
             this.textProperties.color,
             this.textProperties.backgroundColor,
             this.textProperties.shadow,
+            true,
             this.guiGraphics.scissorStack.peek()
         ));
     }
@@ -194,7 +198,7 @@ public final class GuiGraphicsHelper {
         this.submitText(Component.literal(text), x, y, null);
     }
 
-    public void submitTexture(GpuTextureView texture, float x, float y, float width, float height, Consumer<TextureProperties> properties){
+    public void submitTexture(GpuTextureView texture, GpuSampler sampler, float x, float y, float width, float height, Consumer<TextureProperties> properties){
         // Resolve the properties
         if(this.textureProperties == null)
             this.textureProperties = new TextureProperties();
@@ -212,28 +216,27 @@ public final class GuiGraphicsHelper {
         // Submit the texture
         this.guiGraphics.submitBlit(
             this.textureProperties.renderPipeline,
-            texture,
+            texture, sampler,
             (int)x, (int)y, (int)(x + width), (int)(y + height),
             this.textureProperties.u, this.textureProperties.u + this.textureProperties.w, this.textureProperties.v, this.textureProperties.v + this.textureProperties.h,
             this.textureProperties.color
         );
     }
 
-    public void submitTexture(GpuTextureView texture, float x, float y, float width, float height){
-        this.submitTexture(texture, x, y, width, height, null);
+    public void submitTexture(GpuTextureView texture, GpuSampler sampler, float x, float y, float width, float height){
+        this.submitTexture(texture, sampler, x, y, width, height, null);
     }
 
-    public void submitTexture(ResourceLocation texture, float x, float y, float width, float height, Consumer<TextureProperties> properties){
-        GpuTextureView textureView = this.guiGraphics.minecraft.getTextureManager().getTexture(texture).getTextureView();
-        this.submitTexture(textureView, x, y, width, height, properties);
+    public void submitTexture(Identifier texture, float x, float y, float width, float height, Consumer<TextureProperties> properties){
+        AbstractTexture t = this.guiGraphics.minecraft.getTextureManager().getTexture(texture);
+        this.submitTexture(t.getTextureView(), t.getSampler(), x, y, width, height, properties);
     }
 
-    public void submitTexture(ResourceLocation texture, float x, float y, float width, float height){
+    public void submitTexture(Identifier texture, float x, float y, float width, float height){
         this.submitTexture(texture, x, y, width, height, null);
     }
 
     public void submitSprite(TextureAtlasSprite sprite, float x, float y, float width, float height, Consumer<TextureProperties> properties){
-        //noinspection resource
         GuiSpriteScaling scaling = sprite.contents().getAdditionalMetadata(GuiMetadataSection.TYPE).orElse(GuiMetadataSection.DEFAULT).scaling();
 
         // Handle stretch scaling
@@ -266,7 +269,6 @@ public final class GuiGraphicsHelper {
         if(this.textureProperties.centerVertically)
             y -= height / 2f;
         // Call original method
-        //noinspection resource
         this.guiGraphics.blitSprite(
             this.textureProperties.renderPipeline,
             sprite.contents().name(),
@@ -279,11 +281,11 @@ public final class GuiGraphicsHelper {
         this.submitSprite(sprite, x, y, width, height, null);
     }
 
-    public void submitSprite(ResourceLocation sprite, float x, float y, float width, float height, Consumer<TextureProperties> properties){
+    public void submitSprite(Identifier sprite, float x, float y, float width, float height, Consumer<TextureProperties> properties){
         this.submitSprite(this.guiGraphics.guiSprites.getSprite(sprite), x, y, width, height, properties);
     }
 
-    public void submitSprite(ResourceLocation sprite, float x, float y, float width, float height){
+    public void submitSprite(Identifier sprite, float x, float y, float width, float height){
         this.submitSprite(sprite, x, y, width, height, null);
     }
 
@@ -409,7 +411,7 @@ public final class GuiGraphicsHelper {
         Font font = this.tooltipProperties.font == null ? ClientUtils.getFontRenderer() : this.tooltipProperties.font;
         List<ClientTooltipComponent> components = List.copyOf(this.tooltipContent.content);
         ClientTooltipPositioner positioner = this.tooltipProperties.positioner;
-        ResourceLocation frame = this.tooltipProperties.frame;
+        Identifier frame = this.tooltipProperties.frame;
         this.guiGraphics.deferredTooltip = () -> {
             this.guiGraphics.pose().pushMatrix().set(matrix);
             this.guiGraphics.renderTooltip(font, components, (int)x, (int)y, positioner, frame);
@@ -818,7 +820,7 @@ public final class GuiGraphicsHelper {
     public static class TooltipProperties {
         private ClientTooltipPositioner positioner;
         private Font font;
-        private ResourceLocation frame;
+        private Identifier frame;
 
         private TooltipProperties(){
             this.clear();
@@ -852,7 +854,7 @@ public final class GuiGraphicsHelper {
             return this.font(null);
         }
 
-        public TooltipProperties frame(ResourceLocation texture){
+        public TooltipProperties frame(Identifier texture){
             this.frame = texture;
             return this;
         }

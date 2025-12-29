@@ -50,14 +50,14 @@ public abstract class BlockEntityBasePacket<T extends BlockEntity> extends Block
         super.write(buffer);
         buffer.writeBoolean(this.dimension != null);
         if(this.dimension != null)
-            buffer.writeResourceLocation(this.dimension.location());
+            buffer.writeIdentifier(this.dimension.identifier());
     }
 
     @Override
     public void read(FriendlyByteBuf buffer){
         super.read(buffer);
         if(buffer.readBoolean())
-            this.dimension = ResourceKey.create(Registries.DIMENSION, buffer.readResourceLocation());
+            this.dimension = ResourceKey.create(Registries.DIMENSION, buffer.readIdentifier());
     }
 
     @Override

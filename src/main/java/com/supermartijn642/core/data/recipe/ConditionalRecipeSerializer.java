@@ -10,7 +10,7 @@ import com.supermartijn642.core.registry.Registries;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
@@ -27,7 +27,7 @@ import java.util.stream.Stream;
  */
 public final class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> {
 
-    public static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.simple(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy"));
+    public static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.simple(Identifier.fromNamespaceAndPath("supermartijn642corelib", "dummy"));
     public static final Recipe<?> DUMMY_RECIPE = new DummyRecipe();
     public static final ConditionalRecipeSerializer INSTANCE = new ConditionalRecipeSerializer();
 
@@ -96,7 +96,7 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
     private ConditionalRecipeSerializer(){
     }
 
-    public static <T> JsonElement unwrapRecipe(ResourceLocation location, JsonObject json, DynamicOps<T> ops){
+    public static <T> JsonElement unwrapRecipe(Identifier location, JsonObject json, DynamicOps<T> ops){
         if(!json.has("conditions") || !json.get("conditions").isJsonArray())
             throw new RuntimeException("Conditional recipe '" + location + "' must have 'conditions' array!");
         if(!json.has("recipe") || !json.get("recipe").isJsonObject())
