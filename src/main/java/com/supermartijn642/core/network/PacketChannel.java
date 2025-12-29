@@ -91,11 +91,19 @@ public class PacketChannel {
             this.handle(packet, new PacketContext(CoreSide.SERVER, null, server));
         });
         // Play stage
-        if(CommonUtils.getEnvironmentSide().isClient())
-            ClientPlayNetworking.registerGlobalReceiver(this.channelName, (minecraft, packetListener, buffer, sender) -> {
-                BasePacket packet = this.read(buffer, PacketDirection.SERVER_TO_CLIENT);
-                this.handle(packet, new PacketContext(CoreSide.CLIENT, minecraft.player, null));
-            });
+        if(CommonUtils.getEnvironmentSide().isClient()){
+            // This has to be this dumb because the payload handler lambda calls ClientPlayNetworking$Context#player() which returns a client-only class LocalPlayer
+            //noinspection Convert2Lambda,TrivialFunctionalExpressionUsage
+            new Runnable() {
+                @Override
+                public void run(){
+                    ClientPlayNetworking.registerGlobalReceiver(PacketChannel.this.channelName, (minecraft, packetListener, buffer, sender) -> {
+                        BasePacket packet = PacketChannel.this.read(buffer, PacketDirection.SERVER_TO_CLIENT);
+                        PacketChannel.this.handle(packet, new PacketContext(CoreSide.CLIENT, minecraft.player, null));
+                    });
+                }
+            }.run();
+        }
         ServerPlayNetworking.registerGlobalReceiver(this.channelName, (server, player, packetListener, buffer, sender) -> {
             BasePacket packet = this.read(buffer, PacketDirection.CLIENT_TO_SERVER);
             this.handle(packet, new PacketContext(CoreSide.SERVER, player, server));
