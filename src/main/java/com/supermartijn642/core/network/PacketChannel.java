@@ -19,8 +19,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
@@ -72,7 +72,7 @@ public class PacketChannel {
     }
 
     private final String modid, name;
-    private final ResourceLocation channelName;
+    private final Identifier channelName;
     private final CustomPacketPayload.Type<Payload> payloadType;
 
     private final List<PacketProperties<?>> packetsByIndex = new ArrayList<>();
@@ -81,7 +81,7 @@ public class PacketChannel {
     private PacketChannel(String modid, String name){
         this.modid = modid;
         this.name = name;
-        this.channelName = ResourceLocation.fromNamespaceAndPath(modid, name);
+        this.channelName = Identifier.fromNamespaceAndPath(modid, name);
         this.payloadType = new CustomPacketPayload.Type<>(this.channelName);
 
         StreamCodec<FriendlyByteBuf,Payload> s2cPayloadCodec = StreamCodec.of(

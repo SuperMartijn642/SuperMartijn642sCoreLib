@@ -5,7 +5,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.objectweb.asm.Type;
 
 import java.lang.annotation.ElementType;
@@ -61,8 +61,8 @@ public @interface RegistryEntryAcceptor {
 
         private static final Type TYPE = Type.getType(RegistryEntryAcceptor.class);
 
-        private static final Map<Registries.Registry<?>,Map<ResourceLocation,Set<Field>>> FIELDS = new HashMap<>();
-        private static final Map<Registries.Registry<?>,Map<ResourceLocation,Set<Method>>> METHODS = new HashMap<>();
+        private static final Map<Registries.Registry<?>,Map<Identifier,Set<Field>>> FIELDS = new HashMap<>();
+        private static final Map<Registries.Registry<?>,Map<Identifier,Set<Method>>> METHODS = new HashMap<>();
 
         public static void gatherAnnotatedFields(){
             for(EntrypointContainer<ModInitializer> entrypoint : FabricLoader.getInstance().getEntrypointContainers("main", ModInitializer.class)){
@@ -98,7 +98,7 @@ public @interface RegistryEntryAcceptor {
 
                         // Add the field
                         FIELDS.computeIfAbsent(registry.registry, o -> new HashMap<>())
-                            .computeIfAbsent(ResourceLocation.fromNamespaceAndPath(namespace, identifier), o -> new HashSet<>())
+                            .computeIfAbsent(Identifier.fromNamespaceAndPath(namespace, identifier), o -> new HashSet<>())
                             .add(field);
                     }
                 }catch(NoClassDefFoundError ignored){
@@ -139,7 +139,7 @@ public @interface RegistryEntryAcceptor {
 
                         // Add the method
                         METHODS.computeIfAbsent(registry.registry, o -> new HashMap<>())
-                            .computeIfAbsent(ResourceLocation.fromNamespaceAndPath(namespace, identifier), o -> new HashSet<>())
+                            .computeIfAbsent(Identifier.fromNamespaceAndPath(namespace, identifier), o -> new HashSet<>())
                             .add(method);
                     }
                 }catch(NoClassDefFoundError ignored){
@@ -159,16 +159,16 @@ public @interface RegistryEntryAcceptor {
             }
         }
 
-        public static void onRegisterEvent(Registries.Registry<?> registry, ResourceLocation identifier, Object object){
+        public static void onRegisterEvent(Registries.Registry<?> registry, Identifier identifier, Object object){
             applyToFields(registry, identifier, object);
             applyToMethods(registry, identifier, object);
         }
 
-        private static void applyToFields(Registries.Registry<?> registry, ResourceLocation identifier, Object object){
+        private static void applyToFields(Registries.Registry<?> registry, Identifier identifier, Object object){
             if(registry == null || !FIELDS.containsKey(registry))
                 return;
 
-            for(Map.Entry<ResourceLocation,Set<Field>> entry : FIELDS.get(registry).entrySet()){
+            for(Map.Entry<Identifier,Set<Field>> entry : FIELDS.get(registry).entrySet()){
                 if(!identifier.equals(entry.getKey()))
                     continue;
 
@@ -189,11 +189,11 @@ public @interface RegistryEntryAcceptor {
             }
         }
 
-        private static void applyToMethods(Registries.Registry<?> registry, ResourceLocation identifier, Object object){
+        private static void applyToMethods(Registries.Registry<?> registry, Identifier identifier, Object object){
             if(registry == null || !METHODS.containsKey(registry))
                 return;
 
-            for(Map.Entry<ResourceLocation,Set<Method>> entry : METHODS.get(registry).entrySet()){
+            for(Map.Entry<Identifier,Set<Method>> entry : METHODS.get(registry).entrySet()){
                 if(!identifier.equals(entry.getKey()))
                     continue;
 
@@ -225,14 +225,14 @@ public @interface RegistryEntryAcceptor {
         private static void reportMissing(Registries.Registry<?> registry){
             // Fields
             if(FIELDS.containsKey(registry)){
-                for(Map.Entry<ResourceLocation,Set<Field>> entry : FIELDS.get(registry).entrySet()){
+                for(Map.Entry<Identifier,Set<Field>> entry : FIELDS.get(registry).entrySet()){
                     if(!registry.hasIdentifier(entry.getKey()))
                         CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getRegistryIdentifier() + "' for @RegistryEntryAcceptor!");
                 }
             }
             // Methods
             if(METHODS.containsKey(registry)){
-                for(Map.Entry<ResourceLocation,Set<Method>> entry : METHODS.get(registry).entrySet()){
+                for(Map.Entry<Identifier,Set<Method>> entry : METHODS.get(registry).entrySet()){
                     if(!registry.hasIdentifier(entry.getKey()))
                         CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getRegistryIdentifier() + "' for @RegistryEntryAcceptor!");
                 }

@@ -6,7 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.util.Pair;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -31,7 +31,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
     public void save(){
         // Loop over all block states
         for(BlockStateBuilder blockStateBuilder : this.blockStates.values()){
-            ResourceLocation block = Registries.BLOCKS.getIdentifier(blockStateBuilder.block);
+            Identifier block = Registries.BLOCKS.getIdentifier(blockStateBuilder.block);
             JsonObject json = new JsonObject();
 
             // Serialize all variants
@@ -86,7 +86,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
         }
     }
 
-    private JsonElement serializeVariant(VariantBuilder builder, ResourceLocation block){
+    private JsonElement serializeVariant(VariantBuilder builder, Identifier block){
         JsonObject[] models = new JsonObject[builder.models.size()];
         for(int i = 0; i < models.length; i++){
             VariantModel model = builder.models.get(i);
@@ -153,7 +153,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
      * @param block block to get a block state builder for
      */
     protected BlockStateBuilder blockState(Block block){
-        ResourceLocation identifier = Registries.BLOCKS.getIdentifier(block);
+        Identifier identifier = Registries.BLOCKS.getIdentifier(block);
         this.cache.trackToBeGeneratedResource(ResourceType.ASSET, identifier.getNamespace(), "blockstates", identifier.getPath(), ".json");
         return this.blockStates.computeIfAbsent(block, o -> new BlockStateBuilder(this.modid, o));
     }
@@ -320,7 +320,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          * @param uvLock        whether to apply uv lock to the model
          * @param weight        weight of the model when considering which model to pick
          */
-        public VariantBuilder model(ResourceLocation modelLocation, int xRotation, int yRotation, boolean uvLock, int weight){
+        public VariantBuilder model(Identifier modelLocation, int xRotation, int yRotation, boolean uvLock, int weight){
             this.models.add(new VariantModel(modelLocation, xRotation, yRotation, uvLock, weight));
             return this;
         }
@@ -335,7 +335,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          * @param weight     weight of the model when considering which model to pick
          */
         public VariantBuilder model(String namespace, String identifier, int xRotation, int yRotation, boolean uvLock, int weight){
-            return this.model(ResourceLocation.fromNamespaceAndPath(namespace, identifier), xRotation, yRotation, uvLock, weight);
+            return this.model(Identifier.fromNamespaceAndPath(namespace, identifier), xRotation, yRotation, uvLock, weight);
         }
 
         /**
@@ -357,7 +357,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          * @param yRotation     rotation around the y-axis for the model
          * @param uvLock        whether to apply uv lock to the model
          */
-        public VariantBuilder model(ResourceLocation modelLocation, int xRotation, int yRotation, boolean uvLock){
+        public VariantBuilder model(Identifier modelLocation, int xRotation, int yRotation, boolean uvLock){
             return this.model(modelLocation, xRotation, yRotation, uvLock, 1);
         }
 
@@ -370,7 +370,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          * @param uvLock     whether to apply uv lock to the model
          */
         public VariantBuilder model(String namespace, String identifier, int xRotation, int yRotation, boolean uvLock){
-            return this.model(ResourceLocation.fromNamespaceAndPath(namespace, identifier), xRotation, yRotation, uvLock);
+            return this.model(Identifier.fromNamespaceAndPath(namespace, identifier), xRotation, yRotation, uvLock);
         }
 
         /**
@@ -390,7 +390,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          * @param xRotation     rotation around the x-axis for the model
          * @param yRotation     rotation around the y-axis for the model
          */
-        public VariantBuilder model(ResourceLocation modelLocation, int xRotation, int yRotation){
+        public VariantBuilder model(Identifier modelLocation, int xRotation, int yRotation){
             return this.model(modelLocation, xRotation, yRotation, false, 1);
         }
 
@@ -402,7 +402,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          * @param yRotation  rotation around the y-axis for the model
          */
         public VariantBuilder model(String namespace, String identifier, int xRotation, int yRotation){
-            return this.model(ResourceLocation.fromNamespaceAndPath(namespace, identifier), xRotation, yRotation);
+            return this.model(Identifier.fromNamespaceAndPath(namespace, identifier), xRotation, yRotation);
         }
 
         /**
@@ -419,7 +419,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          * Adds a model to the list of options for this variant.
          * @param modelLocation location of the model
          */
-        public VariantBuilder model(ResourceLocation modelLocation){
+        public VariantBuilder model(Identifier modelLocation){
             return this.model(modelLocation, 0, 0, false, 1);
         }
 
@@ -429,7 +429,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          * @param identifier path of the model
          */
         public VariantBuilder model(String namespace, String identifier){
-            return this.model(ResourceLocation.fromNamespaceAndPath(namespace, identifier));
+            return this.model(Identifier.fromNamespaceAndPath(namespace, identifier));
         }
 
         /**
@@ -443,13 +443,13 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
 
     protected static class VariantModel {
 
-        public final ResourceLocation modelLocation;
+        public final Identifier modelLocation;
         public final int xRotation;
         public final int yRotation;
         public final boolean uvLock;
         public final int weight;
 
-        public VariantModel(ResourceLocation modelLocation, int xRotation, int yRotation, boolean uvLock, int weight){
+        public VariantModel(Identifier modelLocation, int xRotation, int yRotation, boolean uvLock, int weight){
             this.modelLocation = modelLocation;
             this.xRotation = xRotation;
             this.yRotation = yRotation;

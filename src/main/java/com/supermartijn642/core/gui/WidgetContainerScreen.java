@@ -115,7 +115,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
                 this.hoveredSlot = slot;
                 helper.submitSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE, slot.x - 4, slot.y - 4, 24, 24);
             }
-            this.renderSlot(guiGraphics, slot);
+            this.renderSlot(guiGraphics, slot, mouseX, mouseY);
             if(this.hoveredSlot == slot)
                 helper.submitSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE, slot.x - 4, slot.y - 4, 24, 24);
         }

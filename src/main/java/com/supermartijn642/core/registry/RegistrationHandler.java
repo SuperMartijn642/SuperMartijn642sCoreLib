@@ -8,7 +8,7 @@ import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.StatType;
 import net.minecraft.world.effect.MobEffect;
@@ -65,7 +65,7 @@ public class RegistrationHandler {
     }
 
     private final String modid;
-    private final Map<Registries.Registry<?>,Map<ResourceLocation,Supplier<?>>> entryMap = new HashMap<>();
+    private final Map<Registries.Registry<?>,Map<Identifier,Supplier<?>>> entryMap = new HashMap<>();
     private final Map<Registries.Registry<?>,List<Consumer<Helper<?>>>> callbacks = new HashMap<>();
 
     private RegistrationHandler(String modid){
@@ -426,8 +426,8 @@ public class RegistrationHandler {
         if(entry == null)
             throw new IllegalArgumentException("Entry supplier for '" + namespace + ":" + identifier + "' must not be null!");
 
-        ResourceLocation fullIdentifier = ResourceLocation.fromNamespaceAndPath(namespace, identifier);
-        Map<ResourceLocation,Supplier<?>> entries = this.entryMap.computeIfAbsent(registry, o -> new LinkedHashMap<>());
+        Identifier fullIdentifier = Identifier.fromNamespaceAndPath(namespace, identifier);
+        Map<Identifier,Supplier<?>> entries = this.entryMap.computeIfAbsent(registry, o -> new LinkedHashMap<>());
         if(entries.containsKey(fullIdentifier))
             throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + registry.getRegistryIdentifier() + "'!");
 
@@ -461,8 +461,8 @@ public class RegistrationHandler {
 
     @SuppressWarnings("unchecked")
     private <T> void registerEntries(Registries.Registry<T> registry){
-        Map<ResourceLocation,Supplier<?>> entries = this.entryMap.get(registry);
-        for(Map.Entry<ResourceLocation,Supplier<?>> entry : entries.entrySet()){
+        Map<Identifier,Supplier<?>> entries = this.entryMap.get(registry);
+        for(Map.Entry<Identifier,Supplier<?>> entry : entries.entrySet()){
             T object = (T)entry.getValue().get();
             registry.register(entry.getKey(), object);
         }
@@ -499,8 +499,8 @@ public class RegistrationHandler {
             if(!RegistryUtil.isValidPath(identifier))
                 throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-            ResourceLocation fullIdentifier = ResourceLocation.fromNamespaceAndPath(namespace, identifier);
-            Map<ResourceLocation,Supplier<?>> entries = RegistrationHandler.this.entryMap.computeIfAbsent(this.registry, o -> new LinkedHashMap<>());
+            Identifier fullIdentifier = Identifier.fromNamespaceAndPath(namespace, identifier);
+            Map<Identifier,Supplier<?>> entries = RegistrationHandler.this.entryMap.computeIfAbsent(this.registry, o -> new LinkedHashMap<>());
             if(entries.containsKey(fullIdentifier))
                 throw new RuntimeException("Duplicate entry '" + fullIdentifier + "' for registry '" + this.registry.getRegistryIdentifier() + "'!");
 

@@ -2,7 +2,7 @@ package com.supermartijn642.core.data.condition;
 
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Created 14/11/2022 by SuperMartijn642
@@ -44,7 +44,7 @@ public class NotResourceCondition implements ResourceCondition {
                 throw new RuntimeException("Condition must have key 'value' with a json object!");
 
             JsonObject conditionJson = json.getAsJsonObject("value");
-            ResourceLocation identifier = ResourceLocation.tryParse(conditionJson.get("condition").getAsString());
+            Identifier identifier = Identifier.tryParse(conditionJson.get("condition").getAsString());
             if(!Registries.RESOURCE_CONDITION_SERIALIZERS.hasIdentifier(identifier))
                 throw new RuntimeException("Could not find any resource condition with identifier '" + identifier + "'!");
 

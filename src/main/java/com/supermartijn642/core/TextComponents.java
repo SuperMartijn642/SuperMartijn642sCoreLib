@@ -159,7 +159,7 @@ public class TextComponents {
      * new {@link TextComponentBuilder} around it.
      */
     public static TextComponentBuilder dimension(ResourceKey<Level> dimension){
-        String dimensionName = dimension.location().getPath();
+        String dimensionName = dimension.identifier().getPath();
         dimensionName = dimensionName.substring(Math.min(dimensionName.length() - 1, Math.max(0, dimensionName.indexOf('/') + 1))).toLowerCase();
         dimensionName = dimensionName.substring(0, 1).toUpperCase() + dimensionName.substring(1);
         for(int i = 0; i < dimensionName.length() - 1; i++)

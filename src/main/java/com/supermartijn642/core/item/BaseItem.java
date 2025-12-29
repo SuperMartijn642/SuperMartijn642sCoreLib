@@ -6,8 +6,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -48,13 +48,13 @@ public class BaseItem extends Item {
 
     private static Properties removeDescriptionAndModelFromProperties(Properties properties){
         return properties.overrideDescription("")
-            .setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "dummy")));
+            .setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, Identifier.fromNamespaceAndPath("supermartijn642corelib", "dummy")));
     }
 
     @ApiStatus.Internal
     public void resolveRegistryDependencies(){
         if(!this.resolvedRegistryDependencies){
-            ResourceLocation identifier = Registries.ITEMS.getIdentifier(this);
+            Identifier identifier = Registries.ITEMS.getIdentifier(this);
             this.descriptionId = identifier.getNamespace() + ".item." + identifier.getPath();
             this.components = DataComponentMap.builder().addAll(this.components)
                 .set(DataComponents.ITEM_NAME, Component.translatable(this.descriptionId))

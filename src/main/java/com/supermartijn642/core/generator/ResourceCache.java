@@ -11,11 +11,11 @@ import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.generator.aggregator.ResourceAggregator;
 import com.supermartijn642.core.registry.RegistryUtil;
 import com.supermartijn642.core.util.Pair;
-import net.fabricmc.fabric.impl.resource.loader.ModNioResourcePack;
+import net.fabricmc.fabric.impl.resource.pack.ModNioPackResources;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.data.HashCache;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import org.jetbrains.annotations.ApiStatus;
@@ -141,7 +141,7 @@ public abstract class ResourceCache {
                     throw new RuntimeException("Property 'fabric-api.datagen.modid' is set to unknown modid '" + modFilter + "'!");
                 // Remove the resource pack for the datagen mod
                 this.otherResourcePacks.removeIf(pack ->
-                    pack instanceof ModNioResourcePack && ((ModNioResourcePack)pack).getFabricModMetadata() == container.getMetadata()
+                    pack instanceof ModNioPackResources && ((ModNioPackResources)pack).getFabricModMetadata() == container.getMetadata()
                 );
             }else
                 CoreLib.LOGGER.warn("The 'fabric-api.datagen.modid' property has not been set! The resource cache may wrongly identify previously generated files as existing files!");
@@ -175,7 +175,7 @@ public abstract class ResourceCache {
         }
 
         private boolean existsInLoadedResources(ResourceType resourceType, String namespace, String directory, String fileName, String extension){
-            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension);
+            Identifier location = Identifier.fromNamespaceAndPath(namespace, directory + "/" + fileName + extension);
             return this.otherResourcePacks.stream().anyMatch(pack -> pack.getResource(resourceType == ResourceType.ASSET ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA, location) != null);
         }
 

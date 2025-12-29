@@ -4,8 +4,8 @@ import com.google.gson.JsonObject;
 import com.supermartijn642.core.codec.CodecHelper;
 import com.supermartijn642.core.util.Holder;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class ResourceConditions {
 
-    public static void registerFabricResourceCondition(ResourceLocation identifier, ResourceConditionSerializer<?> serializer){
+    public static void registerFabricResourceCondition(Identifier identifier, ResourceConditionSerializer<?> serializer){
         Holder<ResourceConditionType<ResourceConditionWrapper>> typeHolder = new Holder<>();
         ResourceConditionType<ResourceConditionWrapper> type = ResourceConditionType.create(identifier, CodecHelper.jsonSerializerToMapCodec(
             input -> {

@@ -4,7 +4,7 @@ import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.registry.RegistryUtil;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
@@ -108,7 +108,7 @@ public final class CreativeItemGroup extends CreativeModeTab {
         this.identifier = identifier;
         this.displayItemsGenerator = (flags, output) -> this.applyFiller(output::accept);
 
-        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath(modid, identifier), this);
+        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, Identifier.fromNamespaceAndPath(modid, identifier), this);
     }
 
     private void applyFiller(Consumer<ItemStack> output){

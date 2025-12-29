@@ -3,7 +3,7 @@ package com.supermartijn642.core.data.condition;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,7 +66,7 @@ public class OrResourceCondition implements ResourceCondition {
             ResourceCondition[] conditions = new ResourceCondition[conditionsJson.size()];
             for(int i = 0; i < conditionsJson.size(); i++){
                 JsonObject conditionJson = conditionsJson.get(i).getAsJsonObject();
-                ResourceLocation identifier = ResourceLocation.tryParse(conditionJson.get("condition").getAsString());
+                Identifier identifier = Identifier.tryParse(conditionJson.get("condition").getAsString());
                 if(!Registries.RESOURCE_CONDITION_SERIALIZERS.hasIdentifier(identifier))
                     throw new RuntimeException("Could not find any resource condition with identifier '" + identifier + "'!");
                 conditions[i] = Registries.RESOURCE_CONDITION_SERIALIZERS.getValue(identifier).deserialize(conditionJson);

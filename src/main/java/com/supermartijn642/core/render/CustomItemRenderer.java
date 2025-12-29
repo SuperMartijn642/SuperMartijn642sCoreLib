@@ -7,9 +7,8 @@ import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
-import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -27,8 +26,8 @@ public interface CustomItemRenderer<S> {
             }
 
             @Override
-            public void getExtents(Set<Vector3f> set){
-                customRenderer.getExtents(set::add);
+            public void getExtents(Consumer<Vector3fc> consumer){
+                customRenderer.getExtents(consumer);
             }
 
             @Override
@@ -48,7 +47,7 @@ public interface CustomItemRenderer<S> {
      */
     void render(ItemStack itemStack, ItemDisplayContext transformType, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay);
 
-    void getExtents(Consumer<Vector3f> extents);
+    void getExtents(Consumer<Vector3fc> extents);
 
     interface RenderContext {
         ItemDisplayContext displayContext();

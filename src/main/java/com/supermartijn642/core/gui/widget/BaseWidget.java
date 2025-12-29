@@ -2,10 +2,10 @@ package com.supermartijn642.core.gui.widget;
 
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.gui.GuiGraphicsHelper;
-import net.minecraft.Util;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;

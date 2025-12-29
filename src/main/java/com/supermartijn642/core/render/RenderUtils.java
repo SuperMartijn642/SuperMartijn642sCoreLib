@@ -7,14 +7,17 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.block.BlockShape;
-import net.minecraft.client.renderer.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.rendertype.LayeringTransform;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Matrix4f;
-
-import java.util.OptionalDouble;
 
 /**
  * Created 6/12/2021 by SuperMartijn642
@@ -23,63 +26,45 @@ public class RenderUtils {
 
     private static final RenderType LINES = RenderType.create(
         "supermartijn642corelib:lines",
-        128,
-        true,
-        true,
-        RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
-            .withLocation(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "lines"))
+        RenderSetup.builder(RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
+            .withLocation(Identifier.fromNamespaceAndPath("supermartijn642corelib", "lines"))
             .withBlend(BlendFunction.TRANSLUCENT)
             .withCull(false)
             .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
-            .build(),
-        RenderType.CompositeState.builder()
-            .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(1)))
-            .setLayeringState(RenderStateShard.VIEW_OFFSET_Z_LAYERING)
-            .createCompositeState(false)
+            .build()
+        ).setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING).createRenderSetup()
     );
     private static final RenderType LINES_NO_DEPTH = RenderType.create(
         "supermartijn642corelib:lines_no_depth",
-        128,
-        true,
-        true,
-        RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
-            .withLocation(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "lines_no_depth"))
+        RenderSetup.builder(RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
+            .withLocation(Identifier.fromNamespaceAndPath("supermartijn642corelib", "lines_no_depth"))
             .withBlend(BlendFunction.TRANSLUCENT)
             .withCull(false)
             .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-            .build(),
-        RenderType.CompositeState.builder()
-            .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(1)))
-            .setLayeringState(RenderStateShard.VIEW_OFFSET_Z_LAYERING)
-            .createCompositeState(false)
+            .build()
+        ).setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING).createRenderSetup()
     );
     private static final RenderType QUADS = RenderType.create(
         "supermartijn642corelib:quads",
-        256,
-        false,
-        true,
-        RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
-            .withLocation(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "quads"))
+        RenderSetup.builder(RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+            .withLocation(Identifier.fromNamespaceAndPath("supermartijn642corelib", "quads"))
             .withBlend(BlendFunction.TRANSLUCENT)
             .withCull(false)
             .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
             .withDepthWrite(false)
-            .build(),
-        RenderType.CompositeState.builder().createCompositeState(false)
+            .build()
+        ).createRenderSetup()
     );
     private static final RenderType QUADS_NO_DEPTH = RenderType.create(
         "supermartijn642corelib:quads_no_depth",
-        256,
-        false,
-        true,
-        RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
-            .withLocation(ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "quads_no_depth"))
+        RenderSetup.builder(RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+            .withLocation(Identifier.fromNamespaceAndPath("supermartijn642corelib", "quads_no_depth"))
             .withBlend(BlendFunction.TRANSLUCENT)
             .withCull(false)
             .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
             .withDepthWrite(false)
-            .build(),
-        RenderType.CompositeState.builder().createCompositeState(false)
+            .build()
+        ).createRenderSetup()
     );
 
     public static final ThreadLocal<MultiBufferSource.BufferSource> GUI_BUFFER_SOURCE_OVERWRITE = new ThreadLocal<>();
@@ -88,7 +73,7 @@ public class RenderUtils {
      * @return the current interpolated camera position
      */
     public static Vec3 getCameraPosition(){
-        return ClientUtils.getMinecraft().getEntityRenderDispatcher().camera.getPosition();
+        return ClientUtils.getMinecraft().getEntityRenderDispatcher().camera.position();
     }
 
     /**

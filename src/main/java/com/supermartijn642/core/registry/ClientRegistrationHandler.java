@@ -31,7 +31,7 @@ import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.special.SpecialModelRenderers;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
@@ -70,13 +70,13 @@ public class ClientRegistrationHandler {
     }
 
     @ApiStatus.Internal
-    public static void registerBlockModelConsumerDependenciesInternal(Predicate<ResourceLocation> markModelDependency){
+    public static void registerBlockModelConsumerDependenciesInternal(Predicate<Identifier> markModelDependency){
         haveModelsBeenRegistered = true;
         REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.registerBlockModelConsumerDependencies(markModelDependency));
     }
 
     @ApiStatus.Internal
-    public static void applyBlockModelConsumersInternal(Function<ResourceLocation,BlockStateModel> modelGetter){
+    public static void applyBlockModelConsumersInternal(Function<Identifier,BlockStateModel> modelGetter){
         REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.handleBlockModelConsumers(modelGetter));
     }
 
@@ -86,7 +86,7 @@ public class ClientRegistrationHandler {
     }
 
     @ApiStatus.Internal
-    public static void applyItemModelOverwritesInternal(Map<ResourceLocation,ItemModel> models){
+    public static void applyItemModelOverwritesInternal(Map<Identifier,ItemModel> models){
         REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.applyItemModelOverwrites(models));
     }
 
@@ -110,21 +110,21 @@ public class ClientRegistrationHandler {
     }
 
     @ApiStatus.Internal
-    public static void collectSprites(ResourceLocation atlas, Consumer<ResourceLocation> spriteConsumer){
+    public static void collectSprites(Identifier atlas, Consumer<Identifier> spriteConsumer){
         for(ClientRegistrationHandler value : REGISTRATION_HELPER_MAP.values())
             value.addSprites(atlas, spriteConsumer);
     }
 
     private final String modid;
 
-    private final List<Pair<ResourceLocation,Consumer<BlockStateModel>>> blockModelConsumers = new ArrayList<>();
+    private final List<Pair<Identifier,Consumer<BlockStateModel>>> blockModelConsumers = new ArrayList<>();
     private final List<Pair<Supplier<Block>,Function<BlockStateModel,BlockStateModel>>> blockModelOverwrites = new ArrayList<>();
     private final List<Pair<Supplier<Item>,Function<ItemModel,ItemModel>>> itemModelOverwrites = new ArrayList<>();
 
     private final List<Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?,?>>>> entityRenderers = new ArrayList<>();
     private final List<Pair<Supplier<BlockEntityType<?>>,Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?,?>>>> blockEntityRenderers = new ArrayList<>();
 
-    private final Map<ResourceLocation,Set<ResourceLocation>> textureAtlasSprites = new HashMap<>();
+    private final Map<Identifier,Set<Identifier>> textureAtlasSprites = new HashMap<>();
 
     private final List<Pair<Supplier<Block>,Supplier<SpecialModelRenderer.Unbaked>>> blockSpecialRenderers = new ArrayList<>();
 
@@ -141,7 +141,7 @@ public class ClientRegistrationHandler {
      * Causes the model at the given location to be loaded as a block model.
      * @param consumer called whenever the model for the given location is baked
      */
-    public void registerBlockModelConsumer(ResourceLocation location, Consumer<BlockStateModel> consumer){
+    public void registerBlockModelConsumer(Identifier location, Consumer<BlockStateModel> consumer){
         if(haveModelsBeenRegistered)
             throw new IllegalStateException("Cannot register new model consumer after model registry has been completed!");
         this.blockModelConsumers.add(Pair.of(location, consumer));
@@ -157,7 +157,7 @@ public class ClientRegistrationHandler {
         if(!RegistryUtil.isValidPath(identifier))
             throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-        this.registerBlockModelConsumer(ResourceLocation.fromNamespaceAndPath(namespace, identifier), consumer);
+        this.registerBlockModelConsumer(Identifier.fromNamespaceAndPath(namespace, identifier), consumer);
     }
 
     /**
@@ -286,14 +286,14 @@ public class ClientRegistrationHandler {
     /**
      * Adds the given sprite to the given atlas.
      */
-    public void registerAtlasSprite(ResourceLocation textureAtlas, ResourceLocation spriteLocation){
+    public void registerAtlasSprite(Identifier textureAtlas, Identifier spriteLocation){
         if(this.passedTextureStitch)
             throw new IllegalStateException("Cannot register new models after texture stitching has been completed!");
         if(textureAtlas == null)
             throw new IllegalArgumentException("Texture atlas must not be null!");
 
         if(textureAtlas.getPath().startsWith("textures/atlas/") && textureAtlas.getPath().endsWith(".png"))
-            textureAtlas = ResourceLocation.fromNamespaceAndPath(textureAtlas.getNamespace(), textureAtlas.getPath().substring("textures/atlas/".length(), textureAtlas.getPath().length() - ".png".length()));
+            textureAtlas = Identifier.fromNamespaceAndPath(textureAtlas.getNamespace(), textureAtlas.getPath().substring("textures/atlas/".length(), textureAtlas.getPath().length() - ".png".length()));
 
         this.textureAtlasSprites.putIfAbsent(textureAtlas, new HashSet<>());
         if(this.textureAtlasSprites.get(textureAtlas).contains(spriteLocation))
@@ -305,18 +305,18 @@ public class ClientRegistrationHandler {
     /**
      * Adds the given sprite to the given atlas.
      */
-    public void registerAtlasSprite(ResourceLocation textureAtlas, String spriteLocation){
+    public void registerAtlasSprite(Identifier textureAtlas, String spriteLocation){
         if(!RegistryUtil.isValidPath(spriteLocation))
             throw new IllegalArgumentException("Sprite location '" + spriteLocation + "' must only contain characters [a-z0-9_./-]!");
 
-        this.registerAtlasSprite(textureAtlas, ResourceLocation.fromNamespaceAndPath(this.modid, spriteLocation));
+        this.registerAtlasSprite(textureAtlas, Identifier.fromNamespaceAndPath(this.modid, spriteLocation));
     }
 
     /**
      * Registers the given special model renderer.
      */
     public void registerSpecialModelRenderer(String identifier, MapCodec<? extends SpecialModelRenderer.Unbaked> codec){
-        SpecialModelRenderers.ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath(this.modid, identifier), codec);
+        SpecialModelRenderers.ID_MAPPER.put(Identifier.fromNamespaceAndPath(this.modid, identifier), codec);
     }
 
     /**
@@ -442,20 +442,6 @@ public class ClientRegistrationHandler {
     }
 
     /**
-     * Registers the cutout mipped render type to be used when rendering the given block.
-     */
-    public void registerBlockModelCutoutMippedRenderType(Supplier<Block> block){
-        this.registerBlockModelRenderType(block, ChunkSectionLayer.CUTOUT_MIPPED);
-    }
-
-    /**
-     * Registers the cutout mipped render type to be used when rendering the given block.
-     */
-    public void registerBlockModelCutoutMippedRenderType(Block block){
-        this.registerBlockModelRenderType(block, ChunkSectionLayer.CUTOUT_MIPPED);
-    }
-
-    /**
      * Registers the cutout render type to be used when rendering the given block.
      */
     public void registerBlockModelCutoutRenderType(Supplier<Block> block){
@@ -484,7 +470,7 @@ public class ClientRegistrationHandler {
     }
 
     public void registerItemModelType(String identifier, MapCodec<? extends ItemModel.Unbaked> codec){
-        ItemModels.ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath(this.modid, identifier), codec);
+        ItemModels.ID_MAPPER.put(Identifier.fromNamespaceAndPath(this.modid, identifier), codec);
     }
 
     public void registerPictureInPictureRenderer(Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>> renderer){
@@ -572,10 +558,10 @@ public class ClientRegistrationHandler {
         }
     }
 
-    private void registerBlockModelConsumerDependencies(Predicate<ResourceLocation> markModelDependency){
-        Set<ResourceLocation> missingModels = null;
-        for(Pair<ResourceLocation,Consumer<BlockStateModel>> consumer : this.blockModelConsumers){
-            ResourceLocation location = consumer.left();
+    private void registerBlockModelConsumerDependencies(Predicate<Identifier> markModelDependency){
+        Set<Identifier> missingModels = null;
+        for(Pair<Identifier,Consumer<BlockStateModel>> consumer : this.blockModelConsumers){
+            Identifier location = consumer.left();
             if(!markModelDependency.test(location)){
                 if(missingModels == null)
                     missingModels = new HashSet<>();
@@ -586,9 +572,9 @@ public class ClientRegistrationHandler {
             CoreLib.LOGGER.error("Missing models for block model consumers from mod '{}': {}", this.modid, missingModels.stream().map(l -> "'" + l + "'").collect(Collectors.joining(", ")));
     }
 
-    private void handleBlockModelConsumers(Function<ResourceLocation,BlockStateModel> modelGetter){
+    private void handleBlockModelConsumers(Function<Identifier,BlockStateModel> modelGetter){
         // Model callbacks
-        for(Pair<ResourceLocation,Consumer<BlockStateModel>> entry : this.blockModelConsumers){
+        for(Pair<Identifier,Consumer<BlockStateModel>> entry : this.blockModelConsumers){
             try{
                 entry.right().accept(modelGetter.apply(entry.left()));
             }catch(Exception e){
@@ -623,14 +609,14 @@ public class ClientRegistrationHandler {
         }
     }
 
-    private void applyItemModelOverwrites(Map<ResourceLocation,ItemModel> models){
+    private void applyItemModelOverwrites(Map<Identifier,ItemModel> models){
         for(Pair<Supplier<Item>,Function<ItemModel,ItemModel>> overwrite : this.itemModelOverwrites){
             Item item = overwrite.left().get();
             if(item == null){
                 CoreLib.LOGGER.error("Got 'null' item for item model overwrite from mod '{}'!", this.modid);
                 continue;
             }
-            ResourceLocation modelLocation = item.components().get(DataComponents.ITEM_MODEL);
+            Identifier modelLocation = item.components().get(DataComponents.ITEM_MODEL);
             ItemModel model = models.get(modelLocation);
             if(model == null)
                 continue;
@@ -648,11 +634,11 @@ public class ClientRegistrationHandler {
         }
     }
 
-    private void addSprites(ResourceLocation atlas, Consumer<ResourceLocation> spriteConsumer){
+    private void addSprites(Identifier atlas, Consumer<Identifier> spriteConsumer){
         this.passedTextureStitch = true;
 
         // Texture atlas sprites
-        Set<ResourceLocation> sprites = this.textureAtlasSprites.get(atlas);
+        Set<Identifier> sprites = this.textureAtlasSprites.get(atlas);
         if(sprites == null)
             return;
 
