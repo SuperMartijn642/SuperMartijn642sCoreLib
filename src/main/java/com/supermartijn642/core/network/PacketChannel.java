@@ -105,10 +105,18 @@ public class PacketChannel {
         );
         // Play stage
         PayloadTypeRegistry.playS2C().register(this.payloadType, s2cPayloadCodec);
-        if(CommonUtils.getEnvironmentSide().isClient())
-            ClientPlayNetworking.registerGlobalReceiver(this.payloadType, (payload, context) ->
-                this.handle(payload.packet, new PacketContext(CoreSide.CLIENT, context.player(), null))
-            );
+        if(CommonUtils.getEnvironmentSide().isClient()){
+            // This has to be this dumb because the payload handler lambda calls ClientPlayNetworking$Context#player() which returns a client-only class LocalPlayer
+            //noinspection Convert2Lambda,TrivialFunctionalExpressionUsage
+            new Runnable() {
+                @Override
+                public void run(){
+                    ClientPlayNetworking.registerGlobalReceiver(PacketChannel.this.payloadType, (payload, context) ->
+                        PacketChannel.this.handle(payload.packet, new PacketContext(CoreSide.CLIENT, context.player(), null))
+                    );
+                }
+            }.run();
+        }
         PayloadTypeRegistry.playC2S().register(this.payloadType, c2sPayloadCodec);
         ServerPlayNetworking.registerGlobalReceiver(this.payloadType, (payload, context) ->
             this.handle(payload.packet, new PacketContext(CoreSide.SERVER, context.player(), context.server()))
