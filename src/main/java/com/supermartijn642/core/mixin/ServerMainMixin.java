@@ -16,7 +16,7 @@ public class ServerMainMixin {
     @Inject(
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/Util;startTimerHackThread()V",
+            target = "Lnet/minecraft/util/Util;startTimerHackThread()V",
             ordinal = 0,
             shift = At.Shift.BEFORE
         ),
@@ -29,7 +29,7 @@ public class ServerMainMixin {
     @Inject(
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/Util;startTimerHackThread()V",
+            target = "Lnet/minecraft/util/Util;startTimerHackThread()V",
             ordinal = 0,
             shift = At.Shift.AFTER
         ),
