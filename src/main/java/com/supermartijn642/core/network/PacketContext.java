@@ -12,12 +12,12 @@ import net.minecraft.world.level.Level;
 public class PacketContext {
 
     private final CoreSide handlingSide;
-    private final Player sendingPlayer;
+    private final Player player;
     private final MinecraftServer server;
 
-    public PacketContext(CoreSide handlingSide, Player sendingPlayer, MinecraftServer server){
+    public PacketContext(CoreSide handlingSide, Player player, MinecraftServer server){
         this.handlingSide = handlingSide;
-        this.sendingPlayer = sendingPlayer;
+        this.player = player;
         this.server = server;
     }
 
@@ -35,8 +35,19 @@ public class PacketContext {
         return this.handlingSide == CoreSide.CLIENT ? CoreSide.SERVER : CoreSide.CLIENT;
     }
 
+    /**
+     * @return the local player on the client, the player entity corresponding to the client that sent the packet on the server
+     */
+    public Player getPlayer(){
+        return this.player;
+    }
+
+    /**
+     * @deprecated Use {@link #getPlayer()}.
+     */
+    @Deprecated
     public Player getSendingPlayer(){
-        return this.sendingPlayer;
+        return this.player;
     }
 
     /**
