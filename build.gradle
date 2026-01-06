@@ -277,6 +277,7 @@ publishMods {
 }
 
 // Rename the 'publishMods' task
+[tasks.publishCurseforge, tasks.publishModrinth].forEach { it.dependsOn(tasks.renameJar) }
 tasks.publishMods.group = "other"
 tasks.register("publishAll") {
     group = "publishing"
