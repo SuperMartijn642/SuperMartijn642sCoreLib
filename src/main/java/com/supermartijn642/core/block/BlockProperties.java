@@ -13,6 +13,7 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.common.util.TriPredicate;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 
@@ -22,43 +23,46 @@ import java.util.function.ToIntFunction;
 public class BlockProperties {
 
     public static BlockProperties create(Material material, MaterialColor color){
-        return new BlockProperties(material, color);
+        return new BlockProperties(material).mapColor(color);
     }
 
     public static BlockProperties create(Material material, DyeColor color){
-        return new BlockProperties(material, color.getMaterialColor());
+        return new BlockProperties(material).mapColor(color.getMaterialColor());
     }
 
     public static BlockProperties create(Material material){
-        return new BlockProperties(material, material.getColor());
+        return new BlockProperties(material);
     }
 
-    public static BlockProperties copy(Block block){
-        BlockBehaviour.Properties sourceProperties = block.properties;
-        BlockProperties properties = create(sourceProperties.material, block.defaultMaterialColor());
-        properties.hasCollision = sourceProperties.hasCollision;
-        properties.canOcclude = block.defaultBlockState().canOcclude();
-        properties.soundType = block.getSoundType(block.defaultBlockState());
-        properties.lightLevel = sourceProperties.lightEmission;
-        properties.explosionResistance = block.getExplosionResistance();
-        properties.destroyTime = block.defaultDestroyTime();
-        properties.requiresCorrectTool = block.defaultBlockState().requiresCorrectToolForDrops();
-        properties.ticksRandomly = block.isRandomlyTicking(block.defaultBlockState());
-        properties.friction = block.getFriction();
-        properties.speedFactor = block.getSpeedFactor();
-        properties.jumpFactor = block.getJumpFactor();
-        properties.isAir = block.defaultBlockState().isAir();
-        properties.isRedstoneConductor = sourceProperties.isRedstoneConductor::test;
-        properties.isSuffocating = sourceProperties.isSuffocating::test;
-        properties.hasDynamicShape = block.hasDynamicShape();
-        properties.lootTableSupplier = sourceProperties.drops != null ? () -> sourceProperties.drops : ((BlockPropertiesAccessor)sourceProperties).getLootTableSupplier();
+    public static BlockProperties fromVanilla(BlockBehaviour.Properties vanilla){
+        BlockProperties properties = create(vanilla.material);
+        properties.mapColor = vanilla.materialColor;
+        properties.hasCollision = vanilla.hasCollision;
+        properties.soundType = vanilla.soundType;
+        properties.lightLevel = vanilla.lightEmission;
+        properties.explosionResistance = vanilla.explosionResistance;
+        properties.destroyTime = vanilla.destroyTime;
+        properties.requiresCorrectTool = vanilla.requiresCorrectToolForDrops;
+        properties.ticksRandomly = vanilla.isRandomlyTicking;
+        properties.friction = vanilla.friction;
+        properties.speedFactor = vanilla.speedFactor;
+        properties.jumpFactor = vanilla.jumpFactor;
+        properties.canOcclude = vanilla.canOcclude;
+        properties.isAir = vanilla.isAir;
+        properties.isRedstoneConductor = vanilla.isRedstoneConductor::test;
+        properties.isSuffocating = vanilla.isSuffocating::test;
+        properties.hasDynamicShape = vanilla.dynamicShape;
+        properties.lootTableSupplier = vanilla.drops != null ? () -> vanilla.drops : ((BlockPropertiesAccessor)vanilla).getLootTableSupplier();
         return properties;
     }
 
+    public static BlockProperties copy(Block block){
+        return fromVanilla(block.properties);
+    }
+
     private final Material material;
-    private final MaterialColor mapColor;
+    private Function<BlockState,MaterialColor> mapColor;
     private boolean hasCollision = true;
-    private boolean canOcclude = true;
     private SoundType soundType = SoundType.STONE;
     private ToIntFunction<BlockState> lightLevel = state -> 0;
     private float explosionResistance;
@@ -68,6 +72,7 @@ public class BlockProperties {
     private float friction = 0.6f;
     private float speedFactor = 1.0f;
     private float jumpFactor = 1.0f;
+    private boolean canOcclude = true;
     private boolean isAir = false;
     private TriPredicate<BlockState,BlockGetter,BlockPos> isRedstoneConductor = (state, level, pos) -> state.getMaterial().isSolidBlocking() && state.isCollisionShapeFullBlock(level, pos);
     private TriPredicate<BlockState,BlockGetter,BlockPos> isSuffocating = (state, level, pos) -> state.getMaterial().blocksMotion() && state.isCollisionShapeFullBlock(level, pos);
@@ -75,20 +80,28 @@ public class BlockProperties {
     private boolean noLootTable = false;
     private Supplier<ResourceLocation> lootTableSupplier;
 
-    private BlockProperties(Material material, MaterialColor color){
+    private BlockProperties(Material material){
         this.material = material;
-        this.mapColor = color;
+    }
+
+    public BlockProperties mapColor(Function<BlockState,MaterialColor> colorFunction){
+        this.mapColor = colorFunction;
+        return this;
+    }
+
+    public BlockProperties mapColor(MaterialColor color){
+        return this.mapColor(state -> color);
+    }
+
+    public BlockProperties collision(boolean hasCollision){
+        this.hasCollision = hasCollision;
+        if(!hasCollision)
+            this.canOcclude = false;
+        return this;
     }
 
     public BlockProperties noCollision(){
-        this.hasCollision = false;
-        this.canOcclude = false;
-        return this;
-    }
-
-    public BlockProperties noOcclusion(){
-        this.canOcclude = false;
-        return this;
+        return this.collision(false);
     }
 
     public BlockProperties sound(SoundType soundTypeIn){
@@ -116,14 +129,29 @@ public class BlockProperties {
         return this;
     }
 
+    /**
+     * Sets both explosion resistance and destroy time.
+     */
+    public BlockProperties strength(float strength){
+        return this.explosionResistance(strength).destroyTime(strength);
+    }
+
+    public BlockProperties requiresCorrectTool(boolean requiresCorrectTool){
+        this.requiresCorrectTool = requiresCorrectTool;
+        return this;
+    }
+
     public BlockProperties requiresCorrectTool(){
-        this.requiresCorrectTool = true;
+        return this.requiresCorrectTool(true);
+    }
+
+    public BlockProperties randomTicks(boolean receiveRandomTicks){
+        this.ticksRandomly = receiveRandomTicks;
         return this;
     }
 
     public BlockProperties randomTicks(){
-        this.ticksRandomly = true;
-        return this;
+        return this.randomTicks(true);
     }
 
     public BlockProperties friction(float friction){
@@ -141,9 +169,22 @@ public class BlockProperties {
         return this;
     }
 
-    public BlockProperties air(){
-        this.isAir = true;
+    public BlockProperties canOcclude(boolean canOcclude){
+        this.canOcclude = canOcclude;
         return this;
+    }
+
+    public BlockProperties noOcclusion(){
+        return this.canOcclude(false);
+    }
+
+    public BlockProperties air(boolean isAir){
+        this.isAir = isAir;
+        return this;
+    }
+
+    public BlockProperties air(){
+        return this.air(true);
     }
 
     public BlockProperties isRedstoneConductor(TriPredicate<BlockState,BlockGetter,BlockPos> isRedstoneConductor){
