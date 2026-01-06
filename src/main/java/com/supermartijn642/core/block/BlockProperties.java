@@ -1,5 +1,6 @@
 package com.supermartijn642.core.block;
 
+import com.supermartijn642.core.extensions.BlockExtension;
 import com.supermartijn642.core.mixin.BlockPropertiesAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -22,50 +23,62 @@ import java.util.function.ToIntFunction;
 public class BlockProperties {
 
     public static BlockProperties create(Material material, MaterialColor color){
-        return new BlockProperties(material, color);
+        return new BlockProperties(material).mapColor(color);
     }
 
     public static BlockProperties create(Material material, DyeColor color){
-        return new BlockProperties(material, color.getMaterialColor());
+        return new BlockProperties(material).mapColor(color.getMaterialColor());
     }
 
     public static BlockProperties create(Material material){
-        return new BlockProperties(material, material.getColor());
+        return new BlockProperties(material);
+    }
+
+    public static BlockProperties fromVanilla(Block.Properties vanilla){
+        BlockProperties properties = create(vanilla.material);
+        properties.mapColor = vanilla.materialColor;
+        properties.hasCollision = vanilla.hasCollision;
+        properties.soundType = vanilla.soundType;
+        int lightEmission = vanilla.lightEmission;
+        properties.lightLevel = state -> lightEmission;
+        properties.explosionResistance = vanilla.explosionResistance;
+        properties.destroyTime = vanilla.destroyTime;
+        properties.requiresCorrectTool = !vanilla.material.isAlwaysDestroyable();
+        properties.ticksRandomly = vanilla.isTicking;
+        properties.friction = vanilla.friction;
+        properties.speedFactor = vanilla.speedFactor;
+        properties.jumpFactor = vanilla.jumpFactor;
+        properties.canOcclude = vanilla.canOcclude;
+        properties.hasDynamicShape = vanilla.dynamicShape;
+        if(LootTables.EMPTY.equals(vanilla.drops))
+            properties.noLootTable = true;
+        else
+            properties.lootTable(vanilla.drops);
+        return properties;
     }
 
     public static BlockProperties copy(Block block){
-        BlockProperties properties = create(block.material, block.materialColor);
-        properties.hasCollision = block.hasCollision;
-        properties.canOcclude = block.canOcclude;
-        properties.soundType = block.soundType;
+        BlockProperties properties = fromVanilla(((BlockExtension)block).supermartijn642corelibGetProperties());
+        //noinspection deprecation
         properties.lightLevel = block::getLightEmission;
-        properties.explosionResistance = block.getExplosionResistance();
-        properties.destroyTime = block.destroySpeed;
-        properties.requiresCorrectTool = !block.material.isAlwaysDestroyable();
-        properties.ticksRandomly = block.isRandomlyTicking(block.defaultBlockState());
-        properties.friction = block.getFriction();
-        properties.speedFactor = block.getSpeedFactor();
-        properties.jumpFactor = block.getJumpFactor();
+        //noinspection deprecation
         properties.isAir = block.defaultBlockState().isAir();
+        //noinspection deprecation
         properties.isRedstoneConductor = block::isRedstoneConductor;
+        //noinspection deprecation
         properties.isSuffocating = block::isSuffocating;
-        properties.hasDynamicShape = block.hasDynamicShape();
-        ResourceLocation lootTable = block.getLootTable();
-        if(LootTables.EMPTY.equals(lootTable))
-            properties.noLootTable = true;
-        else if(lootTable != null){
+        if(properties.lootTableSupplier != null){
+            ResourceLocation lootTable = properties.lootTableSupplier.get();
             ResourceLocation registryName = block.getRegistryName();
-            if(registryName != null && !lootTable.getNamespace().equals(block.getRegistryName().getNamespace()) && !lootTable.getPath().equals("block/" + block.getRegistryName().getPath())){
-                properties.lootTableSupplier = () -> lootTable;
-            }
+            if(registryName != null && !lootTable.getNamespace().equals(block.getRegistryName().getNamespace()) && !lootTable.getPath().equals("block/" + block.getRegistryName().getPath()))
+                properties.lootTable(lootTable);
         }
         return properties;
     }
 
     private final Material material;
-    private final MaterialColor mapColor;
+    private MaterialColor mapColor;
     private boolean hasCollision = true;
-    private boolean canOcclude = true;
     private SoundType soundType = SoundType.STONE;
     ToIntFunction<BlockState> lightLevel = state -> 0;
     private float explosionResistance;
@@ -75,6 +88,7 @@ public class BlockProperties {
     private float friction = 0.6f;
     private float speedFactor = 1.0f;
     private float jumpFactor = 1.0f;
+    private boolean canOcclude = true;
     boolean isAir = false;
     TriPredicate<BlockState,IBlockReader,BlockPos> isRedstoneConductor = (state, level, pos) -> state.getMaterial().isSolidBlocking() && state.isCollisionShapeFullBlock(level, pos);
     TriPredicate<BlockState,IBlockReader,BlockPos> isSuffocating = (state, level, pos) -> state.getMaterial().blocksMotion() && state.isCollisionShapeFullBlock(level, pos);
@@ -82,20 +96,24 @@ public class BlockProperties {
     private boolean noLootTable = false;
     Supplier<ResourceLocation> lootTableSupplier;
 
-    private BlockProperties(Material material, MaterialColor color){
+    private BlockProperties(Material material){
         this.material = material;
+    }
+
+    public BlockProperties mapColor(MaterialColor color){
         this.mapColor = color;
+        return this;
+    }
+
+    public BlockProperties collision(boolean hasCollision){
+        this.hasCollision = hasCollision;
+        if(!hasCollision)
+            this.canOcclude = false;
+        return this;
     }
 
     public BlockProperties noCollision(){
-        this.hasCollision = false;
-        this.canOcclude = false;
-        return this;
-    }
-
-    public BlockProperties noOcclusion(){
-        this.canOcclude = false;
-        return this;
+        return this.collision(false);
     }
 
     public BlockProperties sound(SoundType soundTypeIn){
@@ -123,14 +141,29 @@ public class BlockProperties {
         return this;
     }
 
+    /**
+     * Sets both explosion resistance and destroy time.
+     */
+    public BlockProperties strength(float strength){
+        return this.explosionResistance(strength).destroyTime(strength);
+    }
+
+    public BlockProperties requiresCorrectTool(boolean requiresCorrectTool){
+        this.requiresCorrectTool = requiresCorrectTool;
+        return this;
+    }
+
     public BlockProperties requiresCorrectTool(){
-        this.requiresCorrectTool = true;
+        return this.requiresCorrectTool(true);
+    }
+
+    public BlockProperties randomTicks(boolean receiveRandomTicks){
+        this.ticksRandomly = receiveRandomTicks;
         return this;
     }
 
     public BlockProperties randomTicks(){
-        this.ticksRandomly = true;
-        return this;
+        return this.randomTicks(true);
     }
 
     public BlockProperties friction(float friction){
@@ -148,9 +181,22 @@ public class BlockProperties {
         return this;
     }
 
-    public BlockProperties air(){
-        this.isAir = true;
+    public BlockProperties canOcclude(boolean canOcclude){
+        this.canOcclude = canOcclude;
         return this;
+    }
+
+    public BlockProperties noOcclusion(){
+        return this.canOcclude(false);
+    }
+
+    public BlockProperties air(boolean isAir){
+        this.isAir = isAir;
+        return this;
+    }
+
+    public BlockProperties air(){
+        return this.air(true);
     }
 
     public BlockProperties isRedstoneConductor(TriPredicate<BlockState,IBlockReader,BlockPos> isRedstoneConductor){
@@ -201,7 +247,9 @@ public class BlockProperties {
      */
     @Deprecated
     public Block.Properties toUnderlying(){
-        Block.Properties properties = Block.Properties.of(this.material, this.mapColor);
+        Block.Properties properties = Block.Properties.of(this.material);
+        if(this.mapColor != null)
+            properties.materialColor = this.mapColor;
         if(!this.hasCollision)
             properties.noCollission();
         properties.sound(this.soundType);
