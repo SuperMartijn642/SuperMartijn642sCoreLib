@@ -18,40 +18,44 @@ import java.util.function.ToIntFunction;
 public class BlockProperties {
 
     public static BlockProperties create(Material material, MapColor color){
-        return new BlockProperties(material, color);
+        return new BlockProperties(material).mapColor(color);
     }
 
     public static BlockProperties create(Material material, EnumDyeColor color){
-        return new BlockProperties(material, MapColor.getBlockColor(color));
+        return new BlockProperties(material).mapColor(MapColor.getBlockColor(color));
     }
 
     public static BlockProperties create(Material material){
-        return new BlockProperties(material, material.getMaterialMapColor());
+        return new BlockProperties(material);
     }
 
     public static BlockProperties copy(Block block){
         BlockProperties properties = create(block.blockMaterial, block.blockMapColor);
         properties.hasCollision = block.isCollidable();
-        properties.canOcclude = block.isOpaqueCube(block.getDefaultState());
+        //noinspection deprecation
         properties.soundType = block.getSoundType();
+        //noinspection deprecation
         properties.lightLevel = block::getLightValue;
         properties.explosionResistance = block.blockResistance;
         properties.destroyTime = block.blockHardness;
         properties.requiresCorrectTool = !block.blockMaterial.isToolNotRequired();
         properties.ticksRandomly = block.getTickRandomly();
+        //noinspection deprecation
         properties.friction = block.slipperiness;
         properties.speedFactor = 1;
         properties.jumpFactor = 1;
+        //noinspection deprecation
+        properties.canOcclude = block.isOpaqueCube(block.getDefaultState());
         properties.isAir = block.blockMaterial == Material.AIR;
+        //noinspection deprecation
         properties.isSuffocating = block::causesSuffocation;
         properties.copyLootTableBlock = block;
         return properties;
     }
 
     final Material material;
-    final MapColor mapColor;
+    MapColor mapColor;
     boolean hasCollision = true;
-    boolean canOcclude = true;
     SoundType soundType = SoundType.STONE;
     ToIntFunction<IBlockState> lightLevel = state -> 0;
     float explosionResistance;
@@ -61,6 +65,7 @@ public class BlockProperties {
     float friction = 0.6f;
     float speedFactor = 1.0f;
     float jumpFactor = 1.0f;
+    boolean canOcclude = true;
     boolean isAir;
     Predicate<IBlockState> isSuffocating = (state) -> state.getMaterial().blocksMovement() && state.isFullCube();
     boolean noLootTable = false;
@@ -68,21 +73,25 @@ public class BlockProperties {
     Block copyLootTableBlock;
     Supplier<ResourceLocation> lootTableSupplier;
 
-    private BlockProperties(Material material, MapColor color){
+    private BlockProperties(Material material){
         this.material = material;
-        this.mapColor = color;
         this.isAir = material == Material.AIR;
     }
 
-    public BlockProperties noCollision(){
-        this.hasCollision = false;
-        this.canOcclude = false;
+    public BlockProperties mapColor(MapColor color){
+        this.mapColor = color;
         return this;
     }
 
-    public BlockProperties noOcclusion(){
-        this.canOcclude = false;
+    public BlockProperties collision(boolean hasCollision){
+        this.hasCollision = hasCollision;
+        if(!hasCollision)
+            this.canOcclude = false;
         return this;
+    }
+
+    public BlockProperties noCollision(){
+        return this.collision(false);
     }
 
     public BlockProperties sound(SoundType soundTypeIn){
@@ -110,14 +119,29 @@ public class BlockProperties {
         return this;
     }
 
+    /**
+     * Sets both explosion resistance and destroy time.
+     */
+    public BlockProperties strength(float strength){
+        return this.explosionResistance(strength).destroyTime(strength);
+    }
+
+    public BlockProperties requiresCorrectTool(boolean requiresCorrectTool){
+        this.requiresCorrectTool = requiresCorrectTool;
+        return this;
+    }
+
     public BlockProperties requiresCorrectTool(){
-        this.requiresCorrectTool = true;
+        return this.requiresCorrectTool(true);
+    }
+
+    public BlockProperties randomTicks(boolean receiveRandomTicks){
+        this.ticksRandomly = receiveRandomTicks;
         return this;
     }
 
     public BlockProperties randomTicks(){
-        this.ticksRandomly = true;
-        return this;
+        return this.randomTicks(true);
     }
 
     public BlockProperties friction(float friction){
@@ -135,9 +159,22 @@ public class BlockProperties {
         return this;
     }
 
-    public BlockProperties air(){
-        this.isAir = true;
+    public BlockProperties canOcclude(boolean canOcclude){
+        this.canOcclude = canOcclude;
         return this;
+    }
+
+    public BlockProperties noOcclusion(){
+        return this.canOcclude(false);
+    }
+
+    public BlockProperties air(boolean isAir){
+        this.isAir = isAir;
+        return this;
+    }
+
+    public BlockProperties air(){
+        return this.air(true);
     }
 
     public BlockProperties isSuffocating(Predicate<IBlockState> isSuffocating){

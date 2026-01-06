@@ -56,7 +56,7 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
     private BlockRenderLayer renderLayer = BlockRenderLayer.SOLID;
 
     public BaseBlock(boolean saveTileData, BlockProperties properties){
-        super(properties.material, properties.mapColor);
+        super(properties.material, properties.mapColor == null ? properties.material.getMaterialMapColor() : properties.mapColor);
         this.saveTileData = saveTileData;
         this.properties = properties;
 
