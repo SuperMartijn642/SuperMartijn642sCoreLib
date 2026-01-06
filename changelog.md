@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.19
+- Added additional properties to `BlockProperties` to match vanilla
+
 ### SuperMartijn642's Core Library 1.1.18a
 - Fixed `OredictItemPredicate` mixin overwriting ore dictionary key to `null`
 
