@@ -10,7 +10,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootTable;
 
 import java.util.function.Function;
@@ -26,32 +28,39 @@ public class BlockProperties {
         return new BlockProperties();
     }
 
-    public static BlockProperties copy(Block block){
-        BlockBehaviour.Properties sourceProperties = block.properties;
-        BlockProperties properties = create();
-        properties.mapColor = sourceProperties.mapColor;
-        properties.hasCollision = sourceProperties.hasCollision;
-        properties.canOcclude = block.defaultBlockState().canOcclude();
-        properties.soundType = block.properties.soundType;
-        properties.lightLevel = sourceProperties.lightEmission;
-        properties.explosionResistance = block.getExplosionResistance();
-        properties.destroyTime = block.defaultDestroyTime();
-        properties.requiresCorrectTool = block.defaultBlockState().requiresCorrectToolForDrops();
-        properties.ticksRandomly = block.properties.isRandomlyTicking;
-        properties.friction = block.getFriction();
-        properties.speedFactor = block.getSpeedFactor();
-        properties.jumpFactor = block.getJumpFactor();
-        properties.isAir = block.defaultBlockState().isAir();
-        properties.isRedstoneConductor = sourceProperties.isRedstoneConductor::test;
-        properties.isSuffocating = sourceProperties.isSuffocating::test;
-        properties.hasDynamicShape = block.hasDynamicShape();
-        properties.lootTable = sourceProperties.drops;
+    public static BlockProperties fromVanilla(BlockBehaviour.Properties vanilla){
+        BlockProperties properties = BlockProperties.create();
+        properties.mapColor = vanilla.mapColor;
+        properties.hasCollision = vanilla.hasCollision;
+        properties.soundType = vanilla.soundType;
+        properties.lightLevel = vanilla.lightEmission;
+        properties.explosionResistance = vanilla.explosionResistance;
+        properties.destroyTime = vanilla.destroyTime;
+        properties.requiresCorrectTool = vanilla.requiresCorrectToolForDrops;
+        properties.ticksRandomly = vanilla.isRandomlyTicking;
+        properties.friction = vanilla.friction;
+        properties.speedFactor = vanilla.speedFactor;
+        properties.jumpFactor = vanilla.jumpFactor;
+        properties.canOcclude = vanilla.canOcclude;
+        properties.isAir = vanilla.isAir;
+        properties.ignitedByLava = vanilla.ignitedByLava;
+        properties.pushReaction = vanilla.pushReaction;
+        properties.spawnTerrainParticles = vanilla.spawnTerrainParticles;
+        properties.instrument = vanilla.instrument;
+        properties.replaceable = vanilla.replaceable;
+        properties.isRedstoneConductor = vanilla.isRedstoneConductor::test;
+        properties.isSuffocating = vanilla.isSuffocating::test;
+        properties.hasDynamicShape = vanilla.dynamicShape;
+        properties.lootTable = vanilla.drops;
         return properties;
+    }
+
+    public static BlockProperties copy(Block block){
+        return fromVanilla(block.properties);
     }
 
     private Function<BlockState,MapColor> mapColor;
     private boolean hasCollision = true;
-    private boolean canOcclude = true;
     private SoundType soundType = SoundType.STONE;
     private ToIntFunction<BlockState> lightLevel = state -> 0;
     private float explosionResistance;
@@ -61,7 +70,13 @@ public class BlockProperties {
     private float friction = 0.6f;
     private float speedFactor = 1.0f;
     private float jumpFactor = 1.0f;
+    private boolean canOcclude = true;
     private boolean isAir = false;
+    private boolean ignitedByLava = false;
+    private PushReaction pushReaction = PushReaction.NORMAL;
+    private boolean spawnTerrainParticles = true;
+    private NoteBlockInstrument instrument = NoteBlockInstrument.HARP;
+    boolean replaceable = false;
     private TriPredicate<BlockState,BlockGetter,BlockPos> isRedstoneConductor = BlockBehaviour.BlockStateBase::isCollisionShapeFullBlock;
     private TriPredicate<BlockState,BlockGetter,BlockPos> isSuffocating = (state, level, pos) -> state.blocksMotion() && state.isCollisionShapeFullBlock(level, pos);
     private boolean hasDynamicShape = false;
@@ -81,15 +96,15 @@ public class BlockProperties {
         return this.mapColor(state -> color);
     }
 
-    public BlockProperties noCollision(){
-        this.hasCollision = false;
-        this.canOcclude = false;
+    public BlockProperties collision(boolean hasCollision){
+        this.hasCollision = hasCollision;
+        if(!hasCollision)
+            this.canOcclude = false;
         return this;
     }
 
-    public BlockProperties noOcclusion(){
-        this.canOcclude = false;
-        return this;
+    public BlockProperties noCollision(){
+        return this.collision(false);
     }
 
     public BlockProperties sound(SoundType soundTypeIn){
@@ -117,14 +132,29 @@ public class BlockProperties {
         return this;
     }
 
+    /**
+     * Sets both explosion resistance and destroy time.
+     */
+    public BlockProperties strength(float strength){
+        return this.explosionResistance(strength).destroyTime(strength);
+    }
+
+    public BlockProperties requiresCorrectTool(boolean requiresCorrectTool){
+        this.requiresCorrectTool = requiresCorrectTool;
+        return this;
+    }
+
     public BlockProperties requiresCorrectTool(){
-        this.requiresCorrectTool = true;
+        return this.requiresCorrectTool(true);
+    }
+
+    public BlockProperties randomTicks(boolean receiveRandomTicks){
+        this.ticksRandomly = receiveRandomTicks;
         return this;
     }
 
     public BlockProperties randomTicks(){
-        this.ticksRandomly = true;
-        return this;
+        return this.randomTicks(true);
     }
 
     public BlockProperties friction(float friction){
@@ -142,9 +172,59 @@ public class BlockProperties {
         return this;
     }
 
-    public BlockProperties air(){
-        this.isAir = true;
+    public BlockProperties canOcclude(boolean canOcclude){
+        this.canOcclude = canOcclude;
         return this;
+    }
+
+    public BlockProperties noOcclusion(){
+        return this.canOcclude(false);
+    }
+
+    public BlockProperties air(boolean isAir){
+        this.isAir = isAir;
+        return this;
+    }
+
+    public BlockProperties air(){
+        return this.air(true);
+    }
+
+    public BlockProperties ignitedByLava(boolean getsIgnitedByLava){
+        this.ignitedByLava = getsIgnitedByLava;
+        return this;
+    }
+
+    public BlockProperties ignitedByLava(){
+        return this.ignitedByLava(true);
+    }
+
+    public BlockProperties pushReaction(PushReaction pushReaction){
+        this.pushReaction = pushReaction;
+        return this;
+    }
+
+    public BlockProperties spawnTerrainParticles(boolean spawnTerrainParticles){
+        this.spawnTerrainParticles = spawnTerrainParticles;
+        return this;
+    }
+
+    public BlockProperties noTerrainParticles(){
+        return this.spawnTerrainParticles(false);
+    }
+
+    public BlockProperties instrument(NoteBlockInstrument instrument){
+        this.instrument = instrument;
+        return this;
+    }
+
+    public BlockProperties replaceable(boolean isReplaceable){
+        this.replaceable = isReplaceable;
+        return this;
+    }
+
+    public BlockProperties replaceable(){
+        return this.replaceable(true);
     }
 
     public BlockProperties isRedstoneConductor(TriPredicate<BlockState,BlockGetter,BlockPos> isRedstoneConductor){
@@ -224,6 +304,14 @@ public class BlockProperties {
             properties.noOcclusion();
         if(this.isAir)
             properties.air();
+        if(this.ignitedByLava)
+            properties.ignitedByLava();
+        properties.pushReaction(this.pushReaction);
+        if(!this.spawnTerrainParticles)
+            properties.noTerrainParticles();
+        properties.instrument(this.instrument);
+        if(this.replaceable)
+            properties.replaceable();
         properties.isRedstoneConductor(this.isRedstoneConductor::test);
         properties.isSuffocating(this.isSuffocating::test);
         properties.isViewBlocking(this.isSuffocating::test);
