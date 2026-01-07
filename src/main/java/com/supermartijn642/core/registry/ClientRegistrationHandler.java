@@ -9,7 +9,6 @@ import com.supermartijn642.core.util.Pair;
 import com.supermartijn642.core.util.TriFunction;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.SpecialBlockRendererRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
@@ -76,6 +75,11 @@ public class ClientRegistrationHandler {
     }
 
     @ApiStatus.Internal
+    public static void registerPictureInPictureRenderersInternal(MultiBufferSource.BufferSource bufferSource, Consumer<PictureInPictureRenderer<?>> output){
+        REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.registerPictureInPictureRenderers(bufferSource, output));
+    }
+
+    @ApiStatus.Internal
     public static void applyBlockModelConsumersInternal(Function<ResourceLocation,BlockStateModel> modelGetter){
         REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.handleBlockModelConsumers(modelGetter));
     }
@@ -130,6 +134,8 @@ public class ClientRegistrationHandler {
 
     private final List<Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>>> containerScreens = new ArrayList<>();
     private final List<Pair<Supplier<Block>,Supplier<ChunkSectionLayer>>> blockRenderTypes = new ArrayList<>();
+
+    private final List<Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>>> pictureInPictureRenderers = new ArrayList<>();
 
     private boolean passedTextureStitch;
 
@@ -488,7 +494,7 @@ public class ClientRegistrationHandler {
     }
 
     public void registerPictureInPictureRenderer(Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>> renderer){
-        SpecialGuiElementRegistry.register(c -> renderer.apply(c.vertexConsumers()));
+        this.pictureInPictureRenderers.add(renderer);
     }
 
     public void registerPictureInPictureRenderer(Supplier<PictureInPictureRenderer<?>> renderer){
@@ -584,6 +590,23 @@ public class ClientRegistrationHandler {
         }
         if(missingModels != null)
             CoreLib.LOGGER.error("Missing models for block model consumers from mod '{}': {}", this.modid, missingModels.stream().map(l -> "'" + l + "'").collect(Collectors.joining(", ")));
+    }
+
+    private void registerPictureInPictureRenderers(MultiBufferSource.BufferSource bufferSource, Consumer<PictureInPictureRenderer<?>> output){
+        Set<Class<?>> stateClasses = new HashSet<>();
+        for(Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>> rendererFunction : this.pictureInPictureRenderers){
+            PictureInPictureRenderer<?> renderer;
+            try{
+                renderer = rendererFunction.apply(bufferSource);
+            }catch(RuntimeException e){
+                throw new RuntimeException("Encountered an exception whilst creating picture in picture renderer for mod '" + this.modid + "'!", e);
+            }
+            if(renderer == null)
+                throw new RuntimeException("Picture in picture renderer function for mod '" + this.modid + "' returned null!");
+            if(!stateClasses.add(renderer.getRenderStateClass()))
+                throw new RuntimeException("Mod '" + this.modid + "' registered multiple picture in picture renderers for class '" + renderer.getRenderStateClass().getName() + "'!");
+            output.accept(renderer);
+        }
     }
 
     private void handleBlockModelConsumers(Function<ResourceLocation,BlockStateModel> modelGetter){
