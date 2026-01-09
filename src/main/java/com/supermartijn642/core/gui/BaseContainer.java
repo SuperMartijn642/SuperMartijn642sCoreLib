@@ -2,7 +2,6 @@ package com.supermartijn642.core.gui;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.world.World;
 
 /**
@@ -48,13 +47,25 @@ public abstract class BaseContainer extends Container {
         // player
         for(int row = 0; row < 3; row++){
             for(int column = 0; column < 9; column++){
-                this.addSlot(new Slot(this.player.inventory, row * 9 + column + 9, x + 18 * column, y + 18 * row));
+                this.addSlot(
+                    CustomSlot.builder()
+                        .position(x + 18 * column, y + 18 * row)
+                        .playerInventory(row * 9 + column + 9, this.player.inventory)
+                        .build()
+                        .getVanillaSlot()
+                );
             }
         }
 
         // hot bar
         for(int column = 0; column < 9; column++)
-            this.addSlot(new Slot(this.player.inventory, column, x + 18 * column, y + 58));
+            this.addSlot(
+                CustomSlot.builder()
+                    .position(x + 18 * column, y + 58)
+                    .playerInventory(column, this.player.inventory)
+                    .build()
+                    .getVanillaSlot()
+            );
     }
 
     @Override

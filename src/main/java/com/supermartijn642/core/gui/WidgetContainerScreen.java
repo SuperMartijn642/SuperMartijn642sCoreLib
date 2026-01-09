@@ -96,8 +96,17 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
         if(this.drawSlots){
             for(Slot slot : this.container.slots){
-                ScreenUtils.bindTexture(SLOT_TEXTURE);
-                ScreenUtils.drawTexture(slot.x - 1, slot.y - 1, 18, 18);
+                if(!slot.isActive())
+                    continue;
+                if(slot instanceof CustomSlot){
+                    if(((CustomSlot)slot).showBackground()){
+                        ScreenUtils.bindTexture(SLOT_TEXTURE);
+                        ScreenUtils.drawTexture(slot.x - 1, slot.y - 1, ((CustomSlot)slot).getWidth(), ((CustomSlot)slot).getHeight());
+                    }
+                }else{
+                    ScreenUtils.bindTexture(SLOT_TEXTURE);
+                    ScreenUtils.drawTexture(slot.x - 1, slot.y - 1, 18, 18);
+                }
             }
         }
 
@@ -118,17 +127,51 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             if(!slot.isActive())
                 continue;
 
-            this.renderSlot(slot);
-            if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
-                this.hoveredSlot = slot;
-                GlStateManager.disableLighting();
-                GlStateManager.disableDepthTest();
-                GlStateManager.colorMask(true, true, true, false);
-                int slotColor = this.getSlotColor(0);
-                ScreenUtils.fillRect(slot.x, slot.y, 16, 16, slotColor);
-                GlStateManager.colorMask(true, true, true, true);
-                GlStateManager.enableLighting();
-                GlStateManager.enableDepthTest();
+            if(slot instanceof CustomSlot){
+                // Custom slot
+                CustomSlot customSlot = (CustomSlot)slot;
+                int slotWidth = customSlot.getWidth();
+                int slotHeight = customSlot.getHeight();
+                if(customSlot.showItem()){
+                    float scale = Math.min(slotWidth / 18f, slotHeight / 18f);
+
+                    GlStateManager.pushMatrix();
+                    if(customSlot.scaleItemToSize() && scale != 1){
+                        GlStateManager.translated(slot.x, slot.y, 0);
+                        GlStateManager.scaled(scale, scale, scale);
+                        GlStateManager.translated(-slot.x, -slot.y, 0);
+                        this.renderSlot(slot);
+                    }else{
+                        GlStateManager.translated((customSlot.getWidth() - 18) / 2f, (customSlot.getHeight() - 18) / 2f, 0);
+                        this.renderSlot(slot);
+                    }
+                    GlStateManager.popMatrix();
+                }
+                if(this.isHovering(slot.x, slot.y, slotWidth - 2, slotHeight - 2, mouseX, mouseY) && customSlot.showHighlight()){
+                    this.hoveredSlot = slot;
+                    int slotColor = this.getSlotColor(0);
+                    GlStateManager.disableLighting();
+                    GlStateManager.disableDepthTest();
+                    GlStateManager.colorMask(true, true, true, false);
+                    ScreenUtils.fillRect(slot.x, slot.y, slotWidth - 2, slotHeight - 2, slotColor);
+                    GlStateManager.colorMask(true, true, true, true);
+                    GlStateManager.enableLighting();
+                    GlStateManager.enableDepthTest();
+                }
+            }else{
+                // Regular slot
+                this.renderSlot(slot);
+                if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
+                    this.hoveredSlot = slot;
+                    GlStateManager.disableLighting();
+                    GlStateManager.disableDepthTest();
+                    GlStateManager.colorMask(true, true, true, false);
+                    int slotColor = this.getSlotColor(0);
+                    ScreenUtils.fillRect(slot.x, slot.y, 16, 16, slotColor);
+                    GlStateManager.colorMask(true, true, true, true);
+                    GlStateManager.enableLighting();
+                    GlStateManager.enableDepthTest();
+                }
             }
         }
 
