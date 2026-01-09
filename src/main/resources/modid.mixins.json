@@ -15,6 +15,7 @@
     "TagLoaderMixin"
   ],
   "client": [
+    "AbstractContainerScreenMixin",
     "LevelRendererMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",
