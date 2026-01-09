@@ -15,6 +15,7 @@
   "client": [
     "dev.DataGeneratorConfigMixin",
     "dev.DataGeneratorMixin",
+    "AbstractContainerScreenMixin",
     "LevelRendererMixin",
     "ModelBakerImplMixin",
     "ModelBakeryMixin",
