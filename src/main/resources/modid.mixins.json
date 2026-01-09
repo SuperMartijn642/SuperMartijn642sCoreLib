@@ -13,6 +13,7 @@
     "TagLoaderMixin"
   ],
   "client": [
+    "AbstractContainerScreenMixin",
     "DataGeneratorMixin",
     "FabricDataGenHelperMixin",
     "GuiGraphicsMixin",
