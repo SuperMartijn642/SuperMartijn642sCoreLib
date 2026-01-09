@@ -12,6 +12,7 @@
     "TagLoaderMixin"
   ],
   "client": [
+    "AbstractContainerScreenMixin",
     "DataGeneratorMixin",
     "FabricDataGenHelperMixin",
     "LevelRendererMixin",
