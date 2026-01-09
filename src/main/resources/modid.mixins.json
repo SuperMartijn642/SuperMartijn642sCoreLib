@@ -16,6 +16,7 @@
     "TagCollectionReaderMixin"
   ],
   "client": [
+    "AbstractContainerScreenMixin",
     "LevelRendererMixin"
   ],
   "server": [],
