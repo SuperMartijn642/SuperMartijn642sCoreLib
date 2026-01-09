@@ -99,8 +99,15 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
         if(this.drawSlots){
             for(Slot slot : this.container.inventorySlots){
-                ScreenUtils.bindTexture(SLOT_TEXTURE);
-                ScreenUtils.drawTexture(slot.xPos - 1, slot.yPos - 1, 18, 18);
+                if(slot instanceof CustomSlot){
+                    if(((CustomSlot)slot).showBackground()){
+                        ScreenUtils.bindTexture(SLOT_TEXTURE);
+                        ScreenUtils.drawTexture(slot.xPos - 1, slot.yPos - 1, ((CustomSlot)slot).getWidth(), ((CustomSlot)slot).getHeight());
+                    }
+                }else{
+                    ScreenUtils.bindTexture(SLOT_TEXTURE);
+                    ScreenUtils.drawTexture(slot.xPos - 1, slot.yPos - 1, 18, 18);
+                }
             }
         }
 
@@ -114,16 +121,49 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             if(!slot.isEnabled())
                 continue;
 
-            this.drawSlot(slot);
-            if(this.isMouseOverSlot(slot, mouseX, mouseY)){
-                this.hoveredSlot = slot;
-                GlStateManager.disableLighting();
-                GlStateManager.disableDepth();
-                GlStateManager.colorMask(true, true, true, false);
-                ScreenUtils.fillRect(slot.xPos, slot.yPos, 16, 16, -2130706433);
-                GlStateManager.colorMask(true, true, true, true);
-                GlStateManager.enableLighting();
-                GlStateManager.enableDepth();
+            if(slot instanceof CustomSlot){
+                // Custom slot
+                CustomSlot customSlot = (CustomSlot)slot;
+                int slotWidth = customSlot.getWidth();
+                int slotHeight = customSlot.getHeight();
+                if(customSlot.showItem()){
+                    float scale = Math.min(slotWidth / 18f, slotHeight / 18f);
+
+                    GlStateManager.pushMatrix();
+                    if(customSlot.scaleItemToSize() && scale != 1){
+                        GlStateManager.translate(slot.xPos, slot.yPos, 0);
+                        GlStateManager.scale(scale, scale, scale);
+                        GlStateManager.translate(-slot.xPos, -slot.yPos, 0);
+                        this.drawSlot(slot);
+                    }else{
+                        GlStateManager.translate((customSlot.getWidth() - 18) / 2f, (customSlot.getHeight() - 18) / 2f, 0);
+                        this.drawSlot(slot);
+                    }
+                    GlStateManager.popMatrix();
+                }
+                if(this.isMouseOverSlot(slot, mouseX, mouseY) && customSlot.showHighlight()){
+                    this.hoveredSlot = slot;
+                    GlStateManager.disableLighting();
+                    GlStateManager.disableDepth();
+                    GlStateManager.colorMask(true, true, true, false);
+                    ScreenUtils.fillRect(slot.xPos, slot.yPos, slotWidth - 2, slotHeight - 2, -2130706433);
+                    GlStateManager.colorMask(true, true, true, true);
+                    GlStateManager.enableLighting();
+                    GlStateManager.enableDepth();
+                }
+            }else{
+                // Regular slot
+                this.drawSlot(slot);
+                if(this.isMouseOverSlot(slot, mouseX, mouseY)){
+                    this.hoveredSlot = slot;
+                    GlStateManager.disableLighting();
+                    GlStateManager.disableDepth();
+                    GlStateManager.colorMask(true, true, true, false);
+                    ScreenUtils.fillRect(slot.xPos, slot.yPos, 16, 16, -2130706433);
+                    GlStateManager.colorMask(true, true, true, true);
+                    GlStateManager.enableLighting();
+                    GlStateManager.enableDepth();
+                }
             }
         }
 

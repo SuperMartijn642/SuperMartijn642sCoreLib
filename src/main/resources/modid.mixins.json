@@ -38,6 +38,7 @@
   ],
   "client": [
     "ClientPlayerEntityMixin",
+    "GuiContainerMixin",
     "LevelRendererMixin",
     "LocaleMixin",
     "ModelLoaderMixin",
