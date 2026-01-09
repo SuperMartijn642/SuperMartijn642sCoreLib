@@ -61,6 +61,8 @@ public abstract class BaseWidget implements Widget {
         if(this.focused != focused)
             this.nextNarration = focused ? Util.getMillis() + 750 : Long.MAX_VALUE;
         this.focused = focused;
+        if(!focused)
+            this.widgets.forEach(w -> w.setFocused(false));
     }
 
     public boolean isFocused(){
