@@ -37,6 +37,9 @@ accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties speedFactor F
 # BlockEntityType$BlockEntitySupplier
 extendable class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
+# ContainerSlots
+mutable field net/minecraft/world/inventory/Slot x I
+mutable field net/minecraft/world/inventory/Slot y I
 # GuiComponent
 accessible method net/minecraft/client/gui/GuiComponent fillGradient (Lcom/mojang/math/Matrix4f;Lcom/mojang/blaze3d/vertex/BufferBuilder;IIIIIII)V # fillGradient
 # HashCache
