@@ -16,6 +16,7 @@
     "TagManagerMixin"
   ],
   "client": [
+    "AbstractContainerScreenMixin",
     "GuiGraphicsInvoker",
     "LevelRendererMixin",
     "SpriteSourceListMixin"
