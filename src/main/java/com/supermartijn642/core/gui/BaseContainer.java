@@ -2,7 +2,6 @@ package com.supermartijn642.core.gui;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.Level;
 
 /**
@@ -48,13 +47,25 @@ public abstract class BaseContainer extends AbstractContainerMenu {
         // player
         for(int row = 0; row < 3; row++){
             for(int column = 0; column < 9; column++){
-                this.addSlot(new Slot(this.player.getInventory(), row * 9 + column + 9, x + 18 * column, y + 18 * row));
+                this.addSlot(
+                    CustomSlot.builder()
+                        .position(x + 18 * column, y + 18 * row)
+                        .playerInventory(row * 9 + column + 9, this.player.getInventory())
+                        .build()
+                        .getVanillaSlot()
+                );
             }
         }
 
         // hot bar
         for(int column = 0; column < 9; column++)
-            this.addSlot(new Slot(this.player.getInventory(), column, x + 18 * column, y + 58));
+            this.addSlot(
+                CustomSlot.builder()
+                    .position(x + 18 * column, y + 58)
+                    .playerInventory(column, this.player.getInventory())
+                    .build()
+                    .getVanillaSlot()
+            );
     }
 
     @Override

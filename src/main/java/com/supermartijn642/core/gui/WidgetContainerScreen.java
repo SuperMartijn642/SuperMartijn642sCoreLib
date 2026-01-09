@@ -99,8 +99,17 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
         if(this.drawSlots){
             for(Slot slot : this.container.slots){
-                ScreenUtils.bindTexture(SLOT_TEXTURE);
-                ScreenUtils.drawTexture(poseStack, slot.x - 1, slot.y - 1, 18, 18);
+                if(!slot.isActive())
+                    continue;
+                if(slot instanceof CustomSlot customSlot){
+                    if(customSlot.showBackground()){
+                        ScreenUtils.bindTexture(SLOT_TEXTURE);
+                        ScreenUtils.drawTexture(poseStack, slot.x - 1, slot.y - 1, customSlot.getWidth(), customSlot.getHeight());
+                    }
+                }else{
+                    ScreenUtils.bindTexture(SLOT_TEXTURE);
+                    ScreenUtils.drawTexture(poseStack, slot.x - 1, slot.y - 1, 18, 18);
+                }
             }
         }
 
@@ -121,10 +130,44 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             if(!slot.isActive())
                 continue;
 
-            this.renderSlot(poseStack, slot);
-            if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
-                this.hoveredSlot = slot;
-                renderSlotHighlight(poseStack, slot.x, slot.y, this.getBlitOffset(), this.getSlotColor(0));
+            if(slot instanceof CustomSlot customSlot){
+                // Custom slot
+                int slotWidth = customSlot.getWidth();
+                int slotHeight = customSlot.getHeight();
+                if(customSlot.showItem()){
+                    float scale = Math.min(slotWidth / 18f, slotHeight / 18f);
+
+                    RenderSystem.getModelViewStack().pushPose();
+                    if(customSlot.scaleItemToSize() && scale != 1){
+                        RenderSystem.getModelViewStack().translate(slot.x, slot.y, 0);
+                        RenderSystem.getModelViewStack().scale(scale, scale, 1);
+                        RenderSystem.getModelViewStack().translate(-slot.x, -slot.y, 0);
+                        RenderSystem.applyModelViewMatrix();
+                        this.renderSlot(poseStack, slot);
+                    }else{
+                        RenderSystem.getModelViewStack().translate((customSlot.getWidth() - 18) / 2f, (customSlot.getHeight() - 18) / 2f, 0);
+                        RenderSystem.applyModelViewMatrix();
+                        this.renderSlot(poseStack, slot);
+                    }
+                    RenderSystem.getModelViewStack().popPose();
+                    RenderSystem.applyModelViewMatrix();
+                }
+                if(this.isHovering(slot.x, slot.y, slotWidth - 2, slotHeight - 2, mouseX, mouseY) && customSlot.showHighlight()){
+                    this.hoveredSlot = slot;
+                    int slotColor = this.getSlotColor(0);
+                    RenderSystem.disableDepthTest();
+                    RenderSystem.colorMask(true, true, true, false);
+                    fillGradient(poseStack, slot.x, slot.y, slot.x + slotWidth - 2, slot.y + slotHeight - 2, slotColor, slotColor, this.getBlitOffset());
+                    RenderSystem.colorMask(true, true, true, true);
+                    RenderSystem.enableDepthTest();
+                }
+            }else{
+                // Regular slot
+                this.renderSlot(poseStack, slot);
+                if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
+                    this.hoveredSlot = slot;
+                    renderSlotHighlight(poseStack, slot.x, slot.y, this.getBlitOffset(), this.getSlotColor(0));
+                }
             }
         }
 
