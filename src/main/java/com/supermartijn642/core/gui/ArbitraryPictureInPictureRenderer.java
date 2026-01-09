@@ -153,6 +153,7 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
 
     public record State(int x, int y, int width, int height,
                         Matrix3x2f pose,
+                        ScreenRectangle scissorArea,
                         BiConsumer<PoseStack,MultiBufferSource.BufferSource> rendering) implements PictureInPictureRenderState {
 
         @Override
@@ -182,7 +183,7 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
 
         @Override
         public ScreenRectangle scissorArea(){
-            return null;
+            return this.scissorArea;
         }
 
         @Override
