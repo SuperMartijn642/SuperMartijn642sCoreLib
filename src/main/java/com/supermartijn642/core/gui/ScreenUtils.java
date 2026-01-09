@@ -1,9 +1,13 @@
 package com.supermartijn642.core.gui;
 
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector4f;
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.render.RenderUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
@@ -358,5 +362,33 @@ public class ScreenUtils {
         }
 
         itemRenderer.blitOffset = oldBlitOffset;
+    }
+
+    public static void withScissor(PoseStack poseStack, int x, int y, int width, int height, Runnable rendering){
+        // Draw current buffers before enabling scissor
+        RenderUtils.getMainBufferSource().endBatch();
+
+        // Apply matrix stack to given coordinates
+        Vector4f scissorStart = new Vector4f(x, y, 0, 1);
+        Vector4f scissorEnd = new Vector4f(x + width, y + height, 0, 1);
+        scissorStart.transform(poseStack.last().pose());
+        scissorEnd.transform(poseStack.last().pose());
+        scissorStart.transform(RenderSystem.getModelViewStack().last().pose());
+        scissorEnd.transform(RenderSystem.getModelViewStack().last().pose());
+        // Convert coordinates to window
+        Window window = Minecraft.getInstance().getWindow();
+        double guiScale = window.getGuiScale();
+        double scissorX = scissorStart.x() * guiScale;
+        double scissorY = window.getHeight() - scissorEnd.y() * guiScale;
+        double scissorWidth = (scissorEnd.x() - scissorStart.x()) * guiScale;
+        double scissorHeight = (scissorEnd.y() - scissorStart.y()) * guiScale;
+        // Apply scissor and run rendering function
+        RenderSystem.enableScissor((int)scissorX, (int)scissorY, Math.max(0, (int)scissorWidth), Math.max(0, (int)scissorHeight));
+        try{
+            rendering.run();
+            RenderUtils.getMainBufferSource().endBatch();
+        }finally{
+            RenderSystem.disableScissor();
+        }
     }
 }
