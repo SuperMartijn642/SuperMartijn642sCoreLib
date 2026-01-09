@@ -95,8 +95,15 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         this.widget.renderBackground(this.widgetRenderContext, helper, offsetMouseX, offsetMouseY);
 
         if(this.drawSlots){
-            for(Slot slot : this.container.slots)
-                helper.submitDefaultSlot(slot.x - 1, slot.y - 1);
+            for(Slot slot : this.container.slots){
+                if(!slot.isActive())
+                    continue;
+                if(slot instanceof CustomSlot customSlot){
+                    if(customSlot.showBackground())
+                        helper.submitDefaultSlot(slot.x - 1, slot.y - 1, customSlot.getWidth(), customSlot.getHeight());
+                }else
+                    helper.submitDefaultSlot(slot.x - 1, slot.y - 1);
+            }
         }
 
         // Render the widget
@@ -107,13 +114,41 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             if(!slot.isActive())
                 continue;
 
-            if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
-                this.hoveredSlot = slot;
-                helper.submitSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE, slot.x - 4, slot.y - 4, 24, 24);
+            if(slot instanceof CustomSlot customSlot){
+                // Custom slot
+                int slotWidth = customSlot.getWidth();
+                int slotHeight = customSlot.getHeight();
+                if(this.isHovering(slot.x, slot.y, slotWidth - 2, slotHeight - 2, mouseX, mouseY)){
+                    this.hoveredSlot = slot;
+                    if(customSlot.showHighlight() && slot.isHighlightable())
+                        helper.submitSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE, slot.x - 4, slot.y - 4, slotWidth + 6, slotHeight + 6);
+                }
+                if(customSlot.showItem()){
+                    float scale = Math.min(slotWidth / 18f, slotHeight / 18f);
+                    guiGraphics.pose().pushMatrix();
+                    if(customSlot.scaleItemToSize() && scale != 1){
+                        guiGraphics.pose().translate(slot.x, slot.y);
+                        guiGraphics.pose().scale(scale);
+                        guiGraphics.pose().translate(-slot.x, -slot.y);
+                        this.renderSlot(guiGraphics, slot);
+                    }else{
+                        guiGraphics.pose().translate((customSlot.getWidth() - 18) / 2f, (customSlot.getHeight() - 18) / 2f);
+                        this.renderSlot(guiGraphics, slot);
+                    }
+                    guiGraphics.pose().popMatrix();
+                }
+                if(this.hoveredSlot == slot && slot.isHighlightable())
+                    helper.submitSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE, slot.x - 4, slot.y - 4, slotWidth + 6, slotHeight + 6);
+            }else{
+                // Regular slot
+                if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
+                    this.hoveredSlot = slot;
+                    helper.submitSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE, slot.x - 4, slot.y - 4, 24, 24);
+                }
+                this.renderSlot(guiGraphics, slot);
+                if(this.hoveredSlot == slot)
+                    helper.submitSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE, slot.x - 4, slot.y - 4, 24, 24);
             }
-            this.renderSlot(guiGraphics, slot);
-            if(this.hoveredSlot == slot)
-                helper.submitSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE, slot.x - 4, slot.y - 4, 24, 24);
         }
 
         // Render the widget's foreground
