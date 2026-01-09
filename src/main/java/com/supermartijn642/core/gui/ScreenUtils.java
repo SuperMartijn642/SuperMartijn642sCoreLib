@@ -2,6 +2,7 @@ package com.supermartijn642.core.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.supermartijn642.core.ClientUtils;
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
@@ -12,6 +13,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.fml.client.config.GuiUtils;
+import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -267,5 +269,23 @@ public class ScreenUtils {
         int screenWidth = ClientUtils.getMinecraft().window.getGuiScaledWidth();
         int screenHeight = ClientUtils.getMinecraft().window.getGuiScaledHeight();
         GuiUtils.drawHoveringText(components, x, y, screenWidth, screenHeight, -1, fontRenderer);
+    }
+
+    public static void withScissor(int x, int y, int width, int height, Runnable rendering){
+        // Convert coordinates to window
+        MainWindow window = Minecraft.getInstance().window;
+        double guiScale = window.getGuiScale();
+        double scissorX = x * guiScale;
+        double scissorY = window.getHeight() - (y + height) * guiScale;
+        double scissorWidth = width * guiScale;
+        double scissorHeight = height * guiScale;
+        // Apply scissor and run rendering function
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        GL11.glScissor((int)scissorX, (int)scissorY, Math.max(0, (int)scissorWidth), Math.max(0, (int)scissorHeight));
+        try{
+            rendering.run();
+        }finally{
+            GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        }
     }
 }
