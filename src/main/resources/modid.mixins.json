@@ -15,6 +15,7 @@
     "TagManagerMixin"
   ],
   "client": [
+    "AbstractContainerScreenMixin",
     "DataGeneratorMixin",
     "DatagenModLoaderAccessor",
     "LevelRendererMixin"
