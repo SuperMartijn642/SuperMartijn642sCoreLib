@@ -467,13 +467,13 @@ public final class GuiGraphicsHelper {
     }
 
     public void submitCustomRendering(int x, int y, int width, int height, BiConsumer<PoseStack,MultiBufferSource.BufferSource> rendering){
-        this.guiGraphics.guiRenderState.submitPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), rendering));
+        this.guiGraphics.guiRenderState.submitPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), this.guiGraphics.scissorStack.peek(), rendering));
     }
 
     // TODO remove this when mods require changes anyways
     @Deprecated
     public void submitCustomRendering(int x, int y, int width, int height, Consumer<PoseStack> rendering){
-        this.guiGraphics.guiRenderState.submitPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), (poseStack, bufferSource) -> {
+        this.guiGraphics.guiRenderState.submitPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), this.guiGraphics.scissorStack.peek(), (poseStack, bufferSource) -> {
             RenderUtils.GUI_BUFFER_SOURCE_OVERWRITE.set(bufferSource);
             rendering.accept(poseStack);
             RenderUtils.GUI_BUFFER_SOURCE_OVERWRITE.remove();
