@@ -4,13 +4,12 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.render.RenderUtils;
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix4f;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -442,5 +441,33 @@ public class ScreenUtils {
         RenderSystem.disableBlend();
         RenderSystem.enableAlphaTest();
         RenderSystem.enableTexture();
+    }
+
+    public static void withScissor(MatrixStack poseStack, int x, int y, int width, int height, Runnable rendering){
+        // Draw current buffers before enabling scissor
+        RenderUtils.getMainBufferSource().endBatch();
+
+        // Apply matrix stack to given coordinates
+        Vector4f scissorStart = new Vector4f(x, y, 0, 1);
+        Vector4f scissorEnd = new Vector4f(x + width, y + height, 0, 1);
+        scissorStart.transform(poseStack.last().pose());
+        scissorEnd.transform(poseStack.last().pose());
+        // Convert coordinates to window
+        MainWindow window = Minecraft.getInstance().getWindow();
+        double guiScale = window.getGuiScale();
+        double scissorX = scissorStart.x() * guiScale;
+        double scissorY = window.getHeight() - scissorEnd.y() * guiScale;
+        double scissorWidth = (scissorEnd.x() - scissorStart.x()) * guiScale;
+        double scissorHeight = (scissorEnd.y() - scissorStart.y()) * guiScale;
+        // Apply scissor and run rendering function
+        RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        GL11.glScissor((int)scissorX, (int)scissorY, Math.max(0, (int)scissorWidth), Math.max(0, (int)scissorHeight));
+        try{
+            rendering.run();
+            RenderUtils.getMainBufferSource().endBatch();
+        }finally{
+            GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        }
     }
 }
