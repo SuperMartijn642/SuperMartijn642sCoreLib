@@ -1,8 +1,11 @@
 package com.supermartijn642.core.gui;
 
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.render.RenderUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
@@ -16,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.Collections;
 import java.util.List;
@@ -356,5 +360,31 @@ public class ScreenUtils {
         }
 
         itemRenderer.blitOffset = oldBlitOffset;
+    }
+
+    public static void withScissor(PoseStack poseStack, int x, int y, int width, int height, Runnable rendering){
+        // Draw current buffers before enabling scissor
+        RenderUtils.getMainBufferSource().endBatch();
+
+        // Apply matrix stack to given coordinates
+        Vector3f scissorStart = poseStack.last().pose().transformPosition(x, y, 0, new Vector3f());
+        Vector3f scissorEnd = poseStack.last().pose().transformPosition(x + width, y + height, 0, new Vector3f());
+        RenderSystem.getModelViewStack().last().pose().transformPosition(scissorStart.x, scissorStart.y, 0, scissorStart);
+        RenderSystem.getModelViewStack().last().pose().transformPosition(scissorEnd.x, scissorEnd.y, 0, scissorEnd);
+        // Convert coordinates to window
+        Window window = Minecraft.getInstance().getWindow();
+        double guiScale = window.getGuiScale();
+        double scissorX = scissorStart.x * guiScale;
+        double scissorY = window.getHeight() - scissorEnd.y * guiScale;
+        double scissorWidth = (scissorEnd.x - scissorStart.x) * guiScale;
+        double scissorHeight = (scissorEnd.y - scissorStart.y) * guiScale;
+        // Apply scissor and run rendering function
+        RenderSystem.enableScissor((int)scissorX, (int)scissorY, Math.max(0, (int)scissorWidth), Math.max(0, (int)scissorHeight));
+        try{
+            rendering.run();
+            RenderUtils.getMainBufferSource().endBatch();
+        }finally{
+            RenderSystem.disableScissor();
+        }
     }
 }
