@@ -12,6 +12,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -104,8 +105,17 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
         if(this.drawSlots){
             for(Slot slot : this.container.slots){
-                ScreenUtils.bindTexture(SLOT_TEXTURE);
-                ScreenUtils.drawTexture(guiGraphics.pose(), slot.x - 1, slot.y - 1, 18, 18);
+                if(!slot.isActive())
+                    continue;
+                if(slot instanceof CustomSlot customSlot){
+                    if(customSlot.showBackground()){
+                        ScreenUtils.bindTexture(SLOT_TEXTURE);
+                        ScreenUtils.drawTexture(guiGraphics.pose(), slot.x - 1, slot.y - 1, customSlot.getWidth(), customSlot.getHeight());
+                    }
+                }else{
+                    ScreenUtils.bindTexture(SLOT_TEXTURE);
+                    ScreenUtils.drawTexture(guiGraphics.pose(), slot.x - 1, slot.y - 1, 18, 18);
+                }
             }
         }
 
@@ -117,10 +127,35 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             if(!slot.isActive())
                 continue;
 
-            this.renderSlot(guiGraphics, slot);
-            if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
-                this.hoveredSlot = slot;
-                renderSlotHighlight(guiGraphics, slot.x, slot.y, 0);
+            if(slot instanceof CustomSlot customSlot){
+                // Custom slot
+                int slotWidth = customSlot.getWidth();
+                int slotHeight = customSlot.getHeight();
+                if(customSlot.showItem()){
+                    float scale = Math.min(slotWidth / 18f, slotHeight / 18f);
+                    guiGraphics.pose().pushPose();
+                    if(customSlot.scaleItemToSize() && scale != 1){
+                        guiGraphics.pose().translate(slot.x, slot.y, 0);
+                        guiGraphics.pose().scale(scale, scale, 1);
+                        guiGraphics.pose().translate(-slot.x, -slot.y, 0);
+                        this.renderSlot(guiGraphics, slot);
+                    }else{
+                        guiGraphics.pose().translate((customSlot.getWidth() - 18) / 2f, (customSlot.getHeight() - 18) / 2f, 0);
+                        this.renderSlot(guiGraphics, slot);
+                    }
+                    guiGraphics.pose().popPose();
+                }
+                if(this.isHovering(slot.x, slot.y, slotWidth - 2, slotHeight - 2, mouseX, mouseY) && slot.isHighlightable()){
+                    this.hoveredSlot = slot;
+                    guiGraphics.fillGradient(RenderType.guiOverlay(), slot.x, slot.y, slot.x + slotWidth - 2, slot.y + slotHeight - 2, -2130706433, -2130706433, 0);
+                }
+            }else{
+                // Regular slot
+                this.renderSlot(guiGraphics, slot);
+                if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
+                    this.hoveredSlot = slot;
+                    renderSlotHighlight(guiGraphics, slot.x, slot.y, 0);
+                }
             }
         }
 
