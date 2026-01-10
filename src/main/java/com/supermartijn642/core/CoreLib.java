@@ -4,6 +4,7 @@ import com.supermartijn642.core.data.condition.*;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
 import com.supermartijn642.core.data.tag.CustomTagEntries;
 import com.supermartijn642.core.data.tag.entries.NamespaceTagEntry;
+import com.supermartijn642.core.generator.standard.CoreLibLanguageGenerator;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import com.supermartijn642.core.registry.RegistrationHandler;
@@ -40,6 +41,8 @@ public class CoreLib {
 
         // Register generator for default tags
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibMiningTagGenerator("supermartijn642corelib", cache));
+        // Register generator for translations
+        GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibLanguageGenerator("supermartijn642corelib", cache));
     }
 
     private void onConstructMod(FMLConstructModEvent e){
