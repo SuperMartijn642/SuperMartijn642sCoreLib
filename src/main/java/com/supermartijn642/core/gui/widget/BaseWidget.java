@@ -112,16 +112,20 @@ public abstract class BaseWidget implements Widget {
             this.focusedWidget = null;
         else if(!this.dragging){
             if(this.focusedWidget != null && !(mouseX > this.focusedWidget.left() && mouseX < this.focusedWidget.left() + this.focusedWidget.width() && mouseY > this.focusedWidget.top() && mouseY < this.focusedWidget.top() + this.focusedWidget.height())){
+                Widget focusedWidget = this.focusedWidget;
                 this.focusedWidget = null;
+                focusedWidget.setFocused(false);
                 this.nextNarration = Util.getMillis() + 750;
             }
-            for(Widget widget : this.widgets){
-                if(this.focusedWidget != widget && mouseX >= widget.left() && mouseX < widget.left() + widget.width() && mouseY >= widget.top() && mouseY < widget.top() + widget.height()){
-                    this.focusedWidget = widget;
-                    widget.setFocused(true);
-                    this.nextNarration = Long.MAX_VALUE;
-                }else
-                    widget.setFocused(widget == this.focusedWidget);
+            if(this.focusedWidget == null){
+                for(Widget widget : this.widgets){
+                    if(mouseX >= widget.left() && mouseX < widget.left() + widget.width() && mouseY >= widget.top() && mouseY < widget.top() + widget.height()){
+                        this.focusedWidget = widget;
+                        widget.setFocused(true);
+                        this.nextNarration = Long.MAX_VALUE;
+                        break;
+                    }
+                }
             }
         }
 
