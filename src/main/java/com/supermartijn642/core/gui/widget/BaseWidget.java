@@ -1,6 +1,7 @@
 package com.supermartijn642.core.gui.widget;
 
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.gui.CursorType;
 import com.supermartijn642.core.gui.GuiGraphicsHelper;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
@@ -190,6 +191,18 @@ public abstract class BaseWidget implements Widget {
 
     @Override
     public void discard(){
+    }
+
+    @Override
+    public CursorType curser(int mouseX, int mouseY){
+        if(this.focusedWidget != null && mouseX > this.focusedWidget.left() && mouseX < this.focusedWidget.left() + this.focusedWidget.width() && mouseY > this.focusedWidget.top() && mouseY < this.focusedWidget.top() + this.focusedWidget.height())
+            return this.focusedWidget.curser(mouseX, mouseY);
+        for(Widget widget : this.widgets){
+            if(mouseX >= widget.left() && mouseX < widget.left() + widget.width() && mouseY >= widget.top() && mouseY < widget.top() + widget.height()){
+                return widget.curser(mouseX, mouseY);
+            }
+        }
+        return null;
     }
 
     @Override
