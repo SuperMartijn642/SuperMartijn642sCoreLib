@@ -3,6 +3,7 @@ package com.supermartijn642.core.generator.standard;
 import com.supermartijn642.core.generator.AtlasSourceGenerator;
 import com.supermartijn642.core.generator.ResourceCache;
 import com.supermartijn642.core.gui.GuiGraphicsHelper;
+import com.supermartijn642.core.gui.widget.premade.ScrollbarWidget;
 
 /**
  * Created 28/06/2025 by SuperMartijn642
@@ -20,6 +21,8 @@ public class CoreLibAtlasSourceGenerator extends AtlasSourceGenerator {
             .texture(GuiGraphicsHelper.BUTTON_DEFAULT_SPRITE)
             .texture(GuiGraphicsHelper.BUTTON_HIGHLIGHTED_SPRITE)
             .texture(GuiGraphicsHelper.BUTTON_DISABLED_SPRITE)
-            .texture(GuiGraphicsHelper.SLOT_SPRITE);
+            .texture(GuiGraphicsHelper.SLOT_SPRITE)
+            .texture(ScrollbarWidget.BACKGROUND)
+            .texture(ScrollbarWidget.SCROLLER);
     }
 }
