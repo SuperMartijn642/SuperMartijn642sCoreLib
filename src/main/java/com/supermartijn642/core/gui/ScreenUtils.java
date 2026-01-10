@@ -470,4 +470,11 @@ public class ScreenUtils {
             GL11.glDisable(GL11.GL_SCISSOR_TEST);
         }
     }
+
+    /**
+     * @see CursorTypes
+     */
+    public static void requestCursor(CursorType cursorType){
+        CursorTypes.pendingCursor = cursorType;
+    }
 }

@@ -20,6 +20,7 @@
   ],
   "client": [
     "AbstractContainerScreenMixin",
+    "GameRendererMixin",
     "ItemRendererMixin",
     "LevelRendererMixin"
   ],
