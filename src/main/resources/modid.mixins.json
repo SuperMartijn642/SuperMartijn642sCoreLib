@@ -16,6 +16,7 @@
     "AbstractContainerScreenMixin",
     "DataGeneratorMixin",
     "FabricDataGenHelperMixin",
+    "GameRendererMixin",
     "GuiGraphicsMixin",
     "GuiRendererMixin",
     "LevelRendererMixin",
