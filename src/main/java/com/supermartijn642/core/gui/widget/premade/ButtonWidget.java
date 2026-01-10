@@ -10,7 +10,6 @@ import net.minecraft.network.chat.Component;
 public class ButtonWidget extends AbstractButtonWidget {
 
     private Component text;
-    private boolean active = true;
 
     /**
      * @param text    the text to be displayed on the button
@@ -20,11 +19,6 @@ public class ButtonWidget extends AbstractButtonWidget {
     public ButtonWidget(int x, int y, int width, int height, Component text, Runnable onPress){
         super(x, y, width, height, onPress);
         this.text = text;
-    }
-
-    @Override
-    protected boolean isClickable(){
-        return this.active;
     }
 
     /**
@@ -38,14 +32,6 @@ public class ButtonWidget extends AbstractButtonWidget {
         return this.text;
     }
 
-    public void setActive(boolean active){
-        this.active = active;
-    }
-
-    public boolean isActive(){
-        return this.active;
-    }
-
     @Override
     public Component getNarrationMessage(){
         return this.text;
@@ -57,6 +43,6 @@ public class ButtonWidget extends AbstractButtonWidget {
             this.isActive() ? this.isFocused() ? GuiGraphicsHelper.ButtonState.HIGHLIGHTED : GuiGraphicsHelper.ButtonState.DEFAULT : GuiGraphicsHelper.ButtonState.DISABLED,
             this.x, this.y, this.width, this.height
         );
-        graphics.submitText(this.text, this.x + this.width / 2f, this.y + this.height / 2f - 5, p -> p.shadow().centerHorizontally().color(this.active ? 0xFFFFFFFF : Integer.MAX_VALUE));
+        graphics.submitText(this.text, this.x + this.width / 2f, this.y + this.height / 2f - 5, p -> p.shadow().centerHorizontally().color(this.isActive() ? 0xFFFFFFFF : Integer.MAX_VALUE));
     }
 }
