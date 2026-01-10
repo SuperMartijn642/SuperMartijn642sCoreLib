@@ -1,6 +1,8 @@
 package com.supermartijn642.core.gui.widget.premade;
 
+import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.gui.CursorTypes;
 import com.supermartijn642.core.gui.widget.BaseWidget;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -33,6 +35,11 @@ public abstract class AbstractButtonWidget extends BaseWidget {
         playClickSound();
         if(this.pressable != null)
             this.pressable.run();
+    }
+
+    @Override
+    public CursorType curser(int mouseX, int mouseY){
+        return this.isClickable() ? CursorTypes.pointingHand() : null;
     }
 
     @Override

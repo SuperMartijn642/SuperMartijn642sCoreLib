@@ -1,6 +1,8 @@
 package com.supermartijn642.core.gui.widget.premade;
 
+import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.supermartijn642.core.TextComponents;
+import com.supermartijn642.core.gui.CursorTypes;
 import com.supermartijn642.core.gui.GuiGraphicsHelper;
 import com.supermartijn642.core.gui.widget.BaseWidget;
 import com.supermartijn642.core.gui.widget.WidgetRenderContext;
@@ -82,8 +84,10 @@ public class ScrollbarWidget extends BaseWidget {
         if(this.dragging){
             if(!this.canUserMoveScroller())
                 this.dragging = false;
-            else
+            else{
                 this.updateDrag(mouseY);
+                graphics.requestCursor(CursorTypes.resizeVertical());
+            }
         }
 
         super.renderBackground(context, graphics, mouseX, mouseY);
@@ -137,6 +141,13 @@ public class ScrollbarWidget extends BaseWidget {
 
     private void updateDrag(int mouseY){
         this.tryScrollTo((mouseY - this.y - this.scrollerHeight / 2f) / (this.height - this.scrollerHeight), false);
+    }
+
+    @Override
+    public CursorType curser(int mouseX, int mouseY){
+        if(!this.active || !this.canUserMoveScroller())
+            return null;
+        return this.dragging ? CursorTypes.resizeVertical() : CursorTypes.pointingHand();
     }
 
     @Override

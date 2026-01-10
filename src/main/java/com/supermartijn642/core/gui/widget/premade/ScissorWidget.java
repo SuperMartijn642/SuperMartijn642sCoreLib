@@ -1,5 +1,6 @@
 package com.supermartijn642.core.gui.widget.premade;
 
+import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.supermartijn642.core.gui.GuiGraphicsHelper;
 import com.supermartijn642.core.gui.widget.BaseWidget;
 import com.supermartijn642.core.gui.widget.Widget;
@@ -77,6 +78,13 @@ public class ScissorWidget extends BaseWidget {
     @Override
     public void renderTooltips(WidgetRenderContext context, GuiGraphicsHelper graphics, int mouseX, int mouseY){
         this.renderScissored(context, graphics, mouseX, mouseY, super::renderTooltips);
+    }
+
+    @Override
+    public CursorType curser(int mouseX, int mouseY){
+        if(mouseX < this.x || mouseX > this.x + this.width || mouseY < this.y || mouseY > this.y + this.height)
+            return null;
+        return super.curser(mouseX, mouseY);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.supermartijn642.core.gui;
 
+import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.ContainerWidget;
@@ -90,6 +91,11 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         // Update whether the widget is focused
         if(!this.dragging)
             this.widget.setFocused(offsetMouseX >= 0 && offsetMouseX < this.widget.width() && offsetMouseY >= 0 && offsetMouseY < this.widget.height());
+
+        // Update cursor
+        CursorType curser = this.widget.curser(offsetMouseX, offsetMouseY);
+        if(curser != null)
+            guiGraphics.requestCursor(curser);
 
         // Render the widget background
         this.widget.renderBackground(this.widgetRenderContext, helper, offsetMouseX, offsetMouseY);
