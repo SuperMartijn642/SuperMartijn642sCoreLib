@@ -98,6 +98,13 @@ public final class GuiGraphicsHelper {
         return this.guiGraphics.containsPointInScissor((int)x, (int)y);
     }
 
+    /**
+     * @see CursorTypes
+     */
+    public void requestCursor(CursorType cursorType){
+        CursorTypes.pendingCursor = cursorType;
+    }
+
     public void submitText(FormattedText text, float x, float y, Consumer<TextProperties> properties){
         // Resolve the properties
         if(this.textProperties == null)
