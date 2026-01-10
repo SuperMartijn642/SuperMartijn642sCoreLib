@@ -1,5 +1,6 @@
 package com.supermartijn642.core.gui.widget;
 
+import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.supermartijn642.core.gui.GuiGraphicsHelper;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonInfo;
@@ -82,6 +83,11 @@ public interface Widget {
      * Called when the widget is disposed of.
      */
     void discard();
+
+    /**
+     * Gets the cursor to be used when hovering this widget.
+     */
+    CursorType curser(int mouseX, int mouseY);
 
     /**
      * Called when a mouse button is pressed down.
