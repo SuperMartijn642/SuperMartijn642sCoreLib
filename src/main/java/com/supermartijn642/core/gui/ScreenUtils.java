@@ -389,4 +389,11 @@ public class ScreenUtils {
             RenderSystem.disableScissor();
         }
     }
+
+    /**
+     * @see CursorTypes
+     */
+    public static void requestCursor(CursorType cursorType){
+        CursorTypes.pendingCursor = cursorType;
+    }
 }
