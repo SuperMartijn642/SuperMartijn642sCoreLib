@@ -15,6 +15,7 @@
   ],
   "client": [
     "AbstractContainerScreenMixin",
+    "GameRendererMixin",
     "LevelRendererMixin",
     "ModelBakerImplMixin",
     "ModelBakeryMixin",
