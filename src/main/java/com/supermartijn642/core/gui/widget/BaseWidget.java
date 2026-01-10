@@ -18,6 +18,7 @@ public abstract class BaseWidget implements Widget {
     protected final List<Widget> widgets = new ArrayList<>();
     protected Widget focusedWidget = null;
     protected int x, y, width, height;
+    protected boolean dragging = false;
     private boolean focused;
     protected long nextNarration = Long.MAX_VALUE;
 
@@ -108,17 +109,23 @@ public abstract class BaseWidget implements Widget {
         // Update the focused widget
         if(!this.focused)
             this.focusedWidget = null;
-        else if(this.focusedWidget != null && !(mouseX > this.focusedWidget.left() && mouseX < this.focusedWidget.left() + this.focusedWidget.width() && mouseY > this.focusedWidget.top() && mouseY < this.focusedWidget.top() + this.focusedWidget.height())){
-            this.focusedWidget = null;
-            this.nextNarration = Util.getMillis() + 750;
-        }
-        for(Widget widget : this.widgets){
-            if(this.focusedWidget == null && mouseX >= widget.left() && mouseX < widget.left() + widget.width() && mouseY >= widget.top() && mouseY < widget.top() + widget.height()){
-                this.focusedWidget = widget;
-                widget.setFocused(true);
-                this.nextNarration = Long.MAX_VALUE;
-            }else
-                widget.setFocused(widget == this.focusedWidget);
+        else if(!this.dragging){
+            if(this.focusedWidget != null && !(mouseX > this.focusedWidget.left() && mouseX < this.focusedWidget.left() + this.focusedWidget.width() && mouseY > this.focusedWidget.top() && mouseY < this.focusedWidget.top() + this.focusedWidget.height())){
+                Widget focusedWidget = this.focusedWidget;
+                this.focusedWidget = null;
+                focusedWidget.setFocused(false);
+                this.nextNarration = Util.getMillis() + 750;
+            }
+            if(this.focusedWidget == null){
+                for(Widget widget : this.widgets){
+                    if(mouseX >= widget.left() && mouseX < widget.left() + widget.width() && mouseY >= widget.top() && mouseY < widget.top() + widget.height()){
+                        this.focusedWidget = widget;
+                        widget.setFocused(true);
+                        this.nextNarration = Long.MAX_VALUE;
+                        break;
+                    }
+                }
+            }
         }
 
         // Narrate this widget's narration message
@@ -188,6 +195,7 @@ public abstract class BaseWidget implements Widget {
 
     @Override
     public boolean mousePressed(int mouseX, int mouseY, int button, boolean hasBeenHandled){
+        this.dragging = true;
         if(this.focusedWidget != null)
             hasBeenHandled = this.focusedWidget.mousePressed(mouseX, mouseY, button, hasBeenHandled) || hasBeenHandled;
         for(Widget widget : this.widgets){
@@ -199,6 +207,7 @@ public abstract class BaseWidget implements Widget {
 
     @Override
     public boolean mouseReleased(int mouseX, int mouseY, int button, boolean hasBeenHandled){
+        this.dragging = false;
         if(this.focusedWidget != null)
             hasBeenHandled = this.focusedWidget.mouseReleased(mouseX, mouseY, button, hasBeenHandled) || hasBeenHandled;
         for(Widget widget : this.widgets){
