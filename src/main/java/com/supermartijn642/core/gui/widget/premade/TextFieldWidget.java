@@ -1,8 +1,9 @@
 package com.supermartijn642.core.gui.widget.premade;
 
-import com.mojang.blaze3d.platform.cursor.CursorTypes;
+import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
+import com.supermartijn642.core.gui.CursorTypes;
 import com.supermartijn642.core.gui.GuiGraphicsHelper;
 import com.supermartijn642.core.gui.widget.BaseWidget;
 import com.supermartijn642.core.gui.widget.WidgetRenderContext;
@@ -117,10 +118,6 @@ public class TextFieldWidget extends BaseWidget {
             int l1 = left + fontRenderer.width(s.substring(0, relativeSelection));
             this.drawSelectionBox(graphics, cursorX, top - 1, l1 - 1, top + 1 + fontRenderer.lineHeight);
         }
-
-        // Request I-beam cursor
-        if(this.isHovered(mouseX, mouseY) && this.active && this.isFocused())
-            graphics.requestCursor(CursorTypes.IBEAM);
     }
 
     protected void drawBackground(GuiGraphicsHelper graphics){
@@ -303,6 +300,11 @@ public class TextFieldWidget extends BaseWidget {
         this.active = active;
         if(!active)
             this.setSelected(false);
+    }
+
+    @Override
+    public CursorType curser(int mouseX, int mouseY){
+        return this.active ? CursorTypes.iBeam() : null;
     }
 
     @Override
