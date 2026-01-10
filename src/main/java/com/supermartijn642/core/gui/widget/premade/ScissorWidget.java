@@ -1,5 +1,6 @@
 package com.supermartijn642.core.gui.widget.premade;
 
+import com.supermartijn642.core.gui.CursorType;
 import com.supermartijn642.core.gui.ScreenUtils;
 import com.supermartijn642.core.gui.widget.BaseWidget;
 import com.supermartijn642.core.gui.widget.Widget;
@@ -78,6 +79,13 @@ public class ScissorWidget extends BaseWidget {
         if(mouseX < this.x || mouseX > this.x + this.width || mouseY < this.y || mouseY > this.y + this.height)
             mouseX = mouseY = -100;
         super.renderTooltips(context, mouseX, mouseY);
+    }
+
+    @Override
+    public CursorType curser(int mouseX, int mouseY){
+        if(mouseX < this.x || mouseX > this.x + this.width || mouseY < this.y || mouseY > this.y + this.height)
+            return null;
+        return super.curser(mouseX, mouseY);
     }
 
     @Override
