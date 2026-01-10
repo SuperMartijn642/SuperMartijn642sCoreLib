@@ -15,6 +15,7 @@
     "AbstractContainerScreenMixin",
     "DataGeneratorMixin",
     "DatagenModLoaderAccessor",
+    "GameRendererMixin",
     "LevelRendererMixin",
     "SpriteResourceLoaderMixin"
   ],

@@ -97,6 +97,11 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         // Update whether the widget is focused
         this.widget.setFocused(offsetMouseX >= 0 && offsetMouseX < this.widget.width() && offsetMouseY >= 0 && offsetMouseY < this.widget.height());
 
+        // Update cursor
+        CursorType curser = this.widget.curser(offsetMouseX, offsetMouseY);
+        if(curser != null)
+            ScreenUtils.requestCursor(curser);
+
         // Render the widget background
         this.widget.renderBackground(this.widgetRenderContext, offsetMouseX, offsetMouseY);
 
