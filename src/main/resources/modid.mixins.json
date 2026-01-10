@@ -17,6 +17,7 @@
     "AbstractContainerScreenMixin",
     "DataGeneratorMixin",
     "DatagenModLoaderAccessor",
+    "GameRendererMixin",
     "LevelRendererMixin"
   ],
   "server": [],
