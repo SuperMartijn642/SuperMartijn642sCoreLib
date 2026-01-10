@@ -13,6 +13,7 @@ import net.minecraft.util.SoundEvents;
 public abstract class AbstractButtonWidget extends BaseWidget {
 
     private final Runnable pressable;
+    private boolean active = true;
 
     /**
      * @param onPress the action which will called when the user clicks the
@@ -23,8 +24,16 @@ public abstract class AbstractButtonWidget extends BaseWidget {
         this.pressable = onPress;
     }
 
+    public void setActive(boolean active){
+        this.active = active;
+    }
+
+    public boolean isActive(){
+        return this.active;
+    }
+
     protected boolean isClickable(){
-        return true;
+        return this.active;
     }
 
     /**
