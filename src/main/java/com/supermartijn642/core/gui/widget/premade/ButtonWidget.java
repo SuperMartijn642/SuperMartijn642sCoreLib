@@ -22,6 +22,11 @@ public class ButtonWidget extends AbstractButtonWidget {
         this.text = text;
     }
 
+    @Override
+    protected boolean isClickable(){
+        return this.active;
+    }
+
     /**
      * Sets the text which is displayed on the button.
      */
