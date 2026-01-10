@@ -6,6 +6,8 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
+import com.supermartijn642.core.gui.CursorType;
+import com.supermartijn642.core.gui.CursorTypes;
 import com.supermartijn642.core.gui.ScreenUtils;
 import com.supermartijn642.core.gui.widget.BaseWidget;
 import net.minecraft.SharedConstants;
@@ -283,6 +285,11 @@ public class TextFieldWidget extends BaseWidget {
         this.active = active;
         if(!active)
             this.setSelected(false);
+    }
+
+    @Override
+    public CursorType curser(int mouseX, int mouseY){
+        return this.active ? CursorTypes.iBeam() : null;
     }
 
     @Override
