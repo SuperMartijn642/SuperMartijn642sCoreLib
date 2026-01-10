@@ -17,6 +17,7 @@
     "dev.DataGeneratorConfigMixin",
     "dev.DataGeneratorMixin",
     "AbstractContainerScreenMixin",
+    "GameRendererMixin",
     "GuiGraphicsMixin",
     "LevelRendererMixin",
     "ModelBakeryMixin",
