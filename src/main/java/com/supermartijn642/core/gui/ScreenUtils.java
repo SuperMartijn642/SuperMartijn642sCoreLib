@@ -373,4 +373,11 @@ public class ScreenUtils {
             GlStateManager._disableScissorTest();
         }
     }
+
+    /**
+     * @see CursorTypes
+     */
+    public static void requestCursor(CursorType cursorType){
+        CursorTypes.pendingCursor = cursorType;
+    }
 }
