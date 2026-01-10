@@ -24,6 +24,7 @@
     "AbstractContainerScreenMixin",
     "ClientPlayerEntityMixin",
     "EntityRendererManagerMixin",
+    "GameRendererMixin",
     "LevelRendererMixin",
     "TileEntityRendererDispatcherMixin"
   ],

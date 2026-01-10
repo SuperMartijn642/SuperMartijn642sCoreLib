@@ -1,5 +1,6 @@
 package com.supermartijn642.core.gui.widget;
 
+import com.supermartijn642.core.gui.CursorType;
 import net.minecraft.util.text.ITextComponent;
 
 /**
@@ -79,6 +80,11 @@ public interface Widget {
      * Called when the widget is disposed of.
      */
     void discard();
+
+    /**
+     * Gets the cursor to be used when hovering this widget.
+     */
+    CursorType curser(int mouseX, int mouseY);
 
     /**
      * Called when a mouse button is pressed down.
