@@ -4,9 +4,10 @@ import com.supermartijn642.core.CoreLib;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
+import net.fabricmc.loader.api.metadata.ModDependency;
 import net.minecraft.resources.ResourceLocation;
-import org.objectweb.asm.Type;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -16,10 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created 14/07/2022 by SuperMartijn642
@@ -59,13 +57,26 @@ public @interface RegistryEntryAcceptor {
 
     class Handler {
 
-        private static final Type TYPE = Type.getType(RegistryEntryAcceptor.class);
-
         private static final Map<Registries.Registry<?>,Map<ResourceLocation,Set<Field>>> FIELDS = new HashMap<>();
         private static final Map<Registries.Registry<?>,Map<ResourceLocation,Set<Method>>> METHODS = new HashMap<>();
 
         public static void gatherAnnotatedFields(){
-            for(EntrypointContainer<ModInitializer> entrypoint : FabricLoader.getInstance().getEntrypointContainers("main", ModInitializer.class)){
+            // Find all mod initializers for mods that depend on the core library
+            Set<ModContainer> dependentMods = new HashSet<>();
+            for(ModContainer mod : FabricLoader.getInstance().getAllMods()){
+                boolean isDependent = mod.getMetadata().getDependencies().stream()
+                    .map(ModDependency::getModId)
+                    .anyMatch("supermartijn642corelib"::equals);
+                if(isDependent)
+                    dependentMods.add(mod);
+            }
+            List<EntrypointContainer<ModInitializer>> entrypoints = FabricLoader.getInstance().getEntrypointContainers("main", ModInitializer.class)
+                .stream()
+                .filter(entrypoint -> dependentMods.contains(entrypoint.getProvider()))
+                .toList();
+
+            // Gather annotations
+            for(EntrypointContainer<?> entrypoint : entrypoints){
                 // Fields
                 try{
                     for(Field field : entrypoint.getEntrypoint().getClass().getFields()){
@@ -103,7 +114,7 @@ public @interface RegistryEntryAcceptor {
                     }
                 }catch(NoClassDefFoundError ignored){
                 }catch(Exception e){
-                    CoreLib.LOGGER.error("Encountered an exception whilst scanning fields in 'main' entrypoint for mod '" + entrypoint.getProvider().getMetadata().getName() + "'!", e);
+                    CoreLib.LOGGER.error("Encountered an exception whilst scanning fields in 'main' entrypoint for mod '{}'!", entrypoint.getProvider().getMetadata().getName(), e);
                     continue;
                 }
 
@@ -145,7 +156,7 @@ public @interface RegistryEntryAcceptor {
                 }catch(NoClassDefFoundError ignored){
                     // Some mods have methods with client class parameters in their main class apparently ¯\(o_o)/¯
                 }catch(Exception e){
-                    CoreLib.LOGGER.error("Encountered an exception whilst scanning methods in 'main' entrypoint for mod '" + entrypoint.getProvider().getMetadata().getName() + "'!", e);
+                    CoreLib.LOGGER.error("Encountered an exception whilst scanning methods in 'main' entrypoint for mod '{}'!", entrypoint.getProvider().getMetadata().getName(), e);
                 }
             }
 
@@ -176,14 +187,14 @@ public @interface RegistryEntryAcceptor {
                 for(Field field : entry.getValue()){
                     // Check if the value can be assigned to the field
                     if(!field.getType().isAssignableFrom(object.getClass())){
-                        CoreLib.LOGGER.warn("@RegistryEntryAcceptor field '" + field.getDeclaringClass().getName() + "." + field.getName() + "' for '" + entry.getKey() + "' could not be assigned value of type '" + object.getClass() + "'.");
+                        CoreLib.LOGGER.warn("@RegistryEntryAcceptor field '{}.{}' for '{}' could not be assigned value of type '{}'.", field.getDeclaringClass().getName(), field.getName(), entry.getKey(), object.getClass());
                         continue;
                     }
                     // Set the field's value
                     try{
                         field.set(null, object);
                     }catch(IllegalAccessException e){
-                        CoreLib.LOGGER.error("Encountered an error when trying to apply @RegistryEntryAcceptor annotation on field '" + field.getDeclaringClass().getName() + "." + field.getName() + "'!", e);
+                        CoreLib.LOGGER.error("Encountered an error when trying to apply @RegistryEntryAcceptor annotation on field '{}.{}'!", field.getDeclaringClass().getName(), field.getName(), e);
                     }
                 }
             }
@@ -201,7 +212,7 @@ public @interface RegistryEntryAcceptor {
                 for(Method method : entry.getValue()){
                     // Check if the value can be passed to the method
                     if(!method.getParameterTypes()[0].isAssignableFrom(object.getClass())){
-                        CoreLib.LOGGER.warn("@RegistryEntryAcceptor method '" + method.getDeclaringClass().getName() + "." + method.getName() + "' for '" + entry.getKey() + "' could not be assigned value of type '" + object.getClass() + "'.");
+                        CoreLib.LOGGER.warn("@RegistryEntryAcceptor method '{}.{}' for '{}' could not be assigned value of type '{}'.", method.getDeclaringClass().getName(), method.getName(), entry.getKey(), object.getClass());
                         continue;
                     }
                     // Set the method's value
@@ -209,7 +220,7 @@ public @interface RegistryEntryAcceptor {
                         method.invoke(null, object);
                     }catch(InvocationTargetException |
                            IllegalAccessException e){
-                        CoreLib.LOGGER.error("Encountered an error when trying to apply @RegistryEntryAcceptor annotation on method '" + method.getDeclaringClass().getName() + "." + method.getName() + "'!", e);
+                        CoreLib.LOGGER.error("Encountered an error when trying to apply @RegistryEntryAcceptor annotation on method '{}.{}'!", method.getDeclaringClass().getName(), method.getName(), e);
                     }
                 }
             }
@@ -227,14 +238,14 @@ public @interface RegistryEntryAcceptor {
             if(FIELDS.containsKey(registry)){
                 for(Map.Entry<ResourceLocation,Set<Field>> entry : FIELDS.get(registry).entrySet()){
                     if(!registry.hasIdentifier(entry.getKey()))
-                        CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getRegistryIdentifier() + "' for @RegistryEntryAcceptor!");
+                        CoreLib.LOGGER.warn("Could not find value '{}' in registry '{}' for @RegistryEntryAcceptor!", entry.getKey(), registry.getRegistryIdentifier());
                 }
             }
             // Methods
             if(METHODS.containsKey(registry)){
                 for(Map.Entry<ResourceLocation,Set<Method>> entry : METHODS.get(registry).entrySet()){
                     if(!registry.hasIdentifier(entry.getKey()))
-                        CoreLib.LOGGER.warn("Could not find value '" + entry.getKey() + "' in registry '" + registry.getRegistryIdentifier() + "' for @RegistryEntryAcceptor!");
+                        CoreLib.LOGGER.warn("Could not find value '{}' in registry '{}' for @RegistryEntryAcceptor!", entry.getKey(), registry.getRegistryIdentifier());
                 }
             }
         }
