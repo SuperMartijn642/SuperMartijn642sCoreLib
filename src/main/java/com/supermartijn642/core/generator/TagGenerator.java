@@ -1,9 +1,6 @@
 package com.supermartijn642.core.generator;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.supermartijn642.core.data.tag.CustomTagEntry;
 import com.supermartijn642.core.generator.aggregator.ResourceAggregator;
 import com.supermartijn642.core.registry.Registries;
@@ -62,7 +59,8 @@ public abstract class TagGenerator extends ResourceGenerator {
             JsonArray entries = new JsonArray();
             //noinspection rawtypes,unchecked
             tag.entries.forEach(entry -> entry.serializeTo(entries, element -> ((Registries.Registry)tag.registry).getIdentifier(element)));
-            if(entries.size() == 0 || (tag.optional.isEmpty() && tag.remove.isEmpty()))
+            sortJsonArray(entries);
+            if(entries.size() > 0 || (tag.optional.isEmpty() && tag.remove.isEmpty()))
                 json.add("values", entries);
             // Optional
             JsonArray optionalEntries = new JsonArray();
@@ -74,6 +72,7 @@ public abstract class TagGenerator extends ResourceGenerator {
             JsonArray removedEntries = new JsonArray();
             //noinspection rawtypes,unchecked
             tag.remove.forEach(entry -> entry.serializeTo(removedEntries, element -> ((Registries.Registry)tag.registry).getIdentifier(element)));
+            sortJsonArray(removedEntries);
             if(removedEntries.size() > 0)
                 json.add("remove", removedEntries);
 
@@ -641,5 +640,86 @@ public abstract class TagGenerator extends ResourceGenerator {
             this.optional.addAll(other.optional);
             this.remove.addAll(other.remove);
         }
+    }
+
+    private static void sortJsonArray(JsonArray array){
+        List<JsonElement> elements = new ArrayList<>(array.size());
+        for(JsonElement element : array)
+            elements.add(element);
+        elements.sort(TagGenerator::compareJson);
+        for(int i = 0; i < elements.size(); i++)
+            array.set(i, elements.get(i));
+    }
+
+    private static int compareJson(JsonElement element1, JsonElement element2){
+        if(element1.isJsonNull()){
+            if(!element2.isJsonNull())
+                return -1;
+            return 0;
+        }else if(element2.isJsonNull())
+            return 1;
+        if(element1.isJsonPrimitive()){
+            if(!element2.isJsonPrimitive())
+                return -1;
+            JsonPrimitive primitive1 = element1.getAsJsonPrimitive();
+            JsonPrimitive primitive2 = element2.getAsJsonPrimitive();
+            if(primitive1.isString()){
+                if(!primitive2.isString())
+                    return -1;
+                return primitive1.getAsString().compareTo(primitive2.getAsString());
+            }else if(primitive2.isString())
+                return 1;
+            if(primitive1.isNumber()){
+                if(!primitive2.isNumber())
+                    return -1;
+                return Double.compare(primitive1.getAsDouble(), primitive2.getAsDouble());
+            }else if(primitive2.isNumber())
+                return 1;
+            if(primitive1.isBoolean()){
+                if(!primitive2.isBoolean())
+                    return -1;
+            }else if(primitive2.isBoolean())
+                return 1;
+        }else if(element2.isJsonPrimitive())
+            return 1;
+        if(element1.isJsonObject()){
+            if(!element2.isJsonObject())
+                return -1;
+            JsonObject object1 = element1.getAsJsonObject();
+            JsonObject object2 = element2.getAsJsonObject();
+            if(object1.size() != object2.size())
+                return object1.size() - object2.size();
+            Iterator<Map.Entry<String,JsonElement>> iterator1 = object1.entrySet().iterator();
+            Iterator<Map.Entry<String,JsonElement>> iterator2 = object2.entrySet().iterator();
+            while(iterator1.hasNext() && iterator2.hasNext()){
+                Map.Entry<String,JsonElement> entry1 = iterator1.next();
+                Map.Entry<String,JsonElement> entry2 = iterator2.next();
+                if(!entry1.getKey().equals(entry2.getKey()))
+                    return entry1.getKey().compareTo(entry2.getKey());
+                int compare = compareJson(entry1.getValue(), entry2.getValue());
+                if(compare != 0)
+                    return compare;
+            }
+            if(iterator1.hasNext() || iterator2.hasNext())
+                throw new AssertionError();
+            return 0;
+        }else if(element2.isJsonObject())
+            return 1;
+        if(element1.isJsonArray()){
+            if(!element2.isJsonArray())
+                return -1;
+            JsonArray array1 = element1.getAsJsonArray();
+            JsonArray array2 = element2.getAsJsonArray();
+            if(array1.size() != array2.size())
+                return array1.size() - array2.size();
+            for(int i = 0; i < array1.size(); i++){
+                int compare = compareJson(array1.get(i), array2.get(i));
+                if(compare != 0)
+                    return compare;
+            }
+            return 0;
+        }else if(element2.isJsonArray())
+            return 1;
+        throw new AssertionError("Unknown json element type '" + element1.getClass() + "'!");
     }
 }
