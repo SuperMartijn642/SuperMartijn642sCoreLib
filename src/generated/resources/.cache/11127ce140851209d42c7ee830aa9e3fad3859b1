@@ -1,5 +1,6 @@
 // this.cache.versionId	-999999999-01-01T00:00:00	Core Lib Generators
-f2f6397a521a604d6f740b784b3daffca04c8a15 assets/minecraft/atlases/gui.json
+a27f7ccc5ea4a03fb4ae42399e965f18dc25d5f6 assets/minecraft/atlases/gui.json
+73f383ab2d6b6283e0e7e2e0726ae73fc8276f49 assets/supermartijn642corelib/lang/en_us.json
 8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/block/mineable/axe.json
 8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/block/mineable/hoe.json
 8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/block/mineable/pickaxe.json
@@ -7,4 +8,4 @@ f2f6397a521a604d6f740b784b3daffca04c8a15 assets/minecraft/atlases/gui.json
 8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/block/needs_diamond_tool.json
 8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/block/needs_iron_tool.json
 8a23702b05296c8af5014d6aa6e9265ded85c7d9 data/minecraft/tags/block/needs_stone_tool.json
-83702864d2f517b15f637697772b55a7e932dacc data/supermartijn642corelib/accesswidener/generated-entries.accesswidener
+629201ade38472dcdfeb7c5bc0ca7e59eaf0957f data/supermartijn642corelib/accesswidener/generated-entries.accesswidener
