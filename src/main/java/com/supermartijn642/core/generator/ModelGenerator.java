@@ -670,7 +670,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
 
     protected static class ElementBuilder {
 
-        private final Map<EnumFacing,FaceBuilder> faces = new HashMap<>();
+        private final Map<EnumFacing,FaceBuilder> faces = new LinkedHashMap<>();
         private Vector3f from = new Vector3f(), to = new Vector3f(16, 16, 16);
         private RotationBuilder rotation;
         private boolean shading = true;
