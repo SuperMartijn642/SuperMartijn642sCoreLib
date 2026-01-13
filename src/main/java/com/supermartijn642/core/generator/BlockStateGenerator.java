@@ -1,6 +1,5 @@
 package com.supermartijn642.core.generator;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -36,7 +35,9 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
 
             // Serialize all variants
             JsonObject variantsJson = new JsonObject();
-            for(Map.Entry<PartialBlockState,VariantBuilder> variantEntry : blockStateBuilder.variants.entrySet()){
+            ArrayList<Map.Entry<PartialBlockState,VariantBuilder>> variants = new ArrayList<>(blockStateBuilder.variants.entrySet());
+            variants.sort(Map.Entry.comparingByKey());
+            for(Map.Entry<PartialBlockState,VariantBuilder> variantEntry : variants){
                 if(variantEntry.getValue().models.isEmpty())
                     continue;
                 String name = formatVariantName(variantEntry.getKey());
@@ -461,7 +462,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
     protected static class MultipartConditionBuilder {
 
         private final Block block;
-        private final Map<Property<?>,Comparable<?>[]> properties = new HashMap<>();
+        private Map<Property<?>,Comparable<?>[]> properties = new HashMap<>();
         private final List<MultipartConditionBuilder> or = new ArrayList<>();
 
         private MultipartConditionBuilder(Block block){
@@ -516,17 +517,29 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
             this.or.add(0, this);
             for(int i = 1; i < this.or.size(); i++)
                 this.or.addAll(this.or.get(i).or);
+            for(MultipartConditionBuilder b : this.or){
+                b.properties = Collections.unmodifiableMap(
+                    this.properties.entrySet().stream()
+                        .sorted(Comparator.comparing(e -> e.getKey().getName()))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (p1, p2) -> p1, LinkedHashMap::new))
+                );
+            }
+            this.or.sort(Comparator.comparing(c -> c.properties, BlockStateGenerator::compareMultiProperties));
         }
     }
 
-    protected static class PartialBlockState {
+    protected static class PartialBlockState implements Comparable<PartialBlockState> {
 
         private final Block block;
         private final Map<Property<?>,Comparable<?>> properties;
 
         protected PartialBlockState(Block block, Map<Property<?>,Comparable<?>> properties){
             this.block = block;
-            this.properties = ImmutableMap.copyOf(properties);
+            this.properties = Collections.unmodifiableMap(
+                properties.entrySet().stream()
+                    .sorted(Comparator.comparing(e -> e.getKey().getName()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (p1, p2) -> p1, LinkedHashMap::new))
+            );
         }
 
         /**
@@ -557,6 +570,16 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
 
             //noinspection unchecked
             return (T)this.properties.get(property);
+        }
+
+        @Override
+        public int compareTo(BlockStateGenerator.PartialBlockState o){
+            if(this.block != o.block){
+                ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this.block);
+                ResourceLocation otherIdentifier = Registries.BLOCKS.getIdentifier(o.block);
+                return identifier.compareTo(otherIdentifier);
+            }
+            return compareProperties(this.properties, o.properties);
         }
     }
 
@@ -631,5 +654,52 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
         public PartialBlockState build(){
             return new PartialBlockState(this.block, this.properties);
         }
+    }
+
+    private static int compareProperties(Map<Property<?>,Comparable<?>> properties1, Map<Property<?>,Comparable<?>> properties2){
+        if(properties1.size() != properties2.size())
+            return properties1.size() - properties2.size();
+        Iterator<Map.Entry<Property<?>,Comparable<?>>> iterator1 = properties1.entrySet().iterator();
+        Iterator<Map.Entry<Property<?>,Comparable<?>>> iterator2 = properties2.entrySet().iterator();
+        while(iterator1.hasNext() && iterator2.hasNext()){
+            Map.Entry<Property<?>,Comparable<?>> entry1 = iterator1.next();
+            Map.Entry<Property<?>,Comparable<?>> entry2 = iterator2.next();
+            Property<?> property1 = entry1.getKey();
+            Property<?> property2 = entry2.getKey();
+            if(property1 != property2)
+                return property1.getName().compareTo(property2.getName());
+            Comparable<?> value1 = entry1.getValue();
+            Comparable<?> value2 = entry2.getValue();
+            if(!value1.equals(value2))
+                //noinspection unchecked,rawtypes
+                return ((Property)property1).getName(value1).compareTo(((Property)property2).getName(value2));
+        }
+        if(iterator1.hasNext() || iterator2.hasNext())
+            throw new AssertionError();
+        return 0;
+    }
+
+    private static int compareMultiProperties(Map<Property<?>,Comparable<?>[]> properties1, Map<Property<?>,Comparable<?>[]> properties2){
+        if(properties1.size() != properties2.size())
+            return properties1.size() - properties2.size();
+        Iterator<Map.Entry<Property<?>,Comparable<?>[]>> iterator1 = properties1.entrySet().iterator();
+        Iterator<Map.Entry<Property<?>,Comparable<?>[]>> iterator2 = properties2.entrySet().iterator();
+        while(iterator1.hasNext() && iterator2.hasNext()){
+            Map.Entry<Property<?>,Comparable<?>[]> entry1 = iterator1.next();
+            Map.Entry<Property<?>,Comparable<?>[]> entry2 = iterator2.next();
+            Property<?> property1 = entry1.getKey();
+            Property<?> property2 = entry2.getKey();
+            if(property1 != property2)
+                return property1.getName().compareTo(property2.getName());
+            Comparable<?>[] values1 = entry1.getValue();
+            Comparable<?>[] values2 = entry2.getValue();
+            //noinspection unchecked,rawtypes
+            int compare = Arrays.compare(values1, values2, Comparator.comparing(v -> ((Property)property1).getName(v)));
+            if(compare != 0)
+                return compare;
+        }
+        if(iterator1.hasNext() || iterator2.hasNext())
+            throw new AssertionError();
+        return 0;
     }
 }
