@@ -2791,6 +2791,7 @@ mutable field net/minecraft/world/item/Items MUSIC_DISC_CHIRP Lnet/minecraft/wor
 mutable field net/minecraft/world/item/Items MUSIC_DISC_CREATOR Lnet/minecraft/world/item/Item;
 mutable field net/minecraft/world/item/Items MUSIC_DISC_CREATOR_MUSIC_BOX Lnet/minecraft/world/item/Item;
 mutable field net/minecraft/world/item/Items MUSIC_DISC_FAR Lnet/minecraft/world/item/Item;
+mutable field net/minecraft/world/item/Items MUSIC_DISC_LAVA_CHICKEN Lnet/minecraft/world/item/Item;
 mutable field net/minecraft/world/item/Items MUSIC_DISC_MALL Lnet/minecraft/world/item/Item;
 mutable field net/minecraft/world/item/Items MUSIC_DISC_MELLOHI Lnet/minecraft/world/item/Item;
 mutable field net/minecraft/world/item/Items MUSIC_DISC_OTHERSIDE Lnet/minecraft/world/item/Item;
