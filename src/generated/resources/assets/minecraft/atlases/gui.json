@@ -6,6 +6,10 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "supermartijn642corelib:gui/scroller"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "supermartijn642corelib:gui/button_default"
     },
     {
@@ -15,6 +19,10 @@
     {
       "type": "minecraft:single",
       "resource": "supermartijn642corelib:gui/background"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "supermartijn642corelib:gui/scrollbar_background"
     },
     {
       "type": "minecraft:single",
