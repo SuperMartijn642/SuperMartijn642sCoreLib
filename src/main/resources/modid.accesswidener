@@ -18,7 +18,6 @@ accessible field net/minecraft/world/level/block/state/BlockBehaviour properties
 extendable method net/minecraft/world/level/block/state/BlockBehaviour getLootTable ()Lnet/minecraft/resources/ResourceKey; # getLootTable
 # BlockBehaviour$Properties
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties canOcclude Z
-accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties descriptionId Lnet/minecraft/resources/DependantName;
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties destroyTime F
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties drops Lnet/minecraft/resources/ResourceKey;
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties dynamicShape Z
@@ -40,8 +39,6 @@ accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties soundType Lnet/minecraft/world/level/block/SoundType;
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties spawnTerrainParticles Z
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties speedFactor F
-# BlockEntityType
-accessible method net/minecraft/world/level/block/entity/BlockEntityType <init> (Lnet/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier;Ljava/util/Set;)V
 # BlockEntityType$BlockEntitySupplier
 extendable class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
 # CreativeModeTab
