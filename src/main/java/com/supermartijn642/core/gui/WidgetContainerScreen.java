@@ -155,7 +155,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
                     this.hoveredSlot = slot;
                     RenderSystem.disableDepthTest();
                     RenderSystem.colorMask(true, true, true, false);
-                    fillGradient(poseStack, slot.x, slot.y, slot.x + slotWidth - 2, slot.y + slotHeight - 2, -2130706433, -2130706433, 0);
+                    fillGradient(poseStack, slot.x, slot.y, slot.x + slotWidth - 2, slot.y + slotHeight - 2, -2130706433, -2130706433, this.getBlitOffset());
                     RenderSystem.colorMask(true, true, true, true);
                     RenderSystem.enableDepthTest();
                 }
@@ -164,7 +164,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
                 this.renderSlot(poseStack, slot);
                 if(this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY)){
                     this.hoveredSlot = slot;
-                    renderSlotHighlight(poseStack, slot.x, slot.y, 0);
+                    renderSlotHighlight(poseStack, slot.x, slot.y, this.getBlitOffset());
                 }
             }
         }
