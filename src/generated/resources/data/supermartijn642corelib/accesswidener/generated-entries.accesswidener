@@ -1234,6 +1234,12 @@ mutable field net/minecraft/sounds/SoundEvents SPIDER_HURT Lnet/minecraft/sounds
 mutable field net/minecraft/sounds/SoundEvents SPIDER_STEP Lnet/minecraft/sounds/SoundEvent;
 mutable field net/minecraft/sounds/SoundEvents SPLASH_POTION_BREAK Lnet/minecraft/sounds/SoundEvent;
 mutable field net/minecraft/sounds/SoundEvents SPLASH_POTION_THROW Lnet/minecraft/sounds/SoundEvent;
+mutable field net/minecraft/sounds/SoundEvents SPONGE_ABSORB Lnet/minecraft/sounds/SoundEvent;
+mutable field net/minecraft/sounds/SoundEvents SPONGE_BREAK Lnet/minecraft/sounds/SoundEvent;
+mutable field net/minecraft/sounds/SoundEvents SPONGE_FALL Lnet/minecraft/sounds/SoundEvent;
+mutable field net/minecraft/sounds/SoundEvents SPONGE_HIT Lnet/minecraft/sounds/SoundEvent;
+mutable field net/minecraft/sounds/SoundEvents SPONGE_PLACE Lnet/minecraft/sounds/SoundEvent;
+mutable field net/minecraft/sounds/SoundEvents SPONGE_STEP Lnet/minecraft/sounds/SoundEvent;
 mutable field net/minecraft/sounds/SoundEvents SPORE_BLOSSOM_BREAK Lnet/minecraft/sounds/SoundEvent;
 mutable field net/minecraft/sounds/SoundEvents SPORE_BLOSSOM_FALL Lnet/minecraft/sounds/SoundEvent;
 mutable field net/minecraft/sounds/SoundEvents SPORE_BLOSSOM_HIT Lnet/minecraft/sounds/SoundEvent;
@@ -1415,6 +1421,11 @@ mutable field net/minecraft/sounds/SoundEvents WET_GRASS_FALL Lnet/minecraft/sou
 mutable field net/minecraft/sounds/SoundEvents WET_GRASS_HIT Lnet/minecraft/sounds/SoundEvent;
 mutable field net/minecraft/sounds/SoundEvents WET_GRASS_PLACE Lnet/minecraft/sounds/SoundEvent;
 mutable field net/minecraft/sounds/SoundEvents WET_GRASS_STEP Lnet/minecraft/sounds/SoundEvent;
+mutable field net/minecraft/sounds/SoundEvents WET_SPONGE_BREAK Lnet/minecraft/sounds/SoundEvent;
+mutable field net/minecraft/sounds/SoundEvents WET_SPONGE_FALL Lnet/minecraft/sounds/SoundEvent;
+mutable field net/minecraft/sounds/SoundEvents WET_SPONGE_HIT Lnet/minecraft/sounds/SoundEvent;
+mutable field net/minecraft/sounds/SoundEvents WET_SPONGE_PLACE Lnet/minecraft/sounds/SoundEvent;
+mutable field net/minecraft/sounds/SoundEvents WET_SPONGE_STEP Lnet/minecraft/sounds/SoundEvent;
 mutable field net/minecraft/sounds/SoundEvents WITCH_AMBIENT Lnet/minecraft/sounds/SoundEvent;
 mutable field net/minecraft/sounds/SoundEvents WITCH_CELEBRATE Lnet/minecraft/sounds/SoundEvent;
 mutable field net/minecraft/sounds/SoundEvents WITCH_DEATH Lnet/minecraft/sounds/SoundEvent;
@@ -1663,6 +1674,7 @@ mutable field net/minecraft/world/entity/ai/attributes/Attributes FOLLOW_RANGE L
 mutable field net/minecraft/world/entity/ai/attributes/Attributes JUMP_STRENGTH Lnet/minecraft/world/entity/ai/attributes/Attribute;
 mutable field net/minecraft/world/entity/ai/attributes/Attributes KNOCKBACK_RESISTANCE Lnet/minecraft/world/entity/ai/attributes/Attribute;
 mutable field net/minecraft/world/entity/ai/attributes/Attributes LUCK Lnet/minecraft/world/entity/ai/attributes/Attribute;
+mutable field net/minecraft/world/entity/ai/attributes/Attributes MAX_ABSORPTION Lnet/minecraft/world/entity/ai/attributes/Attribute;
 mutable field net/minecraft/world/entity/ai/attributes/Attributes MAX_HEALTH Lnet/minecraft/world/entity/ai/attributes/Attribute;
 mutable field net/minecraft/world/entity/ai/attributes/Attributes MOVEMENT_SPEED Lnet/minecraft/world/entity/ai/attributes/Attribute;
 mutable field net/minecraft/world/entity/ai/attributes/Attributes SPAWN_REINFORCEMENTS_CHANCE Lnet/minecraft/world/entity/ai/attributes/Attribute;
