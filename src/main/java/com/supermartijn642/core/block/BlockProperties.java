@@ -82,15 +82,20 @@ public class BlockProperties {
 
     private BlockProperties(Material material){
         this.material = material;
+        this.mapColor = state -> material.getColor();
     }
 
     public BlockProperties mapColor(Function<BlockState,MaterialColor> colorFunction){
+        if(colorFunction == null){
+            Material material = this.material;
+            colorFunction = state -> material.getColor();
+        }
         this.mapColor = colorFunction;
         return this;
     }
 
     public BlockProperties mapColor(MaterialColor color){
-        return this.mapColor(state -> color);
+        return this.mapColor(color == null ? null : state -> color);
     }
 
     public BlockProperties collision(boolean hasCollision){
