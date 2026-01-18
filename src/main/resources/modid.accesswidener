@@ -37,7 +37,6 @@ accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties replaceable Z
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties requiresCorrectToolForDrops Z
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties soundType Lnet/minecraft/world/level/block/SoundType;
-accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties spawnTerrainParticles Z
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties speedFactor F
 # BlockEntityType$BlockEntitySupplier
 extendable class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
