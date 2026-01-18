@@ -98,10 +98,14 @@ public class BlockProperties {
 
     private BlockProperties(Material material){
         this.material = material;
+        this.mapColor = material.getColor();
     }
 
     public BlockProperties mapColor(MaterialColor color){
-        this.mapColor = color;
+        if(color == null)
+            this.mapColor = this.material.getColor();
+        else
+            this.mapColor = color;
         return this;
     }
 
