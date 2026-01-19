@@ -1,6 +1,5 @@
 package com.supermartijn642.core.block;
 
-import com.supermartijn642.core.extensions.BlockExtension;
 import com.supermartijn642.core.mixin.BlockPropertiesAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -57,21 +56,29 @@ public class BlockProperties {
     }
 
     public static BlockProperties copy(Block block){
-        BlockProperties properties = fromVanilla(((BlockExtension)block).supermartijn642corelibGetProperties());
-        //noinspection deprecation
-        properties.lightLevel = block::getLightEmission;
+        BlockProperties properties = create(block.material, block.materialColor);
+        properties.hasCollision = block.hasCollision;
+        properties.soundType = block.soundType;
+        int lightEmission = block.lightEmission;
+        properties.lightLevel = state -> lightEmission;
+        properties.explosionResistance = block.getExplosionResistance();
+        properties.destroyTime = block.destroySpeed;
+        properties.requiresCorrectTool = !block.material.isAlwaysDestroyable();
+        properties.ticksRandomly = block.isRandomlyTicking(block.defaultBlockState());
+        properties.friction = block.getFriction();
         properties.canOcclude = block.hasCollision && block.getRenderLayer() == BlockRenderLayer.SOLID;
-        //noinspection deprecation
+        properties.hasDynamicShape = block.hasDynamicShape();
         properties.isAir = block.defaultBlockState().isAir();
-        //noinspection deprecation
         properties.isRedstoneConductor = block::isRedstoneConductor;
-        //noinspection deprecation
         properties.isSuffocating = block::isViewBlocking;
-        if(properties.lootTableSupplier != null){
-            ResourceLocation lootTable = properties.lootTableSupplier.get();
+        ResourceLocation lootTable = block.getLootTable();
+        if(LootTables.EMPTY.equals(lootTable))
+            properties.noLootTable = true;
+        else if(lootTable != null){
             ResourceLocation registryName = block.getRegistryName();
-            if(registryName != null && !lootTable.getNamespace().equals(block.getRegistryName().getNamespace()) && !lootTable.getPath().equals("block/" + block.getRegistryName().getPath()))
-                properties.lootTable(lootTable);
+            if(registryName != null && !lootTable.getNamespace().equals(block.getRegistryName().getNamespace()) && !lootTable.getPath().equals("block/" + block.getRegistryName().getPath())){
+                properties.lootTableSupplier = () -> lootTable;
+            }
         }
         return properties;
     }
