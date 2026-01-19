@@ -183,9 +183,9 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         // Render the widget's foreground
         this.widget.renderForeground(offsetMouseX, offsetMouseY);
 
-        this.renderTooltip(offsetMouseX, offsetMouseY);
-
         GlStateManager.popMatrix();
+
+        this.renderTooltip(offsetMouseX, offsetMouseY);
 
         MinecraftForge.EVENT_BUS.post(new GuiContainerEvent.DrawForeground(this, mouseX, mouseY));
 
