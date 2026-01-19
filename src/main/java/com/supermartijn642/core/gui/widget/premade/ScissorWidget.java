@@ -7,6 +7,8 @@ import com.supermartijn642.core.gui.widget.BaseWidget;
 import com.supermartijn642.core.gui.widget.Widget;
 import net.minecraft.util.text.ITextComponent;
 
+import java.util.function.IntSupplier;
+
 /**
  * A widgets that restricts the rendering and mouse input handling of its children to within its boundary.
  * <p>
@@ -21,10 +23,18 @@ public class ScissorWidget extends BaseWidget {
         return new ScissorWidget(x, y, width, height, children);
     }
 
+    private IntSupplier scissorOffsetX;
+    private IntSupplier scissorOffsetY;
+
     private ScissorWidget(int x, int y, int width, int height, Widget... children){
         super(x, y, width, height);
         for(Widget child : children)
             this.addWidget(child);
+    }
+
+    public void setScissorOffset(IntSupplier offsetX, IntSupplier offsetY){
+        this.scissorOffsetX = offsetX;
+        this.scissorOffsetY = offsetY;
     }
 
     @Override
@@ -45,9 +55,15 @@ public class ScissorWidget extends BaseWidget {
     private void renderScissored(MatrixStack poseStack, int mouseX, int mouseY, RenderFunction renderFunction){
         if(mouseX < this.x || mouseX > this.x + this.width || mouseY < this.y || mouseY > this.y + this.height)
             mouseX = mouseY = -100;
+        int x = this.x;
+        if(this.scissorOffsetX != null)
+            x += this.scissorOffsetX.getAsInt();
+        int y = this.y;
+        if(this.scissorOffsetY != null)
+            y += this.scissorOffsetY.getAsInt();
         int finalMouseX = mouseX;
         int finalMouseY = mouseY;
-        ScreenUtils.withScissor(poseStack, this.x, this.y, this.width, this.height, () -> renderFunction.render(poseStack, finalMouseX, finalMouseY));
+        ScreenUtils.withScissor(poseStack, x, y, this.width, this.height, () -> renderFunction.render(poseStack, finalMouseX, finalMouseY));
     }
 
     private interface RenderFunction {
