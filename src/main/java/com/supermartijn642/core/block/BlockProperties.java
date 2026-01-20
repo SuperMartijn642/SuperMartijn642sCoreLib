@@ -75,11 +75,15 @@ public class BlockProperties {
 
     private BlockProperties(Material material){
         this.material = material;
+        this.mapColor = material.getMaterialMapColor();
         this.isAir = material == Material.AIR;
     }
 
     public BlockProperties mapColor(MapColor color){
-        this.mapColor = color;
+        if(color == null)
+            this.mapColor = this.material.getMaterialMapColor();
+        else
+            this.mapColor = color;
         return this;
     }
 
