@@ -20,7 +20,7 @@ public class GuiContainerMixin {
         at = @At("HEAD"),
         cancellable = true
     )
-    private void isMouseOverSlot(Slot slot, double mouseX, double mouseY, CallbackInfoReturnable<Boolean> ci){
+    private void isMouseOverSlot(Slot slot, int mouseX, int mouseY, CallbackInfoReturnable<Boolean> ci){
         if(slot instanceof CustomSlot){
             CustomSlot customSlot = (CustomSlot)slot;
             ci.setReturnValue(this.isPointInRegion(
@@ -32,7 +32,7 @@ public class GuiContainerMixin {
     }
 
     @Shadow
-    private boolean isPointInRegion(int x, int y, int width, int height, double mouseX, double mouseY){
+    private boolean isPointInRegion(int x, int y, int width, int height, int mouseX, int mouseY){
         throw new AssertionError();
     }
 }
