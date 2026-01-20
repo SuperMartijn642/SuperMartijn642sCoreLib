@@ -240,8 +240,8 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     public void handleMouseInput() throws IOException{
         super.handleMouseInput();
 
-        int mouseX = (int)((double)Mouse.getEventX() * this.width / this.mc.displayWidth - (this.width - this.widget.width()) / 2);
-        int mouseY = (int)(this.height - (double)Mouse.getEventY() * this.height / this.mc.displayHeight - 1 - (this.height - this.widget.height()) / 2);
+        int mouseX = (int)((double)Mouse.getEventX() * this.width / this.mc.displayWidth);
+        int mouseY = (int)(this.height - (double)Mouse.getEventY() * this.height / this.mc.displayHeight - 1);
 
         int scroll = Mouse.getEventDWheel() / 120;
         if(scroll != 0)
