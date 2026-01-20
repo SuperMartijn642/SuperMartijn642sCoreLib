@@ -49,7 +49,7 @@ public class BlockProperties {
         properties.isAir = block.blockMaterial == Material.AIR;
         //noinspection deprecation
         properties.isSuffocating = block::causesSuffocation;
-        properties.copyLootTableBlock = block;
+        properties.lootTableBlock = () -> block;
         return properties;
     }
 
@@ -70,7 +70,6 @@ public class BlockProperties {
     Predicate<IBlockState> isSuffocating = (state) -> state.getMaterial().blocksMovement() && state.isFullCube();
     boolean noLootTable = false;
     Supplier<Block> lootTableBlock;
-    Block copyLootTableBlock;
     Supplier<ResourceLocation> lootTableSupplier;
 
     private BlockProperties(Material material){
@@ -194,7 +193,13 @@ public class BlockProperties {
     public BlockProperties noLootTable(){
         this.noLootTable = true;
         this.lootTableBlock = null;
-        this.copyLootTableBlock = null;
+        this.lootTableSupplier = null;
+        return this;
+    }
+
+    public BlockProperties defaultLootTable(){
+        this.noLootTable = false;
+        this.lootTableBlock = null;
         this.lootTableSupplier = null;
         return this;
     }
@@ -202,7 +207,6 @@ public class BlockProperties {
     public BlockProperties lootTable(ResourceLocation lootTable){
         this.noLootTable = false;
         this.lootTableBlock = null;
-        this.copyLootTableBlock = null;
         this.lootTableSupplier = () -> lootTable;
         return this;
     }
@@ -210,7 +214,6 @@ public class BlockProperties {
     public BlockProperties lootTableFrom(Supplier<Block> block){
         this.noLootTable = false;
         this.lootTableBlock = block;
-        this.copyLootTableBlock = null;
         this.lootTableSupplier = null;
         return this;
     }

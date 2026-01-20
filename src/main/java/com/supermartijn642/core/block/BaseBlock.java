@@ -86,26 +86,39 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
 
     @Override
     public Item getItemDropped(IBlockState state, Random random, int fortune){
-        return this.properties.noLootTable ? Items.AIR
-            : this.properties.lootTableBlock != null ? this.properties.lootTableBlock.get().getItemDropped(state, random, fortune)
-            : this.properties.copyLootTableBlock != null ? this.properties.copyLootTableBlock.getItemDropped(state, random, fortune)
-            : super.getItemDropped(state, random, fortune);
+        if(this.properties.noLootTable)
+            return Items.AIR;
+        if(this.properties.lootTableBlock != null){
+            Block block = this.properties.lootTableBlock.get();
+            if(block.getItemDropped(block.getDefaultState(), new Random(), 0) == Item.getItemFromBlock(block))
+                return super.getItemDropped(state, random, fortune);
+            return block.getItemDropped(block.getDefaultState(), random, fortune);
+        }
+        return super.getItemDropped(state, random, fortune);
     }
 
     @Override
     public int damageDropped(IBlockState state){
-        return this.properties.noLootTable ? 0
-            : this.properties.lootTableBlock != null ? this.properties.lootTableBlock.get().damageDropped(state)
-            : this.properties.copyLootTableBlock != null ? this.properties.copyLootTableBlock.damageDropped(state)
-            : super.damageDropped(state);
+        if(this.properties.noLootTable)
+            return 0;
+        if(this.properties.lootTableBlock != null){
+            Block block = this.properties.lootTableBlock.get();
+            if(block.getItemDropped(block.getDefaultState(), new Random(), 0) == Item.getItemFromBlock(block))
+                return super.damageDropped(state);
+            return block.damageDropped(block.getDefaultState());
+        }
+        return super.damageDropped(state);
     }
 
     @Override
     public int quantityDropped(IBlockState state, int fortune, Random random){
-        return this.properties.noLootTable ? 0
-            : this.properties.lootTableBlock != null ? this.properties.lootTableBlock.get().quantityDropped(state, fortune, random)
-            : this.properties.copyLootTableBlock != null ? this.properties.copyLootTableBlock.quantityDropped(state, fortune, random)
-            : super.quantityDropped(state, fortune, random);
+        if(this.properties.noLootTable)
+            return 0;
+        if(this.properties.lootTableBlock != null){
+            Block block = this.properties.lootTableBlock.get();
+            return block.quantityDropped(block.getDefaultState(), fortune, random);
+        }
+        return super.quantityDropped(state, fortune, random);
     }
 
     @Override
@@ -145,12 +158,10 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
     private List<ItemStack> resolveLootTable(IBlockAccess level, BlockPos pos, IBlockState state, int fortune, float explosionRadius){
         if(this.properties.lootTableBlock != null){
             NonNullList<ItemStack> drops = NonNullList.create();
-            this.properties.lootTableBlock.get().getDrops(drops, level, pos, state, fortune);
-            if(drops.size() != 1 || drops.get(0).getItem() != Item.getItemFromBlock(this.properties.lootTableBlock.get()))
-                return drops;
-        }else if(this.properties.copyLootTableBlock != null){
-            NonNullList<ItemStack> drops = NonNullList.create();
-            this.properties.copyLootTableBlock.getDrops(drops, level, pos, state, fortune);
+            Block block = this.properties.lootTableBlock.get();
+            block.getDrops(drops, level, pos, block.getDefaultState(), fortune);
+            if(drops.size() == 1 && drops.get(0).getItem() == Item.getItemFromBlock(block)) // If the blocks itself, also drop itself for this block
+                return Collections.singletonList(this.asItem().getDefaultInstance());
             return drops;
         }
         if(!(level instanceof WorldServer) || this.properties.noLootTable)
