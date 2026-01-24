@@ -172,6 +172,7 @@ public class BaseBlock extends Block implements EditableBlockRenderLayer {
             contextBuilder.withPlayer(this.harvesters.get());
         LootContext context = contextBuilder.build();
         ((LootContextExtension)context).coreLibSetExplosionRadius(explosionRadius);
+        ((LootContextExtension)context).coreLibSetBlockState(state);
 
         ResourceLocation identifier = Registries.BLOCKS.getIdentifier(this);
         ResourceLocation lootTableLocation = this.properties.lootTableSupplier == null ? null : this.properties.lootTableSupplier.get();

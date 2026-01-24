@@ -6,6 +6,7 @@ import com.supermartijn642.core.data.tag.entries.NamespaceTagEntry;
 import com.supermartijn642.core.generator.GeneratorManager;
 import com.supermartijn642.core.generator.standard.CoreLibLanguageGenerator;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
+import com.supermartijn642.core.loot_table.BlockStatePropertyLootCondition;
 import com.supermartijn642.core.loot_table.SurvivesExplosionLootCondition;
 import com.supermartijn642.core.loot_table.ToolMatchLootCondition;
 import com.supermartijn642.core.network.OpenContainerPacket;
@@ -49,6 +50,7 @@ public class CoreLib {
         handler.registerCustomTagEntrySerializer("namespace", NamespaceTagEntry.SERIALIZER);
 
         // Register loot condition
+        LootConditionManager.registerCondition(BlockStatePropertyLootCondition.SERIALIZER);
         LootConditionManager.registerCondition(SurvivesExplosionLootCondition.SERIALIZER);
         LootConditionManager.registerCondition(ToolMatchLootCondition.SERIALIZER);
 
