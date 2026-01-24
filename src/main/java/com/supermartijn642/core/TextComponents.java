@@ -101,7 +101,7 @@ public class TextComponents {
      * Creates a new {@link TextComponentBuilder} around the given item's name.
      */
     public static TextComponentBuilder item(Item item){
-        return translation(item.getUnlocalizedName());
+        return translation(item.getItemStackDisplayName(ItemStack.EMPTY));
     }
 
     /**
