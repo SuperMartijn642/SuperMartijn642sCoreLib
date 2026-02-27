@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.20a
+- Update `CustomSlot` stack when if the size of the slot's returned stack is modified
+
 ### SuperMartijn642's Core Library 1.1.20
 - Added `Widget#cursor` to change the cursor when hovering a widget
 - Added `ScrollbarWidget` for creating a configurable scrollbar
