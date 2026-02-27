@@ -125,6 +125,13 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
 
     private boolean active = true;
 
+    /*
+     * Minecraft (,1.16.5] just modify the slots returned stack rather than updating it explicitly.
+     * As returned stacks may be arbitrary instances, we need to keep track and update the stack manually.
+     */
+    private ItemStack lastReturnedStack;
+    private int lastReturnedStackCount = 0;
+
     private CustomSlotImpl(IInventory vanillaContainer, int vanillaSlot, int x, int y, int width, int height, Supplier<ItemStack> getter, Consumer<ItemStack> setter, ToIntFunction<ItemStack> inserter, Function<Integer,ItemStack> extractor, ToIntFunction<ItemStack> capacity, Predicate<ItemStack> filter, SlotChangeListener onInsert, SlotChangeListener onExtract, boolean canInsert, boolean canExtract, boolean scaleItemToSize, boolean showBackground, boolean showItem, boolean showHighlight){
         super(vanillaContainer == null ? EMPTY_CONTAINER : vanillaContainer, vanillaSlot, x, y);
         this.width = width;
@@ -229,7 +236,10 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
 
     @Override
     public ItemStack getItem(){
-        return this.getter.get();
+        ItemStack stack = this.getter.get();
+        this.lastReturnedStack = stack;
+        this.lastReturnedStackCount = stack.getCount();
+        return stack;
     }
 
     @Override
@@ -248,6 +258,8 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
             else
                 this.onInsert.onChange(original, newStack);
         }
+        this.lastReturnedStack = stack;
+        this.lastReturnedStackCount = stack.getCount();
     }
 
     @Override
@@ -267,6 +279,7 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
         ItemStack newStack = this.getter.get();
         if(!ItemStack.areItemStacksEqual(original, newStack))
             this.onExtract.onChange(original, newStack);
+        this.lastReturnedStack = null;
         return extracted;
     }
 
@@ -278,6 +291,14 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
     @Override
     public boolean isActive(){
         return this.active;
+    }
+
+    @Override
+    public void onSlotChanged(){
+        // Check if the stack size of the last given stack was modified
+        if(this.lastReturnedStack != null && this.lastReturnedStack.getCount() != this.lastReturnedStackCount)
+            this.putStack(this.lastReturnedStack);
+        super.onSlotChanged();
     }
 
     private static ItemStack copyWithCount(ItemStack stack, int count){
