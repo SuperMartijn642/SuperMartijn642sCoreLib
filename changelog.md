@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.21
+- Fixed client not being updated when `BaseBlockEntity#writeClientData` returns empty tag
+
 ### SuperMartijn642's Core Library 1.1.20
 - Added `Widget#cursor` to change the cursor when hovering a widget
 - Added `ScrollbarWidget` for creating a configurable scrollbar
