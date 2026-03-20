@@ -6,6 +6,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.common.util.Constants;
 
 /**
  * Created 1/26/2021 by SuperMartijn642
@@ -84,38 +85,36 @@ public abstract class BaseBlockEntity extends TileEntity {
     @Override
     public void readFromNBT(NBTTagCompound nbt){
         super.readFromNBT(nbt);
-        this.readData(nbt.getCompoundTag("data"));
+        this.readData(nbt.hasKey("data", Constants.NBT.TAG_COMPOUND) ? nbt.getCompoundTag("data") : new NBTTagCompound());
     }
 
     @Override
     public NBTTagCompound getUpdateTag(){
         NBTTagCompound tag = super.writeToNBT(new NBTTagCompound());
         NBTTagCompound data = this.writeClientData();
-        if(data != null && !data.hasNoTags())
+        if(data != null)
             tag.setTag("data", data);
         return tag;
-    }
-
-    @Override
-    public void handleUpdateTag(NBTTagCompound tag){
-        super.readFromNBT(tag);
-        this.readData(tag.getCompoundTag("data"));
     }
 
     @Override
     public SPacketUpdateTileEntity getUpdatePacket(){
         if(this.dataChanged){
             this.dataChanged = false;
+            NBTTagCompound tag = new NBTTagCompound();
             NBTTagCompound data = this.writeClientData();
-            if(data != null && !data.hasNoTags())
-                return new SPacketUpdateTileEntity(this.pos, 0, data);
+            if(data != null)
+                tag.setTag("data", data);
+            return new SPacketUpdateTileEntity(this.pos, 0, tag);
         }
         return null;
     }
 
     @Override
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt){
-        this.readData(pkt.getNbtCompound());
+        NBTTagCompound tag = pkt.getNbtCompound();
+        if(tag != null && tag.hasKey("data", Constants.NBT.TAG_COMPOUND))
+            this.readData(tag.getCompoundTag("data"));
     }
 
     public IBlockState getBlockState(){
