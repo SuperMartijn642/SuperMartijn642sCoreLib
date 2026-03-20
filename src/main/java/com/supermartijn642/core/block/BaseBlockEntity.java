@@ -6,6 +6,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.common.util.Constants;
 
 /**
  * Created 1/26/2021 by SuperMartijn642
@@ -74,37 +75,35 @@ public abstract class BaseBlockEntity extends TileEntity {
     @Override
     public void load(BlockState state, CompoundNBT nbt){
         super.load(state, nbt);
-        this.readData(nbt.getCompound("data"));
+        this.readData(nbt.contains("data", Constants.NBT.TAG_COMPOUND) ? nbt.getCompound("data") : new CompoundNBT());
     }
 
     @Override
     public CompoundNBT getUpdateTag(){
         CompoundNBT tag = super.save(new CompoundNBT());
         CompoundNBT data = this.writeClientData();
-        if(data != null && !data.isEmpty())
+        if(data != null)
             tag.put("data", data);
         return tag;
-    }
-
-    @Override
-    public void handleUpdateTag(BlockState state, CompoundNBT tag){
-        super.load(state, tag);
-        this.readData(tag.getCompound("data"));
     }
 
     @Override
     public SUpdateTileEntityPacket getUpdatePacket(){
         if(this.dataChanged){
             this.dataChanged = false;
+            CompoundNBT tag = new CompoundNBT();
             CompoundNBT data = this.writeClientData();
-            if(data != null && !data.isEmpty())
-                return new SUpdateTileEntityPacket(this.worldPosition, 0, data);
+            if(data != null)
+                tag.put("data", data);
+            return new SUpdateTileEntityPacket(this.worldPosition, 0, tag);
         }
         return null;
     }
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt){
-        this.readData(pkt.getTag());
+        CompoundNBT tag = pkt.getTag();
+        if(tag != null && tag.contains("data", Constants.NBT.TAG_COMPOUND))
+            this.readData(tag.getCompound("data"));
     }
 }
