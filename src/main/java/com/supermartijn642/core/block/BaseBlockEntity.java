@@ -82,7 +82,7 @@ public abstract class BaseBlockEntity extends BlockEntity {
         CompoundTag tag = new CompoundTag();
         super.saveAdditional(tag);
         CompoundTag data = this.writeClientData();
-        if(data != null && !data.isEmpty())
+        if(data != null)
             tag.put("data", data);
         return tag;
     }
@@ -94,7 +94,7 @@ public abstract class BaseBlockEntity extends BlockEntity {
             return ClientboundBlockEntityDataPacket.create(this, entity -> {
                 CompoundTag tag = new CompoundTag();
                 CompoundTag data = ((BaseBlockEntity)entity).writeClientData();
-                if(data != null && !data.isEmpty())
+                if(data != null)
                     tag.put("data", data);
                 return tag;
             });
