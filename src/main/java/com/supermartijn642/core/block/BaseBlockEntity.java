@@ -2,6 +2,7 @@ package com.supermartijn642.core.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -75,37 +76,35 @@ public abstract class BaseBlockEntity extends BlockEntity {
     @Override
     public void load(CompoundTag nbt){
         super.load(nbt);
-        this.readData(nbt.getCompound("data"));
+        this.readData(nbt.contains("data", Tag.TAG_COMPOUND) ? nbt.getCompound("data") : new CompoundTag());
     }
 
     @Override
     public CompoundTag getUpdateTag(){
         CompoundTag tag = super.save(new CompoundTag());
         CompoundTag data = this.writeClientData();
-        if(data != null && !data.isEmpty())
+        if(data != null)
             tag.put("data", data);
         return tag;
-    }
-
-    @Override
-    public void handleUpdateTag(CompoundTag tag){
-        super.load(tag);
-        this.readData(tag.getCompound("data"));
     }
 
     @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket(){
         if(this.dataChanged){
             this.dataChanged = false;
+            CompoundTag tag = new CompoundTag();
             CompoundTag data = this.writeClientData();
-            if(data != null && !data.isEmpty())
-                return new ClientboundBlockEntityDataPacket(this.worldPosition, 0, data);
+            if(data != null)
+                tag.put("data", data);
+            return new ClientboundBlockEntityDataPacket(this.worldPosition, 0, tag);
         }
         return null;
     }
 
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt){
-        this.readData(pkt.getTag() == null ? new CompoundTag() : pkt.getTag());
+        CompoundTag tag = pkt.getTag();
+        if(tag != null && tag.contains("data", Tag.TAG_COMPOUND))
+            this.readData(tag.getCompound("data"));
     }
 }
