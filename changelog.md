@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.21
+- Fixed client not being updated when `BaseBlockEntity#writeClientData` returns empty tag
+
 ### SuperMartijn642's Core Library 1.1.20a
 - Update `CustomSlot` stack when if the size of the slot's returned stack is modified
 
