@@ -4,10 +4,12 @@ import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.extensions.CoreLibDataGenerator;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.impl.datagen.FabricDataGenHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -32,23 +34,58 @@ public class FabricDataGenHelperMixin {
         GeneratorRegistrationHandler.getAllHandlers().entrySet()
             .stream()
             .filter(entry -> FabricLoader.getInstance().isModLoaded(entry.getKey()))
-            .map(entry -> {
+            .forEach(entry -> {
                 ModContainer container = FabricLoader.getInstance().getModContainer(entry.getKey()).get();
+
+                // Create function to add providers
                 GeneratorRegistrationHandler registrationHandler = entry.getValue();
-                return new EntrypointContainer<DataGeneratorEntrypoint>() {
+                //noinspection DataFlowIssue
+                DataGeneratorEntrypoint providers = dataGenerator -> ((CoreLibDataGenerator)(Object)dataGenerator).setGeneratorRegistrationHandler(registrationHandler);
+
+                // Find an existing entrypoint for the mod
+                for(int i = 0; i < newEntryPoints.size(); i++){
+                    EntrypointContainer<DataGeneratorEntrypoint> entrypoint = newEntryPoints.get(i);
+                    if(entrypoint.getProvider() == container){
+                        newEntryPoints.set(i, new EntrypointContainer<>() {
+                            @Override
+                            public DataGeneratorEntrypoint getEntrypoint(){
+                                DataGeneratorEntrypoint original = entrypoint.getEntrypoint();
+                                return new DataGeneratorEntrypoint() {
+                                    @Override
+                                    public void onInitializeDataGenerator(FabricDataGenerator dataGenerator){
+                                        original.onInitializeDataGenerator(dataGenerator);
+                                        providers.onInitializeDataGenerator(dataGenerator);
+                                    }
+
+                                    @Override
+                                    public @Nullable String getEffectiveModId(){
+                                        return original.getEffectiveModId();
+                                    }
+                                };
+                            }
+
+                            @Override
+                            public ModContainer getProvider(){
+                                return container;
+                            }
+                        });
+                        return;
+                    }
+                }
+
+                // If there's no existing entrypoint add a new one
+                newEntryPoints.add(new EntrypointContainer<>() {
                     @Override
                     public DataGeneratorEntrypoint getEntrypoint(){
-                        //noinspection DataFlowIssue
-                        return dataGenerator -> ((CoreLibDataGenerator)(Object)dataGenerator).setGeneratorRegistrationHandler(registrationHandler);
+                        return providers;
                     }
 
                     @Override
                     public ModContainer getProvider(){
                         return container;
                     }
-                };
-            })
-            .forEach(newEntryPoints::add);
+                });
+            });
 
         // Also just make sure resource packs are available
         ClientUtils.getMinecraft().resourcePackRepository.reload();
