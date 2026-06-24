@@ -16,12 +16,12 @@ import java.util.function.Consumer;
  */
 public interface CustomItemRenderer<S> {
 
-    static <T> SpecialModelRenderer<?> toSpecialModelRenderer(CustomItemRenderer<T> customRenderer){
+    static <T> SpecialModelRenderer<T> toSpecialModelRenderer(CustomItemRenderer<T> customRenderer){
         MutableCustomItemRendererContext context = new MutableCustomItemRendererContext();
-        return new SpecialModelRenderer<T>() {
+        return new SpecialModelRenderer<>() {
             @Override
-            public void submit(T state, ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector output, int combinedLight, int combinedOverlay, boolean hasFoil, int k){
-                context.set(displayContext, poseStack, combinedLight, combinedOverlay);
+            public void submit(T state, PoseStack poseStack, SubmitNodeCollector output, int lightCoords, int overlayCoords, boolean hasFoil, int outlineColor){
+                context.set(poseStack, lightCoords, overlayCoords);
                 customRenderer.submit(output, state, hasFoil, context);
             }
 

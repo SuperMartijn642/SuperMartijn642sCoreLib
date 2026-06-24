@@ -38,7 +38,7 @@ public class CoreLib {
         // Register conditional recipe type
         RegistrationHandler handler = RegistrationHandler.get("supermartijn642corelib");
         handler.registerRecipeType("dummy", ConditionalRecipeSerializer.DUMMY_RECIPE_TYPE);
-        handler.registerRecipeSerializer("conditional", ConditionalRecipeSerializer.INSTANCE);
+        handler.registerRecipeSerializer("conditional", ConditionalRecipeSerializer.SERIALIZER);
         handler.registerResourceConditionSerializer("mod_loaded", ModLoadedResourceCondition.SERIALIZER);
         handler.registerResourceConditionSerializer("not", NotResourceCondition.SERIALIZER);
         handler.registerResourceConditionSerializer("or", OrResourceCondition.SERIALIZER);
@@ -59,7 +59,7 @@ public class CoreLib {
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibLanguageGenerator("supermartijn642corelib", cache));
 
         // Add all BaseItem instances to their respective creative tabs
-        BuildCreativeModeTabContentsEvent.getBus(context.getModBusGroup()).addListener(event -> {
+        BuildCreativeModeTabContentsEvent.BUS.addListener(event -> {
             Registries.ITEMS.getValues().stream()
                 .filter(item -> item instanceof BaseItem || item instanceof BaseBlockItem)
                 .filter(item -> item instanceof BaseItem ? ((BaseItem)item).isInCreativeGroup(event.getTab()) : ((BaseBlockItem)item).isInCreativeGroup(event.getTab()))

@@ -18,7 +18,7 @@ public class ModLoadedResourceCondition implements ResourceCondition {
 
     @Override
     public boolean test(ResourceConditionContext context){
-        return ModList.get().isLoaded(this.modid);
+        return ModList.isLoaded(this.modid);
     }
 
     @Override

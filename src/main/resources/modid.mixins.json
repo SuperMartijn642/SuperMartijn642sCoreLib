@@ -3,11 +3,10 @@
   "minVersion": "${mixin_minimum_version}",
   "package": "${mod_package}.${mixin_package}",
   "compatibilityLevel": "${mixin_compatibility_level}",
-  "refmap": "${mod_id}.mixins.refmap.json",
   "plugin": "${mod_package}.${mixin_package}.${mixin_plugin}",
   "mixins": [
+    "dev.DataGeneratorCachedMixin",
     "dev.DataGeneratorConfigMixin",
-    "dev.DataGeneratorMixin",
     "dev.DatagenModLoaderAccessor",
     "ItemMixin",
     "GameDataMixin",
@@ -16,7 +15,8 @@
   ],
   "client": [
     "AbstractContainerScreenMixin",
-    "GuiGraphicsMixin",
+    "BuiltInBlockModelsMixin",
+    "GuiGraphicsExtractorMixin",
     "GuiRendererMixin",
     "LevelRendererMixin",
     "ModelBakeryMixin",

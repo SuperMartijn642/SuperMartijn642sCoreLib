@@ -49,7 +49,7 @@ public class PacketChannel {
         if(activeMod != null && !activeMod.equals("minecraft") && !activeMod.equals("forge")){
             if(!activeMod.equals(modid))
                 //noinspection removal
-                CoreLib.LOGGER.warn("Mod '{}' is creating a packet channel for different modid '{}'!", ModLoadingContext.get().getActiveContainer().getModInfo().getDisplayName(), modid);
+                CoreLib.LOGGER.warn("Mod '{}' is creating a packet channel for different modid '{}'!", ModLoadingContext.get().getContainer().getModInfo().getDisplayName(), modid);
         }else if(modid.equals("minecraft") || modid.equals("forge"))
             CoreLib.LOGGER.warn("Mod is creating a packet channel for modid '{}'!", modid);
 

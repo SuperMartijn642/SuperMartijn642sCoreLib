@@ -1,5 +1,6 @@
 package com.supermartijn642.core.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -31,7 +32,7 @@ public class RecipeManagerMixin {
         ),
         locals = LocalCapture.CAPTURE_FAILHARD
     )
-    private void prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller, CallbackInfoReturnable<?> ci, SortedMap<Identifier,Recipe<?>> map){
+    private void prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller, CallbackInfoReturnable<?> ci, @Local SortedMap<Identifier,Recipe<?>> map){
         // Filter out dummy recipes
         List<Identifier> remove = new ArrayList<>();
         map.forEach((location, recipe) -> {

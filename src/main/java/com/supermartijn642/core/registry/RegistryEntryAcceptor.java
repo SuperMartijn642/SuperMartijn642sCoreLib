@@ -63,7 +63,7 @@ public @interface RegistryEntryAcceptor {
         private static final Map<Registries.Registry<?>,Map<Identifier,Set<Method>>> METHODS = new HashMap<>();
 
         public static void gatherAnnotatedFields(){
-            for(ModFileScanData scanData : ModList.get().getAllScanData()){
+            for(ModFileScanData scanData : ModList.getAllScanData()){
                 for(ModFileScanData.AnnotationData annotationData : scanData.getAnnotations()){
                     // Skip other annotations
                     if(!TYPE.equals(annotationData.annotationType()))

@@ -11,7 +11,6 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraftforge.data.event.GatherDataEvent;
-import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,19 +23,14 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Created 06/05/2023 by SuperMartijn642
  */
-@Mixin(DataGenerator.class)
-public class DataGeneratorMixin implements DataGeneratorExtension {
-
-    @Shadow
-    @Final
-    private static Logger LOGGER;
+@Mixin(DataGenerator.Cached.class)
+public abstract class DataGeneratorCachedMixin extends DataGenerator implements DataGeneratorExtension {
 
     @Unique
     private GatherDataEvent.DataGeneratorConfig config;
@@ -44,16 +38,15 @@ public class DataGeneratorMixin implements DataGeneratorExtension {
     private ResourceCache resourceCache;
     @Shadow
     @Final
-    private Map<String,DataProvider> providersToRun;
-    @Shadow
-    @Final
     private boolean alwaysGenerate;
     @Shadow
     @Final
     private WorldVersion version;
-    @Shadow
-    @Final
-    private Set<String> allProviderIds;
+
+    private DataGeneratorCachedMixin(){
+        super(null);
+        throw new AssertionError();
+    }
 
     @Override
     public void setDataGeneratorConfig(GatherDataEvent.DataGeneratorConfig config){
@@ -74,7 +67,8 @@ public class DataGeneratorMixin implements DataGeneratorExtension {
         if(dataGeneratorConfig != null){ // Some mods run data generators themselves
             dataGeneratorConfig.getMods().stream().filter(GeneratorRegistrationHandler::hasHandlerForModid).forEach(modid -> {
                 GeneratorRegistrationHandler handler = GeneratorRegistrationHandler.get(modid);
-                DataGenerator dataGenerator = (DataGenerator)(Object)this;
+                //noinspection DataFlowIssue
+                DataGenerator.Cached dataGenerator = (DataGenerator.Cached)(Object)this;
                 // Get the output folder
                 Path outputFolder = dataGenerator.rootOutputFolder;
                 // Create a ResourceCache instance

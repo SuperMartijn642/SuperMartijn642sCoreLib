@@ -53,7 +53,7 @@ public class RegistrationHandler {
         if(activeMod != null && !activeMod.equals("minecraft") && !activeMod.equals("forge")){
             if(!activeMod.equals(modid))
                 //noinspection removal
-                CoreLib.LOGGER.warn("Mod '" + ModLoadingContext.get().getActiveContainer().getModInfo().getDisplayName() + "' is requesting registration helper for different modid '" + modid + "'!");
+                CoreLib.LOGGER.warn("Mod '" + ModLoadingContext.get().getContainer().getModInfo().getDisplayName() + "' is requesting registration helper for different modid '" + modid + "'!");
         }else if(modid.equals("minecraft") || modid.equals("forge"))
             CoreLib.LOGGER.warn("Mod is requesting registration helper for modid '" + modid + "'!");
 

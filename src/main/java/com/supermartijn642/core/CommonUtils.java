@@ -63,7 +63,7 @@ public class CommonUtils {
      * Checks whether a mod with the given modid is loaded and active.
      */
     public static boolean isModLoaded(String modid){
-        return ModList.get().isLoaded(modid);
+        return ModList.isLoaded(modid);
     }
 
     /**

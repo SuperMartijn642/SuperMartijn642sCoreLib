@@ -41,14 +41,14 @@ public abstract class ResourceGenerator {
         if(activeMod != null && !activeMod.equals("minecraft") && !activeMod.equals("forge")){
             if(!activeMod.equals(modid))
                 //noinspection removal
-                CoreLib.LOGGER.warn("Mod '" + ModLoadingContext.get().getActiveContainer().getModInfo().getDisplayName() + "' is creating a resource generator with different modid '" + modid + "'!");
+                CoreLib.LOGGER.warn("Mod '" + ModLoadingContext.get().getContainer().getModInfo().getDisplayName() + "' is creating a resource generator with different modid '" + modid + "'!");
         }else if(modid.equals("minecraft") || modid.equals("forge"))
             CoreLib.LOGGER.warn("Mod is creating a resource generator with modid '" + modid + "'!");
 
         this.modid = modid;
         this.cache = cache;
 
-        Optional<? extends ModContainer> modContainer = ModList.get().getModContainerById(modid);
+        Optional<? extends ModContainer> modContainer = ModList.getModContainerById(modid);
         this.modName = modContainer.map(ModContainer::getModInfo).map(IModInfo::getDisplayName).orElse(modid);
     }
 

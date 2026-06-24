@@ -6,7 +6,7 @@ import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.ContainerWidget;
 import com.supermartijn642.core.gui.widget.MutableWidgetRenderContext;
 import com.supermartijn642.core.gui.widget.Widget;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -76,7 +76,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks){
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks){
         this.widgetRenderContext.update(guiGraphics, partialTicks, this.font, this.minecraft);
         GuiGraphicsHelper helper = GuiGraphicsHelper.of(guiGraphics);
 
@@ -143,10 +143,10 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
                         guiGraphics.pose().translate(slot.x, slot.y);
                         guiGraphics.pose().scale(scale);
                         guiGraphics.pose().translate(-slot.x, -slot.y);
-                        this.renderSlot(guiGraphics, slot, mouseX, mouseY);
+                        this.extractSlot(guiGraphics, slot, mouseX, mouseY);
                     }else{
                         guiGraphics.pose().translate((customSlot.getWidth() - 18) / 2f, (customSlot.getHeight() - 18) / 2f);
-                        this.renderSlot(guiGraphics, slot, mouseX, mouseY);
+                        this.extractSlot(guiGraphics, slot, mouseX, mouseY);
                     }
                     guiGraphics.pose().popMatrix();
                 }
@@ -158,7 +158,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
                     this.hoveredSlot = slot;
                     helper.submitSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE, slot.x - 4, slot.y - 4, 24, 24);
                 }
-                this.renderSlot(guiGraphics, slot, mouseX, mouseY);
+                this.extractSlot(guiGraphics, slot, mouseX, mouseY);
                 if(this.hoveredSlot == slot)
                     helper.submitSprite(AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE, slot.x - 4, slot.y - 4, 24, 24);
             }
@@ -169,13 +169,13 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
         guiGraphics.pose().popMatrix();
 
-        this.renderTooltip(guiGraphics, mouseX, mouseY);
+        this.extractTooltip(guiGraphics, mouseX, mouseY);
 
         //noinspection UnstableApiUsage
         ForgeEventFactoryClient.onContainerRenderForeground(this, guiGraphics, mouseX, mouseY);
 
-        this.renderCarriedItem(guiGraphics, mouseX, mouseY);
-        this.renderSnapbackItem(guiGraphics);
+        this.extractCarriedItem(guiGraphics, mouseX, mouseY);
+        this.extractSnapbackItem(guiGraphics);
 
         guiGraphics.pose().pushMatrix();
         guiGraphics.pose().translate(offsetX, offsetY);
@@ -186,10 +186,6 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         this.widget.renderTooltips(this.widgetRenderContext, helper, offsetMouseX, offsetMouseY);
 
         guiGraphics.pose().popMatrix();
-    }
-
-    @Override
-    protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY){
     }
 
     @Override
