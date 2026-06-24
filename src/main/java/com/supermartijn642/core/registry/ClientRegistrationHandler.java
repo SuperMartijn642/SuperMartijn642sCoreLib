@@ -7,20 +7,20 @@ import com.supermartijn642.core.render.CustomItemRenderer;
 import com.supermartijn642.core.util.Holder;
 import com.supermartijn642.core.util.Pair;
 import com.supermartijn642.core.util.TriFunction;
-import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.rendering.v1.SpecialBlockRendererRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.BuiltInBlockModels;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderers;
@@ -44,10 +44,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collectors;
 
 /**
@@ -94,6 +91,12 @@ public class ClientRegistrationHandler {
         REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.applyItemModelOverwrites(models));
     }
 
+
+    @ApiStatus.Internal
+    public static void registerBuiltinBlockModelsInternal(BuiltInBlockModels.Builder builder){
+        REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.registerBuiltInBlockModels(builder));
+    }
+
     /**
      * Get a registration handler for a given modid. This will always return one unique registration handler per modid.
      * @param modid modid of the mod registering entries
@@ -121,19 +124,17 @@ public class ClientRegistrationHandler {
 
     private final String modid;
 
-    private final List<Pair<Identifier,Consumer<BlockStateModel>>> blockModelConsumers = new ArrayList<>();
-    private final List<Pair<Supplier<Block>,Function<BlockStateModel,BlockStateModel>>> blockModelOverwrites = new ArrayList<>();
+    private final List<Pair<Identifier,Consumer<BlockStateModel>>> blockStateModelConsumers = new ArrayList<>();
+    private final List<Pair<Supplier<Block>,Function<BlockStateModel,BlockStateModel>>> blockStateModelOverwrites = new ArrayList<>();
     private final List<Pair<Supplier<Item>,Function<ItemModel,ItemModel>>> itemModelOverwrites = new ArrayList<>();
+    private final List<Pair<Supplier<Block>,BiFunction<BlockState,BlockColors,BlockModel.Unbaked>>> builtinBlockModels = new ArrayList<>();
 
     private final List<Pair<Supplier<EntityType<?>>,Function<EntityRendererProvider.Context,EntityRenderer<?,?>>>> entityRenderers = new ArrayList<>();
     private final List<Pair<Supplier<BlockEntityType<?>>,Function<BlockEntityRendererProvider.Context,BlockEntityRenderer<?,?>>>> blockEntityRenderers = new ArrayList<>();
 
     private final Map<Identifier,Set<Identifier>> textureAtlasSprites = new HashMap<>();
 
-    private final List<Pair<Supplier<Block>,Supplier<SpecialModelRenderer.Unbaked>>> blockSpecialRenderers = new ArrayList<>();
-
     private final List<Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>>> containerScreens = new ArrayList<>();
-    private final List<Pair<Supplier<Block>,Supplier<ChunkSectionLayer>>> blockRenderTypes = new ArrayList<>();
 
     private final List<Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>>> pictureInPictureRenderers = new ArrayList<>();
 
@@ -147,55 +148,55 @@ public class ClientRegistrationHandler {
      * Causes the model at the given location to be loaded as a block model.
      * @param consumer called whenever the model for the given location is baked
      */
-    public void registerBlockModelConsumer(Identifier location, Consumer<BlockStateModel> consumer){
+    public void registerBlockStateModelConsumer(Identifier location, Consumer<BlockStateModel> consumer){
         if(haveModelsBeenRegistered)
             throw new IllegalStateException("Cannot register new model consumer after model registry has been completed!");
-        this.blockModelConsumers.add(Pair.of(location, consumer));
+        this.blockStateModelConsumers.add(Pair.of(location, consumer));
     }
 
     /**
      * Causes the model at the given location to be loaded as a block model.
      * @param consumer called whenever the model for the given location is baked
      */
-    public void registerBlockModelConsumer(String namespace, String identifier, Consumer<BlockStateModel> consumer){
+    public void registerBlockStateModelConsumer(String namespace, String identifier, Consumer<BlockStateModel> consumer){
         if(!RegistryUtil.isValidNamespace(namespace))
             throw new IllegalArgumentException("Namespace '" + namespace + "' must only contain characters [a-z0-9_.-]!");
         if(!RegistryUtil.isValidPath(identifier))
             throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
 
-        this.registerBlockModelConsumer(Identifier.fromNamespaceAndPath(namespace, identifier), consumer);
+        this.registerBlockStateModelConsumer(Identifier.fromNamespaceAndPath(namespace, identifier), consumer);
     }
 
     /**
      * Causes the model at the given location to be loaded as a block model.
      * @param consumer called whenever the model for the given location is baked
      */
-    public void registerBlockModelConsumer(String identifier, Consumer<BlockStateModel> consumer){
-        this.registerBlockModelConsumer(this.modid, identifier, consumer);
+    public void registerBlockStateModelConsumer(String identifier, Consumer<BlockStateModel> consumer){
+        this.registerBlockStateModelConsumer(this.modid, identifier, consumer);
     }
 
     /**
      * Registers an overwrite for all models for the given block, including the block's item model.
      */
-    public void registerBlockModelOverwrite(Supplier<Block> block, Function<BlockStateModel,BlockStateModel> modelOverwrite){
+    public void registerBlockStateModelOverwrite(Supplier<Block> block, Function<BlockStateModel,BlockStateModel> modelOverwrite){
         if(haveModelsBeenRegistered)
             throw new IllegalStateException("Cannot register new model overwrites after ModelBakeEvent has been fired!");
 
-        this.blockModelOverwrites.add(Pair.of(block, modelOverwrite));
+        this.blockStateModelOverwrites.add(Pair.of(block, modelOverwrite));
     }
 
     /**
      * Registers an overwrite for all models for the given block, including the block's item model.
      */
-    public void registerBlockModelOverwrite(Supplier<Block> block, Supplier<BlockStateModel> modelOverwrite){
-        this.registerBlockModelOverwrite(block, model -> modelOverwrite.get());
+    public void registerBlockStateModelOverwrite(Supplier<Block> block, Supplier<BlockStateModel> modelOverwrite){
+        this.registerBlockStateModelOverwrite(block, model -> modelOverwrite.get());
     }
 
     /**
      * Registers an overwrite for all models for the given block, including the block's item model.
      */
-    public void registerBlockModelOverwrite(Supplier<Block> block, BlockStateModel modelOverwrite){
-        this.registerBlockModelOverwrite(block, model -> modelOverwrite);
+    public void registerBlockStateModelOverwrite(Supplier<Block> block, BlockStateModel modelOverwrite){
+        this.registerBlockStateModelOverwrite(block, model -> modelOverwrite);
     }
 
     /**
@@ -220,6 +221,10 @@ public class ClientRegistrationHandler {
      */
     public void registerItemModelOverwrite(Supplier<Item> item, ItemModel modelOverwrite){
         this.registerItemModelOverwrite(item, model -> modelOverwrite);
+    }
+
+    public void registerBuiltInBlockModel(Supplier<Block> block, BiFunction<BlockState,BlockColors,BlockModel.Unbaked> modelOverwrite){
+        this.builtinBlockModels.add(Pair.of(block, modelOverwrite));
     }
 
     /**
@@ -321,41 +326,27 @@ public class ClientRegistrationHandler {
     /**
      * Registers the given special model renderer.
      */
-    public void registerSpecialModelRenderer(String identifier, MapCodec<? extends SpecialModelRenderer.Unbaked> codec){
+    public void registerSpecialModelRenderer(String identifier, MapCodec<? extends SpecialModelRenderer.Unbaked<?>> codec){
         SpecialModelRenderers.ID_MAPPER.put(Identifier.fromNamespaceAndPath(this.modid, identifier), codec);
-    }
-
-    /**
-     * Registers the given special model renderer.
-     */
-    public void registerBlockSpecialModelRenderer(Supplier<Block> block, Supplier<SpecialModelRenderer.Unbaked> renderer){
-        this.blockSpecialRenderers.add(Pair.of(block, renderer));
-    }
-
-    /**
-     * Registers the given special model renderer.
-     */
-    public void registerBlockSpecialModelRenderer(Block block, SpecialModelRenderer.Unbaked renderer){
-        SpecialBlockRendererRegistry.register(block, renderer);
     }
 
     /**
      * Registers the given custom item renderer.
      */
-    public void registerCustomItemRenderer(String identifier, Supplier<CustomItemRenderer> itemRenderer){
-        Holder<MapCodec<SpecialModelRenderer.Unbaked>> holder = new Holder<>();
-        MapCodec<SpecialModelRenderer.Unbaked> codec = MapCodec.unit(new SpecialModelRenderer.Unbaked() {
-            SpecialModelRenderer<?> renderer = null;
+    public <S> void registerCustomItemRenderer(String identifier, Supplier<CustomItemRenderer<S>> itemRenderer){
+        Holder<MapCodec<SpecialModelRenderer.Unbaked<S>>> holder = new Holder<>();
+        MapCodec<SpecialModelRenderer.Unbaked<S>> codec = MapCodec.unit(new SpecialModelRenderer.Unbaked<>() {
+            SpecialModelRenderer<S> renderer = null;
 
             @Override
-            public SpecialModelRenderer<?> bake(SpecialModelRenderer.BakingContext context){
+            public SpecialModelRenderer<S> bake(SpecialModelRenderer.BakingContext context){
                 if(this.renderer == null)
                     this.renderer = CustomItemRenderer.toSpecialModelRenderer(itemRenderer.get());
                 return this.renderer;
             }
 
             @Override
-            public MapCodec<? extends SpecialModelRenderer.Unbaked> type(){
+            public MapCodec<? extends SpecialModelRenderer.Unbaked<S>> type(){
                 return holder.get();
             }
         });
@@ -402,79 +393,6 @@ public class ClientRegistrationHandler {
         this.registerContainerScreen(() -> menuType, (container, inventory, title) -> screenSupplier.apply(container));
     }
 
-    /**
-     * Registers the given render type to be used when rendering the given block.
-     */
-    public void registerBlockModelRenderType(Supplier<Block> block, Supplier<ChunkSectionLayer> renderTypeSupplier){
-        if(haveRenderersBeenRegistered)
-            throw new IllegalStateException("Cannot register new menu screens after the ClientInitialization event has been fired!");
-
-        this.blockRenderTypes.add(Pair.of(block, renderTypeSupplier));
-    }
-
-    /**
-     * Registers the given render type to be used when rendering the given block.
-     */
-    public void registerBlockModelRenderType(Supplier<Block> block, ChunkSectionLayer renderType){
-        this.registerBlockModelRenderType(block, () -> renderType);
-    }
-
-    /**
-     * Registers the given render type to be used when rendering the given block.
-     */
-    public void registerBlockModelRenderType(Block block, Supplier<ChunkSectionLayer> renderTypeSupplier){
-        this.registerBlockModelRenderType(() -> block, renderTypeSupplier);
-    }
-
-    /**
-     * Registers the given render type to be used when rendering the given block.
-     */
-    public void registerBlockModelRenderType(Block block, ChunkSectionLayer renderType){
-        this.registerBlockModelRenderType(() -> block, renderType);
-    }
-
-    /**
-     * Registers the solid render type to be used when rendering the given block.
-     */
-    public void registerBlockModelSolidRenderType(Supplier<Block> block){
-        this.registerBlockModelRenderType(block, ChunkSectionLayer.SOLID);
-    }
-
-    /**
-     * Registers the solid render type to be used when rendering the given block.
-     */
-    public void registerBlockModelSolidRenderType(Block block){
-        this.registerBlockModelRenderType(block, ChunkSectionLayer.SOLID);
-    }
-
-    /**
-     * Registers the cutout render type to be used when rendering the given block.
-     */
-    public void registerBlockModelCutoutRenderType(Supplier<Block> block){
-        this.registerBlockModelRenderType(block, ChunkSectionLayer.CUTOUT);
-    }
-
-    /**
-     * Registers the cutout render type to be used when rendering the given block.
-     */
-    public void registerBlockModelCutoutRenderType(Block block){
-        this.registerBlockModelRenderType(block, ChunkSectionLayer.CUTOUT);
-    }
-
-    /**
-     * Registers the translucent render type to be used when rendering the given block.
-     */
-    public void registerBlockModelTranslucentRenderType(Supplier<Block> block){
-        this.registerBlockModelRenderType(block, ChunkSectionLayer.TRANSLUCENT);
-    }
-
-    /**
-     * Registers the translucent render type to be used when rendering the given block.
-     */
-    public void registerBlockModelTranslucentRenderType(Block block){
-        this.registerBlockModelRenderType(block, ChunkSectionLayer.TRANSLUCENT);
-    }
-
     public void registerItemModelType(String identifier, MapCodec<? extends ItemModel.Unbaked> codec){
         ItemModels.ID_MAPPER.put(Identifier.fromNamespaceAndPath(this.modid, identifier), codec);
     }
@@ -516,23 +434,6 @@ public class ClientRegistrationHandler {
             BlockEntityRenderers.register((BlockEntityType)blockEntityType, entry.right()::apply);
         }
 
-        // Block special renderers
-        Set<Block> blocks = new HashSet<>();
-        for(Pair<Supplier<Block>,Supplier<SpecialModelRenderer.Unbaked>> entry : this.blockSpecialRenderers){
-            Block block = entry.left().get();
-            if(block == null)
-                throw new RuntimeException("Special model renderer registered for null block!");
-            if(blocks.contains(block))
-                throw new RuntimeException("Duplicate special model renderer for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
-
-            SpecialModelRenderer.Unbaked renderer = entry.right().get();
-            if(renderer == null)
-                throw new RuntimeException("Got null special model renderer for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
-
-            blocks.add(block);
-            SpecialBlockRendererRegistry.register(block, renderer);
-        }
-
         // Container Screens
         Set<MenuType<?>> menuTypes = new HashSet<>();
         for(Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>> entry : this.containerScreens){
@@ -546,27 +447,11 @@ public class ClientRegistrationHandler {
             //noinspection unchecked,rawtypes
             MenuScreens.register((MenuType)menuType, (MenuScreens.ScreenConstructor)entry.right()::apply);
         }
-
-        // Block render types
-        blocks = new HashSet<>();
-        for(Pair<Supplier<Block>,Supplier<ChunkSectionLayer>> entry : this.blockRenderTypes){
-            Block block = entry.left().get();
-            if(block == null)
-                throw new RuntimeException("Block render layer registered for null block!");
-            if(blocks.contains(block))
-                throw new RuntimeException("Duplicate render layer for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
-            ChunkSectionLayer layer = entry.right().get();
-            if(layer == null)
-                throw new RuntimeException("Got null render layer for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
-
-            blocks.add(block);
-            BlockRenderLayerMap.putBlock(block, layer);
-        }
     }
 
     private void registerBlockModelConsumerDependencies(Predicate<Identifier> markModelDependency){
         Set<Identifier> missingModels = null;
-        for(Pair<Identifier,Consumer<BlockStateModel>> consumer : this.blockModelConsumers){
+        for(Pair<Identifier,Consumer<BlockStateModel>> consumer : this.blockStateModelConsumers){
             Identifier location = consumer.left();
             if(!markModelDependency.test(location)){
                 if(missingModels == null)
@@ -597,7 +482,7 @@ public class ClientRegistrationHandler {
 
     private void handleBlockModelConsumers(Function<Identifier,BlockStateModel> modelGetter){
         // Model callbacks
-        for(Pair<Identifier,Consumer<BlockStateModel>> entry : this.blockModelConsumers){
+        for(Pair<Identifier,Consumer<BlockStateModel>> entry : this.blockStateModelConsumers){
             try{
                 entry.right().accept(modelGetter.apply(entry.left()));
             }catch(Exception e){
@@ -607,7 +492,7 @@ public class ClientRegistrationHandler {
     }
 
     private void applyBlockModelOverwrites(Map<BlockState,BlockStateModel> models){
-        for(Pair<Supplier<Block>,Function<BlockStateModel,BlockStateModel>> overwrite : this.blockModelOverwrites){
+        for(Pair<Supplier<Block>,Function<BlockStateModel,BlockStateModel>> overwrite : this.blockStateModelOverwrites){
             Block block = overwrite.left().get();
             if(block == null){
                 CoreLib.LOGGER.error("Got 'null' block for block model overwrite from mod '{}'!", this.modid);
@@ -654,6 +539,25 @@ public class ClientRegistrationHandler {
                 continue;
             }
             models.put(modelLocation, model);
+        }
+    }
+
+    private void registerBuiltInBlockModels(BuiltInBlockModels.Builder builder){
+        // Block special renderers
+        Set<Block> blocks = new HashSet<>(this.builtinBlockModels.size());
+        for(Pair<Supplier<Block>,BiFunction<BlockState,BlockColors,BlockModel.Unbaked>> entry : this.builtinBlockModels){
+            Block block = entry.left().get();
+            if(block == null)
+                throw new RuntimeException("Built-in block model registered for null block!");
+            if(blocks.contains(block))
+                throw new RuntimeException("Duplicate built-in block model for block '" + Registries.BLOCKS.getIdentifier(block) + "'!");
+
+            blocks.add(block);
+            BiFunction<BlockState,BlockColors,BlockModel.Unbaked> modelCreator = entry.right();
+            builder.put(
+                (BuiltInBlockModels.ModelFactory)(colors, state) -> modelCreator.apply(state, colors),
+                block
+            );
         }
     }
 

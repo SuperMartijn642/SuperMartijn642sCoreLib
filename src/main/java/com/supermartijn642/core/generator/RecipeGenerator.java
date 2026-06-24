@@ -27,7 +27,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.ItemLike;
 
 import java.util.*;
@@ -1078,7 +1078,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private final Map<Character,RecipeInput> inputs = new HashMap<>();
 
         private ShapedRecipeBuilder(Identifier identifier, ItemLike output, DataComponentPatch outputComponents, int outputCount){
-            super(identifier, RecipeSerializer.SHAPED_RECIPE, output, outputComponents, outputCount);
+            super(identifier, ShapedRecipe.SERIALIZER, output, outputComponents, outputCount);
         }
 
         /**
@@ -1154,7 +1154,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private final List<RecipeInput> inputs = new ArrayList<>();
 
         private ShapelessRecipeBuilder(Identifier identifier, ItemLike output, DataComponentPatch outputComponents, int outputCount){
-            super(identifier, RecipeSerializer.SHAPELESS_RECIPE, output, outputComponents, outputCount);
+            super(identifier, ShapelessRecipe.SERIALIZER, output, outputComponents, outputCount);
         }
 
         private ShapelessRecipeBuilder input(RecipeInput input, int count){
@@ -1251,7 +1251,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private int duration = 200;
 
         private SmeltingRecipeBuilder(Identifier identifier, ItemLike output, DataComponentPatch outputComponents, int count){
-            super(identifier, RecipeSerializer.SMELTING_RECIPE, output, outputComponents, count);
+            super(identifier, SmeltingRecipe.SERIALIZER, output, outputComponents, count);
         }
 
         /**
@@ -1383,7 +1383,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private RecipeInput base, addition;
 
         private SmithingRecipeBuilder(Identifier identifier, ItemLike output, DataComponentPatch outputComponents, int outputCount){
-            super(identifier, RecipeSerializer.SMITHING_TRANSFORM, output, outputComponents, outputCount);
+            super(identifier, SmithingTransformRecipe.SERIALIZER, output, outputComponents, outputCount);
         }
 
         private SmithingRecipeBuilder base(RecipeInput input){
@@ -1450,7 +1450,7 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private RecipeInput input;
 
         private StoneCuttingRecipeBuilder(Identifier identifier, ItemLike output, int outputCount){
-            super(identifier, RecipeSerializer.STONECUTTER, output, null, outputCount);
+            super(identifier, StonecutterRecipe.SERIALIZER, output, null, outputCount);
         }
 
         private StoneCuttingRecipeBuilder input(RecipeInput input){

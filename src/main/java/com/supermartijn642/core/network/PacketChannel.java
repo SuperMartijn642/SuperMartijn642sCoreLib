@@ -94,17 +94,17 @@ public class PacketChannel {
         );
 
         // Configuration stage
-        PayloadTypeRegistry.configurationS2C().register(this.payloadType, s2cPayloadCodec);
+        PayloadTypeRegistry.clientboundConfiguration().register(this.payloadType, s2cPayloadCodec);
         if(CommonUtils.getEnvironmentSide().isClient())
             ClientConfigurationNetworking.registerGlobalReceiver(this.payloadType, (payload, context) ->
                 this.handle(payload.packet, new PacketContext(CoreSide.CLIENT, null, null))
             );
-        PayloadTypeRegistry.configurationC2S().register(this.payloadType, c2sPayloadCodec);
+        PayloadTypeRegistry.serverboundConfiguration().register(this.payloadType, c2sPayloadCodec);
         ServerConfigurationNetworking.registerGlobalReceiver(this.payloadType, (payload, context) ->
             this.handle(payload.packet, new PacketContext(CoreSide.SERVER, null, context.server()))
         );
         // Play stage
-        PayloadTypeRegistry.playS2C().register(this.payloadType, s2cPayloadCodec);
+        PayloadTypeRegistry.clientboundPlay().register(this.payloadType, s2cPayloadCodec);
         if(CommonUtils.getEnvironmentSide().isClient()){
             // This has to be this dumb because the payload handler lambda calls ClientPlayNetworking$Context#player() which returns a client-only class LocalPlayer
             //noinspection Convert2Lambda,TrivialFunctionalExpressionUsage
@@ -117,7 +117,7 @@ public class PacketChannel {
                 }
             }.run();
         }
-        PayloadTypeRegistry.playC2S().register(this.payloadType, c2sPayloadCodec);
+        PayloadTypeRegistry.serverboundPlay().register(this.payloadType, c2sPayloadCodec);
         ServerPlayNetworking.registerGlobalReceiver(this.payloadType, (payload, context) ->
             this.handle(payload.packet, new PacketContext(CoreSide.SERVER, context.player(), context.server()))
         );
@@ -220,7 +220,7 @@ public class PacketChannel {
         if(world.isClientSide())
             throw new IllegalStateException("This must only be called server-side!");
         this.checkRegistration(packet, PacketDirection.SERVER_TO_CLIENT);
-        PlayerLookup.world((ServerLevel)world).forEach(player -> this.sendToPlayer(player, packet));
+        PlayerLookup.level((ServerLevel)world).forEach(player -> this.sendToPlayer(player, packet));
     }
 
     /**

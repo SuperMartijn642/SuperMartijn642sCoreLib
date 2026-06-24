@@ -15,7 +15,7 @@ import com.supermartijn642.core.registry.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 
@@ -36,7 +36,7 @@ public class CoreLib implements ModInitializer {
 
         // Register conditional recipe type
         RegistrationHandler handler = RegistrationHandler.get("supermartijn642corelib");
-        handler.registerRecipeSerializer("conditional", ConditionalRecipeSerializer.INSTANCE);
+        handler.registerRecipeSerializer("conditional", ConditionalRecipeSerializer.SERIALIZER);
         handler.registerResourceConditionSerializer("mod_loaded", ModLoadedResourceCondition.SERIALIZER);
         handler.registerResourceConditionSerializer("not", NotResourceCondition.SERIALIZER);
         handler.registerResourceConditionSerializer("or", OrResourceCondition.SERIALIZER);
@@ -59,7 +59,7 @@ public class CoreLib implements ModInitializer {
         GeneratorRegistrationHandler.get("supermartijn642corelib").addGenerator(cache -> new CoreLibLanguageGenerator("supermartijn642corelib", cache));
 
         // Add all BaseItem instances to their respective creative tabs
-        ItemGroupEvents.MODIFY_ENTRIES_ALL.register(((group, entries) -> {
+        CreativeModeTabEvents.MODIFY_OUTPUT_ALL.register(((group, entries) -> {
             Registries.ITEMS.getValues().stream()
                 .filter(item -> item instanceof BaseItem || item instanceof BaseBlockItem)
                 .filter(item -> item instanceof BaseItem ? ((BaseItem)item).isInCreativeGroup(group) : ((BaseBlockItem)item).isInCreativeGroup(group))

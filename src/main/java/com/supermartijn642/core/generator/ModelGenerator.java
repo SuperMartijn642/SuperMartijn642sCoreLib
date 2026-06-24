@@ -4,9 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.ItemTransform;
+import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.client.resources.model.cuboid.ItemTransform;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -112,7 +111,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
         }
         // Gui lighting
         if(modelBuilder.lighting != null)
-            json.addProperty("gui_light", modelBuilder.lighting == BlockModel.GuiLight.FRONT ? "front" : "side");
+            json.addProperty("gui_light", modelBuilder.lighting == UnbakedModel.GuiLight.FRONT ? "front" : "side");
         // Elements
         if(!modelBuilder.elements.isEmpty()){
             JsonArray elementsJson = new JsonArray();
@@ -463,7 +462,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
         private Identifier parent;
         private Identifier renderType;
         private boolean ambientOcclusion = true;
-        private BlockModel.GuiLight lighting = null;
+        private UnbakedModel.GuiLight lighting = null;
 
         protected ModelBuilder(String modid, Identifier identifier){
             this.modid = modid;
@@ -518,7 +517,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
          * Sets the lighting used when rendering this model in a gui to FRONT.
          */
         public ModelBuilder frontLit(){
-            this.lighting = BlockModel.GuiLight.FRONT;
+            this.lighting = UnbakedModel.GuiLight.FRONT;
             return this;
         }
 
@@ -526,7 +525,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
          * Sets the lighting used when rendering this model in a gui to SIDE.
          */
         public ModelBuilder sideLit(){
-            this.lighting = BlockModel.GuiLight.SIDE;
+            this.lighting = UnbakedModel.GuiLight.SIDE;
             return this;
         }
 

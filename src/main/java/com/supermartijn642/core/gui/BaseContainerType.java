@@ -1,7 +1,7 @@
 package com.supermartijn642.core.gui;
 
 import com.supermartijn642.core.ClientUtils;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.player.Player;
@@ -12,7 +12,7 @@ import java.util.function.BiFunction;
 /**
  * Created 05/08/2022 by SuperMartijn642
  */
-public final class BaseContainerType<T extends BaseContainer> extends ExtendedScreenHandlerType<T,T> {
+public final class BaseContainerType<T extends BaseContainer> extends ExtendedMenuType<T,T> {
 
     /**
      * Creates a new container type.

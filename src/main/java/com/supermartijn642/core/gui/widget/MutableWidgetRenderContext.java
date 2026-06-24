@@ -2,7 +2,7 @@ package com.supermartijn642.core.gui.widget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * Created 05/06/2023 by SuperMartijn642
@@ -13,7 +13,7 @@ public final class MutableWidgetRenderContext implements WidgetRenderContext {
         return new MutableWidgetRenderContext();
     }
 
-    private GuiGraphics guiGraphics;
+    private GuiGraphicsExtractor guiGraphics;
     private float partialTicks;
     private Font font;
     private Minecraft minecraft;
@@ -21,7 +21,7 @@ public final class MutableWidgetRenderContext implements WidgetRenderContext {
     private MutableWidgetRenderContext(){
     }
 
-    public void update(GuiGraphics guiGraphics, float partialTicks, Font font, Minecraft minecraft){
+    public void update(GuiGraphicsExtractor guiGraphics, float partialTicks, Font font, Minecraft minecraft){
         this.guiGraphics = guiGraphics;
         this.partialTicks = partialTicks;
         this.font = font;
@@ -29,7 +29,7 @@ public final class MutableWidgetRenderContext implements WidgetRenderContext {
     }
 
     @Override
-    public GuiGraphics guiGraphics(){
+    public GuiGraphicsExtractor guiGraphics(){
         return this.guiGraphics;
     }
 

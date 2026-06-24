@@ -2,7 +2,7 @@ package com.supermartijn642.core;
 
 import com.supermartijn642.core.gui.BaseContainer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
@@ -13,7 +13,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +73,7 @@ public class CommonUtils {
             return;
 
         // Open the container
-        player.openMenu(new ExtendedScreenHandlerFactory<BaseContainer>() {
+        player.openMenu(new ExtendedMenuProvider<BaseContainer>() {
             @Override
             public BaseContainer getScreenOpeningData(ServerPlayer player){
                 return container;
@@ -85,10 +84,9 @@ public class CommonUtils {
                 return Component.empty();
             }
 
-            @Nullable
             @Override
-            public AbstractContainerMenu createMenu(int windowId, Inventory inventory, Player player){
-                container.setContainerId(windowId);
+            public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player){
+                container.setContainerId(containerId);
                 return container;
             }
         });

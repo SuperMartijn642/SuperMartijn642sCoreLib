@@ -5,7 +5,7 @@ import com.supermartijn642.core.generator.ResourceCache;
 import com.supermartijn642.core.generator.ResourceGenerator;
 import com.supermartijn642.core.util.Either;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.data.DataProvider;
@@ -53,7 +53,7 @@ public class GeneratorRegistrationHandler {
     }
 
     private final String modid;
-    private final List<Either<Function<ResourceCache,ResourceGenerator>,Function<FabricDataOutput,DataProvider>>> generatorsAndProviders = new ArrayList<>();
+    private final List<Either<Function<ResourceCache,ResourceGenerator>,Function<FabricPackOutput,DataProvider>>> generatorsAndProviders = new ArrayList<>();
 
     private GeneratorRegistrationHandler(String modid){
         this.modid = modid;
@@ -94,7 +94,7 @@ public class GeneratorRegistrationHandler {
     /**
      * Adds the given data provider to the list of providers to be run.
      */
-    public void addProvider(Function<FabricDataOutput,DataProvider> provider){
+    public void addProvider(Function<FabricPackOutput,DataProvider> provider){
         if(provider == null)
             throw new IllegalArgumentException("Provider must not be null!");
         if(haveProvidersBeenRegistered)
@@ -124,7 +124,6 @@ public class GeneratorRegistrationHandler {
     }
 
     @ApiStatus.Internal
-    @Deprecated
     public void registerProviders(FabricDataGenerator dataGenerator, ResourceCache cache){
         // Create a new pack
         FabricDataGenerator.Pack pack = dataGenerator.createPack();

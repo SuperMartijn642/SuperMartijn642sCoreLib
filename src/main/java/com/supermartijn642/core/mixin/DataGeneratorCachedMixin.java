@@ -1,6 +1,7 @@
 package com.supermartijn642.core.mixin;
 
 import com.google.common.base.Stopwatch;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.extensions.CoreLibDataGenerator;
 import com.supermartijn642.core.generator.ResourceCache;
@@ -30,8 +31,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created 06/05/2023 by SuperMartijn642
  */
-@Mixin(DataGenerator.class)
-public class DataGeneratorMixin implements CoreLibDataGenerator {
+@Mixin(DataGenerator.Cached.class)
+public class DataGeneratorCachedMixin implements CoreLibDataGenerator {
 
     @Shadow
     @Final
@@ -60,16 +61,15 @@ public class DataGeneratorMixin implements CoreLibDataGenerator {
             value = "INVOKE",
             target = "Lcom/google/common/base/Stopwatch;createStarted()Lcom/google/common/base/Stopwatch;",
             shift = At.Shift.BEFORE
-        ),
-        locals = LocalCapture.CAPTURE_FAILHARD
+        )
     )
-    private void runHead(CallbackInfo ci, HashCache hashCache){
+    private void runHead(CallbackInfo ci, @Local HashCache hashCache){
         //noinspection ConstantValue
-        if(this.handler != null && (Object)this instanceof FabricDataGenerator){
-            FabricDataGenerator dataGenerator = (FabricDataGenerator)(Object)this;
+        if(this.handler != null && (Object)this instanceof FabricDataGenerator dataGenerator){
             // Get the output folder and manual files folder
             String manualFolderProperty = System.getProperty("fabric-api.datagen.manual-dir");
-            Path outputFolder = dataGenerator.rootOutputFolder, manualFolder = manualFolderProperty == null || manualFolderProperty.isBlank() ? null : Paths.get(manualFolderProperty);
+            // TODO
+            Path outputFolder = ((DataGenerator.Cached)(Object)dataGenerator).rootOutputFolder, manualFolder = manualFolderProperty == null || manualFolderProperty.isBlank() ? null : Paths.get(manualFolderProperty);
             if(manualFolder == null)
                 CoreLib.LOGGER.warn("Property 'fabric-api.datagen.manual-dir' has not been set! Manually created files may not be recognised!");
             // Create a ResourceCache instance

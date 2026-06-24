@@ -29,8 +29,6 @@ public interface CustomTagEntry {
 
         Collection<T> getTag(Identifier identifier);
 
-        Collection<T> getAllElements();
-
         Set<Identifier> getAllIdentifiers();
     }
 }
