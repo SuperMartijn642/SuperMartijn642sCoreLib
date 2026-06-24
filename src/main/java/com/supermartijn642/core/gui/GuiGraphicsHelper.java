@@ -6,16 +6,12 @@ import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
-import com.supermartijn642.core.extensions.GuiGraphicsExtension;
+import com.supermartijn642.core.extensions.GuiGraphicsExtractorExtension;
 import com.supermartijn642.core.render.RenderUtils;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.GuiElementRenderState;
-import net.minecraft.client.gui.render.state.GuiItemRenderState;
-import net.minecraft.client.gui.render.state.GuiTextRenderState;
-import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
 import net.minecraft.client.gui.screens.inventory.tooltip.BelowOrAboveWidgetTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
@@ -23,6 +19,10 @@ import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPosition
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.item.TrackingItemStackRenderState;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
+import net.minecraft.client.renderer.state.gui.GuiItemRenderState;
+import net.minecraft.client.renderer.state.gui.GuiTextRenderState;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.metadata.gui.GuiMetadataSection;
@@ -54,11 +54,11 @@ import java.util.function.Consumer;
  */
 public final class GuiGraphicsHelper {
 
-    public static GuiGraphicsHelper of(GuiGraphics guiGraphics){
-        GuiGraphicsHelper helper = ((GuiGraphicsExtension)guiGraphics).supermartijn642corelibGetHelper();
+    public static GuiGraphicsHelper of(GuiGraphicsExtractor guiGraphics){
+        GuiGraphicsHelper helper = ((GuiGraphicsExtractorExtension)guiGraphics).supermartijn642corelibGetHelper();
         if(helper == null){
             helper = new GuiGraphicsHelper(guiGraphics);
-            ((GuiGraphicsExtension)guiGraphics).supermartijn642corelibSetHelper(helper);
+            ((GuiGraphicsExtractorExtension)guiGraphics).supermartijn642corelibSetHelper(helper);
         }
         return helper;
     }
@@ -69,7 +69,7 @@ public final class GuiGraphicsHelper {
     public static final Identifier BUTTON_DISABLED_SPRITE = Identifier.fromNamespaceAndPath("supermartijn642corelib", "gui/button_disabled");
     public static final Identifier SLOT_SPRITE = Identifier.fromNamespaceAndPath("supermartijn642corelib", "gui/slot");
 
-    private final GuiGraphics guiGraphics;
+    private final GuiGraphicsExtractor guiGraphics;
     private TextProperties textProperties;
     private TextureProperties textureProperties;
     private RectangleProperties rectangleProperties;
@@ -77,7 +77,7 @@ public final class GuiGraphicsHelper {
     private TooltipProperties tooltipProperties;
     private ItemProperties itemProperties;
 
-    private GuiGraphicsHelper(GuiGraphics guiGraphics){
+    private GuiGraphicsHelper(GuiGraphicsExtractor guiGraphics){
         this.guiGraphics = guiGraphics;
     }
 
@@ -138,7 +138,7 @@ public final class GuiGraphicsHelper {
             Matrix3x2f pose = new Matrix3x2f(this.guiGraphics.pose());
             ScreenRectangle scissor = this.guiGraphics.scissorStack.peek();
             for(FormattedCharSequence line : lines){
-                this.guiGraphics.guiRenderState.submitText(new GuiTextRenderState(
+                this.guiGraphics.guiRenderState.addText(new GuiTextRenderState(
                     font,
                     line,
                     pose,
@@ -172,7 +172,7 @@ public final class GuiGraphicsHelper {
         if(this.textProperties.centerVertically)
             y -= font.lineHeight / 2f;
         // Submit the text
-        this.guiGraphics.guiRenderState.submitText(new GuiTextRenderState(
+        this.guiGraphics.guiRenderState.addText(new GuiTextRenderState(
             font,
             Language.getInstance().getVisualOrder(text),
             new Matrix3x2f(this.guiGraphics.pose()),
@@ -214,7 +214,7 @@ public final class GuiGraphicsHelper {
             y -= height / 2f;
 
         // Submit the texture
-        this.guiGraphics.submitBlit(
+        this.guiGraphics.innerBlit(
             this.textureProperties.renderPipeline,
             texture, sampler,
             (int)x, (int)y, (int)(x + width), (int)(y + height),
@@ -344,7 +344,7 @@ public final class GuiGraphicsHelper {
         }
 
         // Submit rectangle
-        this.guiGraphics.submitColoredRectangle(
+        this.guiGraphics.innerFill(
             this.rectangleProperties.renderPipeline,
             TextureSetup.noTexture(),
             (int)x, (int)y, (int)(x + width), (int)(y + height),
@@ -375,7 +375,7 @@ public final class GuiGraphicsHelper {
             properties.accept(this.tooltipProperties);
 
         // Submit tooltip
-        this.guiGraphics.renderTooltip(
+        this.guiGraphics.tooltip(
             this.tooltipProperties.font == null ? ClientUtils.getFontRenderer() : this.tooltipProperties.font,
             List.copyOf(this.tooltipContent.content),
             (int)x, (int)y,
@@ -414,7 +414,7 @@ public final class GuiGraphicsHelper {
         Identifier frame = this.tooltipProperties.frame;
         this.guiGraphics.deferredTooltip = () -> {
             this.guiGraphics.pose().pushMatrix().set(matrix);
-            this.guiGraphics.renderTooltip(font, components, (int)x, (int)y, positioner, frame);
+            this.guiGraphics.tooltip(font, components, (int)x, (int)y, positioner, frame);
             this.guiGraphics.pose().popMatrix();
         };
     }
@@ -447,8 +447,7 @@ public final class GuiGraphicsHelper {
             this.itemProperties.entity,
             0
         );
-        this.guiGraphics.guiRenderState.submitItem(new GuiItemRenderState(
-            item.getItem().getName().toString(),
+        this.guiGraphics.guiRenderState.addItem(new GuiItemRenderState(
             new Matrix3x2f(this.guiGraphics.pose()),
             renderState,
             (int)x, (int)y,
@@ -457,11 +456,11 @@ public final class GuiGraphicsHelper {
 
         // Submit the decorations
         if(this.itemProperties.showBar)
-            this.guiGraphics.renderItemBar(item, (int)x, (int)y);
+            this.guiGraphics.itemBar(item, (int)x, (int)y);
         if(this.itemProperties.showCooldown)
-            this.guiGraphics.renderItemCooldown(item, (int)x, (int)y);
+            this.guiGraphics.itemCooldown(item, (int)x, (int)y);
         if(this.itemProperties.showCount)
-            this.guiGraphics.renderItemCount(ClientUtils.getFontRenderer(), item, (int)x, (int)y, null);
+            this.guiGraphics.itemCount(ClientUtils.getFontRenderer(), item, (int)x, (int)y, null);
     }
 
     public void submitItem(ItemStack item, float x, float y){
@@ -469,21 +468,21 @@ public final class GuiGraphicsHelper {
     }
 
     public void submitGuiElement(GuiElementRenderState element){
-        this.guiGraphics.guiRenderState.submitGuiElement(element);
+        this.guiGraphics.guiRenderState.addGuiElement(element);
     }
 
     public void submitPictureInPicture(PictureInPictureRenderState element){
-        this.guiGraphics.guiRenderState.submitPicturesInPictureState(element);
+        this.guiGraphics.guiRenderState.addPicturesInPictureState(element);
     }
 
     public void submitCustomRendering(int x, int y, int width, int height, BiConsumer<PoseStack,MultiBufferSource.BufferSource> rendering){
-        this.guiGraphics.guiRenderState.submitPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), this.guiGraphics.scissorStack.peek(), rendering));
+        this.guiGraphics.guiRenderState.addPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), this.guiGraphics.scissorStack.peek(), rendering));
     }
 
     // TODO remove this when mods require changes anyways
     @Deprecated
     public void submitCustomRendering(int x, int y, int width, int height, Consumer<PoseStack> rendering){
-        this.guiGraphics.guiRenderState.submitPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), this.guiGraphics.scissorStack.peek(), (poseStack, bufferSource) -> {
+        this.guiGraphics.guiRenderState.addPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), this.guiGraphics.scissorStack.peek(), (poseStack, bufferSource) -> {
             RenderUtils.GUI_BUFFER_SOURCE_OVERWRITE.set(bufferSource);
             rendering.accept(poseStack);
             RenderUtils.GUI_BUFFER_SOURCE_OVERWRITE.remove();

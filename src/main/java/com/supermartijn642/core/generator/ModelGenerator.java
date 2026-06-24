@@ -1,24 +1,17 @@
 package com.supermartijn642.core.generator;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.ItemTransform;
+import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.client.resources.model.cuboid.ItemTransform;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.ItemLike;
-import net.neoforged.neoforge.client.NamedRenderTypeManager;
-import net.neoforged.neoforge.client.RenderTypeGroup;
 import org.joml.Vector3f;
 
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -28,35 +21,6 @@ import java.util.function.Consumer;
  * Created 18/08/2022 by SuperMartijn642
  */
 public abstract class ModelGenerator extends ResourceGenerator {
-
-    private static final Gson GSON = new GsonBuilder().setLenient().create();
-
-    /**
-     * {@link NamedRenderTypeManager#RENDER_TYPES}
-     */
-    @SuppressWarnings("JavadocReference")
-    private static final Field RENDER_TYPES;
-
-    static{
-        try{
-            RENDER_TYPES = NamedRenderTypeManager.class.getDeclaredField("RENDER_TYPES");
-            RENDER_TYPES.setAccessible(true);
-        }catch(NoSuchFieldException e){
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Used to check if a render type is registered for a given name in order to be able to throw an error if not.
-     */
-    private static boolean isRenderTypeRegistered(Identifier identifier){
-        try{
-            //noinspection unchecked
-            return ((ImmutableMap<Identifier,RenderTypeGroup>)RENDER_TYPES.get(null)).containsKey(identifier);
-        }catch(IllegalAccessException e){
-            throw new RuntimeException(e);
-        }
-    }
 
     private final Map<Identifier,ModelBuilder> models = new HashMap<>();
     private final ModelAtlasSourceGenerator atlasSourceGenerator;
@@ -128,7 +92,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
         }
         // Gui lighting
         if(modelBuilder.lighting != null)
-            json.addProperty("gui_light", modelBuilder.lighting.getSerializedName());
+            json.addProperty("gui_light", modelBuilder.lighting == UnbakedModel.GuiLight.FRONT ? "front" : "side");
         // Elements
         if(!modelBuilder.elements.isEmpty()){
             JsonArray elementsJson = new JsonArray();
@@ -479,7 +443,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
         private Identifier parent;
         private Identifier renderType;
         private boolean ambientOcclusion = true;
-        private BlockModel.GuiLight lighting = null;
+        private UnbakedModel.GuiLight lighting = null;
 
         protected ModelBuilder(String modid, Identifier identifier){
             this.modid = modid;
@@ -516,62 +480,6 @@ public abstract class ModelGenerator extends ResourceGenerator {
         }
 
         /**
-         * Sets the render type to be used for this model. Render types must be registered through {@link NamedRenderTypeManager}.
-         * @param renderType identifier of the render type
-         */
-        public ModelBuilder renderType(Identifier renderType){
-            if(!isRenderTypeRegistered(renderType))
-                throw new RuntimeException("Could not find any object registered under '" + renderType + "'!");
-
-            this.renderType = renderType;
-            return this;
-        }
-
-        /**
-         * Sets the render type to be used for this model. Render types must be registered through {@link NamedRenderTypeManager}.
-         * @param namespace  namespace of the render type
-         * @param identifier path of the render type
-         */
-        public ModelBuilder renderType(String namespace, String identifier){
-            return this.renderType(Identifier.fromNamespaceAndPath(namespace, identifier));
-        }
-
-        /**
-         * Sets the render type for this model to <b>minecraft:solid</b>.
-         */
-        public ModelBuilder renderTypeSolid(){
-            return this.renderType(Identifier.withDefaultNamespace("solid"));
-        }
-
-        /**
-         * Sets the render type for this model to <b>minecraft:cutout</b>.
-         */
-        public ModelBuilder renderTypeCutout(){
-            return this.renderType(Identifier.withDefaultNamespace("cutout"));
-        }
-
-        /**
-         * Sets the render type for this model to <b>minecraft:cutout_mipped</b>.
-         */
-        public ModelBuilder renderTypeCutoutMipped(){
-            return this.renderType(Identifier.withDefaultNamespace("cutout_mipped"));
-        }
-
-        /**
-         * Sets the render type for this model to <b>minecraft:cutout_mipped_all</b>.
-         */
-        public ModelBuilder renderTypeCutoutMippedAll(){
-            return this.renderType(Identifier.withDefaultNamespace("cutout_mipped_all"));
-        }
-
-        /**
-         * Sets the render type for this model to <b>minecraft:translucent</b>.
-         */
-        public ModelBuilder renderTypeTranslucent(){
-            return this.renderType(Identifier.withDefaultNamespace("translucent"));
-        }
-
-        /**
          * Sets whether ambient occlusion should be applied when rendering this model.
          */
         public ModelBuilder ambientOcclusion(boolean useAmbientOcclusion){
@@ -590,7 +498,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
          * Sets the lighting used when rendering this model in a gui to FRONT.
          */
         public ModelBuilder frontLit(){
-            this.lighting = BlockModel.GuiLight.FRONT;
+            this.lighting = UnbakedModel.GuiLight.FRONT;
             return this;
         }
 
@@ -598,7 +506,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
          * Sets the lighting used when rendering this model in a gui to SIDE.
          */
         public ModelBuilder sideLit(){
-            this.lighting = BlockModel.GuiLight.SIDE;
+            this.lighting = UnbakedModel.GuiLight.SIDE;
             return this;
         }
 

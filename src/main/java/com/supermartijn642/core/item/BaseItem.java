@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -56,10 +57,14 @@ public class BaseItem extends Item {
         if(!this.resolvedRegistryDependencies){
             Identifier identifier = Registries.ITEMS.getIdentifier(this);
             this.descriptionId = identifier.getNamespace() + ".item." + identifier.getPath();
-            this.components = DataComponentMap.builder().addAll(this.components)
-                .set(DataComponents.ITEM_NAME, Component.translatable(this.descriptionId))
-                .set(DataComponents.ITEM_MODEL, identifier)
-                .build();
+            BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.add(
+                ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, identifier),
+                (components, context, key) -> {
+                    components
+                        .set(DataComponents.ITEM_NAME, Component.translatable(this.descriptionId))
+                        .set(DataComponents.ITEM_MODEL, identifier);
+                }
+            );
             this.resolvedRegistryDependencies = true;
         }
     }

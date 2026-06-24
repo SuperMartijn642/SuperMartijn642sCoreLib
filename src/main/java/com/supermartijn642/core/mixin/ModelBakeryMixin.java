@@ -4,14 +4,14 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.ClientRegistrationHandler;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
-import net.minecraft.client.renderer.block.model.SimpleModelWrapper;
-import net.minecraft.client.renderer.block.model.SingleVariant;
+import net.minecraft.client.renderer.block.dispatch.BlockModelRotation;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.SingleVariant;
 import net.minecraft.client.renderer.item.ItemModel;
-import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ResolvedModel;
-import net.minecraft.client.resources.model.SpriteGetter;
+import net.minecraft.client.resources.model.SimpleModelWrapper;
+import net.minecraft.client.resources.model.sprite.MaterialBaker;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Final;
@@ -45,7 +45,7 @@ public class ModelBakeryMixin {
             ordinal = 0
         )
     )
-    private void bakeModelsHead(SpriteGetter spriteGetter, Executor executor, CallbackInfoReturnable<ModelBakery.BakingResult> ci, @Local ModelBakery.ModelBakerImpl modelBaker){
+    private void bakeModelsHead(MaterialBaker materials, Executor executor, CallbackInfoReturnable<ModelBakery.BakingResult> ci, @Local ModelBakery.ModelBakerImpl modelBaker){
         // Catch errors here to prevent the model manager from continuously retrying to load models
         try{
             // Apply block model consumers
@@ -66,7 +66,7 @@ public class ModelBakeryMixin {
         require = 1,
         allow = 1
     )
-    private void bakeModelsTail(SpriteGetter spriteGetter, Executor executor, CallbackInfoReturnable<ModelBakery.BakingResult> ci, @Local(ordinal = 0) LocalRef<CompletableFuture<Map<BlockState,BlockStateModel>>> blockModels, @Local(ordinal = 1) LocalRef<CompletableFuture<Map<Identifier,ItemModel>>> itemModels){
+    private void bakeModelsTail(MaterialBaker materials, Executor executor, CallbackInfoReturnable<ModelBakery.BakingResult> ci, @Local(ordinal = 0) LocalRef<CompletableFuture<Map<BlockState,BlockStateModel>>> blockModels, @Local(ordinal = 1) LocalRef<CompletableFuture<Map<Identifier,ItemModel>>> itemModels){
         // Catch errors here to prevent the model manager from continuously retrying to load models
         try{
             // Apply block model overwrites

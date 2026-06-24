@@ -8,15 +8,13 @@ import net.minecraft.world.item.ItemDisplayContext;
  */
 public class MutableCustomItemRendererContext implements CustomItemRenderer.RenderContext{
 
-    private ItemDisplayContext displayContext;
     private PoseStack poseStack;
     private int packedLight, packedOverlay;
 
     MutableCustomItemRendererContext(){
     }
 
-    public void set(ItemDisplayContext displayContext, PoseStack poseStack, int packedLight, int packedOverlay){
-        this.displayContext = displayContext;
+    public void set(PoseStack poseStack, int packedLight, int packedOverlay){
         this.poseStack = poseStack;
         this.packedLight = packedLight;
         this.packedOverlay = packedOverlay;

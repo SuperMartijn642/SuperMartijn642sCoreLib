@@ -11,11 +11,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.minecraft.client.gui.render.state.BlitRenderState;
-import net.minecraft.client.gui.render.state.GuiRenderState;
-import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.BlitRenderState;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2f;
 
@@ -69,7 +69,8 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
 
         // Clear texture
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(texture.texture, 0, texture.depthTexture, 1);
-        RenderSystem.setProjectionMatrix(this.projectionMatrixBuffer.getBuffer(texture.width, texture.height), ProjectionType.ORTHOGRAPHIC);
+        this.projection.setupOrtho(-1000.0F, 1000.0F, width, height, true);
+        RenderSystem.setProjectionMatrix(this.projectionMatrixBuffer.getBuffer(this.projection), ProjectionType.ORTHOGRAPHIC);
 
         // Render to the texture
         RenderSystem.outputColorTextureOverride = texture.textureView;
@@ -83,7 +84,7 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
         RenderSystem.outputDepthTextureOverride = null;
 
         // Blit texture
-        guiRenderState.submitBlitToCurrentLayer(
+        guiRenderState.addBlitToCurrentLayer(
             new BlitRenderState(
                 RenderPipelines.GUI_TEXTURED_PREMULTIPLIED_ALPHA,
                 TextureSetup.singleTexture(texture.textureView, RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST)),

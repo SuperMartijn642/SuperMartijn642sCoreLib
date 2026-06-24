@@ -1,6 +1,7 @@
 package com.supermartijn642.core.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.neoforged.bus.api.Event;
 
 /**
@@ -12,10 +13,12 @@ public class RenderWorldEvent extends Event {
 
     private final PoseStack poseStack;
     private final float partialTicks;
+    private final SubmitNodeCollector submitter;
 
-    public RenderWorldEvent(PoseStack poseStack, float partialTicks){
+    public RenderWorldEvent(PoseStack poseStack, float partialTicks, SubmitNodeCollector submitter){
         this.poseStack = poseStack;
         this.partialTicks = partialTicks;
+        this.submitter = submitter;
     }
 
     public PoseStack getPoseStack(){
@@ -24,5 +27,9 @@ public class RenderWorldEvent extends Event {
 
     public float getPartialTicks(){
         return this.partialTicks;
+    }
+
+    public SubmitNodeCollector getSubmitter(){
+        return this.submitter;
     }
 }

@@ -622,7 +622,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
             if(this.block != state.getBlock())
                 throw new IllegalArgumentException("Cannot copy properties of state for block '" + Registries.BLOCKS.getIdentifier(state.getBlock()) + "' to block '" + Registries.BLOCKS.getIdentifier(this.block) + "'!");
 
-            this.properties.putAll(state.getValues());
+            state.getValues().forEach(v -> this.properties.put(v.property(), v.value()));
             return this;
         }
 

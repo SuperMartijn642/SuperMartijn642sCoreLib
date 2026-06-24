@@ -5,14 +5,16 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagEntry;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Created 09/02/2024 by SuperMartijn642
  */
 public class TagEntryAdapter extends TagEntry {
+
+    public static final ThreadLocal<Registry<?>> REGISTRY_CONTEXT = new ThreadLocal<>();
 
     final Identifier identifier;
     final CustomTagEntry customEntry;
@@ -30,7 +32,7 @@ public class TagEntryAdapter extends TagEntry {
 
     @Override
     public <T> boolean build(Lookup<T> lookup, Consumer<T> entryConsumer){
-        CustomTagEntry.TagEntryResolutionContext<T> context = new CustomTagEntry.TagEntryResolutionContext<T>() {
+        CustomTagEntry.TagEntryResolutionContext<T> context = new CustomTagEntry.TagEntryResolutionContext<>() {
             @Override
             public T getElement(Identifier identifier){
                 return lookup.element(identifier, false);
@@ -42,13 +44,9 @@ public class TagEntryAdapter extends TagEntry {
             }
 
             @Override
-            public Collection<T> getAllElements(){
-                //noinspection unchecked
-                return (Collection<T>)TagEntryAdapter.this.registry.stream().collect(Collectors.toList());
-            }
-
-            @Override
             public Set<Identifier> getAllIdentifiers(){
+                if(TagEntryAdapter.this.registry == null)
+                    return Collections.emptySet();
                 return TagEntryAdapter.this.registry.keySet();
             }
         };

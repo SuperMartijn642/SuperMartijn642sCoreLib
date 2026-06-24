@@ -4,8 +4,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.render.RenderWorldEvent;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.neoforged.neoforge.common.NeoForge;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,13 +22,20 @@ public class LevelRendererMixin {
 
     @Unique
     private static final PoseStack POSE_STACK = new PoseStack();
+    @Final
+    @Shadow
+    private SubmitNodeStorage submitNodeStorage;
 
     @Inject(
-        method = "lambda$addParticlesPass$2(Lcom/mojang/blaze3d/buffers/GpuBufferSlice;Lcom/mojang/blaze3d/resource/ResourceHandle;Lcom/mojang/blaze3d/resource/ResourceHandle;Lorg/joml/Matrix4f;)V",
-        at = @At("TAIL")
+        method = "lambda$addMainPass$0",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/renderer/state/level/ParticlesRenderState;submit(Lnet/minecraft/client/renderer/SubmitNodeStorage;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V"
+        ),
+        require = 1
     )
     private void renderLevel(CallbackInfo ci){
-        NeoForge.EVENT_BUS.post(new RenderWorldEvent(POSE_STACK, ClientUtils.getPartialTicks()));
+        NeoForge.EVENT_BUS.post(new RenderWorldEvent(POSE_STACK, ClientUtils.getPartialTicks(), this.submitNodeStorage));
         if(!POSE_STACK.isEmpty())
             throw new IllegalStateException("Pose stack was not cleared properly during RenderWorldEvent!");
     }

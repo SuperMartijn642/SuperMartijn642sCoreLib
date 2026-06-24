@@ -3,8 +3,6 @@ package com.supermartijn642.core;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.world.entity.player.Player;
@@ -33,14 +31,6 @@ public class ClientUtils {
 
     public static Level getWorld(){
         return getMinecraft().level;
-    }
-
-    public static BlockRenderDispatcher getBlockRenderer(){
-        return getMinecraft().getBlockRenderer();
-    }
-
-    public static ItemRenderer getItemRenderer(){
-        return getMinecraft().getItemRenderer();
     }
 
     public static float getPartialTicks(){

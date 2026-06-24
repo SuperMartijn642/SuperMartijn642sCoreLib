@@ -2,6 +2,7 @@ package com.supermartijn642.core.generator;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.math.Transformation;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.supermartijn642.core.registry.Registries;
@@ -15,11 +16,9 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.level.ItemLike;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created 22/12/2024 by SuperMartijn642
@@ -88,8 +87,8 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
     /**
      * @param baseModel model used for transformations, particle texture, and gui lighting
      */
-    protected ModelBuilder specialModel(SpecialModelRenderer.Unbaked specialModel, Identifier baseModel){
-        return ModelBuilder.of(new SpecialModelWrapper.Unbaked(baseModel, specialModel));
+    protected ModelBuilder specialModel(SpecialModelRenderer.Unbaked<?> specialModel, Identifier baseModel, @Nullable Transformation transformation){
+        return ModelBuilder.of(new SpecialModelWrapper.Unbaked(baseModel, Optional.ofNullable(transformation), specialModel));
     }
 
     @Override
@@ -165,6 +164,7 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
 
         private final Identifier model;
         private final List<ItemTintSource> tintSources = new ArrayList<>();
+        private Transformation transformation;
 
         protected ModelModelBuilder(Identifier model){
             this.model = model;
@@ -172,7 +172,7 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
 
         @Override
         protected ItemModel.Unbaked toItemModel(){
-            return new BlockModelWrapper.Unbaked(this.model, this.tintSources);
+            return new CuboidItemModelWrapper.Unbaked(this.model, Optional.ofNullable(this.transformation), this.tintSources);
         }
 
         public ModelModelBuilder addTintSource(ItemTintSource tintSource){
@@ -205,14 +205,20 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
                 throw new IllegalArgumentException("Downfall must be between 0 and 1!");
             return this.addTintSource(new GrassColorSource(temperature, downfall));
         }
+
+        public ModelModelBuilder setTransformation(@Nullable Transformation transformation){
+            this.transformation = transformation;
+            return this;
+        }
     }
 
     protected static class CompositeModelBuilder extends ModelBuilder {
         private final List<ModelBuilder> models = new ArrayList<>();
+        private Transformation transformation;
 
         @Override
         protected ItemModel.Unbaked toItemModel(){
-            return new CompositeModel.Unbaked(this.models.stream().map(ModelBuilder::toItemModel).toList());
+            return new CompositeModel.Unbaked(this.models.stream().map(ModelBuilder::toItemModel).toList(), Optional.ofNullable(this.transformation));
         }
 
         public CompositeModelBuilder addModel(ModelBuilder model){
@@ -222,6 +228,10 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
 
         public CompositeModelBuilder addModel(ItemModel.Unbaked model){
             return this.addModel(ModelBuilder.of(model));
+        }
+
+        public void setTransformation(Transformation transformation){
+            this.transformation = transformation;
         }
     }
 }

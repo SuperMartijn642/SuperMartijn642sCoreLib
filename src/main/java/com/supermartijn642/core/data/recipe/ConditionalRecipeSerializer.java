@@ -5,10 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
-import com.supermartijn642.core.data.condition.ResourceCondition;
 import com.supermartijn642.core.registry.Registries;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -19,17 +16,16 @@ import net.neoforged.neoforge.common.conditions.ICondition;
 
 import java.util.Collection;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * Created 26/08/2022 by SuperMartijn642
  */
-public final class ConditionalRecipeSerializer implements RecipeSerializer<Recipe<?>> {
+public final class ConditionalRecipeSerializer {
 
     public static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.simple(Identifier.fromNamespaceAndPath("supermartijn642corelib", "dummy"));
     public static final Recipe<?> DUMMY_RECIPE = new DummyRecipe();
-    public static final ConditionalRecipeSerializer INSTANCE = new ConditionalRecipeSerializer();
+    public static final RecipeSerializer<Recipe<?>> SERIALIZER;
 
     private static final MapCodec<Recipe<?>> CODEC = new MapCodec<>() {
         @Override
@@ -73,24 +69,19 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
         }
     };
 
+    static{
+        SERIALIZER = new RecipeSerializer<>(CODEC, StreamCodec.unit(null));
+    }
+
     public static JsonObject wrapRecipeWithForgeConditions(JsonObject recipe, Collection<ICondition> conditions){
         JsonObject json = new JsonObject();
-        json.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.INSTANCE).toString());
+        json.addProperty("type", Registries.RECIPE_SERIALIZERS.getIdentifier(ConditionalRecipeSerializer.SERIALIZER).toString());
         JsonArray conditionsJson = new JsonArray();
         for(ICondition condition : conditions)
             conditionsJson.add(ICondition.CODEC.encodeStart(JsonOps.INSTANCE, condition).getOrThrow());
         json.add("conditions", conditionsJson);
         json.add("recipe", recipe);
         return json;
-    }
-
-    public static JsonObject wrapRecipe(JsonObject recipe, Collection<ResourceCondition> conditions){
-        return wrapRecipeWithForgeConditions(
-            recipe,
-            conditions.stream()
-                .map(ResourceCondition::createForgeCondition)
-                .collect(Collectors.toList())
-        );
     }
 
     private ConditionalRecipeSerializer(){
@@ -124,16 +115,6 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
         return json.getAsJsonObject("recipe");
     }
 
-    @Override
-    public MapCodec<Recipe<?>> codec(){
-        return CODEC;
-    }
-
-    @Override
-    public StreamCodec<RegistryFriendlyByteBuf,Recipe<?>> streamCodec(){
-        return StreamCodec.unit(null);
-    }
-
     private static class DummyRecipe implements Recipe<RecipeInput> {
 
         @Override
@@ -142,8 +123,18 @@ public final class ConditionalRecipeSerializer implements RecipeSerializer<Recip
         }
 
         @Override
-        public ItemStack assemble(RecipeInput container, HolderLookup.Provider provider){
+        public ItemStack assemble(RecipeInput input){
             return ItemStack.EMPTY;
+        }
+
+        @Override
+        public boolean showNotification(){
+            return false;
+        }
+
+        @Override
+        public String group(){
+            return "";
         }
 
         @Override
