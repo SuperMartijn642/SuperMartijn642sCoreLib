@@ -106,9 +106,11 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
 
     private TextureEntry createTexture(int width, int height){
         GpuDevice device = RenderSystem.getDevice();
-        GpuTexture texture = device.createTexture(this::getTextureLabel, 12, TextureFormat.RGBA8, width, height, 1, 1);
+        int usage = GpuTexture.USAGE_RENDER_ATTACHMENT | GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_COPY_DST;
+        GpuTexture texture = device.createTexture(this::getTextureLabel, usage, TextureFormat.RGBA8, width, height, 1, 1);
         GpuTextureView textureView = device.createTextureView(texture);
-        GpuTexture depthTexture = device.createTexture(() -> this.getTextureLabel() + " depth texture", 8, TextureFormat.DEPTH32, width, height, 1, 1);
+        usage = GpuTexture.USAGE_RENDER_ATTACHMENT | GpuTexture.USAGE_COPY_DST;
+        GpuTexture depthTexture = device.createTexture(() -> this.getTextureLabel() + " depth texture", usage, TextureFormat.DEPTH32, width, height, 1, 1);
         GpuTextureView depthTextureView = device.createTextureView(depthTexture);
         return new TextureEntry(width, height, texture, textureView, depthTexture, depthTextureView);
     }
