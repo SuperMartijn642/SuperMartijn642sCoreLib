@@ -49,7 +49,7 @@ public class CommonUtils {
     public static RegistryAccess getRegistryAccess(){
         MinecraftServer server = getServer();
         if(server == null && getEnvironmentSide().isClient()){
-            Level level = ClientUtils.getWorld();
+            Level level = ClientUtils.getLevelNotAsClientLevel();
             return level == null ? null : level.registryAccess();
         }
         return server == null ? null : server.registryAccess();
