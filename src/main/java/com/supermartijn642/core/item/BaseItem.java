@@ -3,8 +3,8 @@ package com.supermartijn642.core.item;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentInitializers;
 import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -57,14 +57,12 @@ public class BaseItem extends Item {
         if(!this.resolvedRegistryDependencies){
             Identifier identifier = Registries.ITEMS.getIdentifier(this);
             this.descriptionId = identifier.getNamespace() + ".item." + identifier.getPath();
-            BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.add(
-                ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, identifier),
-                (components, context, key) -> {
-                    components
-                        .set(DataComponents.ITEM_NAME, Component.translatable(this.descriptionId))
-                        .set(DataComponents.ITEM_MODEL, identifier);
-                }
+            ResourceKey<Item> resourceKey = ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, identifier);
+            DataComponentInitializers.Initializer<Item> componentInitializer = this.properties.toUnderlying().setId(resourceKey).finalizeInitializer(
+                Component.translatable(this.descriptionId),
+                identifier
             );
+            BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.add(resourceKey, componentInitializer);
             this.resolvedRegistryDependencies = true;
         }
     }
