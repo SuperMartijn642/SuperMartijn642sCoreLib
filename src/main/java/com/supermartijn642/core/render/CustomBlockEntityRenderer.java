@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -54,6 +55,11 @@ public interface CustomBlockEntityRenderer<T extends BlockEntity, S> {
 
         @Nullable
         ModelFeatureRenderer.CrumblingOverlay breakingOverlay();
+
+        /**
+         * Random source is only valid for the duration of {@link #updateState(Object, BlockEntity, UpdateContext)} or until the next time this method is called.
+         */
+        RandomSource randomSource(long seed);
     }
 
     interface RenderContext {
@@ -77,5 +83,10 @@ public interface CustomBlockEntityRenderer<T extends BlockEntity, S> {
         ModelFeatureRenderer.CrumblingOverlay breakingOverlay();
 
         BlockEntityRenderState blockEntityRenderState();
+
+        /**
+         * Random source is only valid for the duration of {@link #submit(SubmitNodeCollector, Object, RenderContext)} or until the next time this method is called.
+         */
+        RandomSource randomSource(long seed);
     }
 }
