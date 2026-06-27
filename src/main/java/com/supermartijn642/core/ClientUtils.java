@@ -7,6 +7,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 /**
  * Created 1/26/2021 by SuperMartijn642
@@ -61,4 +62,7 @@ public class ClientUtils {
         getMinecraft().setScreen(screen);
     }
 
+    static Level getLevelNotAsClientLevel(){
+        return getWorld();
+    }
 }
