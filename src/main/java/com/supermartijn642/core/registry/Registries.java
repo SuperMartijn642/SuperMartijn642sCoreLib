@@ -3,6 +3,8 @@ package com.supermartijn642.core.registry;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.MapCodec;
 import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
+import com.supermartijn642.core.item.BaseBlockItem;
+import com.supermartijn642.core.item.BaseItem;
 import com.supermartijn642.core.util.MappedSetView;
 import com.supermartijn642.core.util.Pair;
 import net.minecraft.advancements.CriterionTrigger;
@@ -89,7 +91,16 @@ public final class Registries {
 
     public static final Registry<Block> BLOCKS = forge(BLOCK, ForgeRegistries.BLOCKS, Block.class);
     public static final Registry<Fluid> FLUIDS = forge(FLUID, ForgeRegistries.FLUIDS, Fluid.class);
-    public static final Registry<Item> ITEMS = forge(ITEM, ForgeRegistries.ITEMS, Item.class);
+    public static final Registry<Item> ITEMS = new ForgeRegistryWrapper<>(ITEM, ForgeRegistries.ITEMS, Item.class){
+        @Override
+        public void register(Identifier identifier, Item object){
+            super.register(identifier, object);
+            if(object instanceof BaseItem)
+                ((BaseItem)object).resolveRegistryDependencies();
+            if(object instanceof BaseBlockItem)
+                ((BaseBlockItem)object).resolveRegistryDependencies();
+        }
+    };
     public static final Registry<MobEffect> MOB_EFFECTS = forge(MOB_EFFECT, ForgeRegistries.MOB_EFFECTS, MobEffect.class);
     public static final Registry<SoundEvent> SOUND_EVENTS = forge(SOUND_EVENT, ForgeRegistries.SOUND_EVENTS, SoundEvent.class);
     public static final Registry<Potion> POTIONS = forge(POTION, ForgeRegistries.POTIONS, Potion.class);
