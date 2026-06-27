@@ -3,8 +3,8 @@ package com.supermartijn642.core.item;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentInitializers;
 import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -16,10 +16,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -59,14 +56,12 @@ public class BaseBlockItem extends BlockItem {
         if(!this.resolvedRegistryDependencies){
             this.descriptionId = this.getBlock().getDescriptionId();
             Identifier identifier = Registries.ITEMS.getIdentifier(this);
-            BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.add(
-                ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, identifier),
-                (components, context, key) -> {
-                    components
-                        .set(DataComponents.ITEM_NAME, Component.translatable(this.descriptionId))
-                        .set(DataComponents.ITEM_MODEL, identifier);
-                }
+            ResourceKey<Item> resourceKey = ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, identifier);
+            DataComponentInitializers.Initializer<Item> componentInitializer = this.properties.toUnderlying().setId(resourceKey).finalizeInitializer(
+                Component.translatable(this.descriptionId),
+                identifier
             );
+            BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.add(resourceKey, componentInitializer);
             this.resolvedRegistryDependencies = true;
         }
     }

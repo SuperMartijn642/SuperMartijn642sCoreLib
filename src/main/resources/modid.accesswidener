@@ -102,6 +102,8 @@ accessible method net/minecraft/core/Holder$Reference bindKey (Lnet/minecraft/re
 # Item
 extendable method net/minecraft/world/item/Item getDescriptionId ()Ljava/lang/String;
 mutable field net/minecraft/world/item/Item descriptionId Ljava/lang/String;
+# Item$Properties
+accessible method net/minecraft/world/item/Item$Properties finalizeInitializer (Lnet/minecraft/network/chat/Component;Lnet/minecraft/resources/Identifier;)Lnet/minecraft/core/component/DataComponentInitializers$Initializer;
 # ItemTransform$Deserializer
 accessible field net/minecraft/client/resources/model/cuboid/ItemTransform$Deserializer DEFAULT_ROTATION Lorg/joml/Vector3f; # DEFAULT_ROTATION
 accessible field net/minecraft/client/resources/model/cuboid/ItemTransform$Deserializer DEFAULT_TRANSLATION Lorg/joml/Vector3f; # DEFAULT_TRANSLATION

@@ -1,7 +1,12 @@
 package com.supermartijn642.core.mixin;
 
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.supermartijn642.core.block.BaseBlock;
+import com.supermartijn642.core.item.BaseBlockItem;
+import com.supermartijn642.core.item.BaseItem;
+import net.minecraft.core.component.DataComponentInitializers;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -19,6 +24,18 @@ import java.util.function.Consumer;
  */
 @Mixin(Item.class)
 public class ItemMixin {
+
+    @WrapWithCondition(
+        method = "<init>",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/core/component/DataComponentInitializers;add(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/core/component/DataComponentInitializers$Initializer;)V"
+        )
+    )
+    private boolean init(DataComponentInitializers initializers, ResourceKey<?> resourceKey, DataComponentInitializers.Initializer<?> componentInitializer) {
+        //noinspection ConstantValue
+        return !((Object)this instanceof BaseItem) && !((Object)this instanceof BaseBlockItem);
+    }
 
     @Inject(
         method = "appendHoverText",
