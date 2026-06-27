@@ -5,6 +5,7 @@ import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,6 +21,7 @@ public class MutableCustomBlockEntityRendererContext<S> extends BlockEntityRende
     private PoseStack poseStack;
     private CameraRenderState cameraRenderState;
     private float partialTicks;
+    private RandomSource randomSource;
 
     MutableCustomBlockEntityRendererContext(){
     }
@@ -94,5 +96,14 @@ public class MutableCustomBlockEntityRendererContext<S> extends BlockEntityRende
     @Override
     public @Nullable ModelFeatureRenderer.CrumblingOverlay breakingOverlay(){
         return this.breakProgress;
+    }
+
+    @Override
+    public RandomSource randomSource(long seed){
+        if(this.randomSource == null)
+            this.randomSource = RandomSource.create(seed);
+        else
+            this.randomSource.setSeed(seed);
+        return this.randomSource;
     }
 }
