@@ -98,7 +98,8 @@ public class ItemProperties {
         properties.stacksTo(this.maxStackSize);
         if(this.durability != 0)
             properties.durability(this.durability);
-        properties.craftRemainder(this.craftingRemainingItem);
+        if(this.craftingRemainingItem != null)
+            properties.craftRemainder(this.craftingRemainingItem);
         properties.rarity(this.rarity);
         if(this.foodProperties != null)
             properties.food(this.foodProperties);
