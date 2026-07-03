@@ -59,6 +59,8 @@ accessible field net/minecraft/world/item/CreativeModeTab displayItems Ljava/uti
 accessible field net/minecraft/world/item/CreativeModeTab displayItemsGenerator Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator; # displayItemsGenerator
 accessible method net/minecraft/world/item/CreativeModeTab <init> (Lnet/minecraft/world/item/CreativeModeTab$Row;ILnet/minecraft/world/item/CreativeModeTab$Type;Lnet/minecraft/network/chat/Component;Ljava/util/function/Supplier;Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator;)V # constructor
 mutable field net/minecraft/world/item/CreativeModeTab displayItemsGenerator Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator; # displayItemsGenerator
+# DataGenerator
+accessible field net/minecraft/data/DataGenerator LOGGER Lorg/slf4j/Logger;
 # DataGenerator$Cached
 accessible field net/minecraft/data/DataGenerator$Cached rootOutputFolder Ljava/nio/file/Path; # rootOutputFolder
 # FeatureRenderDispatcher

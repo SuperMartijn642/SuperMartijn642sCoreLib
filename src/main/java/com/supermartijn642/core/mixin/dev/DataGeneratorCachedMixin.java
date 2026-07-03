@@ -1,4 +1,4 @@
-package com.supermartijn642.core.mixin;
+package com.supermartijn642.core.mixin.dev;
 
 import com.google.common.base.Stopwatch;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -12,7 +12,6 @@ import net.minecraft.WorldVersion;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
-import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,18 +24,13 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Created 06/05/2023 by SuperMartijn642
  */
 @Mixin(DataGenerator.Cached.class)
-public class DataGeneratorCachedMixin implements CoreLibDataGenerator {
-
-    @Shadow
-    @Final
-    private static Logger LOGGER;
+public abstract class DataGeneratorCachedMixin extends DataGenerator implements CoreLibDataGenerator {
 
     @Unique
     private GeneratorRegistrationHandler handler;
@@ -44,16 +38,15 @@ public class DataGeneratorCachedMixin implements CoreLibDataGenerator {
     private ResourceCache resourceCache;
     @Shadow
     @Final
-    private Map<String,DataProvider> providersToRun;
-    @Shadow
-    @Final
     private boolean alwaysGenerate;
     @Shadow
     @Final
     private WorldVersion version;
-    @Shadow
-    @Final
-    private Set<String> allProviderIds;
+
+    private DataGeneratorCachedMixin(){
+        super(null);
+        throw new AssertionError();
+    }
 
     @Inject(
         method = "run()V",
@@ -68,8 +61,7 @@ public class DataGeneratorCachedMixin implements CoreLibDataGenerator {
         if(this.handler != null && (Object)this instanceof FabricDataGenerator dataGenerator){
             // Get the output folder and manual files folder
             String manualFolderProperty = System.getProperty("fabric-api.datagen.manual-dir");
-            // TODO
-            Path outputFolder = ((DataGenerator.Cached)(Object)dataGenerator).rootOutputFolder, manualFolder = manualFolderProperty == null || manualFolderProperty.isBlank() ? null : Paths.get(manualFolderProperty);
+            Path outputFolder = dataGenerator.rootOutputFolder, manualFolder = manualFolderProperty == null || manualFolderProperty.isBlank() ? null : Paths.get(manualFolderProperty);
             if(manualFolder == null)
                 CoreLib.LOGGER.warn("Property 'fabric-api.datagen.manual-dir' has not been set! Manually created files may not be recognised!");
             // Create a ResourceCache instance
