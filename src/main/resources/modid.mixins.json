@@ -19,6 +19,7 @@
     "BuiltInBlockModelsMixin",
     "GuiGraphicsExtractorMixin",
     "GuiRendererMixin",
+    "LevelExtractorMixin",
     "LevelRendererMixin",
     "MinecraftMixin",
     "ModelBakeryMixin",

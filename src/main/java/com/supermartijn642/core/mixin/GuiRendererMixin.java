@@ -6,8 +6,6 @@ import com.supermartijn642.core.gui.ArbitraryPictureInPictureRenderer;
 import com.supermartijn642.core.registry.ClientRegistrationHandler;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
@@ -41,9 +39,9 @@ public class GuiRendererMixin {
             remap = false
         )
     )
-    private void init(GuiRenderState renderState, MultiBufferSource.BufferSource bufferSource, SubmitNodeCollector output, FeatureRenderDispatcher featureRenderDispatcher, List<?> ignore, CallbackInfo ci, @Local LocalRef<List<PictureInPictureRenderer<?>>> pictureInPictureRenderers){
+    private void init(GuiRenderState renderState, FeatureRenderDispatcher featureRenderDispatcher, List<?> ignore, CallbackInfo ci, @Local LocalRef<List<PictureInPictureRenderer<?>>> pictureInPictureRenderers){
         List<PictureInPictureRenderer<?>> mutableRenderers = new ArrayList<>(pictureInPictureRenderers.get());
-        ClientRegistrationHandler.registerPictureInPictureRenderersInternal(bufferSource, mutableRenderers::add);
+        ClientRegistrationHandler.registerPictureInPictureRenderersInternal(mutableRenderers::add);
         pictureInPictureRenderers.set(mutableRenderers);
     }
 

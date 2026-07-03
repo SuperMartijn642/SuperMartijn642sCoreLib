@@ -59,7 +59,7 @@ public class ClientUtils {
     }
 
     public static void displayScreen(Screen screen){
-        getMinecraft().setScreen(screen);
+        getMinecraft().gui.setScreen(screen);
     }
 
     static Level getLevelNotAsClientLevel(){

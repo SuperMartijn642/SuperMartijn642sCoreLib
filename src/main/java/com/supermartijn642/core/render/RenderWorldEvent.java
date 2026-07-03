@@ -1,10 +1,17 @@
 package com.supermartijn642.core.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
+import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.ApiStatus;
 
+import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -14,6 +21,9 @@ import java.util.function.Consumer;
  */
 public class RenderWorldEvent {
 
+    @ApiStatus.Internal
+    public static RenderStateDataKey<List<BiConsumer<PoseStack,SubmitNodeCollector>>> DATA_KEY = RenderStateDataKey.create();
+
     public static Event<Consumer<RenderWorldEvent>> EVENT = EventFactory.createArrayBacked(
         Consumer.class,
         listeners -> event -> {
@@ -22,25 +32,35 @@ public class RenderWorldEvent {
         }
     );
 
-    private final PoseStack poseStack;
     private final float partialTicks;
-    private final SubmitNodeCollector submitter;
+    private final Camera camera;
+    private final LevelRenderState levelRenderState;
+    private final Consumer<BiConsumer<PoseStack,SubmitNodeCollector>> collector;
 
-    public RenderWorldEvent(PoseStack poseStack, float partialTicks, SubmitNodeCollector submitter){
-        this.poseStack = poseStack;
+    public RenderWorldEvent(float partialTicks, Camera camera, LevelRenderState levelRenderState, Consumer<BiConsumer<PoseStack,SubmitNodeCollector>> collector){
         this.partialTicks = partialTicks;
-        this.submitter = submitter;
-    }
-
-    public PoseStack getPoseStack(){
-        return this.poseStack;
+        this.camera = camera;
+        this.levelRenderState = levelRenderState;
+        this.collector = collector;
     }
 
     public float getPartialTicks(){
         return this.partialTicks;
     }
 
-    public SubmitNodeCollector getSubmitter(){
-        return this.submitter;
+    public Camera getCamera(){
+        return this.camera;
+    }
+
+    public Vec3 getCameraPos(){
+        return this.camera.position();
+    }
+
+    public LevelRenderState getLevelRenderState(){
+        return this.levelRenderState;
+    }
+
+    public void submitFeatures(BiConsumer<PoseStack,SubmitNodeCollector> submitter){
+        this.collector.accept(submitter);
     }
 }

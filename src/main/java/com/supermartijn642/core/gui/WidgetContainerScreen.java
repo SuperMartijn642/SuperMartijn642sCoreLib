@@ -173,7 +173,6 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
             ClientGuiEvent.RENDER_CONTAINER_FOREGROUND.invoker().render(this, guiGraphics, mouseX, mouseY, partialTicks);
 
         this.extractCarriedItem(guiGraphics, mouseX, mouseY);
-        this.extractSnapbackItem(guiGraphics);
 
         guiGraphics.pose().pushMatrix();
         guiGraphics.pose().translate(offsetX, offsetY);

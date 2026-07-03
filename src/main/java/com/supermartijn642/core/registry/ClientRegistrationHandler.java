@@ -14,7 +14,6 @@ import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BuiltInBlockModels;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.model.BlockModel;
@@ -72,8 +71,8 @@ public class ClientRegistrationHandler {
     }
 
     @ApiStatus.Internal
-    public static void registerPictureInPictureRenderersInternal(MultiBufferSource.BufferSource bufferSource, Consumer<PictureInPictureRenderer<?>> output){
-        REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.registerPictureInPictureRenderers(bufferSource, output));
+    public static void registerPictureInPictureRenderersInternal(Consumer<PictureInPictureRenderer<?>> output){
+        REGISTRATION_HELPER_MAP.values().forEach(handler -> handler.registerPictureInPictureRenderers(output));
     }
 
     @ApiStatus.Internal
@@ -136,7 +135,7 @@ public class ClientRegistrationHandler {
 
     private final List<Pair<Supplier<MenuType<?>>,TriFunction<AbstractContainerMenu,Inventory,Component,Screen>>> containerScreens = new ArrayList<>();
 
-    private final List<Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>>> pictureInPictureRenderers = new ArrayList<>();
+    private final List<Supplier<PictureInPictureRenderer<?>>> pictureInPictureRenderers = new ArrayList<>();
 
     private boolean passedTextureStitch;
 
@@ -397,12 +396,8 @@ public class ClientRegistrationHandler {
         ItemModels.ID_MAPPER.put(Identifier.fromNamespaceAndPath(this.modid, identifier), codec);
     }
 
-    public void registerPictureInPictureRenderer(Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>> renderer){
-        this.pictureInPictureRenderers.add(renderer);
-    }
-
     public void registerPictureInPictureRenderer(Supplier<PictureInPictureRenderer<?>> renderer){
-        this.registerPictureInPictureRenderer(buffers -> renderer.get());
+        this.pictureInPictureRenderers.add(renderer);
     }
 
     private void registerRenderers(){
@@ -463,12 +458,12 @@ public class ClientRegistrationHandler {
             CoreLib.LOGGER.error("Missing models for block model consumers from mod '{}': {}", this.modid, missingModels.stream().map(l -> "'" + l + "'").collect(Collectors.joining(", ")));
     }
 
-    private void registerPictureInPictureRenderers(MultiBufferSource.BufferSource bufferSource, Consumer<PictureInPictureRenderer<?>> output){
+    private void registerPictureInPictureRenderers(Consumer<PictureInPictureRenderer<?>> output){
         Set<Class<?>> stateClasses = new HashSet<>();
-        for(Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>> rendererFunction : this.pictureInPictureRenderers){
+        for(Supplier<PictureInPictureRenderer<?>> rendererFunction : this.pictureInPictureRenderers){
             PictureInPictureRenderer<?> renderer;
             try{
-                renderer = rendererFunction.apply(bufferSource);
+                renderer = rendererFunction.get();
             }catch(RuntimeException e){
                 throw new RuntimeException("Encountered an exception whilst creating picture in picture renderer for mod '" + this.modid + "'!", e);
             }

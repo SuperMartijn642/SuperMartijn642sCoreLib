@@ -1,8 +1,6 @@
 classTweaker v1 official
 
 # AbstractContainerScreen
-accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen draggingItem Lnet/minecraft/world/item/ItemStack; # draggingItem
-accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen isSplittingStack Z # isSplittingStack
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen quickCraftingRemainder I # quickCraftingRemainder
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen SLOT_HIGHLIGHT_BACK_SPRITE Lnet/minecraft/resources/Identifier;
 accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen SLOT_HIGHLIGHT_FRONT_SPRITE Lnet/minecraft/resources/Identifier;
@@ -63,9 +61,6 @@ mutable field net/minecraft/world/item/CreativeModeTab displayItemsGenerator Lne
 accessible field net/minecraft/data/DataGenerator LOGGER Lorg/slf4j/Logger;
 # DataGenerator$Cached
 accessible field net/minecraft/data/DataGenerator$Cached rootOutputFolder Ljava/nio/file/Path; # rootOutputFolder
-# FeatureRenderDispatcher
-accessible field net/minecraft/client/renderer/feature/FeatureRenderDispatcher bufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;
-mutable field net/minecraft/client/renderer/feature/FeatureRenderDispatcher bufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;
 # GameRenderer
 accessible field net/minecraft/client/renderer/GameRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
 # GuiGraphicsExtractor
@@ -110,9 +105,9 @@ mutable field net/minecraft/world/item/Item descriptionId Ljava/lang/String;
 # Item$Properties
 accessible method net/minecraft/world/item/Item$Properties finalizeInitializer (Lnet/minecraft/network/chat/Component;Lnet/minecraft/resources/Identifier;)Lnet/minecraft/core/component/DataComponentInitializers$Initializer;
 # ItemTransform$Deserializer
-accessible field net/minecraft/client/resources/model/cuboid/ItemTransform$Deserializer DEFAULT_ROTATION Lorg/joml/Vector3f; # DEFAULT_ROTATION
-accessible field net/minecraft/client/resources/model/cuboid/ItemTransform$Deserializer DEFAULT_TRANSLATION Lorg/joml/Vector3f; # DEFAULT_TRANSLATION
-accessible field net/minecraft/client/resources/model/cuboid/ItemTransform$Deserializer DEFAULT_SCALE Lorg/joml/Vector3f; # DEFAULT_SCALE
+accessible field net/minecraft/client/resources/model/cuboid/ItemTransform$Deserializer DEFAULT_ROTATION Lorg/joml/Vector3fc; # DEFAULT_ROTATION
+accessible field net/minecraft/client/resources/model/cuboid/ItemTransform$Deserializer DEFAULT_TRANSLATION Lorg/joml/Vector3fc; # DEFAULT_TRANSLATION
+accessible field net/minecraft/client/resources/model/cuboid/ItemTransform$Deserializer DEFAULT_SCALE Lorg/joml/Vector3fc; # DEFAULT_SCALE
 accessible class net/minecraft/client/resources/model/cuboid/ItemTransform$Deserializer
 # Minecraft
 accessible field net/minecraft/client/Minecraft options Lnet/minecraft/client/Options; # options
@@ -127,6 +122,7 @@ accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
 # PictureInPictureRenderer
 accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer projection Lnet/minecraft/client/renderer/Projection;
 accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer projectionMatrixBuffer Lnet/minecraft/client/renderer/ProjectionMatrixBuffer;
+accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer submitNodeStorage Lnet/minecraft/client/renderer/SubmitNodeStorage;
 # Player
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
 # RecipeManager

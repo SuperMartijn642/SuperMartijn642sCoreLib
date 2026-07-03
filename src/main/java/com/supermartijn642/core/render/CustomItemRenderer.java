@@ -1,7 +1,6 @@
 package com.supermartijn642.core.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -41,11 +40,6 @@ public interface CustomItemRenderer<S> {
     S extractState(ItemStack stack);
 
     void submit(SubmitNodeCollector output, S state, boolean hasFoil, RenderContext context);
-
-    /**
-     * Renders the given item stack.
-     */
-    void render(ItemStack itemStack, ItemDisplayContext transformType, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay);
 
     void getExtents(Consumer<Vector3fc> extents);
 
