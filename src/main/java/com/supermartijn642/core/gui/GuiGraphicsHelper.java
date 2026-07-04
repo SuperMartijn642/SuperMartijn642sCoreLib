@@ -5,10 +5,7 @@ import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.extensions.GuiGraphicsExtractorExtension;
 import net.minecraft.client.gui.Font;
@@ -19,10 +16,9 @@ import net.minecraft.client.gui.screens.inventory.tooltip.BelowOrAboveWidgetTool
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
-import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.item.TrackingItemStackRenderState;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import net.minecraft.client.renderer.state.gui.GuiItemRenderState;
 import net.minecraft.client.renderer.state.gui.GuiTextRenderState;
@@ -73,31 +69,7 @@ public final class GuiGraphicsHelper {
     public static final Identifier BUTTON_DISABLED_SPRITE = Identifier.fromNamespaceAndPath("supermartijn642corelib", "gui/button_disabled");
     public static final Identifier SLOT_SPRITE = Identifier.fromNamespaceAndPath("supermartijn642corelib", "gui/slot");
 
-    private static FeatureRenderDispatcher featureRenderer;
-
-    private static synchronized FeatureRenderDispatcher getFeatureRenderer(){
-        if(featureRenderer == null){
-            featureRenderer = new FeatureRenderDispatcher(
-                new SubmitNodeStorage(),
-                ClientUtils.getMinecraft().getModelManager(),
-                null,
-                ClientUtils.getMinecraft().getAtlasManager(),
-                new OutlineBufferSource() {
-                    @Override
-                    public VertexConsumer getBuffer(RenderType renderType){
-                        return VertexMultiConsumer.create(new VertexConsumer[0]); // Discard everything
-                    }
-                },
-                MultiBufferSource.immediate(ByteBufferBuilder.exactlySized(0)),
-                ClientUtils.getFontRenderer(),
-                ClientUtils.getMinecraft().gameRenderer.getGameRenderState()
-            );
-        }
-        return featureRenderer;
-    }
-
     private final GuiGraphicsExtractor guiGraphics;
-    private final PoseStack poseStack = new PoseStack();
     private TextProperties textProperties;
     private TextureProperties textureProperties;
     private RectangleProperties rectangleProperties;
@@ -503,22 +475,13 @@ public final class GuiGraphicsHelper {
         this.guiGraphics.guiRenderState.addPicturesInPictureState(element);
     }
 
-    public void submitCustomRendering(int x, int y, int width, int height, BiConsumer<PoseStack,MultiBufferSource.BufferSource> rendering){
-        this.guiGraphics.guiRenderState.addPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), this.guiGraphics.scissorStack.peek(), rendering));
-    }
-
     public void submitFeatures(int x, int y, int width, int height, BiConsumer<PoseStack,SubmitNodeCollector> submitter){
-        FeatureRenderDispatcher featureRenderer = getFeatureRenderer();
-        this.submitCustomRendering(
-            x, y, width, height, (poseStack, bufferSource) -> {
-                submitter.accept(
-                    poseStack,
-                    featureRenderer.getSubmitNodeStorage()
-                );
-                featureRenderer.bufferSource = bufferSource;
-                featureRenderer.renderAllFeatures();
-            }
-        );
+        this.guiGraphics.guiRenderState.addPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(
+            x, y, width, height,
+            new Matrix3x2f(this.guiGraphics.pose()),
+            this.guiGraphics.scissorStack.peek(),
+            submitter
+        ));
     }
 
     public static final class TextProperties {

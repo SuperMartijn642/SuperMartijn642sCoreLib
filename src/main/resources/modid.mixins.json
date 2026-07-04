@@ -17,6 +17,7 @@
     "dev.DataGeneratorConfigMixin",
     "AbstractContainerScreenMixin",
     "GuiGraphicsExtractorMixin",
+    "LevelExtractorMixin",
     "LevelRendererMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",

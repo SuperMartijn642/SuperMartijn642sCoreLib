@@ -12,7 +12,6 @@ import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BuiltInBlockModels;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.model.BlockModel;
@@ -119,7 +118,7 @@ public class ClientRegistrationHandler {
 
     private final List<Pair<Identifier,MapCodec<? extends ItemModel.Unbaked>>> itemModelTypes = new ArrayList<>();
 
-    private final Map<Class<? extends PictureInPictureRenderState>,Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>>> pictureRenderers = new HashMap<>();
+    private final Map<Class<? extends PictureInPictureRenderState>,Supplier<PictureInPictureRenderer<?>>> pictureRenderers = new HashMap<>();
 
     private boolean passedRegisterRenderers;
     private boolean passedTextureStitch;
@@ -388,14 +387,10 @@ public class ClientRegistrationHandler {
         this.itemModelTypes.add(Pair.of(Identifier.fromNamespaceAndPath(this.modid, identifier), codec));
     }
 
-    public <T extends PictureInPictureRenderState> void registerPictureInPictureRenderer(Class<T> state, Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<T>> renderer){
+    public <T extends PictureInPictureRenderState> void registerPictureInPictureRenderer(Class<T> state, Supplier<PictureInPictureRenderer<?>> renderer){
         //noinspection unchecked
-        if(this.pictureRenderers.put(state, (Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<?>>)(Object)renderer) != null)
+        if(this.pictureRenderers.put(state, (Supplier<PictureInPictureRenderer<?>>)(Object)renderer) != null)
             throw new IllegalStateException("Duplicate picture in picture renderer registration for state class '" + state + "'!");
-    }
-
-    public <T extends PictureInPictureRenderState> void registerPictureInPictureRenderer(Class<T> state, Supplier<PictureInPictureRenderer<T>> renderer){
-        this.registerPictureInPictureRenderer(state, buffers -> renderer.get());
     }
 
     private void handleRegisterRenderersEvent(EntityRenderersEvent.RegisterRenderers e){
@@ -545,7 +540,7 @@ public class ClientRegistrationHandler {
 
     private void handleRegisterPictureInPictureRenderersEvent(RegisterPictureInPictureRenderersEvent e){
         //noinspection unchecked
-        this.pictureRenderers.forEach((state, renderer) -> e.register((Class<PictureInPictureRenderState>)state, (Function<MultiBufferSource.BufferSource,PictureInPictureRenderer<PictureInPictureRenderState>>)(Object)renderer));
+        this.pictureRenderers.forEach((state, renderer) -> e.register((Class<PictureInPictureRenderState>)state, (Supplier<PictureInPictureRenderer<PictureInPictureRenderState>>)(Object)renderer));
     }
 
     private void handleRegisterBlockModelsEvent(RegisterBlockModelsEvent e){

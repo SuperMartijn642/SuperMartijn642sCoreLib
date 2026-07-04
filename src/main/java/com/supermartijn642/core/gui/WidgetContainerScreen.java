@@ -167,7 +167,6 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         this.extractTooltip(guiGraphics, mouseX, mouseY);
 
         this.extractCarriedItem(guiGraphics, mouseX, mouseY);
-        this.extractSnapbackItem(guiGraphics);
 
         guiGraphics.pose().pushMatrix();
         guiGraphics.pose().translate(offsetX, offsetY);
