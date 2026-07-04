@@ -4,7 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import com.supermartijn642.core.data.tag.CustomTagEntrySerializer;
-import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.advancements.triggers.CriterionTrigger;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.Identifier;

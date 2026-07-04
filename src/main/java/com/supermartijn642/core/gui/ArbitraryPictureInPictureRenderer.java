@@ -1,23 +1,26 @@
 package com.supermartijn642.core.gui;
 
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
-import com.mojang.blaze3d.textures.TextureFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.state.gui.BlitRenderState;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2f;
+import org.joml.Matrix4fStack;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -33,17 +36,13 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
     private final List<TextureEntry> textures = new ArrayList<>();
     private final BitSet inUse = new BitSet();
 
-    public ArbitraryPictureInPictureRenderer(MultiBufferSource.BufferSource bufferSource){
-        super(bufferSource);
-    }
-
     @Override
     public Class<State> getRenderStateClass(){
         return State.class;
     }
 
     @Override
-    public void prepare(State state, GuiRenderState guiRenderState, int guiScale){
+    public void prepare(State state, GuiRenderState guiRenderState, FeatureRenderDispatcher featureRenderDispatcher, int guiScale){
         // Calculate required size
         int width = state.width * guiScale;
         int height = state.height * guiScale;
@@ -68,18 +67,21 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
         this.inUse.set(textureIndex);
 
         // Clear texture
-        RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(texture.texture, 0, texture.depthTexture, 1);
+        RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(texture.texture, GuiRenderer.CLEAR_COLOR, texture.depthTexture, 0);
         this.projection.setupOrtho(-1000.0F, 1000.0F, width, height, true);
         RenderSystem.setProjectionMatrix(this.projectionMatrixBuffer.getBuffer(this.projection), ProjectionType.ORTHOGRAPHIC);
 
         // Render to the texture
         RenderSystem.outputColorTextureOverride = texture.textureView;
         RenderSystem.outputDepthTextureOverride = texture.depthTextureView;
+        Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
+        modelViewStack.pushMatrix();
         this.poseStack.pushPose();
         this.poseStack.scale(guiScale, guiScale, -guiScale);
-        this.renderToTexture(state, this.poseStack);
+        this.renderToTexture(state, this.poseStack, this.submitNodeStorage);
         this.poseStack.popPose();
-        this.bufferSource.endBatch();
+        featureRenderDispatcher.renderAllFeatures(this.submitNodeStorage);
+        modelViewStack.popMatrix();
         RenderSystem.outputColorTextureOverride = null;
         RenderSystem.outputDepthTextureOverride = null;
 
@@ -107,10 +109,10 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
     private TextureEntry createTexture(int width, int height){
         GpuDevice device = RenderSystem.getDevice();
         int usage = GpuTexture.USAGE_RENDER_ATTACHMENT | GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_COPY_DST;
-        GpuTexture texture = device.createTexture(this::getTextureLabel, usage, TextureFormat.RGBA8, width, height, 1, 1);
+        GpuTexture texture = device.createTexture(this::getTextureLabel, usage, GpuFormat.RGBA8_UNORM, width, height, 1, 1);
         GpuTextureView textureView = device.createTextureView(texture);
         usage = GpuTexture.USAGE_RENDER_ATTACHMENT | GpuTexture.USAGE_COPY_DST;
-        GpuTexture depthTexture = device.createTexture(() -> this.getTextureLabel() + " depth texture", usage, TextureFormat.DEPTH32, width, height, 1, 1);
+        GpuTexture depthTexture = device.createTexture(() -> this.getTextureLabel() + " depth texture", usage, GpuFormat.D32_FLOAT, width, height, 1, 1);
         GpuTextureView depthTextureView = device.createTextureView(depthTexture);
         return new TextureEntry(width, height, texture, textureView, depthTexture, depthTextureView);
     }
@@ -132,9 +134,9 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
     }
 
     @Override
-    protected void renderToTexture(State state, PoseStack poseStack){
+    protected void renderToTexture(State state, PoseStack poseStack, SubmitNodeCollector output){
         try{
-            state.rendering.accept(poseStack, this.bufferSource);
+            state.rendering.accept(poseStack, output);
         }catch(Exception e){
             throw new RuntimeException("Encountered an exception whilst rendering picture in picture element!", e);
         }
@@ -156,7 +158,7 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
     public record State(int x, int y, int width, int height,
                         Matrix3x2f pose,
                         ScreenRectangle scissorArea,
-                        BiConsumer<PoseStack,MultiBufferSource.BufferSource> rendering) implements PictureInPictureRenderState {
+                        BiConsumer<PoseStack,SubmitNodeCollector> rendering) implements PictureInPictureRenderState {
 
         @Override
         public int x0(){

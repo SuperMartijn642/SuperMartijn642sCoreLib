@@ -18,7 +18,9 @@
     "BuiltInBlockModelsMixin",
     "GuiGraphicsExtractorMixin",
     "GuiRendererMixin",
+    "LevelExtractorMixin",
     "LevelRendererMixin",
+    "LevelRenderStateMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",
     "SpriteSourceListMixin"
