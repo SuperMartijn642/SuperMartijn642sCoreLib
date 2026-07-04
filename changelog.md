@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.21a
+- Fixed crash on dedicated server when receiving a packet through `PacketChannel`
+
 ## Update to Minecraft 26.1
 
 ### SuperMartijn642's Core Library 1.1.21
