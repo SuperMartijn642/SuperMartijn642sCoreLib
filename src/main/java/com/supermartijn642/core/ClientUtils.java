@@ -62,7 +62,7 @@ public class ClientUtils {
         getMinecraft().setScreen(screen);
     }
 
-    static Level getLevelNotAsClientLevel(){
+    public static Level getLevelNotAsClientLevel(){
         return getWorld();
     }
 }
