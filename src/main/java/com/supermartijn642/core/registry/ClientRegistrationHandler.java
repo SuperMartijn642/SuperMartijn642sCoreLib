@@ -22,7 +22,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
@@ -504,7 +503,8 @@ public class ClientRegistrationHandler {
                 CoreLib.LOGGER.error("Got 'null' item for item model overwrite from mod '{}'!", this.modid);
                 continue;
             }
-            Identifier modelLocation = item.components().get(DataComponents.ITEM_MODEL);
+            //noinspection deprecation
+            Identifier modelLocation = item.builtInRegistryHolder().key().identifier();
             ItemModel model = models.get(modelLocation);
             if(model == null)
                 continue;
