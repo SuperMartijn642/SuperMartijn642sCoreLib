@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.21b
+- Fixed `ClientRegistrationHandler` item model overwrites not working due to accessing item components too early
+
 ### SuperMartijn642's Core Library 1.1.21a
 - Fixed crash on dedicated server when receiving a packet through `PacketChannel`
 
