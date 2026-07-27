@@ -711,7 +711,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
         /**
          * Sets the start and end position of this element.
          */
-        public ElementBuilder shape(float minX, float minY, int minZ, float maxX, float maxY, float maxZ){
+        public ElementBuilder shape(float minX, float minY, float minZ, float maxX, float maxY, float maxZ){
             return this.shape(new Vector3f(minX, minY, minZ), new Vector3f(maxX, maxY, maxZ));
         }
 
