@@ -102,6 +102,8 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
                 modelJson.addProperty("x", model.xRotation);
             if(model.yRotation != 0)
                 modelJson.addProperty("y", model.yRotation);
+            if(model.zRotation != 0)
+                modelJson.addProperty("z", model.zRotation);
             // UV lock
             if(model.uvLock)
                 modelJson.addProperty("uvlock", true);
@@ -319,12 +321,25 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
          * @param modelLocation location of the model
          * @param xRotation     rotation around the x-axis for the model
          * @param yRotation     rotation around the y-axis for the model
+         * @param zRotation     rotation around the z-axis for the model
+         * @param uvLock        whether to apply uv lock to the model
+         * @param weight        weight of the model when considering which model to pick
+         */
+        public VariantBuilder model(Identifier modelLocation, int xRotation, int yRotation, int zRotation, boolean uvLock, int weight){
+            this.models.add(new VariantModel(modelLocation, xRotation, yRotation, zRotation, uvLock, weight));
+            return this;
+        }
+
+        /**
+         * Adds a model to the list of options for this variant.
+         * @param modelLocation location of the model
+         * @param xRotation     rotation around the x-axis for the model
+         * @param yRotation     rotation around the y-axis for the model
          * @param uvLock        whether to apply uv lock to the model
          * @param weight        weight of the model when considering which model to pick
          */
         public VariantBuilder model(Identifier modelLocation, int xRotation, int yRotation, boolean uvLock, int weight){
-            this.models.add(new VariantModel(modelLocation, xRotation, yRotation, uvLock, weight));
-            return this;
+            return this.model(modelLocation, xRotation, yRotation, 0, uvLock, weight);
         }
 
         /**
@@ -448,13 +463,15 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
         public final Identifier modelLocation;
         public final int xRotation;
         public final int yRotation;
+        public final int zRotation;
         public final boolean uvLock;
         public final int weight;
 
-        public VariantModel(Identifier modelLocation, int xRotation, int yRotation, boolean uvLock, int weight){
+        public VariantModel(Identifier modelLocation, int xRotation, int yRotation, int zRotation, boolean uvLock, int weight){
             this.modelLocation = modelLocation;
             this.xRotation = xRotation;
             this.yRotation = yRotation;
+            this.zRotation = zRotation;
             this.uvLock = uvLock;
             this.weight = weight;
         }
