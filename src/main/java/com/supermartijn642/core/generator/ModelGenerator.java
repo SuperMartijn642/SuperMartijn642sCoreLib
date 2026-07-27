@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
+import com.supermartijn642.core.util.Either;
 import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.client.resources.model.cuboid.ItemTransform;
@@ -79,15 +80,26 @@ public abstract class ModelGenerator extends ResourceGenerator {
         // Textures
         if(!modelBuilder.textures.isEmpty()){
             JsonObject texturesJson = new JsonObject();
-            for(Map.Entry<String,String> entry : modelBuilder.textures.entrySet()){
+            for(Map.Entry<String,Either<String,MaterialBuilder>> entry : modelBuilder.textures.entrySet()){
+                if(entry.getValue().isLeft()){
+                    texturesJson.addProperty(entry.getKey(), entry.getValue().left());
+                    continue;
+                }
+                MaterialBuilder material = entry.getValue().right();
                 // Validate the texture exists
-                if(entry.getValue().charAt(0) != '#'){
-                    Identifier texture = Identifier.parse(entry.getValue());
+                if(entry.getValue().isRight()){
+                    Identifier texture = material.texture;
                     if(!this.cache.doesResourceExist(ResourceType.ASSET, texture.getNamespace(), "textures", texture.getPath(), ".png"))
                         throw new IllegalArgumentException("Could not find texture '" + texture + "' for model '" + modelBuilder.identifier + "'!");
                 }
-
-                texturesJson.addProperty(entry.getKey(), entry.getValue());
+                if(!material.forceTranslucent)
+                    texturesJson.addProperty(entry.getKey(), material.texture.toString());
+                else{
+                    JsonObject textureJson = new JsonObject();
+                    textureJson.addProperty("sprite", material.texture.toString());
+                    textureJson.addProperty("force_translucent", material.forceTranslucent);
+                    texturesJson.add(entry.getKey(), textureJson);
+                }
             }
             json.add("textures", texturesJson);
         }
@@ -438,7 +450,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
 
         protected final String modid;
         protected final Identifier identifier;
-        private final Map<String,String> textures = new LinkedHashMap<>();
+        private final Map<String,Either<String,MaterialBuilder>> textures = new LinkedHashMap<>();
         private final Map<ItemDisplayContext,TransformBuilder> transforms = new LinkedHashMap<>();
         private final List<ElementBuilder> elements = new ArrayList<>();
         private Identifier parent;
@@ -516,8 +528,20 @@ public abstract class ModelGenerator extends ResourceGenerator {
          * @param key     key to be assigned
          * @param texture texture to be assigned to the given key
          */
+        public ModelBuilder texture(String key, Identifier texture, Consumer<MaterialBuilder> materialBuilderConsumer){
+            MaterialBuilder materialBuilder = new MaterialBuilder(texture);
+            this.textures.put(key, Either.right(materialBuilder));
+            materialBuilderConsumer.accept(materialBuilder);
+            return this;
+        }
+
+        /**
+         * Puts the given texture under the given key. These keys may be used when on faces for elements of this model.
+         * @param key     key to be assigned
+         * @param texture texture to be assigned to the given key
+         */
         public ModelBuilder texture(String key, Identifier texture){
-            this.textures.put(key, texture.toString());
+            this.textures.put(key, Either.right(new MaterialBuilder(texture)));
             return this;
         }
 
@@ -532,7 +556,23 @@ public abstract class ModelGenerator extends ResourceGenerator {
 
             if(texture.charAt(0) != '#')
                 return this.texture(key, texture.contains(":") ? Identifier.parse(texture) : Identifier.fromNamespaceAndPath(this.modid, texture));
-            this.textures.put(key, texture);
+            this.textures.put(key, Either.left(texture));
+            return this;
+        }
+
+        /**
+         * Puts the given texture or reference under the given key. These keys may be used when on faces for elements of this model.
+         * @param key        key to be assigned
+         * @param namespace  namespace of the texture
+         * @param identifier path of the texture
+         */
+        public ModelBuilder texture(String key, String namespace, String identifier, Consumer<MaterialBuilder> materialBuilderConsumer){
+            if(!RegistryUtil.isValidNamespace(namespace))
+                throw new IllegalArgumentException("Namespace '" + namespace + "' must only contain characters [a-z0-9_.-]!");
+            if(!RegistryUtil.isValidPath(identifier))
+                throw new IllegalArgumentException("Identifier '" + identifier + "' must only contain characters [a-z0-9_./-]!");
+
+            this.texture(key, Identifier.fromNamespaceAndPath(namespace, identifier), materialBuilderConsumer);
             return this;
         }
 
@@ -556,6 +596,14 @@ public abstract class ModelGenerator extends ResourceGenerator {
          * Sets the given texture to be used for the particles from this model.
          * @param texture texture for the particles
          */
+        public ModelBuilder particleTexture(Identifier texture, Consumer<MaterialBuilder> materialBuilderConsumer){
+            return this.texture("particle", texture, materialBuilderConsumer);
+        }
+
+        /**
+         * Sets the given texture to be used for the particles from this model.
+         * @param texture texture for the particles
+         */
         public ModelBuilder particleTexture(Identifier texture){
             return this.texture("particle", texture);
         }
@@ -566,6 +614,15 @@ public abstract class ModelGenerator extends ResourceGenerator {
          */
         public ModelBuilder particleTexture(String texture){
             return this.texture("particle", texture);
+        }
+
+        /**
+         * Sets the given texture to be used for the particles from this model.
+         * @param namespace  namespace of the texture
+         * @param identifier path of the texture
+         */
+        public ModelBuilder particleTexture(String namespace, String identifier, Consumer<MaterialBuilder> materialBuilderConsumer){
+            return this.texture("particle", namespace, identifier, materialBuilderConsumer);
         }
 
         /**
@@ -939,6 +996,24 @@ public abstract class ModelGenerator extends ResourceGenerator {
         }
     }
 
+    protected static class MaterialBuilder {
+        private final Identifier texture;
+        private boolean forceTranslucent;
+
+        protected MaterialBuilder(Identifier texture){
+            this.texture = texture;
+        }
+
+        public MaterialBuilder forceTranslucent(boolean forceTranslucent){
+            this.forceTranslucent = forceTranslucent;
+            return this;
+        }
+
+        public MaterialBuilder forceTranslucent(){
+            return this.forceTranslucent(true);
+        }
+    }
+
     private class ModelAtlasSourceGenerator extends AtlasSourceGenerator {
 
         public ModelAtlasSourceGenerator(String modid, ResourceCache cache){
@@ -949,7 +1024,7 @@ public abstract class ModelGenerator extends ResourceGenerator {
         public void generate(){
             for(ModelBuilder modelBuilder : ModelGenerator.this.models.values()){
                 // Add the textures used by the model
-                modelBuilder.textures.values().stream().filter(i -> i.charAt(0) != '#').map(Identifier::parse).forEach(this.blockAtlas()::texture);
+                modelBuilder.textures.values().stream().filter(Either::isRight).map(e -> e.right().texture).forEach(this.blockAtlas()::texture);
                 // Add the parent model
                 Identifier parent = modelBuilder.parent;
                 if(parent != null && !ModelGenerator.this.models.containsKey(parent) && this.cache.getExistingResource(ResourceType.ASSET, parent.getNamespace(), "models", parent.getPath(), ".json").isPresent())
