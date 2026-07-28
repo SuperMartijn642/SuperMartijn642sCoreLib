@@ -136,7 +136,7 @@ public class BaseBlockItem extends BlockItem {
     protected static class ItemUseResult {
 
         public static ItemUseResult pass(ItemStack stack){
-            return new ItemUseResult(ActionResultType.SUCCESS, stack);
+            return new ItemUseResult(ActionResultType.PASS, stack);
         }
 
         public static ItemUseResult consume(ItemStack stack){
@@ -171,7 +171,7 @@ public class BaseBlockItem extends BlockItem {
     }
 
     public enum InteractionFeedback {
-        PASS(ActionResultType.PASS), CONSUME(ActionResultType.CONSUME), SUCCESS(ActionResultType.SUCCESS);
+        PASS(ActionResultType.PASS), CONSUME(ActionResultType.CONSUME), SUCCESS(ActionResultType.SUCCESS), FAIL(ActionResultType.FAIL);
 
         private final ActionResultType interactionResult;
 
@@ -185,8 +185,9 @@ public class BaseBlockItem extends BlockItem {
                 case SUCCESS:
                     return SUCCESS;
                 case CONSUME:
-                case FAIL:
                     return CONSUME;
+                case FAIL:
+                    return FAIL;
                 case PASS:
                     return PASS;
             }

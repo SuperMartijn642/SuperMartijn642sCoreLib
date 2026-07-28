@@ -138,7 +138,7 @@ public class BaseItem extends Item {
     protected static class ItemUseResult {
 
         public static ItemUseResult pass(ItemStack stack){
-            return new ItemUseResult(ActionResultType.SUCCESS, stack);
+            return new ItemUseResult(ActionResultType.PASS, stack);
         }
 
         public static ItemUseResult consume(ItemStack stack){
