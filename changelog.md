@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.22
+- Fixed `ElementBuilder#shape` having one parameter as an int instead of float
+
 ### SuperMartijn642's Core Library 1.1.21
 - Fixed client not being updated when `BaseBlockEntity#writeClientData` returns empty tag
 
