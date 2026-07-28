@@ -1,3 +1,8 @@
+### SuperMartijn642's Core Library 1.1.22
+- Added support for vanilla z rotation in `BlockStateGenerator`
+- Added support for material `force_translucent` property in `ModelGenerator`
+- Fixed `ElementBuilder#shape` having one parameter as an int instead of float
+
 ### SuperMartijn642's Core Library 1.1.21b
 - Fixed `ClientRegistrationHandler` item model overwrites not working due to accessing item components too early
 - Completely bypass NeoForge's picture-in-picture rendering pool for ArbitraryPictureInPictureRenderer as it keeps breaking it
