@@ -144,7 +144,7 @@ public class BaseBlockItem extends ItemBlock {
     protected static class ItemUseResult {
 
         public static ItemUseResult pass(ItemStack stack){
-            return new ItemUseResult(EnumActionResult.SUCCESS, stack);
+            return new ItemUseResult(EnumActionResult.PASS, stack);
         }
 
         public static ItemUseResult consume(ItemStack stack){
@@ -179,7 +179,7 @@ public class BaseBlockItem extends ItemBlock {
     }
 
     public enum InteractionFeedback {
-        PASS(EnumActionResult.PASS), CONSUME(EnumActionResult.SUCCESS), SUCCESS(EnumActionResult.SUCCESS);
+        PASS(EnumActionResult.PASS), CONSUME(EnumActionResult.SUCCESS), SUCCESS(EnumActionResult.SUCCESS), FAIL(EnumActionResult.FAIL);
 
         private final EnumActionResult interactionResult;
 
@@ -197,7 +197,7 @@ public class BaseBlockItem extends ItemBlock {
                 case SUCCESS:
                     return SUCCESS;
                 case FAIL:
-                    return CONSUME;
+                    return FAIL;
                 case PASS:
                     return PASS;
             }
