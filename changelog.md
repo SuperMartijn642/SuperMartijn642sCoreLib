@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.22a
+- Account for breaking changes in NeoForge 26.2.0.40-beta
+
 ### SuperMartijn642's Core Library 1.1.22
 - Added support for vanilla z rotation in `BlockStateGenerator`
 - Added support for material `force_translucent` property in `ModelGenerator`
