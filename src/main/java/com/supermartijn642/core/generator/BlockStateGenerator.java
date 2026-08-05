@@ -537,7 +537,7 @@ public abstract class BlockStateGenerator extends ResourceGenerator {
                 this.or.addAll(this.or.get(i).or);
             for(MultipartConditionBuilder b : this.or){
                 b.properties = Collections.unmodifiableMap(
-                    this.properties.entrySet().stream()
+                    b.properties.entrySet().stream()
                         .sorted(Comparator.comparing(e -> e.getKey().getName()))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (p1, p2) -> p1, LinkedHashMap::new))
                 );
