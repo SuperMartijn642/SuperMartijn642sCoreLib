@@ -51,6 +51,10 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         this(widget, container, drawSlots, false);
     }
 
+    public T getWidget(){
+        return this.widget;
+    }
+
     @Override
     public void init(){
         if(!this.initialized){
