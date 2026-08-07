@@ -39,6 +39,10 @@ public class WidgetScreen<T extends Widget> extends Screen {
         this(widget, false);
     }
 
+    public T getWidget(){
+        return this.widget;
+    }
+
     @Override
     protected void init(){
         if(!this.initialized){
