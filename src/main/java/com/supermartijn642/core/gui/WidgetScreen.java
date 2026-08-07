@@ -42,6 +42,10 @@ public class WidgetScreen<T extends Widget> extends GuiScreen {
         this(widget, false);
     }
 
+    public T getWidget(){
+        return this.widget;
+    }
+
     @Override
     public void initGui(){
         if(!this.initialized){
