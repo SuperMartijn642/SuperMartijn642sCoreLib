@@ -76,7 +76,9 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks){
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks){
+        super.extractBackground(guiGraphics, mouseX, mouseY, partialTicks);
+
         this.widgetRenderContext.update(guiGraphics, partialTicks, this.font, this.minecraft);
         GuiGraphicsHelper helper = GuiGraphicsHelper.of(guiGraphics);
 
@@ -112,9 +114,19 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         }
 
         guiGraphics.pose().popMatrix();
+    }
 
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks){
         //noinspection UnstableApiUsage
         ForgeEventFactoryClient.onContainerRenderBackground(this, guiGraphics, mouseX, mouseY);
+
+        this.widgetRenderContext.update(guiGraphics, partialTicks, this.font, this.minecraft);
+        GuiGraphicsHelper helper = GuiGraphicsHelper.of(guiGraphics);
+
+        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
+        int offsetMouseX = mouseX - offsetX;
+        int offsetMouseY = mouseY - offsetY;
 
         guiGraphics.pose().pushMatrix();
         guiGraphics.pose().translate(offsetX, offsetY);
