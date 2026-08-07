@@ -1,3 +1,8 @@
+### SuperMartijn642's Core Library 1.1.23
+- Added `#getWidget` method for `WidgetScreen` and `WidgetContainerScreen`
+- `Widget` backgrounds are now rendered earlier, in the same way as vanilla menu background, for improved mod compatibility
+- Fixed multipart conditions not being flattened correctly in `BlockStateGenerator`
+
 ### SuperMartijn642's Core Library 1.1.22
 - Added support for vanilla z rotation in `BlockStateGenerator`
 - Fixed `ElementBuilder#shape` having one parameter as an int instead of float
