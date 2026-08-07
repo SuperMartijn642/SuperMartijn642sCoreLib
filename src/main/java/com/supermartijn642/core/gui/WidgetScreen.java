@@ -57,7 +57,9 @@ public class WidgetScreen<T extends Widget> extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks){
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks){
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
+
         this.widgetRenderContext.update(guiGraphics, partialTicks, this.font, this.minecraft);
 
         int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
@@ -73,6 +75,22 @@ public class WidgetScreen<T extends Widget> extends Screen {
         GuiGraphicsHelper helper = GuiGraphicsHelper.of(guiGraphics);
         // Render the widget background
         this.widget.renderBackground(this.widgetRenderContext, helper, mouseX, mouseY);
+
+        guiGraphics.pose().popMatrix();
+    }
+
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks){
+        this.widgetRenderContext.update(guiGraphics, partialTicks, this.font, this.minecraft);
+
+        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
+        mouseX -= offsetX;
+        mouseY -= offsetY;
+
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().translate(offsetX, offsetY);
+
+        GuiGraphicsHelper helper = GuiGraphicsHelper.of(guiGraphics);
         // Render the widget
         this.widget.render(this.widgetRenderContext, helper, mouseX, mouseY);
         // Render the widget's foreground
