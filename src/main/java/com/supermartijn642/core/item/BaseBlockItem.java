@@ -1,5 +1,6 @@
 package com.supermartijn642.core.item;
 
+import com.supermartijn642.core.CoreLib;
 import com.supermartijn642.core.registry.Registries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -39,11 +40,18 @@ public class BaseBlockItem extends BlockItem {
     public BaseBlockItem(Block block, Properties properties){
         super(block, removeDescriptionAndModelFromProperties(properties));
         this.properties = null;
+        this.queueForCreativeGroups();
     }
 
     public BaseBlockItem(Block block, ItemProperties properties){
         super(block, removeDescriptionAndModelFromProperties(properties.toUnderlying()));
         this.properties = properties;
+        this.queueForCreativeGroups();
+    }
+
+    private void queueForCreativeGroups(){
+        if(this.properties != null)
+            this.properties.groups.forEach(group -> CoreLib.addItemToCreativeGroup(group, this));
     }
 
     private static Properties removeDescriptionAndModelFromProperties(Properties properties){
