@@ -1,5 +1,6 @@
 package com.supermartijn642.core;
 
+import com.google.common.collect.ImmutableMap;
 import com.supermartijn642.core.block.BaseBlock;
 import com.supermartijn642.core.data.condition.*;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
@@ -7,19 +8,19 @@ import com.supermartijn642.core.data.tag.CustomTagEntries;
 import com.supermartijn642.core.data.tag.entries.NamespaceTagEntry;
 import com.supermartijn642.core.generator.standard.CoreLibLanguageGenerator;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
-import com.supermartijn642.core.item.BaseBlockItem;
-import com.supermartijn642.core.item.BaseItem;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import org.slf4j.Logger;
 
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -58,21 +59,41 @@ public class CoreLib {
 
         // Add all BaseItem instances to their respective creative tabs
         eventBus.addListener((Consumer<BuildCreativeModeTabContentsEvent>)event -> {
-            Registries.ITEMS.getValues().stream()
-                .filter(item -> item instanceof BaseItem || item instanceof BaseBlockItem)
-                .filter(item -> item instanceof BaseItem ? ((BaseItem)item).isInCreativeGroup(event.getTab()) : ((BaseBlockItem)item).isInCreativeGroup(event.getTab()))
-                .forEach(item -> {
-                    try{
-                        event.accept(item, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
-                    }catch(IllegalArgumentException e){
-                        if(!e.getMessage().endsWith(" in the tab's list")) // Ignore adding duplicates errors
-                            throw e;
-                    }
-                });
+            finalizeItemsPerCreativeGroup();
+            for(Item item : itemsPerCreativeGroup.getOrDefault(event.getTab(), List.of())){
+                try{
+                    event.accept(item, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
+                }catch(IllegalArgumentException e){
+                    if(!e.getMessage().endsWith(" in the tab's list")) // Ignore adding duplicates errors
+                        throw e;
+                }
+            }
         });
     }
 
     private void onConstructMod(FMLConstructModEvent e){
         RegistryEntryAcceptor.Handler.gatherAnnotatedFields();
+    }
+
+    private static Map<CreativeModeTab,Collection<Item>> itemsPerCreativeGroup = new HashMap<>();
+    private static boolean creativeGroupsInitialized = false;
+
+    public static void addItemToCreativeGroup(CreativeModeTab group, Item item){
+        if(creativeGroupsInitialized)
+            throw new IllegalStateException("Creative mode tabs have already been initialized!");
+        itemsPerCreativeGroup.computeIfAbsent(group, o -> new HashSet<>()).add(item);
+    }
+
+    private static void finalizeItemsPerCreativeGroup(){
+        if(creativeGroupsInitialized)
+            return;
+        creativeGroupsInitialized = true;
+        ImmutableMap.Builder<CreativeModeTab,Collection<Item>> builder = ImmutableMap.builder();
+        itemsPerCreativeGroup.forEach((group, items) -> {
+            List<Item> sorted = new ArrayList<>(items);
+            sorted.sort(Comparator.comparing(Registries.ITEMS::getIdentifier));
+            builder.put(group, List.copyOf(sorted));
+        });
+        itemsPerCreativeGroup = builder.build();
     }
 }
