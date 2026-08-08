@@ -1,5 +1,6 @@
 package com.supermartijn642.core;
 
+import com.google.common.collect.ImmutableMap;
 import com.supermartijn642.core.block.BaseBlock;
 import com.supermartijn642.core.data.condition.*;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
@@ -8,15 +9,17 @@ import com.supermartijn642.core.data.tag.entries.NamespaceTagEntry;
 import com.supermartijn642.core.generator.standard.CoreLibAccessWidenerGenerator;
 import com.supermartijn642.core.generator.standard.CoreLibLanguageGenerator;
 import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
-import com.supermartijn642.core.item.BaseBlockItem;
-import com.supermartijn642.core.item.BaseItem;
 import com.supermartijn642.core.registry.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import org.slf4j.Logger;
+
+import java.util.*;
 
 /**
  * Created 18/03/2022 by SuperMartijn642
@@ -57,10 +60,8 @@ public class CoreLib implements ModInitializer {
 
         // Add all BaseItem instances to their respective creative tabs
         ItemGroupEvents.MODIFY_ENTRIES_ALL.register(((group, entries) -> {
-            Registries.ITEMS.getValues().stream()
-                .filter(item -> item instanceof BaseItem || item instanceof BaseBlockItem)
-                .filter(item -> item instanceof BaseItem ? ((BaseItem)item).isInCreativeGroup(group) : ((BaseBlockItem)item).isInCreativeGroup(group))
-                .forEach(entries::accept);
+            finalizeItemsPerCreativeGroup();
+            itemsPerCreativeGroup.getOrDefault(group, List.of()).forEach(entries::accept);
         }));
 
         // Load test mod stuff
@@ -101,5 +102,27 @@ public class CoreLib implements ModInitializer {
      * Called right after all {@link ModInitializer}s, {@link ClientModInitializer}'s, and {@link DedicatedServerModInitializer}s have been initialized.
      */
     public static void afterInitializeAll(){
+    }
+
+    private static Map<CreativeModeTab,Collection<Item>> itemsPerCreativeGroup = new HashMap<>();
+    private static boolean creativeGroupsInitialized = false;
+
+    public static void addItemToCreativeGroup(CreativeModeTab group, Item item){
+        if(creativeGroupsInitialized)
+            throw new IllegalStateException("Creative mode tabs have already been initialized!");
+        itemsPerCreativeGroup.computeIfAbsent(group, o -> new HashSet<>()).add(item);
+    }
+
+    private static void finalizeItemsPerCreativeGroup(){
+        if(creativeGroupsInitialized)
+            return;
+        creativeGroupsInitialized = true;
+        ImmutableMap.Builder<CreativeModeTab,Collection<Item>> builder = ImmutableMap.builder();
+        itemsPerCreativeGroup.forEach((group, items) -> {
+            List<Item> sorted = new ArrayList<>(items);
+            sorted.sort(Comparator.comparing(Registries.ITEMS::getIdentifier));
+            builder.put(group, List.copyOf(sorted));
+        });
+        itemsPerCreativeGroup = builder.build();
     }
 }
