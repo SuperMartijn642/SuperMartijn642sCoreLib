@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.23a
+- Fixed code for adding items to creative groups scaling with #total items * #total groups, thus being extremely slow when there's many mods
+
 ### SuperMartijn642's Core Library 1.1.23
 - Added `#getWidget` method for `WidgetScreen` and `WidgetContainerScreen`
 - Fixed multipart conditions not being flattened correctly in `BlockStateGenerator`
