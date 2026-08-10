@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.23b
+- Added workaround for guis not rendering correctly when ImmediatelyFast is present
+
 ### SuperMartijn642's Core Library 1.1.23a
 - Fixed code for adding items to creative groups scaling with #total items * #total groups, thus being extremely slow when there's many mods
 
