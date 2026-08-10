@@ -15,6 +15,7 @@
   ],
   "client": [
     "AbstractContainerScreenMixin",
+    "ForgeHooksClientMixin",
     "GameRendererMixin",
     "LevelRendererMixin",
     "ModelBakerImplMixin",
