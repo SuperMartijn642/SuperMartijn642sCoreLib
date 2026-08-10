@@ -44,10 +44,16 @@ public class ScreenUtils {
     private static final ResourceLocation SCREEN_BACKGROUND = ResourceLocation.fromNamespaceAndPath("supermartijn642corelib", "textures/gui/background.png");
     private static final GuiGraphics GUI_GRAPHICS = new GuiGraphics(ClientUtils.getMinecraft(), null);
 
+    public static MultiBufferSource.BufferSource bufferSourceOverwrite = null;
+
+    private static MultiBufferSource.BufferSource getBufferSource(){
+        return bufferSourceOverwrite == null ? RenderUtils.getMainBufferSource() : bufferSourceOverwrite;
+    }
+
     public static final int DEFAULT_TEXT_COLOR = 4210752, ACTIVE_TEXT_COLOR = 14737632, INACTIVE_TEXT_COLOR = 7368816;
 
     public static void drawString(PoseStack poseStack, Font fontRenderer, Component text, float x, float y, int color){
-        MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
+        MultiBufferSource.BufferSource bufferSource = getBufferSource();
         fontRenderer.drawInBatch(text, x, y, color, false, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         bufferSource.endBatch();
     }
@@ -65,7 +71,7 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, Font fontRenderer, Component text, float x, float y, int color){
-        MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
+        MultiBufferSource.BufferSource bufferSource = getBufferSource();
         fontRenderer.drawInBatch(text, x, y, color, true, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         bufferSource.endBatch();
     }
@@ -115,7 +121,7 @@ public class ScreenUtils {
     }
 
     public static void drawString(PoseStack poseStack, Font fontRenderer, String text, float x, float y, int color){
-        MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
+        MultiBufferSource.BufferSource bufferSource = getBufferSource();
         fontRenderer.drawInBatch(text, x, y, color, false, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         bufferSource.endBatch();
     }
@@ -133,7 +139,7 @@ public class ScreenUtils {
     }
 
     public static void drawStringWithShadow(PoseStack poseStack, Font fontRenderer, String text, float x, float y, int color){
-        MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
+        MultiBufferSource.BufferSource bufferSource = getBufferSource();
         fontRenderer.drawInBatch(text, x, y, color, true, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         bufferSource.endBatch();
     }
@@ -218,7 +224,7 @@ public class ScreenUtils {
 
     public static void drawTexture(ResourceLocation texture, PoseStack poseStack, float x, float y, float width, float height, float tx, float ty, float twidth, float theight){
         Matrix4f matrix = poseStack.last().pose();
-        MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
+        MultiBufferSource.BufferSource bufferSource = getBufferSource();
         VertexConsumer buffer = bufferSource.getBuffer(RenderType.guiTextured(texture));
         buffer.addVertex(matrix, x, y + height, 0).setUv(tx, ty + theight).setColor(-1);
         buffer.addVertex(matrix, x + width, y + height, 0).setUv(tx + twidth, ty + theight).setColor(-1);
@@ -229,7 +235,7 @@ public class ScreenUtils {
     public static void drawGuiSprite(ResourceLocation texture, PoseStack poseStack, float x, float y, float width, float height){
         GUI_GRAPHICS.minecraft = ClientUtils.getMinecraft();
         GUI_GRAPHICS.pose = poseStack;
-        GUI_GRAPHICS.bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
+        GUI_GRAPHICS.bufferSource = getBufferSource();
         GUI_GRAPHICS.blitSprite(RenderType::guiTexturedOverlay, texture, (int)x, (int)y, (int)width, (int)height);
     }
 
@@ -243,7 +249,7 @@ public class ScreenUtils {
 
     public static void fillRect(PoseStack poseStack, float x, float y, float width, float height, float red, float green, float blue, float alpha){
         Matrix4f matrix = poseStack.last().pose();
-        MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
+        MultiBufferSource.BufferSource bufferSource = getBufferSource();
         VertexConsumer buffer = bufferSource.getBuffer(RenderType.gui());
         buffer.addVertex(matrix, x, y + height, 0).setColor(red, green, blue, alpha);
         buffer.addVertex(matrix, x + width, y + height, 0).setColor(red, green, blue, alpha);
@@ -288,7 +294,7 @@ public class ScreenUtils {
 
         GUI_GRAPHICS.minecraft = ClientUtils.getMinecraft();
         GUI_GRAPHICS.pose = poseStack;
-        GUI_GRAPHICS.bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
+        GUI_GRAPHICS.bufferSource = getBufferSource();
         GUI_GRAPHICS.renderTooltipInternal(fontRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE, null);
         GUI_GRAPHICS.bufferSource.endBatch();
     }
@@ -312,7 +318,7 @@ public class ScreenUtils {
                 Lighting.setupForFlatItems();
             RenderSystem.disableDepthTest();
 
-            MultiBufferSource.BufferSource bufferSource = ClientUtils.getMinecraft().gameRenderer.renderBuffers.bufferSource();
+            MultiBufferSource.BufferSource bufferSource = getBufferSource();
             ClientUtils.getItemRenderer().render(stack, ItemDisplayContext.GUI, false, poseStack, bufferSource, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, model);
             bufferSource.endBatch();
 
@@ -332,7 +338,8 @@ public class ScreenUtils {
 
     public static void withScissor(PoseStack poseStack, int x, int y, int width, int height, Runnable rendering){
         // Draw current buffers before enabling scissor
-        RenderUtils.getMainBufferSource().endBatch();
+        MultiBufferSource.BufferSource bufferSource = getBufferSource();
+        bufferSource.endBatch();
 
         // Apply matrix stack to given coordinates
         Vector3f scissorStart = poseStack.last().pose().transformPosition(x, y, 0, new Vector3f());
@@ -348,7 +355,7 @@ public class ScreenUtils {
         RenderSystem.enableScissor((int)scissorX, (int)scissorY, Math.max(0, (int)scissorWidth), Math.max(0, (int)scissorHeight));
         try{
             rendering.run();
-            RenderUtils.getMainBufferSource().endBatch();
+            bufferSource.endBatch();
         }finally{
             RenderSystem.disableScissor();
         }
