@@ -19,6 +19,7 @@
     "dev.DataGeneratorMixin",
     "dev.DatagenModLoaderAccessor",
     "AbstractContainerScreenMixin",
+    "ClientHooksMixin",
     "GameRendererMixin",
     "LevelRendererMixin",
     "SpriteSourceListMixin"
