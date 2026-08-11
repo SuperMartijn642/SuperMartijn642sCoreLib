@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.24
+- Fixed `CustomSlot` hover check area being 2 pixels too large
+
 ### SuperMartijn642's Core Library 1.1.23b
 - Added workaround for guis not rendering correctly when ImmediatelyFast is present
 
