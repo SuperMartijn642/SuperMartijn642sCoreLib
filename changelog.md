@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.24
+- Fixed `CustomSlot` hover check area being 2 pixels too large
+
 ### SuperMartijn642's Core Library 1.1.23
 - Added `#getWidget` method for `WidgetScreen` and `WidgetContainerScreen`
 - Fixed multipart conditions not being flattened correctly in `BlockStateGenerator`
