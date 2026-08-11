@@ -24,7 +24,7 @@ public class AbstractContainerScreenMixin {
         if(slot instanceof CustomSlot customSlot){
             ci.setReturnValue(this.isHovering(
                 slot.x, slot.y,
-                customSlot.getWidth(), customSlot.getHeight(),
+                customSlot.getWidth() - 2, customSlot.getHeight() - 2,
                 mouseX, mouseY
             ));
         }
