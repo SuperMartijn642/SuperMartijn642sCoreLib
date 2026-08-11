@@ -25,7 +25,7 @@ public class GuiContainerMixin {
             CustomSlot customSlot = (CustomSlot)slot;
             ci.setReturnValue(this.isPointInRegion(
                 slot.xPos, slot.yPos,
-                customSlot.getWidth(), customSlot.getHeight(),
+                customSlot.getWidth() - 2, customSlot.getHeight() - 2,
                 mouseX, mouseY
             ));
         }
