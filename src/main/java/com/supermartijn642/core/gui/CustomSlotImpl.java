@@ -13,7 +13,7 @@ import java.util.function.*;
 /**
  * Created 08/01/2026 by SuperMartijn642
  */
-public class CustomSlotImpl extends Slot implements CustomSlot {
+public class CustomSlotImpl implements CustomSlot {
 
     static Builder builder(){
         return new BuilderImpl();
@@ -63,6 +63,13 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
         }
     };
 
+    /*
+     * We have to separate the vanilla Slot implementation from the CustomSlot implementation
+     * Otherwise, ForgeGradle will obfuscate CustomSlot#isActive to Slot#isActive eventhough the interface method has nothing to do with Slot
+     * https://github.com/SuperMartijn642/TrashCans/issues/56
+     */
+
+    private final VanillaSlot vanillaSlot;
     private final int width, height;
     private final Supplier<ItemStack> getter;
     private final Consumer<ItemStack> setter;
@@ -78,7 +85,7 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
     private boolean active = true;
 
     private CustomSlotImpl(Container vanillaContainer, int vanillaSlot, int x, int y, int width, int height, Supplier<ItemStack> getter, Consumer<ItemStack> setter, ToIntFunction<ItemStack> inserter, Function<Integer,ItemStack> extractor, ToIntFunction<ItemStack> capacity, Predicate<ItemStack> filter, SlotChangeListener onInsert, SlotChangeListener onExtract, boolean canInsert, boolean canExtract, boolean scaleItemToSize, boolean showBackground, boolean showItem, boolean showHighlight){
-        super(vanillaContainer == null ? EMPTY_CONTAINER : vanillaContainer, vanillaSlot, x, y);
+        this.vanillaSlot = new VanillaSlot(vanillaContainer, vanillaSlot, x, y);
         this.width = width;
         this.height = height;
         this.getter = getter == null ? () -> ItemStack.EMPTY : getter;
@@ -120,13 +127,18 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
 
     @Override
     public Slot getVanillaSlot(){
-        return this;
+        return this.vanillaSlot;
     }
 
     @Override
     public void move(int x, int y){
-        this.x = x;
-        this.y = y;
+        this.vanillaSlot.x = x;
+        this.vanillaSlot.y = y;
+    }
+
+    @Override
+    public boolean isActive(){
+        return this.active;
     }
 
     @Override
@@ -136,12 +148,12 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
 
     @Override
     public int getX(){
-        return this.x;
+        return this.vanillaSlot.x;
     }
 
     @Override
     public int getY(){
-        return this.y;
+        return this.vanillaSlot.y;
     }
 
     @Override
@@ -174,78 +186,88 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
         return this.showHighlight;
     }
 
-
-    @Override
-    public boolean mayPlace(ItemStack stack){
-        return this.canInsert && this.filter.test(stack);
-    }
-
     @Override
     public ItemStack getItem(){
-        return this.getter.get();
+        return this.vanillaSlot.getItem();
     }
 
-    @Override
-    public void set(ItemStack stack){
-        ItemStack original = this.getter.get();
-        this.setter.accept(stack);
-        ItemStack newStack = this.getter.get();
-        if(!ItemStack.matches(original, newStack)){
-            if(newStack.isEmpty())
-                this.onExtract.onChange(original, newStack);
-            else
-                this.onInsert.onChange(original, newStack);
+    private class VanillaSlot extends Slot {
+        public VanillaSlot(Container vanillaContainer, int vanillaSlot, int x, int y){
+            super(vanillaContainer == null ? EMPTY_CONTAINER : vanillaContainer, vanillaSlot, x, y);
         }
-    }
 
-    @Override
-    public int getMaxStackSize(){
-        return this.capacity.applyAsInt(ItemStack.EMPTY);
-    }
+        @Override
+        public boolean mayPlace(ItemStack stack){
+            return CustomSlotImpl.this.canInsert && CustomSlotImpl.this.filter.test(stack);
+        }
 
-    @Override
-    public int getMaxStackSize(ItemStack stack){
-        return this.capacity.applyAsInt(stack);
-    }
+        @Override
+        public ItemStack getItem(){
+            return CustomSlotImpl.this.getter.get();
+        }
 
-    @Override
-    public ItemStack remove(int amount){
-        return this.extractor.apply(amount);
-    }
+        @Override
+        public void set(ItemStack stack){
+            ItemStack original = CustomSlotImpl.this.getter.get();
+            CustomSlotImpl.this.setter.accept(stack);
+            ItemStack newStack = CustomSlotImpl.this.getter.get();
+            if(!ItemStack.matches(original, newStack)){
+                if(newStack.isEmpty())
+                    CustomSlotImpl.this.onExtract.onChange(original, newStack);
+                else
+                    CustomSlotImpl.this.onInsert.onChange(original, newStack);
+            }
+        }
 
-    @Override
-    public boolean mayPickup(Player player){
-        return this.canExtract;
-    }
+        @Override
+        public int getMaxStackSize(){
+            return CustomSlotImpl.this.capacity.applyAsInt(ItemStack.EMPTY);
+        }
 
-    @Override
-    public boolean isActive(){
-        return this.active;
-    }
+        @Override
+        public int getMaxStackSize(ItemStack stack){
+            return CustomSlotImpl.this.capacity.applyAsInt(stack);
+        }
 
-    @Override
-    public Optional<ItemStack> tryRemove(int amount, int ignored, Player player){
-        if(!this.mayPickup(player))
-            return Optional.empty();
-        ItemStack original = this.getter.get();
-        ItemStack extracted = this.extractor.apply(amount);
-        ItemStack newStack = this.getter.get();
-        if(!ItemStack.matches(original, newStack))
-            this.onInsert.onChange(original, newStack);
-        return extracted.isEmpty() ? Optional.empty() : Optional.of(extracted);
-    }
+        @Override
+        public ItemStack remove(int amount){
+            return CustomSlotImpl.this.extractor.apply(amount);
+        }
 
-    @Override
-    public ItemStack safeInsert(ItemStack stack, int amount){
-        if(stack.isEmpty() || !this.mayPlace(stack))
+        @Override
+        public boolean mayPickup(Player player){
+            return CustomSlotImpl.this.canExtract;
+        }
+
+        @Override
+        public boolean isActive(){
+            return CustomSlotImpl.this.active;
+        }
+
+        @Override
+        public Optional<ItemStack> tryRemove(int amount, int ignored, Player player){
+            if(!this.mayPickup(player))
+                return Optional.empty();
+            ItemStack original = CustomSlotImpl.this.getter.get();
+            ItemStack extracted = CustomSlotImpl.this.extractor.apply(amount);
+            ItemStack newStack = CustomSlotImpl.this.getter.get();
+            if(!ItemStack.matches(original, newStack))
+                CustomSlotImpl.this.onInsert.onChange(original, newStack);
+            return extracted.isEmpty() ? Optional.empty() : Optional.of(extracted);
+        }
+
+        @Override
+        public ItemStack safeInsert(ItemStack stack, int amount){
+            if(stack.isEmpty() || !this.mayPlace(stack))
+                return stack;
+            ItemStack original = CustomSlotImpl.this.getter.get();
+            int inserted = CustomSlotImpl.this.inserter.applyAsInt(copyWithCount(stack, amount));
+            stack.shrink(inserted);
+            ItemStack newStack = CustomSlotImpl.this.getter.get();
+            if(!ItemStack.matches(original, newStack))
+                CustomSlotImpl.this.onExtract.onChange(original, newStack);
             return stack;
-        ItemStack original = this.getter.get();
-        int inserted = this.inserter.applyAsInt(copyWithCount(stack, amount));
-        stack.shrink(inserted);
-        ItemStack newStack = this.getter.get();
-        if(!ItemStack.matches(original, newStack))
-            this.onExtract.onChange(original, newStack);
-        return stack;
+        }
     }
 
     private static ItemStack copyWithCount(ItemStack stack, int count){
