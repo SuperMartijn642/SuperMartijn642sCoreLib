@@ -5,12 +5,14 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.*;
 
 /**
  * Created 29/01/2023 by SuperMartijn642
  */
+@ApiStatus.NonExtendable
 public interface CustomSlot {
 
     static Builder builder(){
