@@ -13,7 +13,7 @@ import java.util.function.*;
 /**
  * Created 08/01/2026 by SuperMartijn642
  */
-public class CustomSlotImpl extends Slot implements CustomSlot {
+public class CustomSlotImpl implements CustomSlot {
 
     static Builder builder(){
         return new BuilderImpl();
@@ -111,6 +111,13 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
         }
     };
 
+    /*
+     * We have to separate the vanilla Slot implementation from the CustomSlot implementation
+     * Otherwise, ForgeGradle will obfuscate CustomSlot#isActive to Slot#isActive eventhough the interface method has nothing to do with Slot
+     * https://github.com/SuperMartijn642/TrashCans/issues/56
+     */
+
+    private final VanillaSlot vanillaSlot;
     private final int width, height;
     private final Supplier<ItemStack> getter;
     private final Consumer<ItemStack> setter;
@@ -125,15 +132,8 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
 
     private boolean active = true;
 
-    /*
-     * Minecraft (,1.16.5] just modify the slots returned stack rather than updating it explicitly.
-     * As returned stacks may be arbitrary instances, we need to keep track and update the stack manually.
-     */
-    private ItemStack lastReturnedStack;
-    private int lastReturnedStackCount = 0;
-
     private CustomSlotImpl(IInventory vanillaContainer, int vanillaSlot, int x, int y, int width, int height, Supplier<ItemStack> getter, Consumer<ItemStack> setter, ToIntFunction<ItemStack> inserter, Function<Integer,ItemStack> extractor, ToIntFunction<ItemStack> capacity, Predicate<ItemStack> filter, SlotChangeListener onInsert, SlotChangeListener onExtract, boolean canInsert, boolean canExtract, boolean scaleItemToSize, boolean showBackground, boolean showItem, boolean showHighlight){
-        super(vanillaContainer == null ? EMPTY_CONTAINER : vanillaContainer, vanillaSlot, x, y);
+        this.vanillaSlot = new VanillaSlot(vanillaContainer, vanillaSlot, x, y);
         this.width = width;
         this.height = height;
         this.getter = getter == null ? () -> ItemStack.EMPTY : getter;
@@ -175,13 +175,18 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
 
     @Override
     public Slot getVanillaSlot(){
-        return this;
+        return this.vanillaSlot;
     }
 
     @Override
     public void move(int x, int y){
-        this.xPos = x;
-        this.yPos = y;
+        this.vanillaSlot.xPos = x;
+        this.vanillaSlot.yPos = y;
+    }
+
+    @Override
+    public boolean isActive(){
+        return this.active;
     }
 
     @Override
@@ -191,12 +196,12 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
 
     @Override
     public int getX(){
-        return this.xPos;
+        return this.vanillaSlot.xPos;
     }
 
     @Override
     public int getY(){
-        return this.yPos;
+        return this.vanillaSlot.yPos;
     }
 
     @Override
@@ -230,75 +235,89 @@ public class CustomSlotImpl extends Slot implements CustomSlot {
     }
 
     @Override
-    public boolean isItemValid(ItemStack stack){
-        return this.canInsert && this.filter.test(stack);
-    }
-
-    @Override
     public ItemStack getItem(){
-        ItemStack stack = this.getter.get();
-        this.lastReturnedStack = stack;
-        this.lastReturnedStackCount = stack.getCount();
-        return stack;
+        return this.vanillaSlot.getStack();
     }
 
-    @Override
-    public ItemStack getStack(){
-        return this.getter.get();
-    }
+    private class VanillaSlot extends Slot {
 
-    @Override
-    public void putStack(ItemStack stack){
-        ItemStack original = this.getter.get();
-        this.setter.accept(stack);
-        ItemStack newStack = this.getter.get();
-        if(!ItemStack.areItemStacksEqual(original, newStack)){
-            if(newStack.isEmpty())
-                this.onExtract.onChange(original, newStack);
-            else
-                this.onInsert.onChange(original, newStack);
+        /*
+         * Minecraft (,1.16.5] just modify the slots returned stack rather than updating it explicitly.
+         * As returned stacks may be arbitrary instances, we need to keep track and update the stack manually.
+         */
+        private ItemStack lastReturnedStack;
+        private int lastReturnedStackCount = 0;
+
+        public VanillaSlot(IInventory vanillaContainer, int vanillaSlot, int x, int y){
+            super(vanillaContainer == null ? EMPTY_CONTAINER : vanillaContainer, vanillaSlot, x, y);
         }
-        this.lastReturnedStack = stack;
-        this.lastReturnedStackCount = stack.getCount();
-    }
 
-    @Override
-    public int getSlotStackLimit(){
-        return this.capacity.applyAsInt(ItemStack.EMPTY);
-    }
+        @Override
+        public boolean isItemValid(ItemStack stack){
+            return CustomSlotImpl.this.canInsert && CustomSlotImpl.this.filter.test(stack);
+        }
 
-    @Override
-    public int getItemStackLimit(ItemStack stack){
-        return this.capacity.applyAsInt(stack);
-    }
+        @Override
+        public ItemStack getStack(){
+            ItemStack stack = CustomSlotImpl.this.getter.get();
+            this.lastReturnedStack = stack;
+            this.lastReturnedStackCount = stack.getCount();
+            return stack;
+        }
 
-    @Override
-    public ItemStack decrStackSize(int amount){
-        ItemStack original = this.getter.get();
-        ItemStack extracted = this.extractor.apply(amount);
-        ItemStack newStack = this.getter.get();
-        if(!ItemStack.areItemStacksEqual(original, newStack))
-            this.onExtract.onChange(original, newStack);
-        this.lastReturnedStack = null;
-        return extracted;
-    }
+        @Override
+        public void putStack(ItemStack stack){
+            ItemStack original = CustomSlotImpl.this.getter.get();
+            CustomSlotImpl.this.setter.accept(stack);
+            ItemStack newStack = CustomSlotImpl.this.getter.get();
+            if(!ItemStack.areItemStacksEqual(original, newStack)){
+                if(newStack.isEmpty())
+                    CustomSlotImpl.this.onExtract.onChange(original, newStack);
+                else
+                    CustomSlotImpl.this.onInsert.onChange(original, newStack);
+            }
+            this.lastReturnedStack = stack;
+            this.lastReturnedStackCount = stack.getCount();
+        }
 
-    @Override
-    public boolean canTakeStack(EntityPlayer player){
-        return this.canExtract;
-    }
+        @Override
+        public int getSlotStackLimit(){
+            return CustomSlotImpl.this.capacity.applyAsInt(ItemStack.EMPTY);
+        }
 
-    @Override
-    public boolean isActive(){
-        return this.active;
-    }
+        @Override
+        public int getItemStackLimit(ItemStack stack){
+            return CustomSlotImpl.this.capacity.applyAsInt(stack);
+        }
 
-    @Override
-    public void onSlotChanged(){
-        // Check if the stack size of the last given stack was modified
-        if(this.lastReturnedStack != null && this.lastReturnedStack.getCount() != this.lastReturnedStackCount)
-            this.putStack(this.lastReturnedStack);
-        super.onSlotChanged();
+        @Override
+        public ItemStack decrStackSize(int amount){
+            ItemStack original = CustomSlotImpl.this.getter.get();
+            ItemStack extracted = CustomSlotImpl.this.extractor.apply(amount);
+            ItemStack newStack = CustomSlotImpl.this.getter.get();
+            if(!ItemStack.areItemStacksEqual(original, newStack))
+                CustomSlotImpl.this.onExtract.onChange(original, newStack);
+            this.lastReturnedStack = null;
+            return extracted;
+        }
+
+        @Override
+        public boolean canTakeStack(EntityPlayer player){
+            return CustomSlotImpl.this.canExtract;
+        }
+
+        @Override
+        public boolean isEnabled(){
+            return CustomSlotImpl.this.active;
+        }
+
+        @Override
+        public void onSlotChanged(){
+            // Check if the stack size of the last given stack was modified
+            if(this.lastReturnedStack != null && this.lastReturnedStack.getCount() != this.lastReturnedStackCount)
+                this.putStack(this.lastReturnedStack);
+            super.onSlotChanged();
+        }
     }
 
     private static ItemStack copyWithCount(ItemStack stack, int count){
