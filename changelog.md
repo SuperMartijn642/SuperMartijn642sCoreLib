@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.24a
+- Fixed `CustomSlot#isActive` being obfuscated by ForgeGradle
+
 ### SuperMartijn642's Core Library 1.1.24
 - Fixed `CustomSlot` hover check area being 2 pixels too large
 
