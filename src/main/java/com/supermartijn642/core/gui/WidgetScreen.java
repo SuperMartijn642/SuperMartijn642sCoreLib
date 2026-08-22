@@ -72,6 +72,7 @@ public class WidgetScreen<T extends Widget> extends Screen {
         super.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
 
         this.widgetRenderContext.update(guiGraphics, partialTicks, this.font, this.minecraft);
+        GuiGraphicsHelper helper = GuiGraphicsHelper.of(guiGraphics);
         int offsetX = this.getWidgetX(), offsetY = this.getWidgetY();
         mouseX -= offsetX;
         mouseY -= offsetY;
@@ -82,7 +83,11 @@ public class WidgetScreen<T extends Widget> extends Screen {
         // Update whether the widget is focused
         this.widget.setFocused(mouseX >= 0 && mouseX < this.widget.width() && mouseY >= 0 && mouseY < this.widget.height());
 
-        GuiGraphicsHelper helper = GuiGraphicsHelper.of(guiGraphics);
+        // Update cursor
+        CursorType curser = this.widget.curser(mouseX, mouseY);
+        if(curser != null)
+            helper.requestCursor(curser);
+
         // Render the widget background
         this.widget.renderBackground(this.widgetRenderContext, helper, mouseX, mouseY);
 
