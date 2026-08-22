@@ -19,6 +19,7 @@
     "GameRendererMixin",
     "LevelRendererMixin",
     "ModelDiscoveryMixin",
+    "PlayerSkinMixin",
     "SpriteSourceListMixin"
   ],
   "server": [],
