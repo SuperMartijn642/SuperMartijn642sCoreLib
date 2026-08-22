@@ -33,6 +33,7 @@
     "PlayerEntityMixin",
     "RecipeUnlockedTriggerInstanceMixin",
     "RegistrySimpleMixin",
+    "SkullBlockEntityMixin",
     "SPacketCustomPayloadMixin",
     "TileEntityMixin"
   ],
@@ -42,6 +43,7 @@
     "LevelRendererMixin",
     "LocaleMixin",
     "ModelLoaderMixin",
+    "PlayerInfoMixin",
     "TileEntityRendererDispatcherMixin",
     "VariantDeserializerMixin"
   ],

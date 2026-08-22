@@ -1,5 +1,6 @@
 package com.supermartijn642.core;
 
+import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.supermartijn642.core.data.TagLoader;
 import com.supermartijn642.core.data.condition.*;
 import com.supermartijn642.core.data.tag.entries.NamespaceTagEntry;
@@ -15,6 +16,7 @@ import com.supermartijn642.core.registry.ClientRegistrationHandler;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
+import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.world.storage.loot.conditions.LootConditionManager;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
@@ -32,6 +34,9 @@ public class CoreLib {
     public static final Logger LOGGER = CommonUtils.getLogger("supermartijn642corelib");
 
     public static final PacketChannel CHANNEL = PacketChannel.create("supermartijn642corelib");
+
+    public static MinecraftSessionService sessionService;
+    public static PlayerProfileCache gameProfileCache;
 
     public CoreLib(){
         CHANNEL.registerMessage(OpenContainerPacket.class, OpenContainerPacket::new, true);

@@ -1,6 +1,7 @@
 package com.supermartijn642.core.gui;
 
 import com.supermartijn642.core.ClientUtils;
+import com.supermartijn642.core.util.playerprofile.PlayerProfileCache;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
@@ -13,10 +14,12 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.client.config.GuiUtils;
+import org.jetbrains.annotations.Contract;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -283,6 +286,19 @@ public class ScreenUtils {
         int screenWidth = MathHelper.ceil((double)displayWidth / scaleFactor);
         int screenHeight = MathHelper.ceil((double)displayHeight / scaleFactor);
         GuiUtils.drawHoveringText(components, x, y, screenWidth, screenHeight, -1, fontRenderer);
+    }
+
+    /**
+     * @param useDefaultIfAbsent if {@code false} and the player profile is not available, this method does nothing
+     */
+    @Contract("_,_,_,_,_,true -> true")
+    public static boolean drawPlayerHead(UUID player, int x, int y, int width, int height, boolean useDefaultIfAbsent){
+        PlayerProfileCache.Skin skin = useDefaultIfAbsent ? PlayerProfileCache.get(true).getSkinOrDefault(player) : PlayerProfileCache.get(true).getSkin(player);
+        if(skin == null)
+            return false;
+        bindTexture(skin.body());
+        drawTexture(x, y, width, height, 1 / 8f, 1 / 8f, 1 / 8f, 1 / 8f);
+        return true;
     }
 
     public static void withScissor(int x, int y, int width, int height, Runnable rendering){
