@@ -9,6 +9,7 @@ import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
+import net.minecraft.server.Services;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -21,6 +22,8 @@ import org.slf4j.Logger;
 public class CoreLib {
 
     public static final Logger LOGGER = CommonUtils.getLogger("supermartijn642corelib");
+
+    public static Services services;
 
     public CoreLib(){
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onConstructMod);
