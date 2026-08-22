@@ -20,6 +20,7 @@
     "ForgeHooksClientMixin",
     "GameRendererMixin",
     "LevelRendererMixin",
+    "PlayerSkinMixin",
     "SpriteSourceListMixin"
   ],
   "server": [],
