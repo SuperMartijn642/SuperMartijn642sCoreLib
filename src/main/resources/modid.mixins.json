@@ -9,6 +9,7 @@
     "MappedRegistryMixin",
     "RecipeManagerMixin",
     "ServerPlayerGameModeMixin",
+    "SkullBlockEntityMixin",
     "TagLoaderMixin",
     "TagManagerMixin"
   ],
@@ -21,6 +22,7 @@
     "MinecraftMixin",
     "ModelManagerMixin",
     "MultiPlayerGameModeMixin",
+    "PlayerSkinMixin",
     "SpriteSourceListMixin"
   ],
   "server": [
