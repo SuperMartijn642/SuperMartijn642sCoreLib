@@ -21,6 +21,7 @@
     "ModelBakerImplMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",
+    "PlayerSkinMixin",
     "SpriteSourceListMixin"
   ],
   "server": [],
