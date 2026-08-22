@@ -12,6 +12,7 @@
     "dev.DatagenModLoaderAccessor",
     "GameDataMixin",
     "RecipeManagerMixin",
+    "SkullBlockEntityMixin",
     "TagLoaderMixin",
     "TagManagerMixin"
   ],
@@ -21,6 +22,7 @@
     "GameRendererMixin",
     "GuiGraphicsInvoker",
     "LevelRendererMixin",
+    "PlayerSkinMixin",
     "SpriteSourceListMixin"
   ],
   "server": [],

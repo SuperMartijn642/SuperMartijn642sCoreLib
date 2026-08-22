@@ -11,6 +11,7 @@ import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
+import net.minecraft.server.Services;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -29,6 +30,8 @@ import java.util.function.Consumer;
 public class CoreLib {
 
     public static final Logger LOGGER = CommonUtils.getLogger("supermartijn642corelib");
+
+    public static Services services;
 
     public CoreLib(){
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onConstructMod);
