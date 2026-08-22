@@ -1,5 +1,6 @@
 package com.supermartijn642.core.gui;
 
+import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
 import com.supermartijn642.core.gui.widget.MutableWidgetRenderContext;
@@ -86,6 +87,11 @@ public class WidgetScreen<T extends Widget> extends Screen {
         // Update whether the widget is focused
         if(!this.dragging)
             this.widget.setFocused(mouseX >= 0 && mouseX < this.widget.width() && mouseY >= 0 && mouseY < this.widget.height());
+
+        // Update cursor
+        CursorType curser = this.widget.curser(mouseX, mouseY);
+        if(curser != null)
+            guiGraphics.requestCursor(curser);
 
         GuiGraphicsHelper helper = GuiGraphicsHelper.of(guiGraphics);
         // Render the widget background
