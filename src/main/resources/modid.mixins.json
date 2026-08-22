@@ -9,6 +9,7 @@
     "CraftingHelperMixin",
     "ForgeHooksMixin",
     "GameDataMixin",
+    "SkullBlockEntityMixin",
     "TagBuilderMixin",
     "TagLoaderMixin",
     "TagManagerMixin"
@@ -18,7 +19,8 @@
     "DataGeneratorMixin",
     "DatagenModLoaderAccessor",
     "GameRendererMixin",
-    "LevelRendererMixin"
+    "LevelRendererMixin",
+    "PlayerInfoMixin"
   ],
   "server": [],
   "injectors": {
