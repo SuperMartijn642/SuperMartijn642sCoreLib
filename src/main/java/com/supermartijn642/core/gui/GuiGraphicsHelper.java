@@ -8,6 +8,7 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.extensions.GuiGraphicsExtractorExtension;
+import com.supermartijn642.core.util.playerprofile.PlayerProfileCache;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -35,17 +36,16 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Contract;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -482,6 +482,18 @@ public final class GuiGraphicsHelper {
             this.guiGraphics.scissorStack.peek(),
             submitter
         ));
+    }
+
+    /**
+     * @param useDefaultIfAbsent if {@code false} and the player profile is not available, this method does nothing
+     */
+    @Contract("_,_,_,_,_,true -> true")
+    public boolean submitPlayerHead(UUID player, int x, int y, int width, int height, boolean useDefaultIfAbsent){
+        PlayerSkin skin = useDefaultIfAbsent ? PlayerProfileCache.get(true).getSkinOrDefault(player) : PlayerProfileCache.get(true).getSkin(player);
+        if(skin == null)
+            return false;
+        this.submitTexture(skin.body().texturePath(), x, y, width, height, p -> p.uv(1 / 8f, 1 / 8f, 1 / 8f, 1 / 8f));
+        return true;
     }
 
     public static final class TextProperties {
