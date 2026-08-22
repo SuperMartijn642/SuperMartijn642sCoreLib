@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.render.RenderUtils;
+import com.supermartijn642.core.util.playerprofile.PlayerProfileCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
@@ -15,11 +16,13 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Contract;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -344,6 +347,19 @@ public class ScreenUtils {
             component.renderImage(ClientUtils.getFontRenderer(), tooltipX, offsetY, poseStack, ClientUtils.getItemRenderer());
             offsetY += component.getHeight() + (index == 0 ? 2 : 0);
         }
+    }
+
+    /**
+     * @param useDefaultIfAbsent if {@code false} and the player profile is not available, this method does nothing
+     */
+    @Contract("_,_,_,_,_,_,true -> true")
+    public static boolean drawPlayerHead(UUID player, PoseStack poseStack, int x, int y, int width, int height, boolean useDefaultIfAbsent){
+        PlayerProfileCache.Skin skin = useDefaultIfAbsent ? PlayerProfileCache.get(true).getSkinOrDefault(player) : PlayerProfileCache.get(true).getSkin(player);
+        if(skin == null)
+            return false;
+        bindTexture(skin.body());
+        drawTexture(poseStack, x, y, width, height, 1 / 8f, 1 / 8f, 1 / 8f, 1 / 8f);
+        return true;
     }
 
     public static void withScissor(PoseStack poseStack, int x, int y, int width, int height, Runnable rendering){
