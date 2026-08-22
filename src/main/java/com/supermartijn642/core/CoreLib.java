@@ -1,5 +1,6 @@
 package com.supermartijn642.core;
 
+import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.supermartijn642.core.data.condition.*;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
 import com.supermartijn642.core.data.tag.entries.NamespaceTagEntry;
@@ -8,6 +9,7 @@ import com.supermartijn642.core.generator.standard.CoreLibMiningTagGenerator;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import com.supermartijn642.core.registry.RegistrationHandler;
 import com.supermartijn642.core.registry.RegistryEntryAcceptor;
+import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -20,6 +22,9 @@ import org.apache.logging.log4j.Logger;
 public class CoreLib {
 
     public static final Logger LOGGER = CommonUtils.getLogger("supermartijn642corelib");
+
+    public static MinecraftSessionService sessionService;
+    public static PlayerProfileCache gameProfileCache;
 
     public CoreLib(){
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onRegisterRegistries);

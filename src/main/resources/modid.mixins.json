@@ -15,6 +15,7 @@
     "GameDataMixin",
     "ItemEntityMixin",
     "PlayerEntityMixin",
+    "SkullBlockEntityMixin",
     "TagBuilderMixin",
     "TagCollectionMixin"
   ],
@@ -22,7 +23,8 @@
     "AbstractContainerScreenMixin",
     "GameRendererMixin",
     "ItemRendererMixin",
-    "LevelRendererMixin"
+    "LevelRendererMixin",
+    "PlayerInfoMixin"
   ],
   "server": [],
   "injectors": {
