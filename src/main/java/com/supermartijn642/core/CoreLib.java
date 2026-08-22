@@ -1,5 +1,6 @@
 package com.supermartijn642.core;
 
+import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.supermartijn642.core.data.condition.*;
 import com.supermartijn642.core.data.recipe.ConditionalRecipeSerializer;
 import com.supermartijn642.core.data.tag.entries.NamespaceTagEntry;
@@ -14,6 +15,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.players.GameProfileCache;
 import org.slf4j.Logger;
 
 /**
@@ -24,6 +26,9 @@ public class CoreLib implements ModInitializer {
     public static final Logger LOGGER = CommonUtils.getLogger("supermartijn642corelib");
 
     public static boolean isArchitecturyLoaded = false;
+
+    public static MinecraftSessionService sessionService;
+    public static GameProfileCache gameProfileCache;
 
     @Override
     public void onInitialize(){

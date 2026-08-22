@@ -8,6 +8,7 @@
     "HolderReferenceMixin",
     "MappedRegistryMixin",
     "ServerPlayerGameModeMixin",
+    "SkullBlockEntityMixin",
     "TagBuilderMixin",
     "TagLoaderMixin",
     "TagManagerMixin"
@@ -20,7 +21,8 @@
     "LevelRendererMixin",
     "MinecraftMixin",
     "ModelManagerMixin",
-    "MultiPlayerGameModeMixin"
+    "MultiPlayerGameModeMixin",
+    "PlayerInfoMixin"
   ],
   "server": [
     "ServerMainMixin"

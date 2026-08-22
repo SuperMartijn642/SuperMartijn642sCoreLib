@@ -7,6 +7,7 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector4f;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.render.RenderUtils;
+import com.supermartijn642.core.util.playerprofile.PlayerProfileCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
@@ -18,9 +19,11 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Contract;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -354,6 +357,19 @@ public class ScreenUtils {
         }
 
         itemRenderer.blitOffset = oldBlitOffset;
+    }
+
+    /**
+     * @param useDefaultIfAbsent if {@code false} and the player profile is not available, this method does nothing
+     */
+    @Contract("_,_,_,_,_,_,true -> true")
+    public static boolean drawPlayerHead(UUID player, PoseStack poseStack, int x, int y, int width, int height, boolean useDefaultIfAbsent){
+        PlayerProfileCache.Skin skin = useDefaultIfAbsent ? PlayerProfileCache.get(true).getSkinOrDefault(player) : PlayerProfileCache.get(true).getSkin(player);
+        if(skin == null)
+            return false;
+        bindTexture(skin.body());
+        drawTexture(poseStack, x, y, width, height, 1 / 8f, 1 / 8f, 1 / 8f, 1 / 8f);
+        return true;
     }
 
     public static void withScissor(PoseStack poseStack, int x, int y, int width, int height, Runnable rendering){
