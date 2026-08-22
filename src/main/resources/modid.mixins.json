@@ -21,6 +21,7 @@
     "LevelRendererMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",
+    "PlayerSkinMixin",
     "SpriteSourceListMixin"
   ],
   "server": [],
