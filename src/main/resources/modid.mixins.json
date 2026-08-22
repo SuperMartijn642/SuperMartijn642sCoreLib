@@ -21,6 +21,7 @@
     "MinecraftMixin",
     "ModelManagerMixin",
     "MultiPlayerGameModeMixin",
+    "PlayerSkinMixin",
     "SpriteSourceListMixin"
   ],
   "server": [
