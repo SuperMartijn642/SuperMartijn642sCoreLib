@@ -8,6 +8,7 @@
     "BlockPropertiesAccessor",
     "CraftingHelperMixin",
     "GameDataMixin",
+    "SkullBlockEntityMixin",
     "TagLoaderMixin",
     "TagManagerMixin"
   ],
@@ -18,6 +19,7 @@
     "ForgeHooksClientMixin",
     "GameRendererMixin",
     "LevelRendererMixin",
+    "PlayerInfoMixin",
     "SpriteResourceLoaderMixin"
   ],
   "server": [],
