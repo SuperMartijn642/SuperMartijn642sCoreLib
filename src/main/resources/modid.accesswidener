@@ -50,6 +50,17 @@ accessible method net/minecraft/world/item/CreativeModeTab <init> (Lnet/minecraf
 mutable field net/minecraft/world/item/CreativeModeTab displayItemsGenerator Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator; # displayItemsGenerator
 # DataGenerator
 accessible field net/minecraft/data/DataGenerator rootOutputFolder Ljava/nio/file/Path; # rootOutputFolder
+# DefaultPlayerSkin
+accessible field net/minecraft/client/resources/DefaultPlayerSkin DEFAULT_SKINS [Lnet/minecraft/client/resources/DefaultPlayerSkin$SkinType;
+# DefaultPlayerSkin$ModelType
+accessible class net/minecraft/client/resources/DefaultPlayerSkin$ModelType
+# DefaultPlayerSkin$SkinType
+accessible class net/minecraft/client/resources/DefaultPlayerSkin$SkinType
+# GameProfileCache
+accessible field net/minecraft/server/players/GameProfileCache profilesByName Ljava/util/Map;
+accessible method net/minecraft/server/players/GameProfileCache getNextOperation ()J
+# GameProfileCache$GameProfileInfo
+accessible class net/minecraft/server/players/GameProfileCache$GameProfileInfo
 # GameRenderer
 accessible field net/minecraft/client/renderer/GameRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
 # GuiGraphics
