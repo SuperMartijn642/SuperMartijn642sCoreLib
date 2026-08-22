@@ -24,6 +24,7 @@
     "ModelBakeryMixin",
     "ModelManagerMixin",
     "MultiPlayerGameModeMixin",
+    "PlayerSkinMixin",
     "SpriteSourceListMixin"
   ],
   "server": [
