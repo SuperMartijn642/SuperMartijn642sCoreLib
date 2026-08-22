@@ -15,6 +15,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.Services;
 import org.slf4j.Logger;
 
 /**
@@ -25,6 +26,8 @@ public class CoreLib implements ModInitializer {
     public static final Logger LOGGER = CommonUtils.getLogger("supermartijn642corelib");
 
     public static boolean isArchitecturyLoaded = false;
+
+    public static Services services;
 
     @Override
     public void onInitialize(){
