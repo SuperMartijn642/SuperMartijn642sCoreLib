@@ -79,6 +79,11 @@ public class WidgetScreen<T extends Widget> extends Screen {
         // Update whether the widget is focused
         this.widget.setFocused(mouseX >= 0 && mouseX < this.widget.width() && mouseY >= 0 && mouseY < this.widget.height());
 
+        // Update cursor
+        CursorType curser = this.widget.curser(mouseX, mouseY);
+        if(curser != null)
+            ScreenUtils.requestCursor(curser);
+
         // Render the widget background
         this.widget.renderBackground(mouseX, mouseY);
         // Render the widget
