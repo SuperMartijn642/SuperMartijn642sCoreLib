@@ -10,6 +10,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.Services;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -107,5 +108,9 @@ public class CommonUtils {
 
     public static Logger getLogger(String modid){
         return LoggerFactory.getLogger(modid);
+    }
+
+    public static Services getServices(){
+        return CoreLib.services;
     }
 }

@@ -51,6 +51,11 @@ accessible method net/minecraft/world/item/CreativeModeTab <init> (Lnet/minecraf
 mutable field net/minecraft/world/item/CreativeModeTab displayItemsGenerator Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator; # displayItemsGenerator
 # DataGenerator
 accessible field net/minecraft/data/DataGenerator rootOutputFolder Ljava/nio/file/Path; # rootOutputFolder
+# GameProfileCache
+accessible field net/minecraft/server/players/GameProfileCache profilesByName Ljava/util/Map;
+accessible method net/minecraft/server/players/GameProfileCache getNextOperation ()J
+# GameProfileCache$GameProfileInfo
+accessible class net/minecraft/server/players/GameProfileCache$GameProfileInfo
 # GameRenderer
 accessible field net/minecraft/client/renderer/GameRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
 # GuiGraphics
@@ -104,6 +109,8 @@ accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
 # RecipeManager
 accessible method net/minecraft/world/item/crafting/RecipeManager fromJson (Lnet/minecraft/resources/ResourceLocation;Lcom/google/gson/JsonObject;)Lnet/minecraft/world/item/crafting/RecipeHolder; # fromJson
+# SkullBlockEntity
+accessible method net/minecraft/world/level/block/entity/SkullBlockEntity fetchGameProfile (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
 # TagEntry
 accessible field net/minecraft/tags/TagEntry CODEC Lcom/mojang/serialization/Codec;
 accessible field net/minecraft/tags/TagEntry id Lnet/minecraft/resources/ResourceLocation;
