@@ -16,6 +16,7 @@
     "ItemEntityMixin",
     "LivingEntityMixin",
     "PlayerEntityMixin",
+    "SkullBlockEntityMixin",
     "TagBuilderMixin",
     "TagCollectionMixin"
   ],
@@ -25,6 +26,7 @@
     "EntityRendererManagerMixin",
     "GameRendererMixin",
     "LevelRendererMixin",
+    "PlayerInfoMixin",
     "TileEntityRendererDispatcherMixin"
   ],
   "server": [],
