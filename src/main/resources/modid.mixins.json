@@ -8,6 +8,7 @@
     "BlockPropertiesAccessor",
     "CraftingHelperMixin",
     "GameDataMixin",
+    "SkullBlockEntityMixin",
     "TagLoaderMixin",
     "TagManagerMixin"
   ],
@@ -17,6 +18,7 @@
     "DatagenModLoaderAccessor",
     "GameRendererMixin",
     "LevelRendererMixin",
+    "PlayerInfoMixin",
     "SpriteResourceLoaderMixin"
   ],
   "server": [],
