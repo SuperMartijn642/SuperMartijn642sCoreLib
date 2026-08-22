@@ -21,6 +21,7 @@
     "ClientHooksMixin",
     "GameRendererMixin",
     "LevelRendererMixin",
+    "PlayerSkinMixin",
     "SpriteSourceListMixin"
   ],
   "server": [],
