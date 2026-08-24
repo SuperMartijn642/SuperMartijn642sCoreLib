@@ -230,8 +230,9 @@ public abstract class ItemInfoGenerator extends ResourceGenerator {
             return this.addModel(ModelBuilder.of(model));
         }
 
-        public void setTransformation(Transformation transformation){
+        public CompositeModelBuilder setTransformation(Transformation transformation){
             this.transformation = transformation;
+            return this;
         }
     }
 }
