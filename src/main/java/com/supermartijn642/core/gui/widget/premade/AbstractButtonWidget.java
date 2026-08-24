@@ -45,6 +45,7 @@ public abstract class AbstractButtonWidget extends BaseWidget {
 
     @Override
     public boolean mousePressed(int mouseX, int mouseY, int button, boolean hasBeenHandled){
+        hasBeenHandled |= super.mousePressed(mouseX, mouseY, button, hasBeenHandled);
         if(!hasBeenHandled && mouseX >= this.x && mouseX < this.x + this.width && mouseY >= this.y && mouseY < this.y + this.height && this.isClickable()){
             this.onPress();
             return true;
