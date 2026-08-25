@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.24a
+- Fixed `tag_populated` resource condition always failing on first resource reload
+
 ### SuperMartijn642's Core Library 1.1.24
 - Fixed `CustomSlot` hover check area being 2 pixels too large
 
