@@ -46,7 +46,7 @@ public class ResourceConditions {
 
         @Override
         public boolean test(@Nullable RegistryOps.RegistryInfoLookup registryLookup){
-            return this.condition.test(ResourceConditionContext.EMPTY);
+            return this.condition.test(new ResourceConditionContext(registryLookup));
         }
     }
 }
