@@ -10,10 +10,12 @@ import com.supermartijn642.core.data.condition.ResourceConditionContext;
 import com.supermartijn642.core.data.condition.ResourceConditionSerializer;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
+import net.fabricmc.fabric.mixin.resource.conditions.RegistryOpsAccessor;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
@@ -53,7 +55,7 @@ public final class ConditionalRecipeSerializer {
                 .filter(Objects::nonNull)
                 .forEach(entry -> json.add(entry.getFirst(), ops.convertTo(JsonOps.INSTANCE, entry.getSecond())));
             // Unwrap recipe
-            JsonElement recipeJson = unwrapRecipe(null, json);
+            JsonElement recipeJson = unwrapRecipe(null, json, ops);
             if(recipeJson == null)
                 return DataResult.success(DUMMY_RECIPE);
             // Convert json to ops type
@@ -100,11 +102,17 @@ public final class ConditionalRecipeSerializer {
     private ConditionalRecipeSerializer(){
     }
 
-    public static JsonElement unwrapRecipe(Identifier location, JsonObject json){
+    public static JsonElement unwrapRecipe(Identifier location, JsonObject json, DynamicOps<?> ops){
         if(!json.has("conditions") || !json.get("conditions").isJsonArray())
             throw new RuntimeException("Conditional recipe '" + location + "' must have 'conditions' array!");
         if(!json.has("recipe") || !json.get("recipe").isJsonObject())
             throw new RuntimeException("Conditional recipe '" + location + "' must have 'recipe' object!");
+
+        // Retrieve registry access from Fabric API
+        RegistryOps.RegistryInfoLookup registryLookup = null;
+        if(ops instanceof RegistryOpsAccessor registryOps)
+            registryLookup = registryOps.getRegistryInfoGetter();
+        ResourceConditionContext context = new ResourceConditionContext(registryLookup);
 
         // Test all conditions
         JsonArray conditions = json.getAsJsonArray("conditions");
@@ -129,7 +137,7 @@ public final class ConditionalRecipeSerializer {
                 throw new RuntimeException("Encountered exception whilst testing condition '" + Identifier.parse(type) + "' for recipe '" + location + "'!");
             }
 
-            if(!condition.test(ResourceConditionContext.EMPTY))
+            if(!condition.test(context))
                 return null;
         }
 

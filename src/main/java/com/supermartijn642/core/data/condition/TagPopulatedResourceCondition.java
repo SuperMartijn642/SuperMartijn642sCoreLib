@@ -3,7 +3,6 @@ package com.supermartijn642.core.data.condition;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 
@@ -28,9 +27,7 @@ public class TagPopulatedResourceCondition implements ResourceCondition {
 
     @Override
     public boolean test(ResourceConditionContext context){
-        Registry<?> vanillaRegistry = this.registry.getVanillaRegistry();
-        //noinspection unchecked,rawtypes,DataFlowIssue
-        return ((Registry)vanillaRegistry).get(TagKey.create(vanillaRegistry.key(), this.tag)).isPresent();
+        return context.isTagPopulated(TagKey.create(this.registry.getVanillaRegistry().key(), this.tag));
     }
 
     @Override
