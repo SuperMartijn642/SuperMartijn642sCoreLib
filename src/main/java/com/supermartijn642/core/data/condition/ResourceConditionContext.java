@@ -1,6 +1,7 @@
 package com.supermartijn642.core.data.condition;
 
 import com.mojang.serialization.DynamicOps;
+import net.minecraft.tags.TagKey;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 
 /**
@@ -16,6 +17,10 @@ public class ResourceConditionContext {
     ResourceConditionContext(ICondition.IContext context, DynamicOps<?> dynamicOps){
         this.context = context;
         this.dynamicOps = dynamicOps;
+    }
+
+    public boolean isTagPopulated(TagKey<?> tag){
+        return !this.context.getTag(tag).isEmpty();
     }
 
     @Deprecated
