@@ -3,9 +3,7 @@ package com.supermartijn642.core.data.condition;
 import com.google.gson.JsonObject;
 import com.supermartijn642.core.registry.Registries;
 import com.supermartijn642.core.registry.RegistryUtil;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 
 /**
@@ -29,9 +27,7 @@ public class TagPopulatedResourceCondition implements ResourceCondition {
 
     @Override
     public boolean test(ResourceConditionContext context){
-        ResourceKey<?> registryKey = this.registry.hasForgeRegistry() ? this.registry.getForgeRegistry().getRegistryKey() : this.registry.getVanillaRegistry().key();
-        //noinspection unchecked
-        return !context.getUnderlying().getTag(TagKey.create((ResourceKey<? extends Registry<Object>>)registryKey, this.tag)).isEmpty();
+        return context.isTagPopulated(TagKey.create(this.registry.getVanillaRegistry().key(), this.tag));
     }
 
     @Override
