@@ -51,6 +51,8 @@ accessible method net/minecraft/world/item/CreativeModeTab <init> (Lnet/minecraf
 mutable field net/minecraft/world/item/CreativeModeTab displayItemsGenerator Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator; # displayItemsGenerator
 # DataGenerator
 accessible field net/minecraft/data/DataGenerator rootOutputFolder Ljava/nio/file/Path; # rootOutputFolder
+# Entity
+accessible method net/minecraft/world/entity/Entity unsetRemoved ()V
 # GameProfileCache
 accessible field net/minecraft/server/players/GameProfileCache profilesByName Ljava/util/Map;
 accessible method net/minecraft/server/players/GameProfileCache getNextOperation ()J
@@ -109,6 +111,13 @@ accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
 # RecipeManager
 accessible method net/minecraft/world/item/crafting/RecipeManager fromJson (Lnet/minecraft/resources/ResourceLocation;Lcom/google/gson/JsonObject;)Lnet/minecraft/world/item/crafting/RecipeHolder; # fromJson
+# ServerPlayer
+accessible field net/minecraft/server/level/ServerPlayer enteredNetherPosition Lnet/minecraft/world/phys/Vec3;
+accessible field net/minecraft/server/level/ServerPlayer isChangingDimension Z
+accessible field net/minecraft/server/level/ServerPlayer lastSentExp I
+accessible field net/minecraft/server/level/ServerPlayer lastSentHealth F
+accessible field net/minecraft/server/level/ServerPlayer lastSentFood I
+accessible method net/minecraft/server/level/ServerPlayer triggerDimensionChangeTriggers (Lnet/minecraft/server/level/ServerLevel;)V
 # SkullBlockEntity
 accessible method net/minecraft/world/level/block/entity/SkullBlockEntity fetchGameProfile (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
 # TagEntry
