@@ -56,6 +56,8 @@ accessible field net/minecraft/client/resources/DefaultPlayerSkin DEFAULT_SKINS 
 accessible class net/minecraft/client/resources/DefaultPlayerSkin$ModelType
 # DefaultPlayerSkin$SkinType
 accessible class net/minecraft/client/resources/DefaultPlayerSkin$SkinType
+# Entity
+accessible method net/minecraft/world/entity/Entity unsetRemoved ()V
 # GameProfileCache
 accessible field net/minecraft/server/players/GameProfileCache profilesByName Ljava/util/Map;
 accessible method net/minecraft/server/players/GameProfileCache getNextOperation ()J
@@ -112,6 +114,13 @@ accessible field net/minecraft/client/Minecraft resourcePackRepository Lnet/mine
 accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
 # Player
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
+# ServerPlayer
+accessible field net/minecraft/server/level/ServerPlayer enteredNetherPosition Lnet/minecraft/world/phys/Vec3;
+accessible field net/minecraft/server/level/ServerPlayer isChangingDimension Z
+accessible field net/minecraft/server/level/ServerPlayer lastSentExp I
+accessible field net/minecraft/server/level/ServerPlayer lastSentHealth F
+accessible field net/minecraft/server/level/ServerPlayer lastSentFood I
+accessible method net/minecraft/server/level/ServerPlayer triggerDimensionChangeTriggers (Lnet/minecraft/server/level/ServerLevel;)V
 # TagEntry
 accessible field net/minecraft/tags/TagEntry CODEC Lcom/mojang/serialization/Codec;
 accessible field net/minecraft/tags/TagEntry id Lnet/minecraft/resources/ResourceLocation;
