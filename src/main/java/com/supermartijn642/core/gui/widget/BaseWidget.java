@@ -105,6 +105,12 @@ public abstract class BaseWidget implements Widget {
      * @return true if this widget contained the given widget
      */
     protected boolean removeWidget(Widget widget){
+        if(this.focusedWidget == widget){
+            Widget focusedWidget = this.focusedWidget;
+            this.focusedWidget = null;
+            focusedWidget.setFocused(false);
+            this.nextNarration = System.currentTimeMillis() + 750;
+        }
         return this.widgets.remove(widget);
     }
 
