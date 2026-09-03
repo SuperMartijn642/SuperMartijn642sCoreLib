@@ -1,6 +1,7 @@
 package com.supermartijn642.core;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
@@ -52,7 +53,11 @@ public class ClientUtils {
      * Closes the player's opened screen
      */
     public static void closeScreen(){
-        getPlayer().closeScreen();
+        EntityPlayer player = getPlayer();
+        if(player.openContainer != player.inventoryContainer)
+            player.closeScreen();
+        else
+            ((EntityPlayerSP)player).closeScreenAndDropStack();
     }
 
     /**
