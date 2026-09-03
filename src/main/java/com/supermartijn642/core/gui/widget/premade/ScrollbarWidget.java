@@ -168,7 +168,7 @@ public class ScrollbarWidget extends BaseWidget {
 
     @Override
     public boolean mouseScrolled(int mouseX, int mouseY, double scrollAmount, boolean hasBeenHandled){
-        if(this.active && this.canUserMoveScroller() && !hasBeenHandled){
+        if(this.active  && this.isFocused() && this.canUserMoveScroller() && !hasBeenHandled){
             if(this.scrollWheelStep == null)
                 this.tryScrollTo(this.scrollerPosition - scrollAmount / 5f, true);
             else if(this.scrollWheelStep != 0){
