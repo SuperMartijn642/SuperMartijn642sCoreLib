@@ -3,6 +3,7 @@ package com.supermartijn642.core;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -53,7 +54,10 @@ public class ClientUtils {
      */
     public static void closeScreen(){
         Player player = getPlayer();
-        player.containerMenu = player.inventoryMenu;
+        if(player.containerMenu != player.inventoryMenu)
+            player.closeContainer();
+        else
+            ((LocalPlayer)player).clientSideCloseContainer();
     }
 
     /**
