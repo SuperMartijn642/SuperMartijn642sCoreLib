@@ -504,7 +504,10 @@ public final class GuiGraphicsHelper {
     }
 
     public void submitCustomRendering(int x, int y, int width, int height, BiConsumer<PoseStack,MultiBufferSource.BufferSource> rendering){
-        this.guiGraphics.guiRenderState.addPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), this.guiGraphics.scissorStack.peek(), rendering));
+        ScreenRectangle scissorArea = this.guiGraphics.scissorStack.peek();
+        if(scissorArea != null && (scissorArea.width() <= 0 || scissorArea.height() <= 0))
+            return;
+        this.guiGraphics.guiRenderState.addPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), scissorArea, rendering));
     }
 
     public void submitFeatures(int x, int y, int width, int height, BiConsumer<PoseStack,SubmitNodeCollector> submitter){
