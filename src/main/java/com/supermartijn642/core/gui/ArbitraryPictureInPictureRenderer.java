@@ -68,7 +68,7 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
 
         // Clear texture
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(texture.texture, GuiRenderer.CLEAR_COLOR, texture.depthTexture, 0);
-        this.projection.setupOrtho(-1000.0F, 1000.0F, width, height, true);
+        this.projection.setupOrtho(-1000.0F, 1000.0F, texture.width, texture.height, true);
         RenderSystem.setProjectionMatrix(this.projectionMatrixBuffer.getBuffer(this.projection), ProjectionType.ORTHOGRAPHIC);
 
         // Render to the texture
