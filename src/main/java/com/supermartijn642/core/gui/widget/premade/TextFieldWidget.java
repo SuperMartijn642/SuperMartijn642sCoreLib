@@ -34,7 +34,8 @@ public class TextFieldWidget extends BaseWidget {
     protected int cursorPosition;
     protected int selectionPos;
     protected boolean drawBackground = true;
-    protected int activeTextColor = 14737632, inactiveTextColor = 7368816;
+    protected int activeTextColor = 14737632, inactiveTextColor = 7368816, suggestionTextColor = -8355712;
+    protected boolean textShadow = false;
 
     private final BiConsumer<String,String> changeListener;
 
@@ -85,7 +86,10 @@ public class TextFieldWidget extends BaseWidget {
 
         if(!s.isEmpty()){
             String s1 = cursorInView ? s.substring(0, relativeCursor) : s;
-            leftOffset = fontRenderer.draw(poseStack, s1, left, top, textColor) + 1;
+            if(this.textShadow)
+            leftOffset += fontRenderer.drawShadow(poseStack, s1, left, top, textColor) + 1;
+                else
+            leftOffset += fontRenderer.draw(poseStack, s1, left, top, textColor) + 1;
         }
 
         boolean cursorAtEnd = this.cursorPosition < this.text.length();
@@ -99,12 +103,16 @@ public class TextFieldWidget extends BaseWidget {
         }
 
         // draw text
-        if(!s.isEmpty() && cursorInView && relativeCursor < s.length())
-            fontRenderer.draw(poseStack, s.substring(relativeCursor), leftOffset, top, textColor);
+        if(!s.isEmpty() && cursorInView && relativeCursor < s.length()){
+            if(this.textShadow)
+                fontRenderer.drawShadow(poseStack, s.substring(relativeCursor), leftOffset, top, textColor);
+            else
+                fontRenderer.draw(poseStack, s.substring(relativeCursor), leftOffset, top, textColor);
+        }
 
         // draw suggestion
         if(!this.suggestion.isEmpty() && this.text.isEmpty())
-            fontRenderer.drawShadow(poseStack, fontRenderer.plainSubstrByWidth(this.suggestion, this.width - 8 - fontRenderer.width("...")) + "...", cursorX, top, -8355712);
+            fontRenderer.drawShadow(poseStack, fontRenderer.plainSubstrByWidth(this.suggestion, this.width - 8 - fontRenderer.width("...")) + "...", cursorX, top, this.suggestionTextColor);
 
         // draw cursor
         if(shouldBlink){
@@ -267,6 +275,11 @@ public class TextFieldWidget extends BaseWidget {
     public void setTextColors(int activeTextColor, int inactiveTextColor){
         this.activeTextColor = activeTextColor;
         this.inactiveTextColor = inactiveTextColor;
+    }
+
+    public void setTextColors(int activeTextColor, int inactiveTextColor, int suggestionTextColor){
+        this.setTextColors(activeTextColor, inactiveTextColor);
+        this.suggestionTextColor = suggestionTextColor;
     }
 
     public void setDrawBackground(boolean drawBackground){
