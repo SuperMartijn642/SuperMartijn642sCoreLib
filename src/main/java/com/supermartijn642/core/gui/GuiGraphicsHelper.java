@@ -478,7 +478,7 @@ public final class GuiGraphicsHelper {
         ScreenRectangle scissorArea = this.guiGraphics.scissorStack.peek();
         if(scissorArea != null && (scissorArea.width() <= 0 || scissorArea.height() <= 0))
             return;
-        this.guiGraphics.guiRenderState.submitPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), scissorArea, rendering));
+        this.guiGraphics.guiRenderState.submitPicturesInPictureState(ArbitraryPictureInPictureRenderer.State.create(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), scissorArea, rendering));
     }
 
     // TODO remove this when mods require changes anyways
