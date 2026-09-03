@@ -475,17 +475,20 @@ public final class GuiGraphicsHelper {
     }
 
     public void submitCustomRendering(int x, int y, int width, int height, BiConsumer<PoseStack,MultiBufferSource.BufferSource> rendering){
-        this.guiGraphics.guiRenderState.submitPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), this.guiGraphics.scissorStack.peek(), rendering));
+        ScreenRectangle scissorArea = this.guiGraphics.scissorStack.peek();
+        if(scissorArea != null && (scissorArea.width() <= 0 || scissorArea.height() <= 0))
+            return;
+        this.guiGraphics.guiRenderState.submitPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), scissorArea, rendering));
     }
 
     // TODO remove this when mods require changes anyways
     @Deprecated
     public void submitCustomRendering(int x, int y, int width, int height, Consumer<PoseStack> rendering){
-        this.guiGraphics.guiRenderState.submitPicturesInPictureState(new ArbitraryPictureInPictureRenderer.State(x, y, width, height, new Matrix3x2f(this.guiGraphics.pose()), this.guiGraphics.scissorStack.peek(), (poseStack, bufferSource) -> {
+        this.submitCustomRendering(x, y, width, height, (poseStack, bufferSource) -> {
             RenderUtils.GUI_BUFFER_SOURCE_OVERWRITE.set(bufferSource);
             rendering.accept(poseStack);
             RenderUtils.GUI_BUFFER_SOURCE_OVERWRITE.remove();
-        }));
+        });
     }
 
     /**
