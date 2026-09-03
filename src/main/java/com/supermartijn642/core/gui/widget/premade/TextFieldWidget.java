@@ -32,7 +32,8 @@ public class TextFieldWidget extends BaseWidget {
     protected int cursorPosition;
     protected int selectionPos;
     protected boolean drawBackground = true;
-    protected int activeTextColor = 14737632, inactiveTextColor = 7368816;
+    protected int activeTextColor = 14737632, inactiveTextColor = 7368816, suggestionTextColor = -8355712;
+    protected boolean textShadow = false;
 
     private final BiConsumer<String,String> changeListener;
 
@@ -83,7 +84,7 @@ public class TextFieldWidget extends BaseWidget {
 
         if(!s.isEmpty()){
             String s1 = cursorInView ? s.substring(0, relativeCursor) : s;
-            graphics.submitText(s1, left, top, p -> p.color(textColor));
+            graphics.submitText(s1, left, top, p -> p.color(textColor).shadow(this.textShadow));
             leftOffset += fontRenderer.width(s1) + 1;
         }
 
@@ -99,11 +100,11 @@ public class TextFieldWidget extends BaseWidget {
 
         // draw text
         if(!s.isEmpty() && cursorInView && relativeCursor < s.length())
-            graphics.submitText(s.substring(relativeCursor), leftOffset, top, p -> p.color(textColor));
+            graphics.submitText(s.substring(relativeCursor), leftOffset, top, p -> p.color(textColor).shadow(this.textShadow));
 
         // draw suggestion
         if(!this.suggestion.isEmpty() && this.text.isEmpty())
-            graphics.submitText(this.suggestion, cursorX, top, p -> p.cutoffWithDots(this.width - 8).color(-8355712));
+            graphics.submitText(this.suggestion, cursorX, top, p -> p.cutoffWithDots(this.width - 8).color(this.suggestionTextColor));
 
         // draw cursor
         if(shouldBlink){
@@ -252,6 +253,11 @@ public class TextFieldWidget extends BaseWidget {
     public void setTextColors(int activeTextColor, int inactiveTextColor){
         this.activeTextColor = activeTextColor;
         this.inactiveTextColor = inactiveTextColor;
+    }
+
+    public void setTextColors(int activeTextColor, int inactiveTextColor, int suggestionTextColor){
+        this.setTextColors(activeTextColor, inactiveTextColor);
+        this.suggestionTextColor = suggestionTextColor;
     }
 
     public void setDrawBackground(boolean drawBackground){
