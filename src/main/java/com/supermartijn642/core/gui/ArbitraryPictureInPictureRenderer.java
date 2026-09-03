@@ -161,7 +161,18 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
     public record State(int x, int y, int width, int height,
                         Matrix3x2f pose,
                         ScreenRectangle scissorArea,
+                        ScreenRectangle bounds,
                         BiConsumer<PoseStack,MultiBufferSource.BufferSource> rendering) implements PictureInPictureRenderState {
+
+        public State(int x, int y, int width, int height,
+                     Matrix3x2f pose,
+                     ScreenRectangle scissorArea,
+                     BiConsumer<PoseStack,MultiBufferSource.BufferSource> rendering){
+            ScreenRectangle bounds = new ScreenRectangle(x, y, width, height).transformMaxBounds(pose);
+            if(scissorArea != null)
+                bounds = scissorArea.intersection(bounds);
+            this(x, y, width, height, pose, scissorArea, bounds, rendering);
+        }
 
         @Override
         public int x0(){
@@ -191,11 +202,6 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
         @Override
         public ScreenRectangle scissorArea(){
             return this.scissorArea;
-        }
-
-        @Override
-        public ScreenRectangle bounds(){
-            return new ScreenRectangle(this.x, this.y, this.width, this.height);
         }
     }
 
