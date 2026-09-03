@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.world.entity.player.Player;
@@ -43,7 +44,10 @@ public class ClientUtils {
      */
     public static void closeScreen(){
         Player player = getPlayer();
-        player.containerMenu = player.inventoryMenu;
+        if(player.containerMenu != player.inventoryMenu)
+            player.closeContainer();
+        else
+            ((LocalPlayer)player).clientSideCloseContainer();
     }
 
     /**
