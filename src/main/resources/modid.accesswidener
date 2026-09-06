@@ -68,9 +68,9 @@ accessible field net/minecraft/client/gui/GuiGraphicsExtractor deferredTooltip L
 accessible field net/minecraft/client/gui/GuiGraphicsExtractor minecraft Lnet/minecraft/client/Minecraft; # minecraft
 accessible field net/minecraft/client/gui/GuiGraphicsExtractor scissorStack Lnet/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack;
 accessible field net/minecraft/client/gui/GuiGraphicsExtractor guiSprites Lnet/minecraft/client/renderer/texture/TextureAtlas;
-accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerBlit (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIIIFFFFI)V
-accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerBlit (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lcom/mojang/blaze3d/textures/GpuTextureView;Lcom/mojang/blaze3d/textures/GpuSampler;IIIIFFFFI)V
-accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerFill (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/gui/render/TextureSetup;IIIIILjava/lang/Integer;)V
+accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerBlit (Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIIIFFFFI)V
+accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerBlit (Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Lcom/mojang/renderpearl/api/textures/GpuTextureView;Lcom/mojang/renderpearl/api/textures/GpuSampler;IIIIFFFFI)V
+accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerFill (Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Lnet/minecraft/client/gui/render/TextureSetup;IIIIILjava/lang/Integer;)V
 accessible method net/minecraft/client/gui/GuiGraphicsExtractor itemBar (Lnet/minecraft/world/item/ItemStack;II)V
 accessible method net/minecraft/client/gui/GuiGraphicsExtractor itemCooldown (Lnet/minecraft/world/item/ItemStack;II)V
 accessible method net/minecraft/client/gui/GuiGraphicsExtractor itemCount (Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V
@@ -125,8 +125,6 @@ accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer pr
 accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer submitNodeStorage Lnet/minecraft/client/renderer/SubmitNodeStorage;
 # Player
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
-# RecipeManager
-accessible method net/minecraft/world/item/crafting/RecipeManager fromJson (Lnet/minecraft/resources/ResourceKey;Lcom/google/gson/JsonObject;Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/world/item/crafting/RecipeHolder;
 # TagEntry
 accessible field net/minecraft/tags/TagEntry CODEC Lcom/mojang/serialization/Codec;
 accessible field net/minecraft/tags/TagEntry id Lnet/minecraft/resources/Identifier;

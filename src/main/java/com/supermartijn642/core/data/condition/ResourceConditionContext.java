@@ -21,7 +21,7 @@ public class ResourceConditionContext {
 
     private <T> HolderSet.Named<T> getTag(TagKey<T> tag){
         return this.registryLookup.lookup(tag.registry())
-            .flatMap(i -> i.getter().get(tag))
+            .flatMap(i -> i.get(tag))
             .orElse(null);
     }
 

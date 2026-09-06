@@ -202,7 +202,7 @@ public class BaseItem extends Item {
         @Deprecated
         public InteractionResult toUnderlying(boolean isClientSide){
             if(!isClientSide && this.result instanceof InteractionResult.Success
-                && ((InteractionResult.Success)this.result).swingSource() == InteractionResult.SwingSource.CLIENT){
+                && ((InteractionResult.Success)this.result).swingSource() == InteractionResult.SwingSource.PREDICTED){
                 return InteractionResult.SUCCESS_SERVER.heldItemTransformedTo(((InteractionResult.Success)this.result).itemContext().heldItemTransformedTo());
             }
             return this.result;

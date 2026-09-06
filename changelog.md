@@ -1,3 +1,5 @@
+## Update to Minecraft 26.3
+
 ### SuperMartijn642's Core Library 1.1.24a
 - Fixed `tag_populated` resource condition always failing on first resource reload
 

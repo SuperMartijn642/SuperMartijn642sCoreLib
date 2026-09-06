@@ -17,6 +17,7 @@ import net.minecraft.advancements.triggers.Criterion;
 import net.minecraft.advancements.triggers.CriterionTrigger;
 import net.minecraft.advancements.triggers.InventoryChangeTrigger;
 import net.minecraft.advancements.triggers.RecipeUnlockedTrigger;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -1495,7 +1496,12 @@ public abstract class RecipeGenerator extends ResourceGenerator {
         private void createAdvancement(String namespace, String identifier, RecipeBuilder<?> recipe){
             AdvancementBuilder builder = this.advancement(namespace, identifier)
                 .parent(Identifier.fromNamespaceAndPath("minecraft", "recipes/root"))
-                .criterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE, recipe.identifier)))
+                .criterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(
+                    Holder.Reference.createStandAlone(
+                        ResourceGenerator.registryAccess.lookupOrThrow(net.minecraft.core.registries.Registries.RECIPE),
+                        ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE, recipe.identifier)
+                    )
+                ))
                 .icon(recipe.output, recipe.outputComponents)
                 .dontShowToast()
                 .dontAnnounceToChat()

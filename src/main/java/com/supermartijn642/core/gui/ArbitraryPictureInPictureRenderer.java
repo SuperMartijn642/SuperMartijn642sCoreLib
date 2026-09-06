@@ -1,13 +1,14 @@
 package com.supermartijn642.core.gui;
 
-import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.ProjectionType;
-import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.commands.RenderPass;
+import com.mojang.renderpearl.api.device.GpuDevice;
+import com.mojang.renderpearl.api.textures.FilterMode;
+import com.mojang.renderpearl.api.textures.GpuTexture;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.render.TextureSetup;
@@ -22,9 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix4fStack;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 /**
@@ -72,18 +71,22 @@ public class ArbitraryPictureInPictureRenderer extends PictureInPictureRenderer<
         RenderSystem.setProjectionMatrix(this.projectionMatrixBuffer.getBuffer(this.projection), ProjectionType.ORTHOGRAPHIC);
 
         // Render to the texture
-        RenderSystem.outputColorTextureOverride = texture.textureView;
-        RenderSystem.outputDepthTextureOverride = texture.depthTextureView;
         Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
         modelViewStack.pushMatrix();
         this.poseStack.pushPose();
         this.poseStack.scale(guiScale, guiScale, -guiScale);
         this.renderToTexture(state, this.poseStack, this.submitNodeStorage);
         this.poseStack.popPose();
-        featureRenderDispatcher.renderAllFeatures(this.submitNodeStorage);
+        try(
+            FeatureRenderDispatcher.PreparedFrame frame = featureRenderDispatcher.prepareFrame(this.submitNodeStorage);
+            RenderPass renderPass = RenderSystem.getDevice()
+                .createCommandEncoder()
+                .createRenderPass(this::getTextureLabel, texture.textureView, Optional.empty(), texture.depthTextureView, OptionalDouble.empty());
+        ){
+            RenderSystem.bindDefaultUniforms(renderPass);
+            FeatureRenderDispatcher.renderAllFeatures(renderPass, frame);
+        }
         modelViewStack.popMatrix();
-        RenderSystem.outputColorTextureOverride = null;
-        RenderSystem.outputDepthTextureOverride = null;
 
         // Blit texture
         guiRenderState.addBlitToCurrentLayer(

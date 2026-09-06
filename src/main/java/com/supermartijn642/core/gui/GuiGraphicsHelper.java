@@ -1,11 +1,11 @@
 package com.supermartijn642.core.gui;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
-import com.mojang.blaze3d.textures.GpuSampler;
-import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.textures.GpuSampler;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.extensions.GuiGraphicsExtractorExtension;
 import net.minecraft.client.gui.Font;
@@ -380,7 +380,8 @@ public final class GuiGraphicsHelper {
             List.copyOf(this.tooltipContent.content),
             (int)x, (int)y,
             this.tooltipProperties.positioner,
-            this.tooltipProperties.frame
+            this.tooltipProperties.frame,
+            this.tooltipProperties.extraSpaceAfterFirstLine
         );
     }
 
@@ -412,9 +413,10 @@ public final class GuiGraphicsHelper {
         List<ClientTooltipComponent> components = List.copyOf(this.tooltipContent.content);
         ClientTooltipPositioner positioner = this.tooltipProperties.positioner;
         Identifier frame = this.tooltipProperties.frame;
+        boolean extraSpaceAfterFirstLine = this.tooltipProperties.extraSpaceAfterFirstLine;
         this.guiGraphics.deferredTooltip = () -> {
             this.guiGraphics.pose().pushMatrix().set(matrix);
-            this.guiGraphics.tooltip(font, components, (int)x, (int)y, positioner, frame);
+            this.guiGraphics.tooltip(font, components, (int)x, (int)y, positioner, frame, extraSpaceAfterFirstLine);
             this.guiGraphics.pose().popMatrix();
         };
     }
@@ -815,6 +817,7 @@ public final class GuiGraphicsHelper {
         private ClientTooltipPositioner positioner;
         private Font font;
         private Identifier frame;
+        private boolean extraSpaceAfterFirstLine = true;
 
         private TooltipProperties(){
             this.clear();
@@ -855,6 +858,15 @@ public final class GuiGraphicsHelper {
 
         public TooltipProperties defaultFrame(){
             return this.frame(null);
+        }
+
+        public TooltipProperties extraSpaceAfterFirstLine(boolean extraSpace){
+            this.extraSpaceAfterFirstLine = extraSpace;
+            return this;
+        }
+
+        public TooltipProperties noExtraSpaceAfterFirstLine(){
+            return this.extraSpaceAfterFirstLine(false);
         }
     }
 
