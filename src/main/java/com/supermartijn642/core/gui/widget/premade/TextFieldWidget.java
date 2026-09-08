@@ -294,6 +294,10 @@ public class TextFieldWidget extends BaseWidget {
 
     public void setSelected(boolean selected){
         this.selected = selected;
+        if(selected)
+            ClientUtils.getMinecraft().textInputManager().startTextInput(this);
+        else
+            ClientUtils.getMinecraft().textInputManager().stopTextInput(this);
     }
 
     public void setActive(boolean active){
