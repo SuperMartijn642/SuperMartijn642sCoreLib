@@ -62,8 +62,10 @@ public abstract class BaseWidget implements Widget {
         if(this.focused != focused)
             this.nextNarration = focused ? Util.getMillis() + 750 : Long.MAX_VALUE;
         this.focused = focused;
-        if(!focused)
+        if(!focused){
+            this.focusedWidget = null;
             this.widgets.forEach(w -> w.setFocused(false));
+        }
     }
 
     public boolean isFocused(){
@@ -109,9 +111,13 @@ public abstract class BaseWidget implements Widget {
     @Override
     public void renderBackground(WidgetRenderContext context, GuiGraphicsHelper graphics, int mouseX, int mouseY){
         // Update the focused widget
-        if(!this.focused)
-            this.focusedWidget = null;
-        else if(!this.dragging){
+        if(!this.focused){
+            if(this.focusedWidget != null){
+                Widget focusedWidget = this.focusedWidget;
+                this.focusedWidget = null;
+                focusedWidget.setFocused(false);
+            }
+        }else if(!this.dragging){
             if(this.focusedWidget != null && !(mouseX > this.focusedWidget.left() && mouseX < this.focusedWidget.left() + this.focusedWidget.width() && mouseY > this.focusedWidget.top() && mouseY < this.focusedWidget.top() + this.focusedWidget.height())){
                 Widget focusedWidget = this.focusedWidget;
                 this.focusedWidget = null;
