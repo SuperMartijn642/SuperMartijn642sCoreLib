@@ -28,7 +28,7 @@ public class RecipeMapMixin {
     private static void filterDummyRecipes(ImmutableMultimap.Builder<RecipeType<?>,RecipeHolder<?>> recipesByType, ImmutableMap.Builder<ResourceKey<Recipe<?>>,RecipeHolder<?>> recipesByKey,
                                     Holder.Reference<Recipe<?>> recipe,
                                     CallbackInfo ci){
-        if(recipe.isBound() && recipe.value() == ConditionalRecipeSerializer.DUMMY_RECIPE)
+        if(recipe.isBound() && ConditionalRecipeSerializer.isDummyRecipe(recipe.value()))
             ci.cancel();
     }
 }
