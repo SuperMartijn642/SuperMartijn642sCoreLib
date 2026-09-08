@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 public final class ConditionalRecipeSerializer {
 
     public static final RecipeType<DummyRecipe> DUMMY_RECIPE_TYPE = RecipeType.simple(Identifier.fromNamespaceAndPath("supermartijn642corelib", "dummy"));
-    public static final Recipe<?> DUMMY_RECIPE = new DummyRecipe();
     public static final RecipeSerializer<Recipe<?>> SERIALIZER;
 
     private static final MapCodec<Recipe<?>> CODEC = new MapCodec<>() {
@@ -47,7 +46,7 @@ public final class ConditionalRecipeSerializer {
             // Unwrap recipe
             JsonElement recipeJson = unwrapRecipe(null, json, ops);
             if(recipeJson == null)
-                return DataResult.success(DUMMY_RECIPE);
+                return DataResult.success(new DummyRecipe());
             // Convert json to ops type
             T t = JsonOps.INSTANCE.convertTo(ops, recipeJson);
             // Decode the actual recipe
@@ -113,6 +112,10 @@ public final class ConditionalRecipeSerializer {
 
         // Now return the recipe
         return json.getAsJsonObject("recipe");
+    }
+
+    public static boolean isDummyRecipe(Recipe<?> recipe){
+        return recipe instanceof DummyRecipe;
     }
 
     private static class DummyRecipe implements Recipe<RecipeInput> {
