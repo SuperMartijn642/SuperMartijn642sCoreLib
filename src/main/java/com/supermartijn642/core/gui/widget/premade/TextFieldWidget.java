@@ -410,9 +410,9 @@ public class TextFieldWidget extends BaseWidget {
     public boolean mousePressed(int mouseX, int mouseY, MouseButtonInfo info, boolean isDoubleClick, boolean hasBeenHandled){
         if(!hasBeenHandled && this.active && this.isHovered(mouseX, mouseY)){
             this.setSelected(true);
-            if(info.button() == 1) // Right-click
+            if(info.button() == 3) // Right-click
                 this.clear();
-            else if(info.button() == 0){ // Left-click
+            else if(info.button() == 1){ // Left-click
                 if(isDoubleClick){
                     int from = this.cursorPosition > 0 && this.text.charAt(this.cursorPosition - 1) != ' ' ?
                         this.getEndOfWord(this.cursorPosition, true) : this.cursorPosition;
@@ -435,7 +435,7 @@ public class TextFieldWidget extends BaseWidget {
 
     @Override
     public boolean mouseDragged(int mouseX, int mouseY, MouseButtonInfo info, double deltaX, double deltaY, boolean hasBeenHandled){
-        if(!hasBeenHandled && this.active && this.isFocused() && info.button() == 0){
+        if(!hasBeenHandled && this.active && this.isFocused() && info.button() == 1){
             this.setSelected(true);
             this.cursorPosition = this.getMousePositionIndex(mouseX, mouseY);
         }
