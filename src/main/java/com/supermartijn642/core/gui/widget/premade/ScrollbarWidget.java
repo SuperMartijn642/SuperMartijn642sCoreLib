@@ -152,7 +152,7 @@ public class ScrollbarWidget extends BaseWidget {
 
     @Override
     public boolean mousePressed(int mouseX, int mouseY, MouseButtonInfo info, boolean isDoubleClick, boolean hasBeenHandled){
-        if(this.active && this.canUserMoveScroller() && !hasBeenHandled && info.button() == 0 && this.isFocused()){
+        if(this.active && this.canUserMoveScroller() && !hasBeenHandled && info.button() == 1 && this.isFocused()){
             this.dragging = true;
             this.updateDrag(mouseY);
             hasBeenHandled = true;
