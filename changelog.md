@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.24b
+- Added icon and banner images for new NeoForge 26.2.0.50-beta mod list
+
 ### SuperMartijn642's Core Library 1.1.24a
 - Fixed `tag_populated` resource condition always failing on first resource reload
 
