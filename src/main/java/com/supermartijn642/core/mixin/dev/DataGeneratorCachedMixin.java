@@ -1,6 +1,7 @@
 package com.supermartijn642.core.mixin.dev;
 
 import com.google.common.base.Stopwatch;
+import com.mojang.serialization.Lifecycle;
 import com.supermartijn642.core.extensions.DataGeneratorConfigExtension;
 import com.supermartijn642.core.extensions.DataGeneratorExtension;
 import com.supermartijn642.core.generator.ResourceCache;
@@ -8,9 +9,11 @@ import com.supermartijn642.core.generator.ResourceGenerator;
 import com.supermartijn642.core.registry.GeneratorRegistrationHandler;
 import net.minecraft.WorldVersion;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
+import net.minecraft.resources.RegistryDataLoader;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * Created 06/05/2023 by SuperMartijn642
@@ -100,10 +104,15 @@ public abstract class DataGeneratorCachedMixin extends DataGenerator implements 
 
             // Get a reference to the lookup provider
             try{
-                Field field = GatherDataEvent.DataGeneratorConfig.class.getDeclaredField("lookupProvider");
+                Field field = GatherDataEvent.DataGeneratorConfig.class.getDeclaredField("worldLookupProvider");
                 field.setAccessible(true);
                 //noinspection unchecked
-                ResourceGenerator.registryAccess = ((CompletableFuture<HolderLookup.Provider>)field.get(this.config)).get();
+                ResourceGenerator.registryAccess = HolderLookup.Provider.create(Stream.concat(
+                    ((CompletableFuture<HolderLookup.Provider>)field.get(this.config)).get().listRegistries(),
+                    RegistryDataLoader.RELOADABLE_REGISTRIES.stream().map(key ->
+                        RegistrySetBuilder.BootstrappedRegistryState.create(key.key(), Lifecycle.stable()).registry()
+                    )
+                ));
             }catch(Exception e){
                 throw new RuntimeException("Failed to obtain lookup provider instance from GatherDataEvent.DataGeneratorConfig!", e);
             }
