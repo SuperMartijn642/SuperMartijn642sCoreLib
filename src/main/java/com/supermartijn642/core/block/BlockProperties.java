@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -74,12 +75,12 @@ public class BlockProperties {
     private boolean canOcclude = true;
     private boolean isAir = false;
     private boolean ignitedByLava = false;
-    private PushReaction pushReaction = PushReaction.NORMAL;
+    private PushReaction pushReaction = PushReaction.PUSH_PULL;
     private boolean spawnTerrainParticles = true;
     private NoteBlockInstrument instrument = NoteBlockInstrument.HARP;
     boolean replaceable = false;
     private TriPredicate<BlockState,BlockGetter,BlockPos> isRedstoneConductor = BlockBehaviour.BlockStateBase::isCollisionShapeFullBlock;
-    private TriPredicate<BlockState,BlockGetter,BlockPos> isSuffocating = (state, level, pos) -> state.blocksMotion() && state.isCollisionShapeFullBlock(level, pos);
+    private TriPredicate<BlockState,BlockGetter,BlockPos> isSuffocating = (state, level, pos) -> state.is(BlockTags.CAUSES_SUFFOCATION) && state.isCollisionShapeFullBlock(level, pos);
     private boolean hasDynamicShape = false;
     boolean noLootTable = false;
     Supplier<Block> lootTableBlock;
@@ -317,7 +318,7 @@ public class BlockProperties {
             properties.replaceable();
         properties.isRedstoneConductor(this.isRedstoneConductor::test);
         properties.isSuffocating(this.isSuffocating::test);
-        properties.isViewBlocking(this.isSuffocating::test);
+        properties.isViewBlocking((state, level, pos, _) -> this.isSuffocating.test(state, level, pos));
         if(this.hasDynamicShape)
             properties.dynamicShape();
         return properties;

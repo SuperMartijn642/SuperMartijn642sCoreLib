@@ -10,6 +10,8 @@ import net.minecraft.advancements.predicates.DataComponentMatchers;
 import net.minecraft.advancements.predicates.EnchantmentPredicate;
 import net.minecraft.advancements.predicates.ItemPredicate;
 import net.minecraft.advancements.predicates.MinMaxBounds;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.predicates.DataComponentPredicates;
 import net.minecraft.core.component.predicates.EnchantmentsPredicate;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -32,7 +34,12 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
-import net.minecraft.world.level.storage.loot.providers.number.*;
+import net.minecraft.world.level.storage.loot.providers.number.floats.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.floats.ContextFloatProvider;
+import net.minecraft.world.level.storage.loot.providers.number.floats.ContextFloatProviders;
+import net.minecraft.world.level.storage.loot.providers.number.floats.FromInt;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProvider;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -62,7 +69,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
             if(!lootTableBuilder.functions.isEmpty()){
                 JsonArray functionsJson = new JsonArray();
                 for(LootItemFunction function : lootTableBuilder.functions)
-                    functionsJson.add(LootItemFunctions.ROOT_CODEC.encodeStart(ops, function).getOrThrow());
+                    functionsJson.add(LootItemFunctions.DIRECT_CODEC.encodeStart(ops, function).getOrThrow());
                 json.add("functions", functionsJson);
             }
             // Pools
@@ -75,10 +82,10 @@ public abstract class LootTableGenerator extends ResourceGenerator {
                     if(pool.name != null && !pool.name.isEmpty())
                         poolJson.addProperty("name", pool.name);
                     // Rolls
-                    poolJson.add("rolls", NumberProviders.CODEC.encodeStart(ops, pool.rolls).getOrThrow());
+                    poolJson.add("rolls", ContextIntProviders.CODEC.encodeStart(ops, pool.rolls).getOrThrow());
                     // Bonus rolls
-                    if(!(pool.bonusRolls instanceof ConstantValue) || pool.bonusRolls.getInt(null) != 0)
-                        poolJson.add("bonus_rolls", NumberProviders.CODEC.encodeStart(ops, pool.bonusRolls).getOrThrow());
+                    if(!(pool.bonusRolls.value() instanceof ConstantValue(float value)) || value != 0)
+                        poolJson.add("bonus_rolls", ContextFloatProviders.CODEC.encodeStart(ops, pool.bonusRolls).getOrThrow());
                     // Conditions
                     if(!pool.conditions.isEmpty()){
                         JsonArray conditionsJson = new JsonArray();
@@ -94,7 +101,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
                     if(!pool.functions.isEmpty()){
                         JsonArray functionsJson = new JsonArray();
                         for(LootItemFunction function : pool.functions)
-                            functionsJson.add(LootItemFunctions.ROOT_CODEC.encodeStart(ops, function).getOrThrow());
+                            functionsJson.add(LootItemFunctions.DIRECT_CODEC.encodeStart(ops, function).getOrThrow());
                         poolJson.add("functions", functionsJson);
                     }
                     // Entries
@@ -236,8 +243,8 @@ public abstract class LootTableGenerator extends ResourceGenerator {
         private final List<Supplier<LootItemCondition>> conditions = new ArrayList<>();
         private final List<LootItemFunction> functions = new ArrayList<>();
         private final List<Supplier<LootPoolEntryContainer>> entries = new ArrayList<>();
-        private NumberProvider rolls = ConstantValue.exactly(1);
-        private NumberProvider bonusRolls = ConstantValue.exactly(0.0F);
+        private Holder<ContextIntProvider> rolls = ContextIntProviders.exactly(1);
+        private Holder<ContextFloatProvider> bonusRolls = ContextFloatProviders.exactly(0);
         private String name;
 
         protected LootPoolBuilder(){
@@ -247,10 +254,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * Sets the number provider for the number of rolls for this loot pool.
          * @param provider number provider for number of rolls
          */
-        public LootPoolBuilder rolls(NumberProvider provider){
-            if(BuiltInRegistries.LOOT_NUMBER_PROVIDER_TYPE.getKey(provider.codec()) == null)
-                throw new IllegalArgumentException("Cannot use unregistered number provider '" + provider + "'!");
-
+        public LootPoolBuilder rolls(Holder<ContextIntProvider> provider){
             this.rolls = provider;
             return this;
         }
@@ -260,7 +264,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param rolls number of rolls
          */
         public LootPoolBuilder constantRolls(int rolls){
-            return this.rolls(ConstantValue.exactly(rolls));
+            return this.rolls(ContextIntProviders.exactly(rolls));
         }
 
         /**
@@ -269,7 +273,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param max maximum number of rolls
          */
         public LootPoolBuilder uniformRolls(int min, int max){
-            return this.rolls(UniformGenerator.between(min, max));
+            return this.rolls(ContextIntProviders.between(min, max));
         }
 
         /**
@@ -278,17 +282,14 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param p chance that an attempt succeeds
          */
         public LootPoolBuilder binomialRolls(int n, int p){
-            return this.rolls(BinomialDistributionGenerator.binomial(n, p));
+            return this.rolls(ContextIntProviders.binomial(n, p));
         }
 
         /**
          * Sets the number provider for the number of bonus rolls for this loot pool.
          * @param provider number provider for number of bonus rolls
          */
-        public LootPoolBuilder bonusRolls(NumberProvider provider){
-            if(BuiltInRegistries.LOOT_NUMBER_PROVIDER_TYPE.getKey(provider.codec()) == null)
-                throw new IllegalArgumentException("Cannot use unregistered number provider '" + provider + "'!");
-
+        public LootPoolBuilder bonusRolls(Holder<ContextFloatProvider> provider){
             this.bonusRolls = provider;
             return this;
         }
@@ -298,7 +299,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param rolls number of bonus rolls
          */
         public LootPoolBuilder constantBonusRolls(int rolls){
-            return this.bonusRolls(ConstantValue.exactly(rolls));
+            return this.bonusRolls(ContextFloatProviders.exactly(rolls));
         }
 
         /**
@@ -307,7 +308,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param max maximum number of bonus rolls
          */
         public LootPoolBuilder uniformBonusRolls(int min, int max){
-            return this.bonusRolls(UniformGenerator.between(min, max));
+            return this.bonusRolls(ContextFloatProviders.between(min, max));
         }
 
         /**
@@ -316,7 +317,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param p chance that an attempt succeeds
          */
         public LootPoolBuilder binomialBonusRolls(int n, int p){
-            return this.bonusRolls(BinomialDistributionGenerator.binomial(n, p));
+            return this.bonusRolls(Holder.direct(new FromInt(ContextIntProviders.binomial(n, p))));
         }
 
         /**
@@ -418,14 +419,14 @@ public abstract class LootTableGenerator extends ResourceGenerator {
             return this;
         }
 
-        private LootPoolBuilder entry(LootPoolSingletonContainer.Builder<?> entry, int weight){
+        private LootPoolBuilder entry(UniformContainerBase.Builder<?> entry, int weight){
             if(weight <= 0)
                 throw new IllegalArgumentException("Loot entry weight must be greater than zero, not '" + weight + "'!");
 
             return this.entry(entry.setWeight(weight).build());
         }
 
-        private LootPoolBuilder entry(Supplier<LootPoolSingletonContainer.Builder<?>> entry, int weight){
+        private LootPoolBuilder entry(Supplier<UniformContainerBase.Builder<?>> entry, int weight){
             if(weight <= 0)
                 throw new IllegalArgumentException("Loot entry weight must be greater than zero, not '" + weight + "'!");
 
@@ -471,7 +472,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param weight weight of the entry
          */
         public LootPoolBuilder itemEntry(ItemLike item, int count, int weight){
-            return this.entry(LootItem.lootTableItem(item).apply(SetItemCountFunction.setCount(ConstantValue.exactly(count))), weight);
+            return this.entry(LootItem.lootTableItem(item).apply(SetItemCountFunction.setCount(ContextIntProviders.exactly(count))), weight);
         }
 
         /**
@@ -482,7 +483,7 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param weight weight of the entry
          */
         public LootPoolBuilder itemEntry(ItemLike item, int min, int max, int weight){
-            return this.entry(LootItem.lootTableItem(item).apply(SetItemCountFunction.setCount(UniformGenerator.between(min, max))), weight);
+            return this.entry(LootItem.lootTableItem(item).apply(SetItemCountFunction.setCount(ContextIntProviders.between(min, max))), weight);
         }
 
         /**
@@ -513,7 +514,10 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          */
         public LootPoolBuilder enchantedItemEntry(ItemLike item, int levels, int weight){
             return this.entry(() -> {
-                EnchantWithLevelsFunction.Builder builder = EnchantWithLevelsFunction.enchantWithLevels(ResourceGenerator.registryAccess, ConstantValue.exactly(levels));
+                EnchantWithLevelsFunction.Builder builder = EnchantWithLevelsFunction.enchantWithLevels(
+                    ResourceGenerator.registryAccess.lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT),
+                    ContextIntProviders.exactly(levels)
+                );
                 return LootItem.lootTableItem(item).apply(builder);
             }, weight);
         }
@@ -527,7 +531,10 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          */
         public LootPoolBuilder enchantedItemEntry(ItemLike item, int minLevels, int maxLevels, int weight){
             return this.entry(() -> {
-                EnchantWithLevelsFunction.Builder builder = EnchantWithLevelsFunction.enchantWithLevels(ResourceGenerator.registryAccess, UniformGenerator.between(minLevels, maxLevels));
+                EnchantWithLevelsFunction.Builder builder = EnchantWithLevelsFunction.enchantWithLevels(
+                    ResourceGenerator.registryAccess.lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT),
+                    ContextIntProviders.between(minLevels, maxLevels)
+                );
                 return LootItem.lootTableItem(item).apply(builder);
             }, weight);
         }
@@ -538,7 +545,11 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param weight weight of the entry
          */
         public LootPoolBuilder tagEntry(TagKey<Item> tagKey, int weight){
-            return this.entry(TagEntry.tagContents(tagKey), weight);
+
+            return this.entry(
+                TagEntry.tagContents(HolderSet.emptyNamed(ResourceGenerator.registryAccess.lookupOrThrow(net.minecraft.core.registries.Registries.ITEM), tagKey)),
+                weight
+            );
         }
 
         /**
@@ -591,7 +602,15 @@ public abstract class LootTableGenerator extends ResourceGenerator {
          * @param weight    weight of the entry
          */
         public LootPoolBuilder lootTableEntry(Identifier lootTable, int weight){
-            return this.entry(NestedLootTable.lootTableReference(ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, lootTable)), weight);
+            return this.entry(
+                NestedLootTable.lootTableReference(
+                    Holder.Reference.createStandAlone(
+                        ResourceGenerator.registryAccess.lookupOrThrow(net.minecraft.core.registries.Registries.LOOT_TABLE),
+                        ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, lootTable)
+                    )
+                ),
+                weight
+            );
         }
 
         /**

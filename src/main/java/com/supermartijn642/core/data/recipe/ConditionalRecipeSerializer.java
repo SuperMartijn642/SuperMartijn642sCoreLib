@@ -51,12 +51,12 @@ public final class ConditionalRecipeSerializer {
             // Convert json to ops type
             T t = JsonOps.INSTANCE.convertTo(ops, recipeJson);
             // Decode the actual recipe
-            return Recipe.CODEC.parse(ops, t);
+            return Recipe.DIRECT_CODEC.parse(ops, t);
         }
 
         @Override
         public <T> RecordBuilder<T> encode(Recipe<?> input, DynamicOps<T> ops, RecordBuilder<T> prefix){
-            return Recipe.CODEC.encodeStart(ops, input).flatMap(output -> {
+            return Recipe.DIRECT_CODEC.encodeStart(ops, input).flatMap(output -> {
                 JsonElement element = ops.convertTo(JsonOps.INSTANCE, output);
                 if(element.isJsonObject()){
                     RecordBuilder<T> map = ops.mapBuilder();

@@ -9,7 +9,7 @@
     "ItemMixin",
     "MappedRegistryMixin",
     "GameDataMixin",
-    "RecipeManagerMixin",
+    "RecipeMapMixin",
     "TagLoaderMixin"
   ],
   "client": [
