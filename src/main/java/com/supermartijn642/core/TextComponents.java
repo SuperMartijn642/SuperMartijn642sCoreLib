@@ -96,7 +96,7 @@ public class TextComponents {
      * Creates a new {@link TextComponentBuilder} around the given block's name.
      */
     public static TextComponentBuilder block(Block block){
-        return translation(block.getDescriptionId());
+        return fromTextComponent(block.getName());
     }
 
     /**
