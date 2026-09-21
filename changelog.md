@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.24a
+- `TextComponents#block` now lets the block create the text component rather than using its translation key
+
 ## Update to Minecraft 26.3
 
 ### SuperMartijn642's Core Library 1.1.24b
