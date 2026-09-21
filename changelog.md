@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.24c
+- `TextComponents#block` now lets the block create the text component rather than using its translation key
+
 ### SuperMartijn642's Core Library 1.1.24b
 - Added icon and banner images for new NeoForge 26.2.0.50-beta mod list
 
