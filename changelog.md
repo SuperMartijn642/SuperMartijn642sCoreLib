@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.24b
+- `TextComponents#block` now lets the block create the text component rather than using its translation key
+
 ### SuperMartijn642's Core Library 1.1.24a
 - Fixed `tag_populated` resource condition always failing on first resource reload
 
