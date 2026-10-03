@@ -14,7 +14,7 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraft.resources.RegistryDataLoader;
-import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.data.event.DataGeneratorConfig;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,11 +35,12 @@ import java.util.stream.Stream;
 /**
  * Created 06/05/2023 by SuperMartijn642
  */
+@SuppressWarnings("UnstableApiUsage")
 @Mixin(DataGenerator.Cached.class)
 public abstract class DataGeneratorCachedMixin extends DataGenerator implements DataGeneratorExtension {
 
     @Unique
-    private GatherDataEvent.DataGeneratorConfig config;
+    private DataGeneratorConfig config;
     @Unique
     private ResourceCache resourceCache;
     @Shadow
@@ -55,7 +56,7 @@ public abstract class DataGeneratorCachedMixin extends DataGenerator implements 
     }
 
     @Override
-    public void setDataGeneratorConfig(GatherDataEvent.DataGeneratorConfig config){
+    public void setDataGeneratorConfig(DataGeneratorConfig config){
         this.config = config;
     }
 
@@ -69,7 +70,7 @@ public abstract class DataGeneratorCachedMixin extends DataGenerator implements 
         locals = LocalCapture.CAPTURE_FAILHARD
     )
     private void runHead(CallbackInfo ci, HashCache hashCache){
-        GatherDataEvent.DataGeneratorConfig dataGeneratorConfig = this.config;
+        DataGeneratorConfig dataGeneratorConfig = this.config;
         if(dataGeneratorConfig != null){ // Some mods run data generators themselves
             dataGeneratorConfig.getMods().stream().filter(GeneratorRegistrationHandler::hasHandlerForModid).forEach(modid -> {
                 GeneratorRegistrationHandler handler = GeneratorRegistrationHandler.get(modid);
@@ -80,12 +81,14 @@ public abstract class DataGeneratorCachedMixin extends DataGenerator implements 
                 // Create a ResourceCache instance
                 if(this.resourceCache == null){
                     // Get the path for manually created files
-                    List<Path> paths = ((DataGeneratorConfigExtension)dataGeneratorConfig).supermartijn642corelibGetExistingPaths();
+                    //noinspection DataFlowIssue
+                    List<Path> paths = ((DataGeneratorConfigExtension)(Object)dataGeneratorConfig).supermartijn642corelibGetExistingPaths();
                     Path manualPath = paths.isEmpty() ? null : paths.getFirst();
+                    //noinspection DataFlowIssue
                     this.resourceCache = ResourceCache.wrap(
                         hashCache,
-                        ((DataGeneratorConfigExtension)dataGeneratorConfig).supermartijn642corelibGetClientResources(),
-                        ((DataGeneratorConfigExtension)dataGeneratorConfig).supermartijn642corelibGetServerResources(),
+                        ((DataGeneratorConfigExtension)(Object)dataGeneratorConfig).supermartijn642corelibGetClientResources(),
+                        ((DataGeneratorConfigExtension)(Object)dataGeneratorConfig).supermartijn642corelibGetServerResources(),
                         outputFolder,
                         manualPath
                     );
@@ -104,7 +107,7 @@ public abstract class DataGeneratorCachedMixin extends DataGenerator implements 
 
             // Get a reference to the lookup provider
             try{
-                Field field = GatherDataEvent.DataGeneratorConfig.class.getDeclaredField("worldLookupProvider");
+                Field field = DataGeneratorConfig.class.getDeclaredField("worldLookupProvider");
                 field.setAccessible(true);
                 //noinspection unchecked
                 ResourceGenerator.registryAccess = HolderLookup.Provider.create(Stream.concat(

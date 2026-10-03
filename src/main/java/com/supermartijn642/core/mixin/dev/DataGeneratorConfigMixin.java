@@ -5,7 +5,7 @@ import com.supermartijn642.core.extensions.DataGeneratorConfigExtension;
 import com.supermartijn642.core.extensions.DataGeneratorExtension;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.data.event.DataGeneratorConfig;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,7 +23,7 @@ import java.util.List;
  * Created 16/10/2023 by SuperMartijn642
  */
 @SuppressWarnings("UnstableApiUsage")
-@Mixin(value = GatherDataEvent.DataGeneratorConfig.class, remap = false)
+@Mixin(value = DataGeneratorConfig.class, remap = false)
 public class DataGeneratorConfigMixin implements DataGeneratorConfigExtension {
 
     @Unique
@@ -51,7 +51,7 @@ public class DataGeneratorConfigMixin implements DataGeneratorConfigExtension {
         DataGenerator generator = ci.getReturnValue();
         if(generator != null)
             //noinspection DataFlowIssue
-            ((DataGeneratorExtension)generator).setDataGeneratorConfig((GatherDataEvent.DataGeneratorConfig)(Object)this);
+            ((DataGeneratorExtension)generator).setDataGeneratorConfig((DataGeneratorConfig)(Object)this);
     }
 
     @Override
