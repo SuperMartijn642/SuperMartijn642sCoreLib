@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.24b
+- Account for breaking changes in NeoForge 26.3.0.36-beta
+
 ### SuperMartijn642's Core Library 1.1.24a
 - `TextComponents#block` now lets the block create the text component rather than using its translation key
 
