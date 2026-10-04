@@ -1,3 +1,7 @@
+### SuperMartijn642's Core Library 1.1.24c
+- Fixed items not always being added to creative search
+- Fixed missing reference map warning
+
 ### SuperMartijn642's Core Library 1.1.24b
 - Account for breaking changes in NeoForge 26.3.0.36-beta
 
