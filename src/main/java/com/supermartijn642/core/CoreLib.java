@@ -67,7 +67,7 @@ public class CoreLib {
             finalizeItemsPerCreativeGroup();
             for(Item item : itemsPerCreativeGroup.getOrDefault(event.getTab(), List.of())){
                 try{
-                    event.accept(item, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
+                    event.accept(item, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                 }catch(IllegalArgumentException e){
                     if(!e.getMessage().endsWith(" in the tab's list")) // Ignore adding duplicates errors
                         throw e;
