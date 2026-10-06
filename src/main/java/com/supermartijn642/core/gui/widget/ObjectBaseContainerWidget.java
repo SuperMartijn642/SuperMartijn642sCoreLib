@@ -92,7 +92,7 @@ public abstract class ObjectBaseContainerWidget<T, C extends AbstractContainerMe
 
     @Override
     public final int left(){
-        return this.validateObjectOrClose() ? this.width(this.object) : 0;
+        return this.validateObjectOrClose() ? this.left(this.object) : 0;
     }
 
     /**
