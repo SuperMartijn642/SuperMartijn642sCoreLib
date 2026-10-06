@@ -58,6 +58,14 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         return this.widget;
     }
 
+    private int getWidgetX(){
+        return (this.width - this.widget.width()) / 2 + this.widget.left();
+    }
+
+    private int getWidgetY(){
+        return (this.height - this.widget.height()) / 2 + this.widget.top();
+    }
+
     @Override
     public void initGui(){
         if(!this.initialized){
@@ -72,6 +80,8 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         this.xSize = this.widget.width();
         this.ySize = this.widget.height();
         super.initGui();
+        this.guiLeft = this.getWidgetX();
+        this.guiTop = this.getWidgetY();
     }
 
     @Override
@@ -89,7 +99,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     public void drawScreen(int mouseX, int mouseY, float partialTicks){
         this.drawDefaultBackground();
 
-        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
+        int offsetX = this.getWidgetX(), offsetY = this.getWidgetY();
         int offsetMouseX = mouseX - offsetX;
         int offsetMouseY = mouseY - offsetY;
         GlStateManager.pushMatrix();
@@ -228,15 +238,13 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
     @Override
     public void mouseClicked(int mouseX, int mouseY, int button) throws IOException{
-        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        if(!this.widget.mousePressed(mouseX - offsetX, mouseY - offsetY, button, false))
+        if(!this.widget.mousePressed(mouseX - this.getWidgetX(), mouseY - this.getWidgetY(), button, false))
             super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public void mouseReleased(int mouseX, int mouseY, int button){
-        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        if(!this.widget.mouseReleased(mouseX - offsetX, mouseY - offsetY, button, false))
+        if(!this.widget.mouseReleased(mouseX - this.getWidgetX(), mouseY - this.getWidgetY(), button, false))
             super.mouseReleased(mouseX, mouseY, button);
     }
 
@@ -253,9 +261,8 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     }
 
     public void mouseScrolled(double mouseX, double mouseY, double amount){
-        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
+        mouseX -= this.getWidgetX();
+        mouseY -= this.getWidgetY();
         this.widget.mouseScrolled((int)mouseX, (int)mouseY, amount, false);
     }
 
