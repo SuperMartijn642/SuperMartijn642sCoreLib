@@ -113,6 +113,16 @@ public abstract class ObjectBaseContainerWidget<T, C extends AbstractContainerMe
     }
 
     @Override
+    public int right(){
+        return this.validateObjectOrClose() ? this.left(this.object) + this.width(this.object) : 0;
+    }
+
+    @Override
+    public int bottom(){
+        return this.validateObjectOrClose() ? this.top(this.object) + this.height(this.object) : 0;
+    }
+
+    @Override
     public final void initialize(){
         if(this.validateObjectOrClose())
             this.initialize(this.object);
