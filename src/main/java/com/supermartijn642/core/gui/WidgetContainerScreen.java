@@ -55,6 +55,14 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         return this.widget;
     }
 
+    private int getWidgetX(){
+        return (this.width - this.widget.width()) / 2 + this.widget.left();
+    }
+
+    private int getWidgetY(){
+        return (this.height - this.widget.height()) / 2 + this.widget.top();
+    }
+
     @Override
     public void init(){
         if(!this.initialized){
@@ -69,6 +77,8 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         this.imageWidth = this.widget.width();
         this.imageHeight = this.widget.height();
         super.init();
+        this.leftPos = this.getWidgetX();
+        this.topPos = this.getWidgetY();
     }
 
     @Override
@@ -86,7 +96,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     public void render(int mouseX, int mouseY, float partialTicks){
         this.renderBackground();
 
-        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
+        int offsetX = this.getWidgetX(), offsetY = this.getWidgetY();
         int offsetMouseX = mouseX - offsetX;
         int offsetMouseY = mouseY - offsetY;
         MatrixStack poseStack = new MatrixStack();
@@ -239,20 +249,20 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button){
-        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        return this.widget.mousePressed((int)mouseX - offsetX, (int)mouseY - offsetY, button, false) || super.mouseClicked(mouseX, mouseY, button);
+        return this.widget.mousePressed((int)mouseX - this.getWidgetX(), (int)mouseY - this.getWidgetY(), button, false)
+            || super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button){
-        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        return this.widget.mouseReleased((int)mouseX - offsetX, (int)mouseY - offsetY, button, false) || super.mouseReleased(mouseX, mouseY, button);
+        return this.widget.mouseReleased((int)mouseX - this.getWidgetX(), (int)mouseY - this.getWidgetY(), button, false)
+            || super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount){
-        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        return this.widget.mouseScrolled((int)mouseX - offsetX, (int)mouseY - offsetY, amount, false) || super.mouseScrolled(mouseX, mouseY, amount);
+        return this.widget.mouseScrolled((int)mouseX - this.getWidgetX(), (int)mouseY - this.getWidgetY(), amount, false)
+            || super.mouseScrolled(mouseX, mouseY, amount);
     }
 
     @Override
