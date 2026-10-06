@@ -41,6 +41,14 @@ public class WidgetScreen<T extends Widget> extends Screen {
         return this.widget;
     }
 
+    private int getWidgetX(){
+        return (this.width - this.widget.width()) / 2 + this.widget.left();
+    }
+
+    private int getWidgetY(){
+        return (this.height - this.widget.height()) / 2 + this.widget.top();
+    }
+
     @Override
     protected void init(){
         if(!this.initialized){
@@ -65,7 +73,7 @@ public class WidgetScreen<T extends Widget> extends Screen {
         this.widgetRenderContext.update(guiGraphics, partialTicks);
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
 
-        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
+        int offsetX = this.getWidgetX(), offsetY = this.getWidgetY();
         mouseX -= offsetX;
         mouseY -= offsetY;
 
@@ -93,25 +101,22 @@ public class WidgetScreen<T extends Widget> extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button){
-        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
+        mouseX -= this.getWidgetX();
+        mouseY -= this.getWidgetY();
         return this.widget.mousePressed((int)mouseX, (int)mouseY, button, false) || super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button){
-        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
+        mouseX -= this.getWidgetX();
+        mouseY -= this.getWidgetY();
         return this.widget.mouseReleased((int)mouseX, (int)mouseY, button, false) || super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount){
-        int offsetX = (this.width - this.widget.width()) / 2, offsetY = (this.height - this.widget.height()) / 2;
-        mouseX -= offsetX;
-        mouseY -= offsetY;
+        mouseX -= this.getWidgetX();
+        mouseY -= this.getWidgetY();
         return this.widget.mouseScrolled((int)mouseX, (int)mouseY, verticalAmount, false) || super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
