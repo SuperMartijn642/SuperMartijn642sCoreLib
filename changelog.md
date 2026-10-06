@@ -1,3 +1,8 @@
+### SuperMartijn642's Core Library 1.1.25
+- Main widget for `WidgetScreen` and `WidgetContainerScreen` can now be offset rather than always centered
+- Added `Widget#right` and `#bottom`
+- Fixed `ObjectBaseWidget#left` and `ObjectBaseContainerWidget#left` returning width instead of left
+
 ### SuperMartijn642's Core Library 1.1.24b
 - `TextComponents#block` now lets the block create the text component rather than using its translation key
 
