@@ -89,7 +89,7 @@ public abstract class ObjectBaseWidget<T> extends BaseWidget {
 
     @Override
     public final int left(){
-        return this.validateObjectOrClose() ? this.width(this.object) : 0;
+        return this.validateObjectOrClose() ? this.left(this.object) : 0;
     }
 
     /**
