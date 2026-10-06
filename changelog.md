@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.24b
+- Added workaround when running datagen for vanilla wrapped registries never being serializable
+
 ### SuperMartijn642's Core Library 1.1.24a
 - `TextComponents#block` now lets the block create the text component rather than using its translation key
 
