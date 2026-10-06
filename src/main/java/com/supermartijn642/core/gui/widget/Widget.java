@@ -34,6 +34,16 @@ public interface Widget {
     int top();
 
     /**
+     * @return the x-position of the right end of this widget
+     */
+    int right();
+
+    /**
+     * @return the y-position of the bottom end of this widget
+     */
+    int bottom();
+
+    /**
      * Called when the widget is added.
      */
     void initialize();
