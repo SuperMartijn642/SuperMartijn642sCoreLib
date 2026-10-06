@@ -52,6 +52,16 @@ public abstract class BaseWidget implements Widget {
     }
 
     @Override
+    public int right(){
+        return this.left() + this.width();
+    }
+
+    @Override
+    public int bottom(){
+        return this.top() + this.height();
+    }
+
+    @Override
     public void initialize(){
         this.addWidgets();
         this.widgets.forEach(Widget::initialize);
