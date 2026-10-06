@@ -15,6 +15,7 @@
   "client": [
     "dev.DataGeneratorCachedMixin",
     "dev.FabricDataGenHelperMixin",
+    "dev.HolderOwnerMixin",
     "AbstractContainerScreenMixin",
     "BuiltInBlockModelsMixin",
     "GuiGraphicsExtractorMixin",
