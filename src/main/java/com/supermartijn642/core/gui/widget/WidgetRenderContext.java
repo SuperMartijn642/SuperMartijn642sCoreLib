@@ -16,4 +16,12 @@ public interface WidgetRenderContext {
     Font font();
 
     Minecraft minecraft();
+
+    int windowWidgetXOffset();
+
+    int windowWidgetYOffset();
+
+    int windowWidth();
+
+    int windowHeight();
 }
