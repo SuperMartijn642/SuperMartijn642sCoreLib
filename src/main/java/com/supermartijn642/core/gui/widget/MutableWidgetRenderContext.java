@@ -5,28 +5,36 @@ import com.supermartijn642.core.ClientUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 
+import java.util.function.IntSupplier;
+
 /**
  * Created 05/06/2023 by SuperMartijn642
  */
 public final class MutableWidgetRenderContext implements WidgetRenderContext {
 
-    public static MutableWidgetRenderContext create(){
-        return new MutableWidgetRenderContext();
+    public static MutableWidgetRenderContext create(IntSupplier widgetX, IntSupplier widgetY){
+        return new MutableWidgetRenderContext(widgetX, widgetY);
     }
 
+    private final IntSupplier widgetOffsetX, widgetOffsetY;
     private GuiGraphics guiGraphics;
     private float partialTicks;
+    private int windowWidth, windowHeight;
 
-    private MutableWidgetRenderContext(){
+    private MutableWidgetRenderContext(IntSupplier widgetOffsetX, IntSupplier widgetOffsetY){
+        this.widgetOffsetX = widgetOffsetX;
+        this.widgetOffsetY = widgetOffsetY;
     }
 
-    public void update(GuiGraphics guiGraphics, float partialTicks){
+    public void update(GuiGraphics guiGraphics, float partialTicks, int windowWidth, int windowHeight){
         this.guiGraphics = guiGraphics;
         this.partialTicks = partialTicks;
+        this.windowWidth = windowWidth;
+        this.windowHeight = windowHeight;
     }
 
-    public void update(GuiGraphics guiGraphics){
-        this.update(guiGraphics, ClientUtils.getPartialTicks());
+    public void update(GuiGraphics guiGraphics, int windowWidth, int windowHeight){
+        this.update(guiGraphics, ClientUtils.getPartialTicks(), windowWidth, windowHeight);
     }
 
     public GuiGraphics guiGraphics(){
@@ -46,5 +54,25 @@ public final class MutableWidgetRenderContext implements WidgetRenderContext {
     @Override
     public float partialTicks(){
         return this.partialTicks;
+    }
+
+    @Override
+    public int windowWidgetXOffset(){
+        return this.widgetOffsetX.getAsInt();
+    }
+
+    @Override
+    public int windowWidgetYOffset(){
+        return this.widgetOffsetY.getAsInt();
+    }
+
+    @Override
+    public int windowWidth(){
+        return this.windowWidth;
+    }
+
+    @Override
+    public int windowHeight(){
+        return this.windowHeight;
     }
 }
