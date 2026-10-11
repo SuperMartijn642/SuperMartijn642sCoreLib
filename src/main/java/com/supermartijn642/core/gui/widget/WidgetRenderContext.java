@@ -13,4 +13,12 @@ public interface WidgetRenderContext {
     MultiBufferSource.BufferSource buffers();
 
     float partialTicks();
+
+    int windowWidgetXOffset();
+
+    int windowWidgetYOffset();
+
+    int windowWidth();
+
+    int windowHeight();
 }
