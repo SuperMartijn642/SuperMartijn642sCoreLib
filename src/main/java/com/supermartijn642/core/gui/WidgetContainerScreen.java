@@ -32,7 +32,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         return new WidgetContainerScreen<>(widget, container, drawSlots);
     }
 
-    private final MutableWidgetRenderContext widgetRenderContext = MutableWidgetRenderContext.create();
+    private final MutableWidgetRenderContext widgetRenderContext = MutableWidgetRenderContext.create(this::getWidgetX, this::getWidgetY);
     protected final X container;
     protected final T widget;
     private boolean initialized = false;
@@ -94,7 +94,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks){
-        this.widgetRenderContext.update(guiGraphics, partialTicks);
+        this.widgetRenderContext.update(guiGraphics, partialTicks, this.width, this.height);
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
 
         // Call Architectury's client events
