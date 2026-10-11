@@ -23,7 +23,7 @@ public class WidgetScreen<T extends Widget> extends Screen {
         return new WidgetScreen<>(widget, isPauseScreen);
     }
 
-    private final MutableWidgetRenderContext widgetRenderContext = MutableWidgetRenderContext.create();
+    private final MutableWidgetRenderContext widgetRenderContext = MutableWidgetRenderContext.create(this::getWidgetX, this::getWidgetY);
     protected final T widget;
     private boolean initialized = false;
     private boolean isPauseScreen = false;
@@ -71,7 +71,7 @@ public class WidgetScreen<T extends Widget> extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks){
-        this.widgetRenderContext.update(guiGraphics, partialTicks);
+        this.widgetRenderContext.update(guiGraphics, partialTicks, this.width, this.height);
         this.renderBackground(guiGraphics);
 
         int offsetX = this.getWidgetX(), offsetY = this.getWidgetY();
