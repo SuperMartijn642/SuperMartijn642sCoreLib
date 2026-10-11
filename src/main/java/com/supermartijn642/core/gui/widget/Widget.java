@@ -36,12 +36,16 @@ public interface Widget {
     /**
      * @return the x-position of the right end of this widget
      */
-    int right();
+    default int right(){
+        return this.left() + this.width();
+    }
 
     /**
      * @return the y-position of the bottom end of this widget
      */
-    int bottom();
+    default int bottom(){
+        return this.top() + this.height();
+    }
 
     /**
      * Called when the widget is added.

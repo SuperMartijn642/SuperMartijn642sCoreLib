@@ -106,6 +106,8 @@ accessible class net/minecraft/client/resources/model/ModelManager$ReloadState
 accessible method net/minecraft/world/entity/player/Player closeContainer ()V # closeContainer
 # RecipeManager
 accessible method net/minecraft/world/item/crafting/RecipeManager fromJson (Lnet/minecraft/resources/ResourceLocation;Lcom/google/gson/JsonObject;Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/world/item/crafting/RecipeHolder; # fromJson
+# Screen
+accessible field net/minecraft/client/gui/screens/Screen INWORLD_MENU_BACKGROUND Lnet/minecraft/resources/ResourceLocation;
 # ServerPlayer
 accessible field net/minecraft/server/level/ServerPlayer enteredNetherPosition Lnet/minecraft/world/phys/Vec3;
 accessible field net/minecraft/server/level/ServerPlayer isChangingDimension Z
