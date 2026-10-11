@@ -29,7 +29,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
         return new WidgetContainerScreen<>(widget, container, drawSlots);
     }
 
-    private final MutableWidgetRenderContext widgetRenderContext = MutableWidgetRenderContext.create();
+    private final MutableWidgetRenderContext widgetRenderContext = MutableWidgetRenderContext.create(this::getWidgetX, this::getWidgetY);
     protected final X container;
     protected final T widget;
     private boolean initialized = false;
@@ -94,7 +94,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
     public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks){
         super.extractBackground(guiGraphics, mouseX, mouseY, partialTicks);
 
-        this.widgetRenderContext.update(guiGraphics, partialTicks, this.font, this.minecraft);
+        this.widgetRenderContext.update(guiGraphics, partialTicks, this.font, this.minecraft, this.width, this.height);
         GuiGraphicsHelper helper = GuiGraphicsHelper.of(guiGraphics);
 
         // Call Architectury's client events
@@ -137,7 +137,7 @@ public class WidgetContainerScreen<T extends Widget, X extends BaseContainer> ex
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks){
-        this.widgetRenderContext.update(guiGraphics, partialTicks, this.font, this.minecraft);
+        this.widgetRenderContext.update(guiGraphics, partialTicks, this.font, this.minecraft, this.width, this.height);
         GuiGraphicsHelper helper = GuiGraphicsHelper.of(guiGraphics);
 
         int offsetX = this.getWidgetX(), offsetY = this.getWidgetY();
