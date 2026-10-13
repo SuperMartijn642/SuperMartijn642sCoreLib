@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.25a
+- Account for changes in Forge 50.2.12
+
 ### SuperMartijn642's Core Library 1.1.25
 - Main widget for `WidgetScreen` and `WidgetContainerScreen` can now be offset rather than always centered
 - Added `Widget#right` and `#bottom`
