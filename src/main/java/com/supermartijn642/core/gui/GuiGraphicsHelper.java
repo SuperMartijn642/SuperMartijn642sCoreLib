@@ -178,6 +178,7 @@ public final class GuiGraphicsHelper {
                     true,
                     scissor
                 ));
+                y += font.lineHeight;
             }
             return;
         }
