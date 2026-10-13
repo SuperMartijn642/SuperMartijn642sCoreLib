@@ -145,6 +145,7 @@ public final class GuiGraphicsHelper {
                     this.textProperties.shadow,
                     scissor
                 ));
+                y += font.lineHeight;
             }
             return;
         }
