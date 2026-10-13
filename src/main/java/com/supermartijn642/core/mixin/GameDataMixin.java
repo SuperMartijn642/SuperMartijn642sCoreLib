@@ -25,12 +25,20 @@ public class GameDataMixin {
 
     @Inject(
         method = "postRegisterEvents()V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraftforge/registries/ObjectHolderRegistry;applyObjectHolders(Ljava/util/function/Predicate;)V",
-            shift = At.Shift.AFTER
-        ),
-        remap = false
+        at = {
+            @At(
+                value = "INVOKE",
+                target = "Lnet/minecraftforge/registries/ObjectHolderRegistry;applyObjectHolders(Ljava/util/function/Predicate;)V",
+                shift = At.Shift.AFTER
+            ),
+            @At(
+                value = "INVOKE",
+                target = "Lnet/minecraftforge/registries/ObjectHolderRegistry;applyObjectHolders(Lnet/minecraft/resources/ResourceLocation;)V",
+                shift = At.Shift.AFTER
+            )
+        },
+        remap = false,
+        require = 1
     )
     private static void postRegisterEvents(CallbackInfo ci){
         RegistryEntryAcceptor.Handler.onRegisterEvent(registerEvent);
