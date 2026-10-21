@@ -1,3 +1,17 @@
+### SuperMartijn642's Core Library 1.1.26
+- Added `PlayerProfileCache` for looking up player names, uuids, and skins
+- Added `Teleporter` for handling teleporting entities
+- Added `StackedWidget` to layer multiple widgets and separate interaction between them
+- Added options to set size and position of `ScissorWidget`
+- Added more text styling option to `TextFieldWidget`
+- Fixed `WidgetScreen` not using widget cursor type
+- Fixed widget cursor type not being maintained whilst dragging
+- Fixed child widgets of `AbstractButtonWidget` not receiving `#mousePressed` call
+- Fixed widgets not being unfocused when removed
+- Fixed `ScrollbarWidget` accepting scroll input when not focused
+- Fixed `ClientUtils#closeScreen` not closing screens without a container
+- Fixed focused child widget state not being updated correctly when setting focus for `BaseWidget`
+
 ### SuperMartijn642's Core Library 1.1.25
 - Main widget for `WidgetScreen` and `WidgetContainerScreen` can now be offset rather than always centered
 - Added `Widget#right` and `#bottom`
