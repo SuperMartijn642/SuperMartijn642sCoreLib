@@ -11,6 +11,7 @@
     "dev.DatagenModLoaderAccessor",
     "GameDataMixin",
     "RecipeManagerMixin",
+    "SkullBlockEntityMixin",
     "TagLoaderMixin"
   ],
   "client": [
@@ -20,7 +21,6 @@
     "LevelRendererMixin",
     "ModelDiscoveryMixin",
     "PlayerSkinMixin",
-    "SkullBlockEntityMixin",
     "SpriteSourceListMixin"
   ],
   "server": [],
