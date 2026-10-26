@@ -53,6 +53,11 @@ mutable field net/minecraft/world/item/CreativeModeTab displayItemsGenerator Lne
 accessible field net/minecraft/data/DataGenerator rootOutputFolder Ljava/nio/file/Path; # rootOutputFolder
 # Entity
 accessible method net/minecraft/world/entity/Entity unsetRemoved ()V
+# GameProfileCache
+accessible field net/minecraft/server/players/GameProfileCache profilesByName Ljava/util/Map;
+accessible method net/minecraft/server/players/GameProfileCache getNextOperation ()J
+# GameProfileCache$GameProfileInfo
+accessible class net/minecraft/server/players/GameProfileCache$GameProfileInfo
 # GameRenderer
 accessible field net/minecraft/client/renderer/GameRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
 # GuiGraphics
