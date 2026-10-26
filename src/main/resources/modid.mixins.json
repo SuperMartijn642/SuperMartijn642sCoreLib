@@ -10,6 +10,7 @@
     "BlockPropertiesAccessor",
     "GameDataMixin",
     "RecipeManagerMixin",
+    "SkullBlockEntityMixin",
     "TagLoaderMixin",
     "TagManagerMixin"
   ],
@@ -22,7 +23,6 @@
     "GameRendererMixin",
     "LevelRendererMixin",
     "PlayerSkinMixin",
-    "SkullBlockEntityMixin",
     "SpriteSourceListMixin"
   ],
   "server": [],
