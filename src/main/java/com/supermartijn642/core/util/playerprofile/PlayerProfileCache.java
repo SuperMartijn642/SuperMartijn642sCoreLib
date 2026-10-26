@@ -5,6 +5,7 @@ import com.supermartijn642.core.CommonUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
@@ -13,20 +14,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
-public abstract sealed class PlayerProfileCache permits ClientPlayerProfileCache, PlayerProfileCache.DedicatedServerPlayerProfileCache {
+public abstract sealed class PlayerProfileCache permits ClientPlayerProfileCache, PlayerProfileCache.ServerPlayerProfileCache {
 
     private static final boolean IS_DEDICATED_SERVER = CommonUtils.getEnvironmentSide().isServer();
-    private static final PlayerProfileCache CLIENT, SERVER;
-
-    static{
-        if(IS_DEDICATED_SERVER){
-            CLIENT = null;
-            SERVER = new DedicatedServerPlayerProfileCache();
-        }else{
-            CLIENT = new ClientPlayerProfileCache.Client();
-            SERVER = new ClientPlayerProfileCache.Server();
-        }
-    }
+    private static final PlayerProfileCache CLIENT = IS_DEDICATED_SERVER ? null : new ClientPlayerProfileCache(), SERVER = new ServerPlayerProfileCache();
 
     public static PlayerProfileCache get(boolean isClient){
         if(IS_DEDICATED_SERVER && isClient)
@@ -37,11 +28,24 @@ public abstract sealed class PlayerProfileCache permits ClientPlayerProfileCache
     PlayerProfileCache(){
     }
 
+    static @Nullable GameProfile getProfile(UUID player){
+        GameProfile profile = CommonUtils.getServices().profileCache().get(player).orElse(null);
+        if(profile != null)
+            return profile;
+        return SkullBlockEntity.fetchGameProfile(player).getNow(Optional.empty()).orElse(null);
+    }
+
     /**
      * Gets the uuid associated with the given username.
      */
     @Nullable
     public UUID getUUID(String username){
+        GameProfileCache profileCache = CommonUtils.getServices().profileCache();
+        GameProfileCache.GameProfileInfo gameProfileInfo = profileCache.profilesByName.get(username);
+        if(gameProfileInfo != null){
+            gameProfileInfo.setLastAccess(profileCache.getNextOperation());
+            return gameProfileInfo.getProfile().getId();
+        }
         return SkullBlockEntity.fetchGameProfile(username).getNow(Optional.empty()).map(GameProfile::getId).orElse(null);
     }
 
@@ -50,7 +54,8 @@ public abstract sealed class PlayerProfileCache permits ClientPlayerProfileCache
      */
     @Nullable
     public String getUsername(UUID player){
-        return SkullBlockEntity.fetchGameProfile(player).getNow(Optional.empty()).map(GameProfile::getName).orElse(null);
+        GameProfile profile = getProfile(player);
+        return profile == null ? null : profile.getName();
     }
 
     /**
@@ -77,7 +82,7 @@ public abstract sealed class PlayerProfileCache permits ClientPlayerProfileCache
     /**
      * Dedicated server, logical server
      */
-    static final class DedicatedServerPlayerProfileCache extends PlayerProfileCache {
+    static final class ServerPlayerProfileCache extends PlayerProfileCache {
         @Override
         public @Nullable UUID getUUID(String username){
             MinecraftServer server = CommonUtils.getServer();
