@@ -18,12 +18,15 @@
     "AbstractContainerScreenMixin",
     "GuiGraphicsMixin",
     "LevelRendererMixin",
+    "MinecraftMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",
     "PictureInPictureRendererPoolMixin",
     "SpriteSourceListMixin"
   ],
-  "server": [],
+  "server": [
+    "ServerMainMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

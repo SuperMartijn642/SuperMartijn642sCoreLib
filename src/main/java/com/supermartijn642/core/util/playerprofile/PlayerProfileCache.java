@@ -10,20 +10,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-public abstract sealed class PlayerProfileCache permits ClientPlayerProfileCache, PlayerProfileCache.DedicatedServerPlayerProfileCache {
+public abstract sealed class PlayerProfileCache permits ClientPlayerProfileCache, PlayerProfileCache.ServerPlayerProfileCache {
 
     private static final boolean IS_DEDICATED_SERVER = CommonUtils.getEnvironmentSide().isServer();
-    private static final PlayerProfileCache CLIENT, SERVER;
-
-    static{
-        if(IS_DEDICATED_SERVER){
-            CLIENT = null;
-            SERVER = new DedicatedServerPlayerProfileCache();
-        }else{
-            CLIENT = new ClientPlayerProfileCache.Client();
-            SERVER = new ClientPlayerProfileCache.Server();
-        }
-    }
+    private static final PlayerProfileCache CLIENT = IS_DEDICATED_SERVER ? null : new ClientPlayerProfileCache(), SERVER = new ServerPlayerProfileCache();
 
     public static PlayerProfileCache get(boolean isClient){
         if(IS_DEDICATED_SERVER && isClient)
@@ -38,13 +28,17 @@ public abstract sealed class PlayerProfileCache permits ClientPlayerProfileCache
      * Gets the uuid associated with the given username.
      */
     @Nullable
-    public abstract UUID getUUID(String username);
+    public UUID getUUID(String username){
+        return CommonUtils.getServices().nameToIdCache().get(username).map(NameAndId::id).orElse(null);
+    }
 
     /**
      * Gets the username associated with the given uuid.
      */
     @Nullable
-    public abstract String getUsername(UUID player);
+    public String getUsername(UUID player){
+        return CommonUtils.getServices().nameToIdCache().get(player).map(NameAndId::name).orElse(null);
+    }
 
     /**
      * Gets the username associated with the given uuid.
@@ -67,10 +61,7 @@ public abstract sealed class PlayerProfileCache permits ClientPlayerProfileCache
      */
     public abstract PlayerSkin getSkinOrDefault(UUID player);
 
-    /**
-     * Dedicated server, logical server
-     */
-    static final class DedicatedServerPlayerProfileCache extends PlayerProfileCache {
+    static final class ServerPlayerProfileCache extends PlayerProfileCache {
         @Override
         public @Nullable UUID getUUID(String username){
             MinecraftServer server = CommonUtils.getServer();
@@ -79,7 +70,7 @@ public abstract sealed class PlayerProfileCache permits ClientPlayerProfileCache
             ServerPlayer p = server.getPlayerList().getPlayer(username);
             if(p != null)
                 return p.getGameProfile().id();
-            return server.services().nameToIdCache().get(username).map(NameAndId::id).orElse(null);
+            return super.getUUID(username);
         }
 
         @Override
@@ -90,7 +81,7 @@ public abstract sealed class PlayerProfileCache permits ClientPlayerProfileCache
             ServerPlayer p = server.getPlayerList().getPlayer(player);
             if(p != null)
                 return p.getGameProfile().name();
-            return server.services().nameToIdCache().get(player).map(NameAndId::name).orElse(null);
+            return super.getUsername(player);
         }
 
         @Override
