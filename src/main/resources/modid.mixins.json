@@ -12,6 +12,7 @@
     "ItemMixin",
     "GameDataMixin",
     "RecipeManagerMixin",
+    "SkullBlockEntityMixin",
     "TagLoaderMixin"
   ],
   "client": [
