@@ -10,6 +10,7 @@
     "MappedRegistryMixin",
     "RecipeManagerMixin",
     "ServerPlayerGameModeMixin",
+    "SkullBlockEntityMixin",
     "TagLoaderMixin"
   ],
   "client": [
