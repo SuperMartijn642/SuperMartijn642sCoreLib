@@ -9,6 +9,7 @@
     "MappedRegistryMixin",
     "GameDataMixin",
     "RecipeManagerMixin",
+    "SkullBlockEntityMixin",
     "TagLoaderMixin"
   ],
   "client": [
@@ -20,7 +21,6 @@
     "GameRendererMixin",
     "LevelRendererMixin",
     "PlayerSkinMixin",
-    "SkullBlockEntityMixin",
     "SpriteSourceListMixin"
   ],
   "server": [],
