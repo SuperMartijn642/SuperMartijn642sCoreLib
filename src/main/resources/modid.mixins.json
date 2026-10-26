@@ -20,6 +20,7 @@
     "GameRendererMixin",
     "LevelRendererMixin",
     "PlayerSkinMixin",
+    "SkullBlockEntityMixin",
     "SpriteSourceListMixin"
   ],
   "server": [],
