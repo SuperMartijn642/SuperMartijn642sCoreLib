@@ -21,11 +21,14 @@
     "LevelExtractorMixin",
     "LevelRendererMixin",
     "LevelRenderStateMixin",
+    "MinecraftMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",
     "SpriteSourceListMixin"
   ],
-  "server": [],
+  "server": [
+    "ServerMainMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
