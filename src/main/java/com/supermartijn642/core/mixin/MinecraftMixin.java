@@ -2,7 +2,10 @@ package com.supermartijn642.core.mixin;
 
 import com.supermartijn642.core.CoreLib;
 import net.minecraft.client.Minecraft;
+import net.minecraft.server.Services;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -12,6 +15,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(Minecraft.class)
 public class MinecraftMixin {
+
+    @Final
+    @Shadow
+    private Services services;
 
     @Inject(
         at = @At(
@@ -37,5 +44,17 @@ public class MinecraftMixin {
     )
     private void afterInit(CallbackInfo ci){
         CoreLib.afterInitializeAll();
+    }
+
+    @Inject(
+        method = "<init>",
+        at = @At(
+            value = "INVOKE_ASSIGN",
+            target = "Lnet/minecraft/server/Services;create(Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;Ljava/io/File;)Lnet/minecraft/server/Services;",
+            shift = At.Shift.AFTER
+        )
+    )
+    private void captureServices(CallbackInfo ci){
+        CoreLib.services = this.services;
     }
 }
