@@ -21,6 +21,7 @@
     "ModelManagerMixin",
     "MultiPlayerGameModeMixin",
     "PlayerSkinMixin",
+    "SkullBlockEntityMixin",
     "SpriteSourceListMixin"
   ],
   "server": [
