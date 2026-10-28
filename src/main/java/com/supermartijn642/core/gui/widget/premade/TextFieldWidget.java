@@ -1,5 +1,6 @@
 package com.supermartijn642.core.gui.widget.premade;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.supermartijn642.core.ClientUtils;
 import com.supermartijn642.core.TextComponents;
@@ -337,21 +338,14 @@ public class TextFieldWidget extends BaseWidget {
             ClientUtils.getMinecraft().keyboardHandler.setClipboard(this.getSelectedText());
             this.addTextAtCursor("");
         }else{
-            switch(event.key()){
-                case 259: // backspace
+            switch(event.keycode()){
+                case InputConstants.KEYCODE_BACKSPACE: // backspace
                     this.removeAtCursor(true, event.hasControlDown());
                     break;
-                case 260: // insert
-                case 264: // down
-                case 265: // up
-                case 266: // page up
-                case 267: // page down
-                default:
-                    return true;
-                case 261: // delete
+                case InputConstants.KEYCODE_DELETE: // delete
                     this.removeAtCursor(false, event.hasControlDown());
                     break;
-                case 262: // right
+                case InputConstants.KEYCODE_RIGHT: // right
                     if(!shift && this.cursorPosition != this.selectionPos)
                         this.cursorPosition = this.selectionPos = Math.max(this.cursorPosition, this.selectionPos);
                     else if(this.cursorPosition < this.text.length()){
@@ -364,7 +358,7 @@ public class TextFieldWidget extends BaseWidget {
                     }
                     this.moveLineOffsetToCursor();
                     break;
-                case 263: // left
+                case InputConstants.KEYCODE_LEFT: // left
                     if(!shift && this.cursorPosition != this.selectionPos)
                         this.cursorPosition = this.selectionPos = Math.min(this.cursorPosition, this.selectionPos);
                     else if(this.cursorPosition > 0){
@@ -377,18 +371,20 @@ public class TextFieldWidget extends BaseWidget {
                     }
                     this.moveLineOffsetToCursor();
                     break;
-                case 268: // home
+                case InputConstants.KEYCODE_HOME: // home
                     this.cursorPosition = 0;
                     if(!shift)
                         this.selectionPos = this.cursorPosition;
                     this.moveLineOffsetToCursor();
                     break;
-                case 269: // end
+                case InputConstants.KEYCODE_END: // end
                     this.cursorPosition = this.text.length();
                     if(!shift)
                         this.selectionPos = this.cursorPosition;
                     this.moveLineOffsetToCursor();
                     break;
+                default:
+                    return true;
             }
 
             return true;
