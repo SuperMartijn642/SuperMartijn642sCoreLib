@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.26a
+- Fixed crash due to broken mixin
+
 ### SuperMartijn642's Core Library 1.1.26
 - Added `PlayerProfileCache` for looking up player names, uuids, and skins
 - Added `Teleporter` for handling teleporting entities
