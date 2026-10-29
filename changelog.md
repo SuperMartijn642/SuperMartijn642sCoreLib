@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.26b
+- Fixed crash on dedicated server
+
 ### SuperMartijn642's Core Library 1.1.26a
 - Fixed `TextFieldWidget` not checking for new SDL keycodes
 
