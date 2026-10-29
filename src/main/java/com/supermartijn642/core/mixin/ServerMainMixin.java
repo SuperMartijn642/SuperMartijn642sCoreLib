@@ -45,7 +45,7 @@ public class ServerMainMixin {
         method = "main",
         at = @At(
             value = "INVOKE_ASSIGN",
-            target = "Lnet/minecraft/server/Services;create(Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;Ljava/io/File;)Lnet/minecraft/server/Services;",
+            target = "Lnet/minecraft/server/Services;create(Lcom/mojang/authlib/services/MinecraftServicesDiscoveryService;Ljava/io/File;)Lnet/minecraft/server/Services;",
             shift = At.Shift.AFTER
         )
     )
