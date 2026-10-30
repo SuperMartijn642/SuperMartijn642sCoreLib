@@ -43,7 +43,7 @@
     "LevelRendererMixin",
     "LocaleMixin",
     "ModelLoaderMixin",
-    "PlayerInfoMixin",
+    "NetworkPlayerInfoMixin",
     "TileEntityRendererDispatcherMixin",
     "VariantDeserializerMixin"
   ],
