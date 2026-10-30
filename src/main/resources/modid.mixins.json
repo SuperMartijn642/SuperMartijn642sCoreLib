@@ -20,7 +20,7 @@
     "AbstractContainerScreenMixin",
     "GameRendererMixin",
     "LevelRendererMixin",
-    "PlayerInfoMixin"
+    "NetworkPlayerInfoMixin"
   ],
   "server": [],
   "injectors": {
