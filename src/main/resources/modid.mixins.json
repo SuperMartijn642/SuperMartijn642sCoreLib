@@ -26,7 +26,7 @@
     "EntityRendererManagerMixin",
     "GameRendererMixin",
     "LevelRendererMixin",
-    "PlayerInfoMixin",
+    "NetworkPlayerInfoMixin",
     "TileEntityRendererDispatcherMixin"
   ],
   "server": [],
