@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.26c
+- Fixed `AdvancementGenerator` generating incorrect advancement background location
+
 ### SuperMartijn642's Core Library 1.1.26b
 - Fixed crash on dedicated server
 
