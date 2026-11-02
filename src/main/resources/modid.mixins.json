@@ -24,7 +24,8 @@
     "GameRendererMixin",
     "ItemRendererMixin",
     "LevelRendererMixin",
-    "NetworkPlayerInfoMixin"
+    "NetworkPlayerInfoMixin",
+    "VariantSimpleModelStateMixin"
   ],
   "server": [],
   "injectors": {
