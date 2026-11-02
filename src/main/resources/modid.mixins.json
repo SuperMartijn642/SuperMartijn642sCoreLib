@@ -23,7 +23,8 @@
     "GameRendererMixin",
     "LevelRendererMixin",
     "PlayerSkinMixin",
-    "SpriteSourceListMixin"
+    "SpriteSourceListMixin",
+    "VariantSimpleModelStateMixin"
   ],
   "server": [],
   "injectors": {
