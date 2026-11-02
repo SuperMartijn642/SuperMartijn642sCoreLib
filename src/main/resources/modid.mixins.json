@@ -22,7 +22,8 @@
     "MinecraftMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",
-    "SpriteSourceListMixin"
+    "SpriteSourceListMixin",
+    "VariantSimpleModelStateMixin"
   ],
   "server": [
     "ServerMainMixin"
