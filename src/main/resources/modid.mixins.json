@@ -23,7 +23,8 @@
     "ModelBakeryMixin",
     "ModelManagerMixin",
     "MultiPlayerGameModeMixin",
-    "SpriteSourceListMixin"
+    "SpriteSourceListMixin",
+    "VariantSimpleModelStateMixin"
   ],
   "server": [
     "ServerMainMixin"
