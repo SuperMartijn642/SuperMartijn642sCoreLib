@@ -75,7 +75,7 @@ public abstract class BlockEntityBasePacket<T extends TileEntity> extends BlockP
                 context.getWorld().provider.getDimensionType() == this.dimension ? context.getWorld() : null :
                 context.getWorld().getMinecraftServer().getWorld(this.dimension.getId());
 
-        if(world == null)
+        if(world == null || !world.isBlockLoaded(this.pos))
             return null;
 
         TileEntity tile = world.getTileEntity(this.pos);
