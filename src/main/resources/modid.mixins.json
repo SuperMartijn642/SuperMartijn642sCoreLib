@@ -22,7 +22,8 @@
     "ModelManagerMixin",
     "MultiPlayerGameModeMixin",
     "PlayerInfoMixin",
-    "SpriteResourceLoaderMixin"
+    "SpriteResourceLoaderMixin",
+    "VariantSimpleModelStateMixin"
   ],
   "server": [
     "ServerMainMixin"
