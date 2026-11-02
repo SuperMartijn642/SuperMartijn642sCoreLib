@@ -24,7 +24,8 @@
     "ModelBakeryMixin",
     "ModelManagerMixin",
     "PlayerSkinMixin",
-    "SpriteSourceListMixin"
+    "SpriteSourceListMixin",
+    "VariantSimpleModelStateMixin"
   ],
   "server": [],
   "injectors": {
