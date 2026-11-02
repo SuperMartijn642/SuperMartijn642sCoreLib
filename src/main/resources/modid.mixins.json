@@ -22,7 +22,8 @@
     "MinecraftMixin",
     "ModelManagerMixin",
     "MultiPlayerGameModeMixin",
-    "PlayerInfoMixin"
+    "PlayerInfoMixin",
+    "VariantSimpleModelStateMixin"
   ],
   "server": [
     "ServerMainMixin"
