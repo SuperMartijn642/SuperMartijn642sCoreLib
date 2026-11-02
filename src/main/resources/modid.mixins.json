@@ -22,7 +22,8 @@
     "ModelBakeryMixin",
     "ModelManagerMixin",
     "PictureInPictureRendererPoolMixin",
-    "SpriteSourceListMixin"
+    "SpriteSourceListMixin",
+    "VariantSimpleModelStateMixin"
   ],
   "server": [
     "ServerMainMixin"
