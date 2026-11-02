@@ -19,7 +19,8 @@
     "GameRendererMixin",
     "LevelRendererMixin",
     "PlayerInfoMixin",
-    "SpriteResourceLoaderMixin"
+    "SpriteResourceLoaderMixin",
+    "VariantSimpleModelStateMixin"
   ],
   "server": [],
   "injectors": {
