@@ -1,0 +1,47 @@
+package com.supermartijn642.core.mixin;
+
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.mojang.math.Transformation;
+import net.minecraft.client.renderer.block.model.Variant;
+import org.joml.Math;
+import org.joml.Quaternionf;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.lang.reflect.Type;
+
+@Mixin(Variant.Deserializer.class)
+public class VariantSimpleModelStateMixin {
+
+    @Inject(
+        method = "deserialize",
+        at = @At("RETURN"),
+        cancellable = true
+    )
+    private void readZRotation(JsonElement element, Type type, JsonDeserializationContext context, CallbackInfoReturnable<Variant> ci){
+        if(!element.isJsonObject())
+            return;
+        JsonObject json = element.getAsJsonObject();
+        if(!json.has("supermartijn642corelib:z")
+            || !json.get("supermartijn642corelib:z").isJsonPrimitive()
+            || !json.getAsJsonPrimitive("supermartijn642corelib:z").isNumber())
+            return;
+        Variant variant = ci.getReturnValue();
+        if(variant == null)
+            return;
+        int z = ((json.get("supermartijn642corelib:z").getAsInt() / 90) % 4 + 4) % 4;
+        Quaternionf rotation = new Quaternionf()
+            .rotateZ(-z * Math.PI_OVER_2_f)
+            .mul(variant.getRotation().getLeftRotation());
+        ci.setReturnValue(new Variant(
+            variant.modelLocation(),
+            new Transformation(null, rotation, null, null),
+            variant.uvLock(),
+            variant.weight()
+        ));
+    }
+}
