@@ -18,7 +18,8 @@
     "DatagenModLoaderAccessor",
     "GameRendererMixin",
     "LevelRendererMixin",
-    "PlayerInfoMixin"
+    "PlayerInfoMixin",
+    "VariantSimpleModelStateMixin"
   ],
   "server": [],
   "injectors": {
