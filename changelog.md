@@ -1,3 +1,6 @@
+### SuperMartijn642's Core Library 1.1.26b
+- Added block loaded check when handling `BlockEntityBasePacket`s
+
 ### SuperMartijn642's Core Library 1.1.26a
 - Fixed `AdvancementGenerator` generating incorrect advancement background location
 
