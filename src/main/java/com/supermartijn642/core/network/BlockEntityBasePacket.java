@@ -76,7 +76,7 @@ public abstract class BlockEntityBasePacket<T extends BlockEntity> extends Block
                 context.getWorld().dimension() == this.dimension ? context.getWorld() : null :
                 context.getWorld().getServer().getLevel(this.dimension);
 
-        if(world == null)
+        if(world == null || !world.isLoaded(this.pos))
             return null;
 
         BlockEntity tile = world.getBlockEntity(this.pos);
