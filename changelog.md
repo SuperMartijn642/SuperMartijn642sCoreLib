@@ -1,3 +1,8 @@
+### SuperMartijn642's Core Library 1.1.26a
+- Added z-axis rotation option for variants in `BlockStateGenerator`
+- Added block loaded check when handling `BlockEntityBasePacket`s
+- Fixed crash from missing mixin
+
 ### SuperMartijn642's Core Library 1.1.26
 - Added `PlayerProfileCache` for looking up player names, uuids, and skins
 - Added `Teleporter` for handling teleporting entities
