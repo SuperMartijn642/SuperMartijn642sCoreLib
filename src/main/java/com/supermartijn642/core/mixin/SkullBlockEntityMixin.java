@@ -9,17 +9,22 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.concurrent.Executor;
-
 @Mixin(SkullBlockEntity.class)
 public class SkullBlockEntityMixin {
 
     @Inject(
-        method = "setup",
+        method = "setProfileCache",
         at = @At("HEAD")
     )
-    private static void setup(GameProfileCache profileCache, MinecraftSessionService sessionService, Executor executor, CallbackInfo ci){
-        CoreLib.sessionService = sessionService;
+    private static void setProfileCache(GameProfileCache profileCache, CallbackInfo ci){
         CoreLib.gameProfileCache = profileCache;
+    }
+
+    @Inject(
+        method = "setSessionService",
+        at = @At("HEAD")
+    )
+    private static void setSessionService(MinecraftSessionService sessionService, CallbackInfo ci){
+        CoreLib.sessionService = sessionService;
     }
 }
