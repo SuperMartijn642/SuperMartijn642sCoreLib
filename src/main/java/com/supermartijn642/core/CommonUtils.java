@@ -19,6 +19,7 @@ import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ public class CommonUtils {
      * @return the integrated server on the client or the server instance a dedicated server
      */
     public static MinecraftServer getServer(){
-        return server;
+        return server == null ? ServerLifecycleHooks.getCurrentServer() : server;
     }
 
     public static Level getLevel(ResourceKey<Level> resourceKey){
