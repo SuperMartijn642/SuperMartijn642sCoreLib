@@ -359,6 +359,8 @@ public class ScreenUtils {
         // Apply matrix stack to given coordinates
         Vector3f scissorStart = poseStack.last().pose().transformPosition(x, y, 0, new Vector3f());
         Vector3f scissorEnd = poseStack.last().pose().transformPosition(x + width, y + height, 0, new Vector3f());
+        RenderSystem.getModelViewStack().transformPosition(scissorStart.x, scissorStart.y, 0, scissorStart);
+        RenderSystem.getModelViewStack().transformPosition(scissorEnd.x, scissorEnd.y, 0, scissorEnd);
         // Convert coordinates to window
         Window window = Minecraft.getInstance().getWindow();
         double guiScale = window.getGuiScale();
