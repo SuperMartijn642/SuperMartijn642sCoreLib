@@ -1,3 +1,8 @@
+### SuperMartijn642's Core Lib 1.1.26b
+- Fixed models from `ClientRegistrationHandler#registerModel` not being loaded
+- Fixed `CommonUtils#getServer` returning null when using Quick Play
+- Fixed `ScreenUtils#withScissor` ignoring model view stack translation
+
 ### SuperMartijn642's Core Library 1.1.26a
 - Added z-axis rotation option for variants in `BlockStateGenerator`
 - Added block loaded check when handling `BlockEntityBasePacket`s
