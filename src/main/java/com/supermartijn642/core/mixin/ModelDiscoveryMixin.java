@@ -1,13 +1,18 @@
 package com.supermartijn642.core.mixin;
 
 import com.supermartijn642.core.registry.ClientRegistrationHandler;
+import net.minecraft.client.resources.model.BlockStateModelLoader;
 import net.minecraft.client.resources.model.ModelDiscovery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -16,12 +21,25 @@ import java.util.Set;
 @Mixin(ModelDiscovery.class)
 public class ModelDiscoveryMixin {
 
+    @Shadow
+    private void registerTopModel(ModelResourceLocation location, UnbakedModel model){
+        throw new AssertionError();
+    }
+
+    @Shadow
+    UnbakedModel getBlockModel(ResourceLocation location){
+        throw new AssertionError();
+    }
+
     @Inject(
-        method = "listMandatoryModels",
-        at = @At("RETURN")
+        method = "registerStandardModels",
+        at = @At("TAIL")
     )
-    private static void listMandatoryModels(CallbackInfoReturnable<Set<ModelResourceLocation>> ci){
+    private void registerStandardModels(BlockStateModelLoader.LoadedModels blockStates, CallbackInfo ci){
         // Add additional special models to be loaded
-        ClientRegistrationHandler.registerSpecialModels(ci.getReturnValue());
+        Set<ModelResourceLocation> models = new HashSet<>();
+        ClientRegistrationHandler.registerSpecialModels(models);
+        for(ModelResourceLocation model : models)
+            this.registerTopModel(model, this.getBlockModel(model.id()));
     }
 }
